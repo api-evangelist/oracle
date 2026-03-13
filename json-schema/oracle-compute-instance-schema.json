@@ -1,0 +1,567 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.oracle.com/en-us/iaas/schemas/compute/instance.json",
+  "title": "OCI Compute Instance",
+  "description": "Schema for an Oracle Cloud Infrastructure compute instance. Defines the structure of a virtual machine or bare metal instance including its shape configuration, source image details, networking, lifecycle state, and metadata.",
+  "type": "object",
+  "required": [
+    "id",
+    "compartmentId",
+    "availabilityDomain",
+    "shape",
+    "region",
+    "lifecycleState",
+    "timeCreated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The OCID of the instance. Oracle Cloud Identifier (OCID) is a unique identifier assigned to every OCI resource.",
+      "pattern": "^ocid1\\.instance\\..+$",
+      "examples": ["ocid1.instance.oc1.phx.abcdefghijklmnop"]
+    },
+    "compartmentId": {
+      "type": "string",
+      "description": "The OCID of the compartment that contains the instance. Compartments are the primary building blocks for organizing cloud resources.",
+      "pattern": "^ocid1\\.compartment\\..+$"
+    },
+    "availabilityDomain": {
+      "type": "string",
+      "description": "The availability domain the instance is running in. An availability domain is one or more data centers within a region.",
+      "examples": ["Uocm:PHX-AD-1", "Uocm:US-ASHBURN-AD-1"]
+    },
+    "faultDomain": {
+      "type": "string",
+      "description": "The fault domain the instance is running in. Fault domains provide anti-affinity within an availability domain.",
+      "examples": ["FAULT-DOMAIN-1", "FAULT-DOMAIN-2", "FAULT-DOMAIN-3"]
+    },
+    "displayName": {
+      "type": "string",
+      "description": "A user-friendly name for the instance. Does not have to be unique and is changeable. Avoid entering confidential information.",
+      "maxLength": 255
+    },
+    "shape": {
+      "type": "string",
+      "description": "The shape of the instance. The shape determines the number of CPUs, amount of memory, and other resources allocated to the instance.",
+      "examples": [
+        "VM.Standard.E4.Flex",
+        "VM.Standard3.Flex",
+        "BM.Standard3.64",
+        "VM.GPU.A10.1",
+        "VM.DenseIO.E4.Flex",
+        "VM.Standard.A1.Flex"
+      ]
+    },
+    "shapeConfig": {
+      "$ref": "#/$defs/ShapeConfig"
+    },
+    "region": {
+      "type": "string",
+      "description": "The region that contains the availability domain the instance is running in.",
+      "examples": ["us-ashburn-1", "us-phoenix-1", "eu-frankfurt-1"]
+    },
+    "imageId": {
+      "type": "string",
+      "description": "Deprecated. Use sourceDetails instead. The OCID of the image used to boot the instance.",
+      "pattern": "^ocid1\\.image\\..+$",
+      "deprecated": true
+    },
+    "sourceDetails": {
+      "$ref": "#/$defs/SourceDetails"
+    },
+    "lifecycleState": {
+      "$ref": "#/$defs/LifecycleState"
+    },
+    "timeCreated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The date and time the instance was created, in RFC 3339 format."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Custom metadata key/value pairs provided for the instance. Common keys include ssh_authorized_keys for providing SSH public keys and user_data for cloud-init scripts (base64-encoded).",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "properties": {
+        "ssh_authorized_keys": {
+          "type": "string",
+          "description": "One or more SSH public keys to be included in the ~/.ssh/authorized_keys file for the default user on the instance. Separate multiple keys with newline characters."
+        },
+        "user_data": {
+          "type": "string",
+          "description": "Base64-encoded cloud-init user data script to run when the instance starts."
+        }
+      }
+    },
+    "extendedMetadata": {
+      "type": "object",
+      "description": "Additional metadata key/value pairs that can contain nested JSON objects.",
+      "additionalProperties": true
+    },
+    "launchMode": {
+      "type": "string",
+      "description": "Specifies the configuration mode for launching VM instances.",
+      "enum": ["NATIVE", "EMULATED", "PARAVIRTUALIZED", "CUSTOM"]
+    },
+    "launchOptions": {
+      "$ref": "#/$defs/LaunchOptions"
+    },
+    "agentConfig": {
+      "$ref": "#/$defs/AgentConfig"
+    },
+    "availabilityConfig": {
+      "$ref": "#/$defs/AvailabilityConfig"
+    },
+    "platformConfig": {
+      "$ref": "#/$defs/PlatformConfig"
+    },
+    "timeMaintenanceRebootDue": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The date and time the instance is expected to be stopped or migrated for infrastructure maintenance, if applicable."
+    },
+    "capacityReservationId": {
+      "type": "string",
+      "description": "The OCID of the compute capacity reservation this instance is launched under.",
+      "pattern": "^ocid1\\.capacityreservation\\..+$"
+    },
+    "dedicatedVmHostId": {
+      "type": "string",
+      "description": "The OCID of the dedicated virtual machine host the instance is placed on.",
+      "pattern": "^ocid1\\.dedicatedvmhost\\..+$"
+    },
+    "isCrossNumaNode": {
+      "type": "boolean",
+      "description": "Whether the instance spans multiple NUMA nodes."
+    },
+    "definedTags": {
+      "$ref": "#/$defs/DefinedTags"
+    },
+    "freeformTags": {
+      "$ref": "#/$defs/FreeformTags"
+    }
+  },
+  "$defs": {
+    "LifecycleState": {
+      "type": "string",
+      "description": "The lifecycle state of a compute instance. The state transitions are: PROVISIONING -> RUNNING -> STOPPING -> STOPPED -> STARTING -> RUNNING, and RUNNING -> TERMINATING -> TERMINATED.",
+      "enum": [
+        "MOVING",
+        "PROVISIONING",
+        "RUNNING",
+        "STARTING",
+        "STOPPING",
+        "STOPPED",
+        "CREATING_IMAGE",
+        "TERMINATING",
+        "TERMINATED"
+      ]
+    },
+    "ShapeConfig": {
+      "type": "object",
+      "description": "The shape configuration of an instance. For flexible shapes, this specifies the allocated OCPUs, memory, and other resources.",
+      "properties": {
+        "ocpus": {
+          "type": "number",
+          "description": "The total number of OCPUs available to the instance.",
+          "minimum": 1,
+          "examples": [1, 2, 4, 8, 16, 32, 64]
+        },
+        "memoryInGBs": {
+          "type": "number",
+          "description": "The total amount of memory available to the instance, in gigabytes.",
+          "minimum": 1,
+          "examples": [16, 32, 64, 128, 256, 512]
+        },
+        "baselineOcpuUtilization": {
+          "type": "string",
+          "description": "The baseline OCPU utilization for a subcore burstable instance. BASELINE_1_8 means 12.5% baseline, BASELINE_1_2 means 50% baseline, BASELINE_1_1 means 100% (non-burstable).",
+          "enum": ["BASELINE_1_8", "BASELINE_1_2", "BASELINE_1_1"]
+        },
+        "processorDescription": {
+          "type": "string",
+          "description": "A short description of the instance processor.",
+          "examples": ["2.55 GHz AMD EPYC 7J13 (Milan)", "3.0 GHz Ampere Altra (Arm-based)"]
+        },
+        "networkingBandwidthInGbps": {
+          "type": "number",
+          "description": "The networking bandwidth available to the instance, in gigabits per second."
+        },
+        "maxVnicAttachments": {
+          "type": "integer",
+          "description": "The maximum number of VNIC attachments for the instance.",
+          "minimum": 1
+        },
+        "gpus": {
+          "type": "integer",
+          "description": "The number of GPUs available to the instance.",
+          "minimum": 0
+        },
+        "gpuDescription": {
+          "type": "string",
+          "description": "A short description of the instance GPU.",
+          "examples": ["NVIDIA A10", "NVIDIA A100"]
+        },
+        "localDisks": {
+          "type": "integer",
+          "description": "The number of local NVMe disks available to the instance.",
+          "minimum": 0
+        },
+        "localDisksTotalSizeInGBs": {
+          "type": "number",
+          "description": "The aggregate size of all local disks, in gigabytes."
+        },
+        "vcpus": {
+          "type": "integer",
+          "description": "The total number of VCPUs available. This is typically 2x the number of OCPUs.",
+          "minimum": 1
+        }
+      }
+    },
+    "SourceDetails": {
+      "type": "object",
+      "description": "Details for the source used to launch the instance. The source is either an image or a boot volume.",
+      "required": ["sourceType"],
+      "properties": {
+        "sourceType": {
+          "type": "string",
+          "description": "The source type for the instance.",
+          "enum": ["image", "bootVolume"]
+        },
+        "imageId": {
+          "type": "string",
+          "description": "The OCID of the image used to boot the instance. Required when sourceType is image.",
+          "pattern": "^ocid1\\.image\\..+$"
+        },
+        "bootVolumeId": {
+          "type": "string",
+          "description": "The OCID of the boot volume used to boot the instance. Required when sourceType is bootVolume.",
+          "pattern": "^ocid1\\.bootvolume\\..+$"
+        },
+        "bootVolumeSizeInGBs": {
+          "type": "integer",
+          "description": "The size of the boot volume in GBs.",
+          "minimum": 50,
+          "maximum": 32768
+        },
+        "bootVolumeVpusPerGB": {
+          "type": "integer",
+          "description": "The number of volume performance units per GB for the boot volume. 10 = Balanced, 20 = Higher Performance, 30-120 = Ultra High Performance.",
+          "minimum": 10,
+          "maximum": 120,
+          "default": 10
+        }
+      },
+      "if": {
+        "properties": {
+          "sourceType": { "const": "image" }
+        }
+      },
+      "then": {
+        "required": ["imageId"]
+      },
+      "else": {
+        "required": ["bootVolumeId"]
+      }
+    },
+    "LaunchOptions": {
+      "type": "object",
+      "description": "Options for tuning the compatibility and performance of VM shapes.",
+      "properties": {
+        "bootVolumeType": {
+          "type": "string",
+          "description": "Emulation type for the boot volume attachment.",
+          "enum": ["ISCSI", "SCSI", "IDE", "VFIO", "PARAVIRTUALIZED"]
+        },
+        "firmware": {
+          "type": "string",
+          "description": "Firmware used to boot the VM.",
+          "enum": ["BIOS", "UEFI_64"]
+        },
+        "networkType": {
+          "type": "string",
+          "description": "Emulation type for the physical network interface card.",
+          "enum": ["E1000", "VFIO", "PARAVIRTUALIZED"]
+        },
+        "remoteDataVolumeType": {
+          "type": "string",
+          "description": "Emulation type for remote data volume attachments.",
+          "enum": ["ISCSI", "SCSI", "IDE", "VFIO", "PARAVIRTUALIZED"]
+        },
+        "isPvEncryptionInTransitEnabled": {
+          "type": "boolean",
+          "description": "Whether in-transit encryption is enabled for the volume's paravirtualized attachment."
+        },
+        "isConsistentVolumeNamingEnabled": {
+          "type": "boolean",
+          "description": "Whether consistent volume naming is enabled."
+        }
+      }
+    },
+    "AgentConfig": {
+      "type": "object",
+      "description": "Configuration options for the Oracle Cloud Agent software running on the instance.",
+      "properties": {
+        "isMonitoringDisabled": {
+          "type": "boolean",
+          "description": "Whether the Monitoring plugin is disabled.",
+          "default": false
+        },
+        "isManagementDisabled": {
+          "type": "boolean",
+          "description": "Whether the Management plugin is disabled.",
+          "default": false
+        },
+        "areAllPluginsDisabled": {
+          "type": "boolean",
+          "description": "Whether all Oracle Cloud Agent plugins are disabled.",
+          "default": false
+        },
+        "pluginsConfig": {
+          "type": "array",
+          "description": "The configuration of plugins associated with this instance.",
+          "items": {
+            "$ref": "#/$defs/PluginConfig"
+          }
+        }
+      }
+    },
+    "PluginConfig": {
+      "type": "object",
+      "description": "Configuration details for an Oracle Cloud Agent plugin.",
+      "required": ["name", "desiredState"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The plugin name.",
+          "examples": [
+            "Vulnerability Scanning",
+            "Compute RDMA GPU Monitoring",
+            "Compute Instance Monitoring",
+            "Bastion",
+            "Management Agent",
+            "Custom Logs Monitoring",
+            "Compute Instance Run Command",
+            "Block Volume Management"
+          ]
+        },
+        "desiredState": {
+          "type": "string",
+          "description": "Whether the plugin should be enabled or disabled.",
+          "enum": ["ENABLED", "DISABLED"]
+        }
+      }
+    },
+    "AvailabilityConfig": {
+      "type": "object",
+      "description": "Options for VM migration during infrastructure maintenance events.",
+      "properties": {
+        "isLiveMigrationPreferred": {
+          "type": "boolean",
+          "description": "Whether live migration is the preferred option for infrastructure maintenance."
+        },
+        "recoveryAction": {
+          "type": "string",
+          "description": "The lifecycle action to take when maintenance is due. RESTORE_INSTANCE restarts the instance after maintenance. STOP_INSTANCE keeps it stopped.",
+          "enum": ["RESTORE_INSTANCE", "STOP_INSTANCE"]
+        }
+      }
+    },
+    "PlatformConfig": {
+      "type": "object",
+      "description": "The platform configuration for the instance, including security settings like Secure Boot and TPM.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "The type of platform configuration.",
+          "enum": [
+            "AMD_MILAN_BM",
+            "AMD_MILAN_BM_GPU",
+            "AMD_ROME_BM",
+            "AMD_ROME_BM_GPU",
+            "AMD_VM",
+            "GENERIC_BM",
+            "INTEL_ICELAKE_BM",
+            "INTEL_SKYLAKE_BM",
+            "INTEL_VM"
+          ]
+        },
+        "isSecureBootEnabled": {
+          "type": "boolean",
+          "description": "Whether Secure Boot is enabled on the instance."
+        },
+        "isTrustedPlatformModuleEnabled": {
+          "type": "boolean",
+          "description": "Whether the Trusted Platform Module (TPM) is enabled."
+        },
+        "isMeasuredBootEnabled": {
+          "type": "boolean",
+          "description": "Whether the Measured Boot feature is enabled."
+        },
+        "isMemoryEncryptionEnabled": {
+          "type": "boolean",
+          "description": "Whether AMD Secure Encrypted Virtualization (SEV) memory encryption is enabled."
+        }
+      }
+    },
+    "DefinedTags": {
+      "type": "object",
+      "description": "Defined tags for the resource. Each key is predefined and scoped to a namespace. Format: {namespace: {key: value}}.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    },
+    "FreeformTags": {
+      "type": "object",
+      "description": "Free-form tags for the resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "Shape": {
+      "type": "object",
+      "description": "A compute shape determines the resources allocated to an instance. Shapes can be fixed (predetermined resources) or flexible (configurable OCPUs and memory).",
+      "required": ["shape"],
+      "properties": {
+        "shape": {
+          "type": "string",
+          "description": "The name of the shape.",
+          "examples": [
+            "VM.Standard.E4.Flex",
+            "VM.Standard3.Flex",
+            "VM.Standard.A1.Flex",
+            "BM.Standard3.64",
+            "VM.GPU.A10.1"
+          ]
+        },
+        "availabilityDomain": {
+          "type": "string",
+          "description": "The availability domain where the shape is available. Null if available across all ADs."
+        },
+        "ocpus": {
+          "type": "number",
+          "description": "The default number of OCPUs for this shape."
+        },
+        "memoryInGBs": {
+          "type": "number",
+          "description": "The default amount of memory for this shape, in GB."
+        },
+        "processorDescription": {
+          "type": "string",
+          "description": "A short description of the processor."
+        },
+        "networkingBandwidthInGbps": {
+          "type": "number",
+          "description": "The networking bandwidth for this shape, in Gbps."
+        },
+        "maxVnicAttachments": {
+          "type": "integer",
+          "description": "The maximum number of VNICs that can be attached."
+        },
+        "gpus": {
+          "type": "integer",
+          "description": "The number of GPUs for this shape."
+        },
+        "gpuDescription": {
+          "type": "string",
+          "description": "A short description of the GPU."
+        },
+        "localDisks": {
+          "type": "integer",
+          "description": "The number of local disks for this shape."
+        },
+        "localDisksTotalSizeInGBs": {
+          "type": "number",
+          "description": "The aggregate local disk size in GB."
+        },
+        "isFlexible": {
+          "type": "boolean",
+          "description": "Whether the shape supports flexible OCPU and memory configuration."
+        },
+        "isBilledForStoppedInstance": {
+          "type": "boolean",
+          "description": "Whether billing continues when the instance is stopped."
+        }
+      }
+    },
+    "Image": {
+      "type": "object",
+      "description": "A boot disk image for launching compute instances. Images can be Oracle-provided platform images, custom images created from instances, or Marketplace partner images.",
+      "required": [
+        "id",
+        "compartmentId",
+        "operatingSystem",
+        "operatingSystemVersion",
+        "lifecycleState",
+        "timeCreated"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The OCID of the image.",
+          "pattern": "^ocid1\\.image\\..+$"
+        },
+        "compartmentId": {
+          "type": "string",
+          "description": "The OCID of the compartment containing the image."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "A user-friendly name for the image."
+        },
+        "operatingSystem": {
+          "type": "string",
+          "description": "The operating system of the image.",
+          "examples": ["Oracle Linux", "CentOS", "Canonical Ubuntu", "Windows"]
+        },
+        "operatingSystemVersion": {
+          "type": "string",
+          "description": "The operating system version.",
+          "examples": ["8", "9", "22.04", "Server 2019 Standard"]
+        },
+        "lifecycleState": {
+          "type": "string",
+          "description": "The lifecycle state of the image.",
+          "enum": [
+            "PROVISIONING",
+            "IMPORTING",
+            "AVAILABLE",
+            "EXPORTING",
+            "DISABLED",
+            "DELETED"
+          ]
+        },
+        "timeCreated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time the image was created."
+        },
+        "baseImageId": {
+          "type": "string",
+          "description": "The OCID of the image originally used to create this custom image."
+        },
+        "sizeInMBs": {
+          "type": "integer",
+          "description": "The boot volume size for instances launched from this image, in MBs."
+        },
+        "billableSizeInGBs": {
+          "type": "integer",
+          "description": "The billable size of the image in GBs."
+        },
+        "createImageAllowed": {
+          "type": "boolean",
+          "description": "Whether instances from this image can create new images."
+        },
+        "launchMode": {
+          "type": "string",
+          "description": "The launch mode of instances created from this image.",
+          "enum": ["NATIVE", "EMULATED", "PARAVIRTUALIZED", "CUSTOM"]
+        }
+      }
+    }
+  }
+}
