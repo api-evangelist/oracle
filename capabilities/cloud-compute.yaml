@@ -1,0 +1,314 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "Oracle Cloud Compute Management"
+  description: "Manage Oracle Cloud Infrastructure compute resources including instances, images, shapes, and attachments. Used by cloud engineers and platform administrators."
+  tags:
+    - Oracle
+    - Cloud
+    - Compute
+    - Infrastructure
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      OCI_API_KEY: OCI_API_KEY
+      OCI_TENANCY_OCID: OCI_TENANCY_OCID
+      OCI_USER_OCID: OCI_USER_OCID
+      OCI_FINGERPRINT: OCI_FINGERPRINT
+
+capability:
+  consumes:
+    - import: oci-compute
+      location: ./shared/oci-compute.yaml
+
+  exposes:
+    - type: rest
+      port: 8080
+      namespace: oracle-compute-api
+      description: "Unified REST API for Oracle Cloud compute resource management."
+      resources:
+        - path: /v1/instances
+          name: instances
+          description: "Manage compute instances"
+          operations:
+            - method: GET
+              name: list-instances
+              description: "List compute instances in a compartment"
+              call: "oci-compute.list-instances"
+              with:
+                compartmentId: "rest.compartmentId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+            - method: POST
+              name: launch-instance
+              description: "Launch a new compute instance"
+              call: "oci-compute.launch-instance"
+              with:
+                compartmentId: "rest.compartmentId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/instances/{instanceId}
+          name: instance
+          description: "Manage a specific compute instance"
+          operations:
+            - method: GET
+              name: get-instance
+              description: "Get instance details"
+              call: "oci-compute.get-instance"
+              with:
+                instanceId: "rest.instanceId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+            - method: PUT
+              name: update-instance
+              description: "Update instance details"
+              call: "oci-compute.update-instance"
+              with:
+                instanceId: "rest.instanceId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+            - method: DELETE
+              name: terminate-instance
+              description: "Terminate an instance"
+              call: "oci-compute.terminate-instance"
+              with:
+                instanceId: "rest.instanceId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/shapes
+          name: shapes
+          description: "List available compute shapes"
+          operations:
+            - method: GET
+              name: list-shapes
+              description: "List available compute shapes"
+              call: "oci-compute.list-shapes"
+              with:
+                compartmentId: "rest.compartmentId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/images
+          name: images
+          description: "Manage compute images"
+          operations:
+            - method: GET
+              name: list-images
+              description: "List compute images"
+              call: "oci-compute.list-images"
+              with:
+                compartmentId: "rest.compartmentId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+            - method: POST
+              name: create-image
+              description: "Create a custom image"
+              call: "oci-compute.create-image"
+              with:
+                compartmentId: "rest.compartmentId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+        - path: /v1/images/{imageId}
+          name: image
+          description: "Manage a specific image"
+          operations:
+            - method: GET
+              name: get-image
+              description: "Get image details"
+              call: "oci-compute.get-image"
+              with:
+                imageId: "rest.imageId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+            - method: PUT
+              name: update-image
+              description: "Update image details"
+              call: "oci-compute.update-image"
+              with:
+                imageId: "rest.imageId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+            - method: DELETE
+              name: delete-image
+              description: "Delete a custom image"
+              call: "oci-compute.delete-image"
+              with:
+                imageId: "rest.imageId"
+              outputParameters:
+                - type: object
+                  mapping: "$."
+
+    - type: mcp
+      port: 9090
+      namespace: oracle-compute-mcp
+      transport: http
+      description: "MCP server for AI-assisted Oracle Cloud compute management."
+      tools:
+        - name: list-instances
+          description: "List compute instances in a compartment"
+          hints:
+            readOnly: true
+            openWorld: true
+          call: "oci-compute.list-instances"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: launch-instance
+          description: "Launch a new compute instance"
+          hints:
+            readOnly: false
+          call: "oci-compute.launch-instance"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-instance
+          description: "Get details of a specific instance"
+          hints:
+            readOnly: true
+          call: "oci-compute.get-instance"
+          with:
+            instanceId: "tools.instanceId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: update-instance
+          description: "Update instance details"
+          hints:
+            readOnly: false
+            idempotent: true
+          call: "oci-compute.update-instance"
+          with:
+            instanceId: "tools.instanceId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: terminate-instance
+          description: "Terminate an instance"
+          hints:
+            destructive: true
+            idempotent: true
+          call: "oci-compute.terminate-instance"
+          with:
+            instanceId: "tools.instanceId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: instance-action
+          description: "Perform an action on an instance (start, stop, reset)"
+          hints:
+            readOnly: false
+          call: "oci-compute.instance-action"
+          with:
+            instanceId: "tools.instanceId"
+            action: "tools.action"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-shapes
+          description: "List available compute shapes"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-shapes"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-images
+          description: "List compute images"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-images"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-image
+          description: "Create a custom image from an instance"
+          hints:
+            readOnly: false
+          call: "oci-compute.create-image"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-image
+          description: "Get details of a specific image"
+          hints:
+            readOnly: true
+          call: "oci-compute.get-image"
+          with:
+            imageId: "tools.imageId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: update-image
+          description: "Update image details"
+          hints:
+            readOnly: false
+            idempotent: true
+          call: "oci-compute.update-image"
+          with:
+            imageId: "tools.imageId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: delete-image
+          description: "Delete a custom image"
+          hints:
+            destructive: true
+            idempotent: true
+          call: "oci-compute.delete-image"
+          with:
+            imageId: "tools.imageId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-vnic-attachments
+          description: "List VNIC attachments in a compartment"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-vnic-attachments"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-volume-attachments
+          description: "List volume attachments in a compartment"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-volume-attachments"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-console-connections
+          description: "List instance console connections"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-console-connections"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."

@@ -1,0 +1,552 @@
+naftiko: "1.0.0-alpha1"
+
+info:
+  label: "OCI Compute"
+  description: "Oracle Cloud Infrastructure Compute API for managing instances, shapes, images, VNICs, and volumes."
+  tags:
+    - Oracle
+    - Cloud
+    - Compute
+    - Infrastructure
+  created: "2026-04-18"
+  modified: "2026-04-18"
+
+binds:
+  - namespace: env
+    keys:
+      OCI_API_KEY: OCI_API_KEY
+      OCI_TENANCY_OCID: OCI_TENANCY_OCID
+      OCI_USER_OCID: OCI_USER_OCID
+      OCI_FINGERPRINT: OCI_FINGERPRINT
+
+capability:
+  consumes:
+    - type: http
+      namespace: oci-compute
+      baseUri: https://iaas.{region}.oraclecloud.com/20160918
+      description: "OCI Compute API for managing cloud compute resources"
+      authentication:
+        type: apikey
+        key: Authorization
+        value: "{{OCI_API_KEY}}"
+        placement: header
+      resources:
+        - name: instances
+          path: /instances
+          description: "Manage compute instances"
+          operations:
+            - name: list-instances
+              method: GET
+              description: "List instances in a compartment"
+              inputParameters:
+                - name: compartmentId
+                  in: query
+                  type: string
+                  required: true
+                  description: "The OCID of the compartment"
+                - name: availabilityDomain
+                  in: query
+                  type: string
+                  required: false
+                  description: "The availability domain name"
+                - name: displayName
+                  in: query
+                  type: string
+                  required: false
+                  description: "Filter by display name"
+                - name: lifecycleState
+                  in: query
+                  type: string
+                  required: false
+                  description: "Filter by lifecycle state"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: launch-instance
+              method: POST
+              description: "Launch a new compute instance"
+              inputParameters:
+                - name: compartmentId
+                  in: query
+                  type: string
+                  required: true
+                  description: "The OCID of the compartment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  compartmentId: "{{tools.compartmentId}}"
+                  availabilityDomain: "{{tools.availabilityDomain}}"
+                  shape: "{{tools.shape}}"
+                  displayName: "{{tools.displayName}}"
+        - name: instance
+          path: /instances/{instanceId}
+          description: "Manage a specific compute instance"
+          operations:
+            - name: get-instance
+              method: GET
+              description: "Get details of a specific instance"
+              inputParameters:
+                - name: instanceId
+                  in: path
+                  type: string
+                  required: true
+                  description: "The OCID of the instance"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: update-instance
+              method: PUT
+              description: "Update instance details"
+              inputParameters:
+                - name: instanceId
+                  in: path
+                  type: string
+                  required: true
+                  description: "The OCID of the instance"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  displayName: "{{tools.displayName}}"
+            - name: terminate-instance
+              method: DELETE
+              description: "Terminate an instance"
+              inputParameters:
+                - name: instanceId
+                  in: path
+                  type: string
+                  required: true
+                  description: "The OCID of the instance"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: instance-action
+          path: /instances/{instanceId}
+          description: "Perform actions on instances"
+          operations:
+            - name: instance-action
+              method: POST
+              description: "Perform an action on an instance (start, stop, reset, etc.)"
+              inputParameters:
+                - name: instanceId
+                  in: path
+                  type: string
+                  required: true
+                  description: "The OCID of the instance"
+                - name: action
+                  in: query
+                  type: string
+                  required: true
+                  description: "The action to perform"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: shapes
+          path: /shapes
+          description: "List available compute shapes"
+          operations:
+            - name: list-shapes
+              method: GET
+              description: "List available compute shapes in a compartment"
+              inputParameters:
+                - name: compartmentId
+                  in: query
+                  type: string
+                  required: true
+                  description: "The OCID of the compartment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: images
+          path: /images
+          description: "Manage compute images"
+          operations:
+            - name: list-images
+              method: GET
+              description: "List images in a compartment"
+              inputParameters:
+                - name: compartmentId
+                  in: query
+                  type: string
+                  required: true
+                  description: "The OCID of the compartment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: create-image
+              method: POST
+              description: "Create a custom image from an instance"
+              inputParameters:
+                - name: compartmentId
+                  in: query
+                  type: string
+                  required: true
+                  description: "The OCID of the compartment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  compartmentId: "{{tools.compartmentId}}"
+                  instanceId: "{{tools.instanceId}}"
+                  displayName: "{{tools.displayName}}"
+        - name: image
+          path: /images/{imageId}
+          description: "Manage a specific image"
+          operations:
+            - name: get-image
+              method: GET
+              description: "Get details of a specific image"
+              inputParameters:
+                - name: imageId
+                  in: path
+                  type: string
+                  required: true
+                  description: "The OCID of the image"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+            - name: update-image
+              method: PUT
+              description: "Update image details"
+              inputParameters:
+                - name: imageId
+                  in: path
+                  type: string
+                  required: true
+                  description: "The OCID of the image"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+              body:
+                type: json
+                data:
+                  displayName: "{{tools.displayName}}"
+            - name: delete-image
+              method: DELETE
+              description: "Delete a custom image"
+              inputParameters:
+                - name: imageId
+                  in: path
+                  type: string
+                  required: true
+                  description: "The OCID of the image"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: vnic-attachments
+          path: /vnicAttachments
+          description: "List VNIC attachments"
+          operations:
+            - name: list-vnic-attachments
+              method: GET
+              description: "List VNIC attachments in a compartment"
+              inputParameters:
+                - name: compartmentId
+                  in: query
+                  type: string
+                  required: true
+                  description: "The OCID of the compartment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: volume-attachments
+          path: /volumeAttachments
+          description: "List volume attachments"
+          operations:
+            - name: list-volume-attachments
+              method: GET
+              description: "List volume attachments in a compartment"
+              inputParameters:
+                - name: compartmentId
+                  in: query
+                  type: string
+                  required: true
+                  description: "The OCID of the compartment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+        - name: console-connections
+          path: /instanceConsoleConnections
+          description: "List instance console connections"
+          operations:
+            - name: list-console-connections
+              method: GET
+              description: "List instance console connections in a compartment"
+              inputParameters:
+                - name: compartmentId
+                  in: query
+                  type: string
+                  required: true
+                  description: "The OCID of the compartment"
+              outputRawFormat: json
+              outputParameters:
+                - name: result
+                  type: object
+                  value: "$."
+
+  exposes:
+    - type: rest
+      port: 8100
+      namespace: oci-compute-api
+      resources:
+        - path: /v1/instances
+          name: instances
+          description: "Manage compute instances"
+          operations:
+            - method: GET
+              name: list-instances
+              description: "List instances"
+              call: "oci-compute.list-instances"
+            - method: POST
+              name: launch-instance
+              description: "Launch a new instance"
+              call: "oci-compute.launch-instance"
+        - path: /v1/instances/{instanceId}
+          name: instance
+          description: "Manage a specific instance"
+          operations:
+            - method: GET
+              name: get-instance
+              description: "Get instance details"
+              call: "oci-compute.get-instance"
+            - method: PUT
+              name: update-instance
+              description: "Update instance"
+              call: "oci-compute.update-instance"
+            - method: DELETE
+              name: terminate-instance
+              description: "Terminate instance"
+              call: "oci-compute.terminate-instance"
+        - path: /v1/shapes
+          name: shapes
+          description: "List compute shapes"
+          operations:
+            - method: GET
+              name: list-shapes
+              description: "List available shapes"
+              call: "oci-compute.list-shapes"
+        - path: /v1/images
+          name: images
+          description: "Manage compute images"
+          operations:
+            - method: GET
+              name: list-images
+              description: "List images"
+              call: "oci-compute.list-images"
+            - method: POST
+              name: create-image
+              description: "Create image"
+              call: "oci-compute.create-image"
+        - path: /v1/images/{imageId}
+          name: image
+          description: "Manage a specific image"
+          operations:
+            - method: GET
+              name: get-image
+              description: "Get image details"
+              call: "oci-compute.get-image"
+            - method: PUT
+              name: update-image
+              description: "Update image"
+              call: "oci-compute.update-image"
+            - method: DELETE
+              name: delete-image
+              description: "Delete image"
+              call: "oci-compute.delete-image"
+
+    - type: mcp
+      port: 9100
+      namespace: oci-compute-mcp
+      transport: http
+      tools:
+        - name: list-instances
+          description: "List compute instances in a compartment"
+          hints:
+            readOnly: true
+            openWorld: true
+          call: "oci-compute.list-instances"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: launch-instance
+          description: "Launch a new compute instance"
+          hints:
+            readOnly: false
+          call: "oci-compute.launch-instance"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-instance
+          description: "Get details of a specific instance"
+          hints:
+            readOnly: true
+          call: "oci-compute.get-instance"
+          with:
+            instanceId: "tools.instanceId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: update-instance
+          description: "Update an instance"
+          hints:
+            readOnly: false
+            idempotent: true
+          call: "oci-compute.update-instance"
+          with:
+            instanceId: "tools.instanceId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: terminate-instance
+          description: "Terminate an instance"
+          hints:
+            destructive: true
+            idempotent: true
+          call: "oci-compute.terminate-instance"
+          with:
+            instanceId: "tools.instanceId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: instance-action
+          description: "Perform an action on an instance (start, stop, reset)"
+          hints:
+            readOnly: false
+          call: "oci-compute.instance-action"
+          with:
+            instanceId: "tools.instanceId"
+            action: "tools.action"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-shapes
+          description: "List available compute shapes"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-shapes"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-images
+          description: "List compute images in a compartment"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-images"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: create-image
+          description: "Create a custom image from an instance"
+          hints:
+            readOnly: false
+          call: "oci-compute.create-image"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: get-image
+          description: "Get details of a specific image"
+          hints:
+            readOnly: true
+          call: "oci-compute.get-image"
+          with:
+            imageId: "tools.imageId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: update-image
+          description: "Update image details"
+          hints:
+            readOnly: false
+            idempotent: true
+          call: "oci-compute.update-image"
+          with:
+            imageId: "tools.imageId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: delete-image
+          description: "Delete a custom image"
+          hints:
+            destructive: true
+            idempotent: true
+          call: "oci-compute.delete-image"
+          with:
+            imageId: "tools.imageId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-vnic-attachments
+          description: "List VNIC attachments in a compartment"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-vnic-attachments"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-volume-attachments
+          description: "List volume attachments in a compartment"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-volume-attachments"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
+        - name: list-console-connections
+          description: "List instance console connections"
+          hints:
+            readOnly: true
+          call: "oci-compute.list-console-connections"
+          with:
+            compartmentId: "tools.compartmentId"
+          outputParameters:
+            - type: object
+              mapping: "$."
