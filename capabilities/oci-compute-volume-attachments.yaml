@@ -1,0 +1,91 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Oracle OCI Compute API — Volume Attachments
+  description: 'Oracle OCI Compute API — Volume Attachments. 1 operations. Lead operation: Oracle List Volume Attachments.
+    Self-contained Naftiko capability covering one Oracle business surface.'
+  tags:
+  - Oracle
+  - Volume Attachments
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    ORACLE_API_KEY: ORACLE_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: oci-compute-volume-attachments
+    baseUri: https://iaas.{region}.oraclecloud.com/20160918
+    description: Oracle OCI Compute API — Volume Attachments business capability. Self-contained, no shared references.
+    resources:
+    - name: volumeAttachments
+      path: /volumeAttachments
+      operations:
+      - name: listvolumeattachments
+        method: GET
+        description: Oracle List Volume Attachments
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: instanceId
+          in: query
+          type: string
+          description: The OCID of the instance to filter by
+        - name: volumeId
+          in: query
+          type: string
+          description: The OCID of the volume to filter by
+        - name: availabilityDomain
+          in: query
+          type: string
+          description: The name of the availability domain to filter by
+    authentication:
+      type: bearer
+      token: '{{env.ORACLE_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: oci-compute-volume-attachments-rest
+    port: 8080
+    description: REST adapter for Oracle OCI Compute API — Volume Attachments. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/volumeattachments
+      name: volumeattachments
+      description: REST surface for volumeAttachments.
+      operations:
+      - method: GET
+        name: listvolumeattachments
+        description: Oracle List Volume Attachments
+        call: oci-compute-volume-attachments.listvolumeattachments
+        with:
+          instanceId: rest.instanceId
+          volumeId: rest.volumeId
+          availabilityDomain: rest.availabilityDomain
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: oci-compute-volume-attachments-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Oracle OCI Compute API — Volume Attachments. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: oracle-list-volume-attachments
+      description: Oracle List Volume Attachments
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: oci-compute-volume-attachments.listvolumeattachments
+      with:
+        instanceId: tools.instanceId
+        volumeId: tools.volumeId
+        availabilityDomain: tools.availabilityDomain
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,86 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Oracle OCI Compute API — Shapes
+  description: 'Oracle OCI Compute API — Shapes. 1 operations. Lead operation: Oracle List Shapes. Self-contained Naftiko
+    capability covering one Oracle business surface.'
+  tags:
+  - Oracle
+  - Shapes
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    ORACLE_API_KEY: ORACLE_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: oci-compute-shapes
+    baseUri: https://iaas.{region}.oraclecloud.com/20160918
+    description: Oracle OCI Compute API — Shapes business capability. Self-contained, no shared references.
+    resources:
+    - name: shapes
+      path: /shapes
+      operations:
+      - name: listshapes
+        method: GET
+        description: Oracle List Shapes
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: availabilityDomain
+          in: query
+          type: string
+          description: The name of the availability domain. If not specified, shapes across all availability domains in the
+            compartment are listed.
+        - name: imageId
+          in: query
+          type: string
+          description: The OCID of an image. If specified, only shapes compatible with the image are returned.
+    authentication:
+      type: bearer
+      token: '{{env.ORACLE_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: oci-compute-shapes-rest
+    port: 8080
+    description: REST adapter for Oracle OCI Compute API — Shapes. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/shapes
+      name: shapes
+      description: REST surface for shapes.
+      operations:
+      - method: GET
+        name: listshapes
+        description: Oracle List Shapes
+        call: oci-compute-shapes.listshapes
+        with:
+          availabilityDomain: rest.availabilityDomain
+          imageId: rest.imageId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: oci-compute-shapes-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Oracle OCI Compute API — Shapes. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: oracle-list-shapes
+      description: Oracle List Shapes
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: oci-compute-shapes.listshapes
+      with:
+        availabilityDomain: tools.availabilityDomain
+        imageId: tools.imageId
+      outputParameters:
+      - type: object
+        mapping: $.

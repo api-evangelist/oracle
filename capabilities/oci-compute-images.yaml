@@ -1,0 +1,236 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Oracle OCI Compute API — Images
+  description: 'Oracle OCI Compute API — Images. 5 operations. Lead operation: Oracle List Images. Self-contained Naftiko
+    capability covering one Oracle business surface.'
+  tags:
+  - Oracle
+  - Images
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    ORACLE_API_KEY: ORACLE_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: oci-compute-images
+    baseUri: https://iaas.{region}.oraclecloud.com/20160918
+    description: Oracle OCI Compute API — Images business capability. Self-contained, no shared references.
+    resources:
+    - name: images
+      path: /images
+      operations:
+      - name: listimages
+        method: GET
+        description: Oracle List Images
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: displayName
+          in: query
+          type: string
+          description: A filter to return only resources that match the given display name exactly
+        - name: operatingSystem
+          in: query
+          type: string
+          description: The image operating system (e.g., Oracle Linux)
+        - name: operatingSystemVersion
+          in: query
+          type: string
+          description: The image operating system version (e.g., 8)
+        - name: shape
+          in: query
+          type: string
+          description: Shape name. If specified, only images compatible with the shape are returned.
+        - name: lifecycleState
+          in: query
+          type: string
+          description: A filter to return only images that match the given lifecycle state
+        - name: sortBy
+          in: query
+          type: string
+          description: The field to sort by
+      - name: createimage
+        method: POST
+        description: Oracle Create an Image
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: images-imageId
+      path: /images/{imageId}
+      operations:
+      - name: getimage
+        method: GET
+        description: Oracle Get an Image
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updateimage
+        method: PUT
+        description: Oracle Update an Image
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteimage
+        method: DELETE
+        description: Oracle Delete an Image
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.ORACLE_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: oci-compute-images-rest
+    port: 8080
+    description: REST adapter for Oracle OCI Compute API — Images. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/images
+      name: images
+      description: REST surface for images.
+      operations:
+      - method: GET
+        name: listimages
+        description: Oracle List Images
+        call: oci-compute-images.listimages
+        with:
+          displayName: rest.displayName
+          operatingSystem: rest.operatingSystem
+          operatingSystemVersion: rest.operatingSystemVersion
+          shape: rest.shape
+          lifecycleState: rest.lifecycleState
+          sortBy: rest.sortBy
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createimage
+        description: Oracle Create an Image
+        call: oci-compute-images.createimage
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/images/{imageid}
+      name: images-imageid
+      description: REST surface for images-imageId.
+      operations:
+      - method: GET
+        name: getimage
+        description: Oracle Get an Image
+        call: oci-compute-images.getimage
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateimage
+        description: Oracle Update an Image
+        call: oci-compute-images.updateimage
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteimage
+        description: Oracle Delete an Image
+        call: oci-compute-images.deleteimage
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: oci-compute-images-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Oracle OCI Compute API — Images. One tool per consumed operation, routed inline through this
+      capability's consumes block.
+    tools:
+    - name: oracle-list-images
+      description: Oracle List Images
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: oci-compute-images.listimages
+      with:
+        displayName: tools.displayName
+        operatingSystem: tools.operatingSystem
+        operatingSystemVersion: tools.operatingSystemVersion
+        shape: tools.shape
+        lifecycleState: tools.lifecycleState
+        sortBy: tools.sortBy
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: oracle-create-image
+      description: Oracle Create an Image
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: oci-compute-images.createimage
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: oracle-get-image
+      description: Oracle Get an Image
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: oci-compute-images.getimage
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: oracle-update-image
+      description: Oracle Update an Image
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: oci-compute-images.updateimage
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: oracle-delete-image
+      description: Oracle Delete an Image
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: oci-compute-images.deleteimage
+      outputParameters:
+      - type: object
+        mapping: $.

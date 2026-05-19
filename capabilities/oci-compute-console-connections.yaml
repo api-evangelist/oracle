@@ -1,0 +1,79 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Oracle OCI Compute API — Console Connections
+  description: 'Oracle OCI Compute API — Console Connections. 1 operations. Lead operation: Oracle List Instance Console Connections.
+    Self-contained Naftiko capability covering one Oracle business surface.'
+  tags:
+  - Oracle
+  - Console Connections
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    ORACLE_API_KEY: ORACLE_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: oci-compute-console-connections
+    baseUri: https://iaas.{region}.oraclecloud.com/20160918
+    description: Oracle OCI Compute API — Console Connections business capability. Self-contained, no shared references.
+    resources:
+    - name: instanceConsoleConnections
+      path: /instanceConsoleConnections
+      operations:
+      - name: listinstanceconsoleconnections
+        method: GET
+        description: Oracle List Instance Console Connections
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: instanceId
+          in: query
+          type: string
+          description: The OCID of the instance to filter by
+    authentication:
+      type: bearer
+      token: '{{env.ORACLE_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: oci-compute-console-connections-rest
+    port: 8080
+    description: REST adapter for Oracle OCI Compute API — Console Connections. One Spectral-compliant resource per consumed
+      operation, prefixed with /v1.
+    resources:
+    - path: /v1/instanceconsoleconnections
+      name: instanceconsoleconnections
+      description: REST surface for instanceConsoleConnections.
+      operations:
+      - method: GET
+        name: listinstanceconsoleconnections
+        description: Oracle List Instance Console Connections
+        call: oci-compute-console-connections.listinstanceconsoleconnections
+        with:
+          instanceId: rest.instanceId
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: oci-compute-console-connections-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Oracle OCI Compute API — Console Connections. One tool per consumed operation, routed inline
+      through this capability's consumes block.
+    tools:
+    - name: oracle-list-instance-console-connections
+      description: Oracle List Instance Console Connections
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: oci-compute-console-connections.listinstanceconsoleconnections
+      with:
+        instanceId: tools.instanceId
+      outputParameters:
+      - type: object
+        mapping: $.
