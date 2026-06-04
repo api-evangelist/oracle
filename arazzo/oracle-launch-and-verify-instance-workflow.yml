@@ -1,0 +1,138 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Launch and Verify Compute Instance
+  summary: Launch a new compute instance, poll until it is running, then read its VNIC attachments.
+  description: >-
+    Provisions a virtual machine or bare metal instance in an OCI compartment
+    and availability domain, then confirms it reached a healthy state. The
+    workflow launches the instance with the supplied shape, image, and subnet,
+    polls getInstance until the lifecycle state becomes RUNNING, and finally
+    lists the VNIC attachments so the caller can discover the network interfaces
+    bound to the new instance. Every step spells out its request inline so the
+    flow can be read and executed without opening the underlying OpenAPI
+    description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: launch-and-verify-instance
+  summary: Launch a compute instance and verify it reaches the RUNNING state.
+  description: >-
+    Launches an instance, polls its lifecycle state until it is RUNNING, and
+    then retrieves the VNIC attachments associated with the instance.
+  inputs:
+    type: object
+    required:
+    - compartmentId
+    - availabilityDomain
+    - shape
+    - subnetId
+    - imageId
+    properties:
+      compartmentId:
+        type: string
+        description: The OCID of the compartment to launch the instance into.
+      availabilityDomain:
+        type: string
+        description: The availability domain to launch in (e.g. Uocm:PHX-AD-1).
+      shape:
+        type: string
+        description: The shape that defines CPU and memory (e.g. VM.Standard.E4.Flex).
+      subnetId:
+        type: string
+        description: The OCID of the subnet the primary VNIC will attach to.
+      imageId:
+        type: string
+        description: The OCID of the image to boot the instance from.
+      displayName:
+        type: string
+        description: An optional user-friendly name for the instance.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: launchInstance
+    description: >-
+      Create a new instance in the compartment and availability domain using the
+      supplied shape, image source, and subnet for the primary VNIC.
+    operationId: launchInstance
+    parameters:
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    requestBody:
+      contentType: application/json
+      payload:
+        compartmentId: $inputs.compartmentId
+        availabilityDomain: $inputs.availabilityDomain
+        shape: $inputs.shape
+        displayName: $inputs.displayName
+        sourceDetails:
+          sourceType: image
+          imageId: $inputs.imageId
+        createVnicDetails:
+          subnetId: $inputs.subnetId
+          assignPublicIp: true
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      instanceId: $response.body#/id
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: pollRunning
+    description: >-
+      Read the instance and confirm its lifecycle state. Repeat this step until
+      the instance reports RUNNING before continuing.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $steps.launchInstance.outputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+      shape: $response.body#/shape
+    onSuccess:
+    - name: instanceReady
+      type: goto
+      stepId: listVnics
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState == "RUNNING"
+        type: jsonpath
+    - name: keepPolling
+      type: goto
+      stepId: pollRunning
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState != "RUNNING"
+        type: jsonpath
+  - stepId: listVnics
+    description: >-
+      List the VNIC attachments in the compartment filtered to this instance to
+      discover the network interfaces bound to it.
+    operationId: listVnicAttachments
+    parameters:
+    - name: compartmentId
+      in: query
+      value: $inputs.compartmentId
+    - name: instanceId
+      in: query
+      value: $steps.launchInstance.outputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      firstVnicId: $response.body#/0/vnicId
+      firstAttachmentId: $response.body#/0/id
+  outputs:
+    instanceId: $steps.launchInstance.outputs.instanceId
+    lifecycleState: $steps.pollRunning.outputs.lifecycleState
+    vnicId: $steps.listVnics.outputs.firstVnicId

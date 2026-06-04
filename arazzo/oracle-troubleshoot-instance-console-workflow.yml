@@ -1,0 +1,116 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Troubleshoot Instance via Console Connection
+  summary: Read an instance, find an active console connection for it, and if none exists fall back to a diagnostic reboot.
+  description: >-
+    Gives an operator a path to debug a misbehaving instance. The workflow reads
+    the instance, lists the console connections filtered to that instance, and
+    branches: when an active console connection exists it ends with the
+    connection details for the operator to attach to, and when none is found it
+    issues a DIAGNOSTICREBOOT action to attempt automated recovery. Every step
+    spells out its request inline so the flow can be read and executed without
+    opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: troubleshoot-instance-console
+  summary: Find a console connection for an instance, or trigger a diagnostic reboot if none exists.
+  description: >-
+    Reads the instance, lists its console connections, and branches between
+    returning the connection details or issuing a DIAGNOSTICREBOOT action.
+  inputs:
+    type: object
+    required:
+    - compartmentId
+    - instanceId
+    properties:
+      compartmentId:
+        type: string
+        description: The OCID of the compartment containing the instance.
+      instanceId:
+        type: string
+        description: The OCID of the instance to troubleshoot.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readInstance
+    description: >-
+      Read the instance to confirm it exists and capture its ETag in case a
+      diagnostic reboot action is required.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: findConsole
+    description: >-
+      List the console connections in the compartment filtered to this instance
+      and branch on whether one exists.
+    operationId: listInstanceConsoleConnections
+    parameters:
+    - name: compartmentId
+      in: query
+      value: $inputs.compartmentId
+    - name: instanceId
+      in: query
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      connectionString: $response.body#/0/connectionString
+      consoleId: $response.body#/0/id
+    onSuccess:
+    - name: hasConsole
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.length > 0
+        type: jsonpath
+    - name: noConsole
+      type: goto
+      stepId: diagnosticReboot
+      criteria:
+      - context: $response.body
+        condition: $.length == 0
+        type: jsonpath
+  - stepId: diagnosticReboot
+    description: >-
+      No console connection was found, so perform a DIAGNOSTICREBOOT action on
+      the instance to attempt automated recovery, guarded by the captured ETag.
+    operationId: instanceAction
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: action
+      in: path
+      value: DIAGNOSTICREBOOT
+    - name: if-match
+      in: header
+      value: $steps.readInstance.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+  outputs:
+    instanceId: $inputs.instanceId
+    consoleConnectionString: $steps.findConsole.outputs.connectionString
+    rebootLifecycleState: $steps.diagnosticReboot.outputs.lifecycleState

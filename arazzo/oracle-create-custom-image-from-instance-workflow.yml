@@ -1,0 +1,126 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Create Custom Image from Instance
+  summary: Verify an instance is stopped, capture a custom image from it, then poll until the image is available.
+  description: >-
+    Captures a reusable boot image from an existing compute instance. The
+    workflow reads the instance and branches on its lifecycle state: image
+    capture requires the instance to be STOPPED. When stopped it creates the
+    image from the instance and then polls getImage until the image leaves the
+    PROVISIONING state and becomes AVAILABLE. Every step spells out its request
+    inline so the flow can be read and executed without opening the underlying
+    OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: create-custom-image-from-instance
+  summary: Capture a custom image from a stopped instance and wait for it to provision.
+  description: >-
+    Confirms the source instance is STOPPED, creates a custom image from it, and
+    polls the image lifecycle state until it is AVAILABLE.
+  inputs:
+    type: object
+    required:
+    - compartmentId
+    - instanceId
+    - displayName
+    properties:
+      compartmentId:
+        type: string
+        description: The OCID of the compartment to create the image in.
+      instanceId:
+        type: string
+        description: The OCID of the stopped instance to capture.
+      displayName:
+        type: string
+        description: A user-friendly name for the new custom image.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readInstance
+    description: >-
+      Read the source instance and confirm it is in the STOPPED state, which is
+      required before an image can be captured from it.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+    onSuccess:
+    - name: isStopped
+      type: goto
+      stepId: createImage
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState == "STOPPED"
+        type: jsonpath
+    - name: notStopped
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState != "STOPPED"
+        type: jsonpath
+  - stepId: createImage
+    description: >-
+      Create a boot disk image from the stopped instance in the target
+      compartment with the supplied display name.
+    operationId: createImage
+    parameters:
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    requestBody:
+      contentType: application/json
+      payload:
+        compartmentId: $inputs.compartmentId
+        displayName: $inputs.displayName
+        instanceId: $inputs.instanceId
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      imageId: $response.body#/id
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: pollImage
+    description: >-
+      Read the new image and check its lifecycle state. Repeat this step until
+      the image leaves PROVISIONING and reports AVAILABLE.
+    operationId: getImage
+    parameters:
+    - name: imageId
+      in: path
+      value: $steps.createImage.outputs.imageId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+    onSuccess:
+    - name: imageReady
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState == "AVAILABLE"
+        type: jsonpath
+    - name: keepPolling
+      type: goto
+      stepId: pollImage
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState == "PROVISIONING"
+        type: jsonpath
+  outputs:
+    imageId: $steps.createImage.outputs.imageId
+    lifecycleState: $steps.pollImage.outputs.lifecycleState

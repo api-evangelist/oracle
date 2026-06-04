@@ -1,0 +1,106 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Stop Compute Instance
+  summary: Read an instance, send the STOP action, then poll until it reports STOPPED.
+  description: >-
+    Gracefully powers off a running compute instance and confirms the shutdown
+    completed. The workflow reads the current instance to capture its ETag for
+    optimistic concurrency, issues the STOP instance action guarded by that
+    ETag, and then polls getInstance until the lifecycle state becomes STOPPED.
+    Every step spells out its request inline so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: stop-instance
+  summary: Stop a running compute instance and confirm it reaches STOPPED.
+  description: >-
+    Reads the instance, performs the STOP action with an if-match guard, and
+    polls the lifecycle state until the instance is STOPPED.
+  inputs:
+    type: object
+    required:
+    - instanceId
+    properties:
+      instanceId:
+        type: string
+        description: The OCID of the instance to stop.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readInstance
+    description: >-
+      Read the instance to confirm it exists and capture its current ETag for
+      optimistic concurrency control on the stop action.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: stopInstance
+    description: >-
+      Perform the STOP action on the instance, equivalent to pressing the power
+      button, guarded by the ETag captured when reading the instance.
+    operationId: instanceAction
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: action
+      in: path
+      value: STOP
+    - name: if-match
+      in: header
+      value: $steps.readInstance.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: pollStopped
+    description: >-
+      Read the instance and check its lifecycle state. Repeat this step until
+      the instance reports STOPPED.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+    onSuccess:
+    - name: stopped
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState == "STOPPED"
+        type: jsonpath
+    - name: keepPolling
+      type: goto
+      stepId: pollStopped
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState != "STOPPED"
+        type: jsonpath
+  outputs:
+    instanceId: $inputs.instanceId
+    lifecycleState: $steps.pollStopped.outputs.lifecycleState

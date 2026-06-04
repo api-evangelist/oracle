@@ -1,0 +1,82 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Rename Compute Instance
+  summary: Read an instance to capture its ETag, then update its display name with an optimistic concurrency guard.
+  description: >-
+    Changes the user-friendly display name of a compute instance safely. The
+    workflow reads the instance to capture its current ETag, then issues an
+    update that sets the new display name while enforcing the ETag through the
+    if-match header so the change only applies if the instance has not been
+    modified concurrently. Every step spells out its request inline so the flow
+    can be read and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: rename-instance
+  summary: Update a compute instance display name with an if-match guard.
+  description: >-
+    Reads the instance to obtain its ETag, then updates the display name guarded
+    by that ETag for optimistic concurrency control.
+  inputs:
+    type: object
+    required:
+    - instanceId
+    - newDisplayName
+    properties:
+      instanceId:
+        type: string
+        description: The OCID of the instance to rename.
+      newDisplayName:
+        type: string
+        description: The new display name to apply to the instance.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readInstance
+    description: >-
+      Read the instance to confirm it exists and capture its current ETag for
+      optimistic concurrency control on the update.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      currentName: $response.body#/displayName
+  - stepId: updateInstance
+    description: >-
+      Update the instance to apply the new display name, guarded by the ETag
+      captured when reading the instance.
+    operationId: updateInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: if-match
+      in: header
+      value: $steps.readInstance.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    requestBody:
+      contentType: application/json
+      payload:
+        displayName: $inputs.newDisplayName
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      instanceId: $response.body#/id
+      displayName: $response.body#/displayName
+  outputs:
+    instanceId: $steps.updateInstance.outputs.instanceId
+    displayName: $steps.updateInstance.outputs.displayName

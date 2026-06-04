@@ -1,0 +1,147 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Provision Image-Compatible Instance
+  summary: Pick an image, list only the shapes compatible with it, launch an instance, and read it back.
+  description: >-
+    Guarantees a launch uses a shape the chosen image actually supports. The
+    workflow lists images filtered by operating system to pick a base image,
+    lists shapes constrained to that imageId so only compatible shapes are
+    considered, launches an instance from the matched image and shape, and reads
+    the new instance back to surface its lifecycle state. Every step spells out
+    its request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: provision-image-compatible-instance
+  summary: Launch an instance using a shape that is compatible with the chosen image.
+  description: >-
+    Selects an image by operating system, lists shapes compatible with that
+    image, launches an instance from the matched pair, and reads it back.
+  inputs:
+    type: object
+    required:
+    - compartmentId
+    - availabilityDomain
+    - subnetId
+    - operatingSystem
+    properties:
+      compartmentId:
+        type: string
+        description: The OCID of the compartment to discover resources and launch into.
+      availabilityDomain:
+        type: string
+        description: The availability domain to scope shape discovery and launch to.
+      subnetId:
+        type: string
+        description: The OCID of the subnet the primary VNIC will attach to.
+      operatingSystem:
+        type: string
+        description: The operating system to filter the base image by (e.g. Oracle Linux).
+      displayName:
+        type: string
+        description: An optional user-friendly name for the launched instance.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: pickImage
+    description: >-
+      List images in the compartment filtered by operating system and available
+      lifecycle state, selecting the first match as the base image.
+    operationId: listImages
+    parameters:
+    - name: compartmentId
+      in: query
+      value: $inputs.compartmentId
+    - name: operatingSystem
+      in: query
+      value: $inputs.operatingSystem
+    - name: lifecycleState
+      in: query
+      value: AVAILABLE
+    - name: limit
+      in: query
+      value: 1
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      imageId: $response.body#/0/id
+  - stepId: listCompatibleShapes
+    description: >-
+      List shapes in the compartment constrained to those compatible with the
+      chosen image, selecting the first compatible shape.
+    operationId: listShapes
+    parameters:
+    - name: compartmentId
+      in: query
+      value: $inputs.compartmentId
+    - name: availabilityDomain
+      in: query
+      value: $inputs.availabilityDomain
+    - name: imageId
+      in: query
+      value: $steps.pickImage.outputs.imageId
+    - name: limit
+      in: query
+      value: 1
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      shape: $response.body#/0/shape
+  - stepId: launchInstance
+    description: >-
+      Launch an instance from the matched image and compatible shape, attaching
+      its primary VNIC to the supplied subnet.
+    operationId: launchInstance
+    parameters:
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    requestBody:
+      contentType: application/json
+      payload:
+        compartmentId: $inputs.compartmentId
+        availabilityDomain: $inputs.availabilityDomain
+        shape: $steps.listCompatibleShapes.outputs.shape
+        displayName: $inputs.displayName
+        sourceDetails:
+          sourceType: image
+          imageId: $steps.pickImage.outputs.imageId
+        createVnicDetails:
+          subnetId: $inputs.subnetId
+          assignPublicIp: true
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      instanceId: $response.body#/id
+  - stepId: readInstance
+    description: >-
+      Read the newly launched instance to surface its current lifecycle state
+      and confirm the launch landed.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $steps.launchInstance.outputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+  outputs:
+    instanceId: $steps.launchInstance.outputs.instanceId
+    imageId: $steps.pickImage.outputs.imageId
+    shape: $steps.listCompatibleShapes.outputs.shape
+    lifecycleState: $steps.readInstance.outputs.lifecycleState

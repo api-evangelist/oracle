@@ -1,0 +1,106 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Start Compute Instance
+  summary: Read a stopped instance, send the START action, then poll until it reports RUNNING.
+  description: >-
+    Powers on a stopped compute instance and confirms it came back online. The
+    workflow reads the current instance to capture its ETag, issues the START
+    instance action guarded by that ETag, and then polls getInstance until the
+    lifecycle state becomes RUNNING. Every step spells out its request inline so
+    the flow can be read and executed without opening the underlying OpenAPI
+    description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: start-instance
+  summary: Start a stopped compute instance and confirm it reaches RUNNING.
+  description: >-
+    Reads the instance, performs the START action with an if-match guard, and
+    polls the lifecycle state until the instance is RUNNING.
+  inputs:
+    type: object
+    required:
+    - instanceId
+    properties:
+      instanceId:
+        type: string
+        description: The OCID of the instance to start.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readInstance
+    description: >-
+      Read the instance to confirm it exists and capture its current ETag for
+      optimistic concurrency control on the start action.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: startInstance
+    description: >-
+      Perform the START action on the instance to power it on, guarded by the
+      ETag captured when reading the instance.
+    operationId: instanceAction
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: action
+      in: path
+      value: START
+    - name: if-match
+      in: header
+      value: $steps.readInstance.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: pollRunning
+    description: >-
+      Read the instance and check its lifecycle state. Repeat this step until
+      the instance reports RUNNING.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+    onSuccess:
+    - name: running
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState == "RUNNING"
+        type: jsonpath
+    - name: keepPolling
+      type: goto
+      stepId: pollRunning
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState != "RUNNING"
+        type: jsonpath
+  outputs:
+    instanceId: $inputs.instanceId
+    lifecycleState: $steps.pollRunning.outputs.lifecycleState

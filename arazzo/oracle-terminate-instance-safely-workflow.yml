@@ -1,0 +1,101 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Terminate Compute Instance Safely
+  summary: Read an instance and its volume attachments, then terminate it while preserving the boot volume.
+  description: >-
+    Tears down a compute instance after taking stock of what is attached to it.
+    The workflow reads the instance to capture its ETag, lists the volume
+    attachments so the caller has a record of the block volumes that were bound
+    to it, and then terminates the instance with the boot volume preserved and
+    the ETag enforced for optimistic concurrency. Every step spells out its
+    request inline so the flow can be read and executed without opening the
+    underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: terminate-instance-safely
+  summary: Terminate a compute instance while preserving its boot volume.
+  description: >-
+    Reads the instance, enumerates its volume attachments for the record, then
+    terminates the instance with preserveBootVolume set to true.
+  inputs:
+    type: object
+    required:
+    - compartmentId
+    - instanceId
+    properties:
+      compartmentId:
+        type: string
+        description: The OCID of the compartment containing the instance.
+      instanceId:
+        type: string
+        description: The OCID of the instance to terminate.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readInstance
+    description: >-
+      Read the instance to confirm it exists and capture its ETag for optimistic
+      concurrency control on the terminate call.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      displayName: $response.body#/displayName
+  - stepId: listVolumes
+    description: >-
+      List the volume attachments in the compartment filtered to this instance
+      so the attached block volumes are recorded before termination.
+    operationId: listVolumeAttachments
+    parameters:
+    - name: compartmentId
+      in: query
+      value: $inputs.compartmentId
+    - name: instanceId
+      in: query
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      firstVolumeId: $response.body#/0/volumeId
+  - stepId: terminateInstance
+    description: >-
+      Terminate the instance, preserving the boot volume, guarded by the ETag
+      captured when reading the instance.
+    operationId: terminateInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: preserveBootVolume
+      in: query
+      value: true
+    - name: if-match
+      in: header
+      value: $steps.readInstance.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 204
+    outputs:
+      requestId: $response.headers.opc-request-id
+  outputs:
+    instanceId: $inputs.instanceId
+    preservedVolumeId: $steps.listVolumes.outputs.firstVolumeId
+    requestId: $steps.terminateInstance.outputs.requestId

@@ -1,0 +1,105 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Resize Flexible Compute Instance
+  summary: Read an instance, update its flexible shape OCPU and memory configuration, then read it back to confirm.
+  description: >-
+    Rescales a flexible-shape compute instance to a new CPU and memory profile.
+    The workflow reads the instance to capture its ETag, updates the instance
+    shapeConfig with the requested OCPU and memory values guarded by that ETag,
+    and then reads the instance back to confirm the new sizing took effect. Every
+    step spells out its request inline so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: resize-flex-instance
+  summary: Update a flexible instance OCPU and memory then confirm the new configuration.
+  description: >-
+    Reads the instance for its ETag, updates the shapeConfig OCPU and memory
+    under an if-match guard, and reads the instance back to confirm the resize.
+  inputs:
+    type: object
+    required:
+    - instanceId
+    - ocpus
+    - memoryInGBs
+    properties:
+      instanceId:
+        type: string
+        description: The OCID of the flexible-shape instance to resize.
+      ocpus:
+        type: number
+        description: The target number of OCPUs for the instance.
+      memoryInGBs:
+        type: number
+        description: The target amount of memory in GBs for the instance.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readInstance
+    description: >-
+      Read the instance to confirm it exists and capture its current ETag for
+      optimistic concurrency control on the resize.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      shape: $response.body#/shape
+  - stepId: resizeInstance
+    description: >-
+      Update the instance shapeConfig to apply the new OCPU and memory values,
+      guarded by the ETag captured when reading the instance.
+    operationId: updateInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: if-match
+      in: header
+      value: $steps.readInstance.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    requestBody:
+      contentType: application/json
+      payload:
+        shapeConfig:
+          ocpus: $inputs.ocpus
+          memoryInGBs: $inputs.memoryInGBs
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      instanceId: $response.body#/id
+  - stepId: confirmResize
+    description: >-
+      Read the instance back to confirm the new OCPU and memory configuration
+      took effect.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      ocpus: $response.body#/shapeConfig/ocpus
+      memoryInGBs: $response.body#/shapeConfig/memoryInGBs
+  outputs:
+    instanceId: $steps.resizeInstance.outputs.instanceId
+    ocpus: $steps.confirmResize.outputs.ocpus
+    memoryInGBs: $steps.confirmResize.outputs.memoryInGBs

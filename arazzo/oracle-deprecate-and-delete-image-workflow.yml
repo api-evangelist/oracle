@@ -1,0 +1,103 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Deprecate and Delete Custom Image
+  summary: Read an image, rename it with a deprecated marker, then delete it under an ETag guard.
+  description: >-
+    Retires a custom image in two safe stages. The workflow reads the image to
+    capture its ETag, updates the display name to flag it as deprecated so any
+    lingering references are obvious, and then deletes the image guarded by the
+    refreshed ETag. Platform images provided by Oracle cannot be deleted, so this
+    flow targets custom images. Every step spells out its request inline so the
+    flow can be read and executed without opening the underlying OpenAPI
+    description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: deprecate-and-delete-image
+  summary: Mark a custom image deprecated, then delete it.
+  description: >-
+    Reads the image for its ETag, renames it to a deprecated label, then deletes
+    it using the ETag returned by the update for optimistic concurrency.
+  inputs:
+    type: object
+    required:
+    - imageId
+    - deprecatedName
+    properties:
+      imageId:
+        type: string
+        description: The OCID of the custom image to deprecate and delete.
+      deprecatedName:
+        type: string
+        description: The display name marking the image as deprecated (e.g. "DEPRECATED - old base").
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readImage
+    description: >-
+      Read the image to confirm it exists and capture its current ETag for the
+      deprecation update.
+    operationId: getImage
+    parameters:
+    - name: imageId
+      in: path
+      value: $inputs.imageId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      currentName: $response.body#/displayName
+  - stepId: markDeprecated
+    description: >-
+      Update the image display name to flag it as deprecated, guarded by the
+      ETag captured when reading the image, and capture the refreshed ETag.
+    operationId: updateImage
+    parameters:
+    - name: imageId
+      in: path
+      value: $inputs.imageId
+    - name: if-match
+      in: header
+      value: $steps.readImage.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    requestBody:
+      contentType: application/json
+      payload:
+        displayName: $inputs.deprecatedName
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      displayName: $response.body#/displayName
+  - stepId: deleteImage
+    description: >-
+      Delete the deprecated custom image, guarded by the refreshed ETag returned
+      by the deprecation update.
+    operationId: deleteImage
+    parameters:
+    - name: imageId
+      in: path
+      value: $inputs.imageId
+    - name: if-match
+      in: header
+      value: $steps.markDeprecated.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 204
+    outputs:
+      requestId: $response.headers.opc-request-id
+  outputs:
+    imageId: $inputs.imageId
+    deprecatedName: $steps.markDeprecated.outputs.displayName
+    requestId: $steps.deleteImage.outputs.requestId

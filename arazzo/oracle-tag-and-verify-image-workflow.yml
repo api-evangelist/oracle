@@ -1,0 +1,114 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Tag and Verify Custom Image
+  summary: Read an image, update its display name and freeform tags, then list images to confirm the new name is visible.
+  description: >-
+    Labels a custom image and confirms the change is searchable. The workflow
+    reads the image to capture its ETag, updates its display name and freeform
+    tags guarded by that ETag, and then lists images in the compartment filtered
+    by the new display name to verify the rename is visible to discovery queries.
+    Every step spells out its request inline so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: tag-and-verify-image
+  summary: Rename and tag a custom image then confirm it is discoverable.
+  description: >-
+    Reads the image for its ETag, updates its display name and freeform tags,
+    then lists images filtered by the new name to confirm the update.
+  inputs:
+    type: object
+    required:
+    - compartmentId
+    - imageId
+    - newDisplayName
+    - freeformTags
+    properties:
+      compartmentId:
+        type: string
+        description: The OCID of the compartment the image belongs to.
+      imageId:
+        type: string
+        description: The OCID of the image to tag and rename.
+      newDisplayName:
+        type: string
+        description: The new display name to apply to the image.
+      freeformTags:
+        type: object
+        description: A map of freeform key/value tags to apply to the image.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readImage
+    description: >-
+      Read the image to confirm it exists and capture its current ETag for
+      optimistic concurrency control on the update.
+    operationId: getImage
+    parameters:
+    - name: imageId
+      in: path
+      value: $inputs.imageId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      currentName: $response.body#/displayName
+  - stepId: updateImage
+    description: >-
+      Update the image to apply the new display name and freeform tags, guarded
+      by the ETag captured when reading the image.
+    operationId: updateImage
+    parameters:
+    - name: imageId
+      in: path
+      value: $inputs.imageId
+    - name: if-match
+      in: header
+      value: $steps.readImage.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    requestBody:
+      contentType: application/json
+      payload:
+        displayName: $inputs.newDisplayName
+        freeformTags: $inputs.freeformTags
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      imageId: $response.body#/id
+      displayName: $response.body#/displayName
+  - stepId: verifyVisible
+    description: >-
+      List images in the compartment filtered by the new display name to confirm
+      the renamed image is discoverable.
+    operationId: listImages
+    parameters:
+    - name: compartmentId
+      in: query
+      value: $inputs.compartmentId
+    - name: displayName
+      in: query
+      value: $inputs.newDisplayName
+    - name: limit
+      in: query
+      value: 1
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      foundImageId: $response.body#/0/id
+  outputs:
+    imageId: $steps.updateImage.outputs.imageId
+    displayName: $steps.updateImage.outputs.displayName
+    verifiedImageId: $steps.verifyVisible.outputs.foundImageId

@@ -1,0 +1,97 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Find Compute Instance by Display Name
+  summary: Search a compartment for an instance matching a display name and fetch its full details.
+  description: >-
+    Resolves a human-friendly instance name into an OCID and full instance
+    record. The workflow lists instances in the compartment filtered by the
+    exact display name, branches on whether a match was found, and when one
+    exists retrieves the complete instance details including shape, image, and
+    lifecycle state. Every step spells out its request inline so the flow can be
+    read and executed without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: find-instance-by-name
+  summary: Look up a compute instance by display name and return its details.
+  description: >-
+    Lists instances filtered by an exact display name, and when a match is
+    found, fetches the full instance record by its OCID.
+  inputs:
+    type: object
+    required:
+    - compartmentId
+    - displayName
+    properties:
+      compartmentId:
+        type: string
+        description: The OCID of the compartment to search within.
+      displayName:
+        type: string
+        description: The exact display name of the instance to find.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: findInstance
+    description: >-
+      List instances in the compartment filtered to those whose display name
+      exactly matches the supplied value.
+    operationId: listInstances
+    parameters:
+    - name: compartmentId
+      in: query
+      value: $inputs.compartmentId
+    - name: displayName
+      in: query
+      value: $inputs.displayName
+    - name: limit
+      in: query
+      value: 1
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      matchedInstanceId: $response.body#/0/id
+    onSuccess:
+    - name: instanceFound
+      type: goto
+      stepId: getInstanceDetails
+      criteria:
+      - context: $response.body
+        condition: $.length > 0
+        type: jsonpath
+    - name: instanceMissing
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.length == 0
+        type: jsonpath
+  - stepId: getInstanceDetails
+    description: >-
+      Fetch the full instance record for the matched OCID, including its
+      lifecycle state, shape, image, and metadata.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $steps.findInstance.outputs.matchedInstanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      instanceId: $response.body#/id
+      lifecycleState: $response.body#/lifecycleState
+      shape: $response.body#/shape
+      imageId: $response.body#/imageId
+  outputs:
+    instanceId: $steps.getInstanceDetails.outputs.instanceId
+    lifecycleState: $steps.getInstanceDetails.outputs.lifecycleState
+    shape: $steps.getInstanceDetails.outputs.shape

@@ -1,0 +1,106 @@
+arazzo: 1.0.1
+info:
+  title: Oracle OCI Soft-Reboot Compute Instance
+  summary: Read an instance, send the SOFTRESET action, then poll until it returns to RUNNING.
+  description: >-
+    Gracefully reboots a compute instance and confirms it came back online. The
+    workflow reads the current instance to capture its ETag, issues the
+    SOFTRESET action which sends an ACPI shutdown and powers the instance back
+    on, and then polls getInstance until the lifecycle state returns to RUNNING.
+    Every step spells out its request inline so the flow can be read and executed
+    without opening the underlying OpenAPI description.
+  version: 1.0.0
+sourceDescriptions:
+- name: ociComputeApi
+  url: ../openapi/oci-compute-api-openapi.yml
+  type: openapi
+workflows:
+- workflowId: reboot-instance
+  summary: Soft-reboot a compute instance and confirm it returns to RUNNING.
+  description: >-
+    Reads the instance, performs the SOFTRESET action with an if-match guard,
+    and polls the lifecycle state until the instance is RUNNING again.
+  inputs:
+    type: object
+    required:
+    - instanceId
+    properties:
+      instanceId:
+        type: string
+        description: The OCID of the instance to soft-reboot.
+      authToken:
+        type: string
+        description: OCI request-signing bearer credential for the Authorization header.
+  steps:
+  - stepId: readInstance
+    description: >-
+      Read the instance to confirm it exists and capture its current ETag for
+      optimistic concurrency control on the reboot action.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      etag: $response.headers.etag
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: softReset
+    description: >-
+      Perform the SOFTRESET action, which gracefully reboots the instance via an
+      ACPI shutdown and power-on, guarded by the captured ETag.
+    operationId: instanceAction
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: action
+      in: path
+      value: SOFTRESET
+    - name: if-match
+      in: header
+      value: $steps.readInstance.outputs.etag
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+  - stepId: pollRunning
+    description: >-
+      Read the instance and check its lifecycle state. Repeat this step until
+      the instance returns to RUNNING after the reboot.
+    operationId: getInstance
+    parameters:
+    - name: instanceId
+      in: path
+      value: $inputs.instanceId
+    - name: Authorization
+      in: header
+      value: $inputs.authToken
+    successCriteria:
+    - condition: $statusCode == 200
+    outputs:
+      lifecycleState: $response.body#/lifecycleState
+    onSuccess:
+    - name: backOnline
+      type: end
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState == "RUNNING"
+        type: jsonpath
+    - name: keepPolling
+      type: goto
+      stepId: pollRunning
+      criteria:
+      - context: $response.body
+        condition: $.lifecycleState != "RUNNING"
+        type: jsonpath
+  outputs:
+    instanceId: $inputs.instanceId
+    lifecycleState: $steps.pollRunning.outputs.lifecycleState
