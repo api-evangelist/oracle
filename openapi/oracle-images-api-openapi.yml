@@ -1,0 +1,821 @@
+openapi: 3.1.0
+info:
+  title: Oracle OCI Compute Console Connections Images API
+  description: The Oracle Cloud Infrastructure Compute API provides REST endpoints for managing compute instances, shapes, and images. You can launch and manage virtual machine (VM) and bare metal instances, query available compute shapes, list and manage custom images, and configure instance console connections. All API requests require OCI request signing for authentication.
+  version: '20160918'
+  contact:
+    name: Oracle Cloud Infrastructure Support
+    url: https://support.oracle.com
+  license:
+    name: Oracle Technology Network License Agreement
+    url: https://www.oracle.com/downloads/licenses/oracle-oci-api-license.html
+  termsOfService: https://www.oracle.com/legal/terms.html
+servers:
+- url: https://iaas.{region}.oraclecloud.com/20160918
+  description: OCI Compute API regional endpoint
+  variables:
+    region:
+      description: The OCI region identifier (e.g., us-ashburn-1, us-phoenix-1, eu-frankfurt-1, ap-tokyo-1)
+      default: us-ashburn-1
+      enum:
+      - us-ashburn-1
+      - us-phoenix-1
+      - us-chicago-1
+      - us-sanjose-1
+      - ca-toronto-1
+      - ca-montreal-1
+      - eu-frankfurt-1
+      - eu-amsterdam-1
+      - eu-zurich-1
+      - eu-madrid-1
+      - uk-london-1
+      - ap-tokyo-1
+      - ap-osaka-1
+      - ap-seoul-1
+      - ap-mumbai-1
+      - ap-sydney-1
+      - ap-melbourne-1
+      - sa-saopaulo-1
+      - me-jeddah-1
+      - af-johannesburg-1
+security:
+- ociRequestSigning: []
+tags:
+- name: Images
+  description: Manage compute images used to launch instances
+paths:
+  /images:
+    get:
+      operationId: listImages
+      summary: Oracle List Images
+      description: Lists a subset of images available in the specified compartment, including platform images, custom images, and Marketplace partner images. You can filter the results by display name, operating system, lifecycle state, and shape compatibility.
+      tags:
+      - Images
+      parameters:
+      - $ref: '#/components/parameters/compartmentId'
+      - name: displayName
+        in: query
+        description: A filter to return only resources that match the given display name exactly
+        schema:
+          type: string
+        example: example_value
+      - name: operatingSystem
+        in: query
+        description: The image operating system (e.g., Oracle Linux)
+        schema:
+          type: string
+        example: example_value
+      - name: operatingSystemVersion
+        in: query
+        description: The image operating system version (e.g., 8)
+        schema:
+          type: string
+        example: example_value
+      - name: shape
+        in: query
+        description: Shape name. If specified, only images compatible with the shape are returned.
+        schema:
+          type: string
+        example: example_value
+      - name: lifecycleState
+        in: query
+        description: A filter to return only images that match the given lifecycle state
+        schema:
+          $ref: '#/components/schemas/ImageLifecycleState'
+        example: example_value
+      - name: sortBy
+        in: query
+        description: The field to sort by
+        schema:
+          type: string
+          enum:
+          - TIMECREATED
+          - DISPLAYNAME
+          default: TIMECREATED
+        example: TIMECREATED
+      - $ref: '#/components/parameters/sortOrder'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: The list of images
+          headers:
+            opc-next-page:
+              description: For pagination. When this header appears in the response, additional pages of results remain.
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
+              examples:
+                Listimages200Example:
+                  summary: Default listImages 200 response
+                  x-microcks-default: true
+                  value:
+                  - id: abc123
+                    compartmentId: '500123'
+                    displayName: example_value
+                    operatingSystem: example_value
+                    operatingSystemVersion: example_value
+                    lifecycleState: PROVISIONING
+                    timeCreated: '2026-01-15T10:30:00Z'
+                    baseImageId: '500123'
+                    sizeInMBs: 10
+                    billableSizeInGBs: 10
+                    createImageAllowed: true
+                    agentFeatures:
+                      isMonitoringSupported: true
+                      isManagementSupported: true
+                    launchMode: NATIVE
+                    launchOptions:
+                      bootVolumeType: ISCSI
+                      firmware: BIOS
+                      networkType: E1000
+                      remoteDataVolumeType: ISCSI
+                      isPvEncryptionInTransitEnabled: true
+                      isConsistentVolumeNamingEnabled: true
+                    listingType: COMMUNITY
+                    definedTags: {}
+                    freeformTags: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    post:
+      operationId: createImage
+      summary: Oracle Create an Image
+      description: Creates a boot disk image for the specified instance or imports an image from an Object Storage URL. The image can then be used to launch new instances. When creating from an instance, the instance must be in the STOPPED state.
+      tags:
+      - Images
+      parameters:
+      - $ref: '#/components/parameters/opcRetryToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateImageDetails'
+            examples:
+              CreateimageRequestExample:
+                summary: Default createImage request
+                x-microcks-default: true
+                value:
+                  compartmentId: '500123'
+                  displayName: example_value
+                  instanceId: '500123'
+                  imageSourceDetails:
+                    sourceType: objectStorageTuple
+                    bucketName: example_value
+                    namespaceName: example_value
+                    objectName: example_value
+                    sourceUri: example_value
+                    sourceImageType: QCOW2
+                    operatingSystem: example_value
+                    operatingSystemVersion: example_value
+                  launchMode: NATIVE
+                  definedTags: {}
+                  freeformTags: {}
+      responses:
+        '200':
+          description: The image was created successfully
+          headers:
+            etag:
+              description: Entity tag for the image resource
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request
+              schema:
+                type: string
+            opc-work-request-id:
+              description: The OCID of the work request. Use GetWorkRequest to monitor the status of the image creation.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+              examples:
+                Createimage200Example:
+                  summary: Default createImage 200 response
+                  x-microcks-default: true
+                  value:
+                    id: abc123
+                    compartmentId: '500123'
+                    displayName: example_value
+                    operatingSystem: example_value
+                    operatingSystemVersion: example_value
+                    lifecycleState: PROVISIONING
+                    timeCreated: '2026-01-15T10:30:00Z'
+                    baseImageId: '500123'
+                    sizeInMBs: 10
+                    billableSizeInGBs: 10
+                    createImageAllowed: true
+                    agentFeatures:
+                      isMonitoringSupported: true
+                      isManagementSupported: true
+                    launchMode: NATIVE
+                    launchOptions:
+                      bootVolumeType: ISCSI
+                      firmware: BIOS
+                      networkType: E1000
+                      remoteDataVolumeType: ISCSI
+                      isPvEncryptionInTransitEnabled: true
+                      isConsistentVolumeNamingEnabled: true
+                    listingType: COMMUNITY
+                    definedTags: {}
+                    freeformTags: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+  /images/{imageId}:
+    get:
+      operationId: getImage
+      summary: Oracle Get an Image
+      description: Gets the specified image, including its display name, lifecycle state, operating system, and size.
+      tags:
+      - Images
+      parameters:
+      - $ref: '#/components/parameters/imageId'
+      responses:
+        '200':
+          description: The image details
+          headers:
+            etag:
+              description: Entity tag for the image resource
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+              examples:
+                Getimage200Example:
+                  summary: Default getImage 200 response
+                  x-microcks-default: true
+                  value:
+                    id: abc123
+                    compartmentId: '500123'
+                    displayName: example_value
+                    operatingSystem: example_value
+                    operatingSystemVersion: example_value
+                    lifecycleState: PROVISIONING
+                    timeCreated: '2026-01-15T10:30:00Z'
+                    baseImageId: '500123'
+                    sizeInMBs: 10
+                    billableSizeInGBs: 10
+                    createImageAllowed: true
+                    agentFeatures:
+                      isMonitoringSupported: true
+                      isManagementSupported: true
+                    launchMode: NATIVE
+                    launchOptions:
+                      bootVolumeType: ISCSI
+                      firmware: BIOS
+                      networkType: E1000
+                      remoteDataVolumeType: ISCSI
+                      isPvEncryptionInTransitEnabled: true
+                      isConsistentVolumeNamingEnabled: true
+                    listingType: COMMUNITY
+                    definedTags: {}
+                    freeformTags: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    put:
+      operationId: updateImage
+      summary: Oracle Update an Image
+      description: Updates the display name and tags of the specified image. Avoid entering confidential information.
+      tags:
+      - Images
+      parameters:
+      - $ref: '#/components/parameters/imageId'
+      - $ref: '#/components/parameters/ifMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateImageDetails'
+            examples:
+              UpdateimageRequestExample:
+                summary: Default updateImage request
+                x-microcks-default: true
+                value:
+                  displayName: example_value
+                  definedTags: {}
+                  freeformTags: {}
+      responses:
+        '200':
+          description: The image was updated successfully
+          headers:
+            etag:
+              description: Entity tag for the updated image resource
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+              examples:
+                Updateimage200Example:
+                  summary: Default updateImage 200 response
+                  x-microcks-default: true
+                  value:
+                    id: abc123
+                    compartmentId: '500123'
+                    displayName: example_value
+                    operatingSystem: example_value
+                    operatingSystemVersion: example_value
+                    lifecycleState: PROVISIONING
+                    timeCreated: '2026-01-15T10:30:00Z'
+                    baseImageId: '500123'
+                    sizeInMBs: 10
+                    billableSizeInGBs: 10
+                    createImageAllowed: true
+                    agentFeatures:
+                      isMonitoringSupported: true
+                      isManagementSupported: true
+                    launchMode: NATIVE
+                    launchOptions:
+                      bootVolumeType: ISCSI
+                      firmware: BIOS
+                      networkType: E1000
+                      remoteDataVolumeType: ISCSI
+                      isPvEncryptionInTransitEnabled: true
+                      isConsistentVolumeNamingEnabled: true
+                    listingType: COMMUNITY
+                    definedTags: {}
+                    freeformTags: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+    delete:
+      operationId: deleteImage
+      summary: Oracle Delete an Image
+      description: Deletes the specified image. Note that platform images provided by Oracle cannot be deleted.
+      tags:
+      - Images
+      parameters:
+      - $ref: '#/components/parameters/imageId'
+      - $ref: '#/components/parameters/ifMatch'
+      responses:
+        '204':
+          description: The image is being deleted
+          headers:
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  responses:
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - invalid parameters or missing required fields
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Too many requests - rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Not found - the specified resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict - the resource is in a conflicting state for this operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    PreconditionFailed:
+      description: Precondition failed - the ETag provided does not match the current resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - missing or invalid authentication credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    ImageLifecycleState:
+      type: string
+      description: The lifecycle state of an image
+      enum:
+      - PROVISIONING
+      - IMPORTING
+      - AVAILABLE
+      - EXPORTING
+      - DISABLED
+      - DELETED
+    FreeformTags:
+      type: object
+      description: Free-form tags for the resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+      additionalProperties:
+        type: string
+    UpdateImageDetails:
+      type: object
+      description: Details for updating an image
+      properties:
+        displayName:
+          type: string
+          description: A user-friendly name for the image. Avoid entering confidential information.
+          example: example_value
+        definedTags:
+          $ref: '#/components/schemas/DefinedTags'
+        freeformTags:
+          $ref: '#/components/schemas/FreeformTags'
+    DefinedTags:
+      type: object
+      description: Defined tags for the resource. Each key is predefined and scoped to a namespace. The value is a map of tag key/value pairs.
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: string
+    CreateImageDetails:
+      type: object
+      description: Details for creating an image
+      required:
+      - compartmentId
+      properties:
+        compartmentId:
+          type: string
+          description: The OCID of the compartment to create the image in
+          example: '500123'
+        displayName:
+          type: string
+          description: A user-friendly name for the image. Avoid entering confidential information.
+          example: example_value
+        instanceId:
+          type: string
+          description: The OCID of the instance to use as the basis for the image. Required if imageSourceDetails is not specified.
+          example: '500123'
+        imageSourceDetails:
+          $ref: '#/components/schemas/ImageSourceDetails'
+        launchMode:
+          type: string
+          description: The launch mode for instances created from this image
+          enum:
+          - NATIVE
+          - EMULATED
+          - PARAVIRTUALIZED
+          - CUSTOM
+          example: NATIVE
+        definedTags:
+          $ref: '#/components/schemas/DefinedTags'
+        freeformTags:
+          $ref: '#/components/schemas/FreeformTags'
+    LaunchOptions:
+      type: object
+      description: Options for tuning the compatibility and performance of VM shapes
+      properties:
+        bootVolumeType:
+          type: string
+          description: Emulation type for the boot volume. PARAVIRTUALIZED is recommended for best performance.
+          enum:
+          - ISCSI
+          - SCSI
+          - IDE
+          - VFIO
+          - PARAVIRTUALIZED
+          example: ISCSI
+        firmware:
+          type: string
+          description: Firmware used to boot the VM
+          enum:
+          - BIOS
+          - UEFI_64
+          example: BIOS
+        networkType:
+          type: string
+          description: Emulation type for the physical network interface card (NIC). PARAVIRTUALIZED or VFIO is recommended.
+          enum:
+          - E1000
+          - VFIO
+          - PARAVIRTUALIZED
+          example: E1000
+        remoteDataVolumeType:
+          type: string
+          description: Emulation type for attached block volume data disks
+          enum:
+          - ISCSI
+          - SCSI
+          - IDE
+          - VFIO
+          - PARAVIRTUALIZED
+          example: ISCSI
+        isPvEncryptionInTransitEnabled:
+          type: boolean
+          description: Whether to enable in-transit encryption for the data volume's paravirtualized attachment
+          example: true
+        isConsistentVolumeNamingEnabled:
+          type: boolean
+          description: Whether to enable consistent volume naming
+          example: true
+    ImageSourceDetails:
+      type: object
+      description: Details for importing an image from Object Storage
+      required:
+      - sourceType
+      properties:
+        sourceType:
+          type: string
+          description: The source type for the image
+          enum:
+          - objectStorageTuple
+          - objectStorageUri
+          example: objectStorageTuple
+        bucketName:
+          type: string
+          description: The Object Storage bucket name (for objectStorageTuple)
+          example: example_value
+        namespaceName:
+          type: string
+          description: The Object Storage namespace (for objectStorageTuple)
+          example: example_value
+        objectName:
+          type: string
+          description: The Object Storage object name (for objectStorageTuple)
+          example: example_value
+        sourceUri:
+          type: string
+          description: The Object Storage URL for the image (for objectStorageUri source type)
+          example: example_value
+        sourceImageType:
+          type: string
+          description: The format of the image to import
+          enum:
+          - QCOW2
+          - VMDK
+          example: QCOW2
+        operatingSystem:
+          type: string
+          description: The operating system of the image
+          example: example_value
+        operatingSystemVersion:
+          type: string
+          description: The operating system version of the image
+          example: example_value
+    Error:
+      type: object
+      description: Error response returned by the OCI API
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          description: A short error code that defines the error, meant for programmatic parsing
+          example: example_value
+        message:
+          type: string
+          description: A human-readable error string
+          example: example_value
+        status:
+          type: integer
+          description: The HTTP status code
+          example: 10
+        opcRequestId:
+          type: string
+          description: Unique Oracle-assigned identifier for the request
+          example: '500123'
+    Image:
+      type: object
+      description: A boot disk image for launching compute instances. Images can be platform images provided by Oracle, custom images, or Marketplace partner images.
+      required:
+      - id
+      - compartmentId
+      - operatingSystem
+      - operatingSystemVersion
+      - lifecycleState
+      - timeCreated
+      properties:
+        id:
+          type: string
+          description: The OCID of the image
+          examples:
+          - ocid1.image.oc1.phx.abcdefghijklmnop
+        compartmentId:
+          type: string
+          description: The OCID of the compartment containing the image
+          example: '500123'
+        displayName:
+          type: string
+          description: A user-friendly name for the image. It does not have to be unique, and it is changeable.
+          example: example_value
+        operatingSystem:
+          type: string
+          description: The image operating system (e.g., Oracle Linux)
+          examples:
+          - Oracle Linux
+          - CentOS
+          - Windows
+          - Canonical Ubuntu
+        operatingSystemVersion:
+          type: string
+          description: The image operating system version (e.g., 8, 9)
+          examples:
+          - '8'
+          - '9'
+          - Server 2019 Standard
+        lifecycleState:
+          $ref: '#/components/schemas/ImageLifecycleState'
+        timeCreated:
+          type: string
+          format: date-time
+          description: The date and time the image was created
+          example: '2026-01-15T10:30:00Z'
+        baseImageId:
+          type: string
+          description: The OCID of the image originally used to create this custom image
+          example: '500123'
+        sizeInMBs:
+          type: integer
+          description: The boot volume size for an instance launched from this image, in MBs
+          example: 10
+        billableSizeInGBs:
+          type: integer
+          description: The billable size of the image in GBs
+          example: 10
+        createImageAllowed:
+          type: boolean
+          description: Whether instances launched from this image can be used to create new images
+          example: true
+        agentFeatures:
+          type: object
+          description: Oracle Cloud Agent features supported on the image
+          properties:
+            isMonitoringSupported:
+              type: boolean
+              description: Whether the Monitoring plugin is supported
+            isManagementSupported:
+              type: boolean
+              description: Whether the Management plugin is supported
+          example: example_value
+        launchMode:
+          type: string
+          description: The launch mode of instances created from this image
+          enum:
+          - NATIVE
+          - EMULATED
+          - PARAVIRTUALIZED
+          - CUSTOM
+          example: NATIVE
+        launchOptions:
+          $ref: '#/components/schemas/LaunchOptions'
+        listingType:
+          type: string
+          description: The listing type of the image
+          enum:
+          - COMMUNITY
+          - NONE
+          example: COMMUNITY
+        definedTags:
+          $ref: '#/components/schemas/DefinedTags'
+        freeformTags:
+          $ref: '#/components/schemas/FreeformTags'
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: For list pagination. The maximum number of results per page, or items to return in a paginated list call. The value must be between 1 and 1000.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+    page:
+      name: page
+      in: query
+      description: For list pagination. The value of the opc-next-page response header from the previous list call.
+      schema:
+        type: string
+    imageId:
+      name: imageId
+      in: path
+      required: true
+      description: The OCID of the image
+      schema:
+        type: string
+    sortOrder:
+      name: sortOrder
+      in: query
+      description: The sort order, either ascending or descending
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    compartmentId:
+      name: compartmentId
+      in: query
+      required: true
+      description: The OCID of the compartment. List operations return resources in the compartment and its sub-compartments unless specified otherwise.
+      schema:
+        type: string
+    ifMatch:
+      name: if-match
+      in: header
+      description: For optimistic concurrency control. The entity tag (ETag) of the resource to match. The request succeeds only if the ETag you provide matches the current ETag value of the resource.
+      schema:
+        type: string
+    opcRetryToken:
+      name: opc-retry-token
+      in: header
+      description: A token that uniquely identifies a request so it can be retried in case of a timeout or server error. Retry tokens expire after 24 hours, but can be invalidated before then due to conflicting operations.
+      schema:
+        type: string
+  securitySchemes:
+    ociRequestSigning:
+      type: http
+      scheme: bearer
+      description: OCI uses a custom request signing scheme based on RSA key pairs. Each API request must include an Authorization header with the signature computed from the request headers, method, and path. See https://docs.oracle.com/en-us/iaas/Content/API/Concepts/signingrequests.htm
+externalDocs:
+  description: OCI Compute Service Documentation
+  url: https://docs.oracle.com/en-us/iaas/Content/Compute/Concepts/computeoverview.htm

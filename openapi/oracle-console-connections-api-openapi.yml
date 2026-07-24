@@ -1,0 +1,259 @@
+openapi: 3.1.0
+info:
+  title: Oracle OCI Compute Console Connections API
+  description: The Oracle Cloud Infrastructure Compute API provides REST endpoints for managing compute instances, shapes, and images. You can launch and manage virtual machine (VM) and bare metal instances, query available compute shapes, list and manage custom images, and configure instance console connections. All API requests require OCI request signing for authentication.
+  version: '20160918'
+  contact:
+    name: Oracle Cloud Infrastructure Support
+    url: https://support.oracle.com
+  license:
+    name: Oracle Technology Network License Agreement
+    url: https://www.oracle.com/downloads/licenses/oracle-oci-api-license.html
+  termsOfService: https://www.oracle.com/legal/terms.html
+servers:
+- url: https://iaas.{region}.oraclecloud.com/20160918
+  description: OCI Compute API regional endpoint
+  variables:
+    region:
+      description: The OCI region identifier (e.g., us-ashburn-1, us-phoenix-1, eu-frankfurt-1, ap-tokyo-1)
+      default: us-ashburn-1
+      enum:
+      - us-ashburn-1
+      - us-phoenix-1
+      - us-chicago-1
+      - us-sanjose-1
+      - ca-toronto-1
+      - ca-montreal-1
+      - eu-frankfurt-1
+      - eu-amsterdam-1
+      - eu-zurich-1
+      - eu-madrid-1
+      - uk-london-1
+      - ap-tokyo-1
+      - ap-osaka-1
+      - ap-seoul-1
+      - ap-mumbai-1
+      - ap-sydney-1
+      - ap-melbourne-1
+      - sa-saopaulo-1
+      - me-jeddah-1
+      - af-johannesburg-1
+security:
+- ociRequestSigning: []
+tags:
+- name: Console Connections
+  description: Manage instance console connections for troubleshooting
+paths:
+  /instanceConsoleConnections:
+    get:
+      operationId: listInstanceConsoleConnections
+      summary: Oracle List Instance Console Connections
+      description: Lists the console connections for the specified compartment or instance. Console connections enable you to troubleshoot instances by connecting to the serial console or VNC console.
+      tags:
+      - Console Connections
+      parameters:
+      - $ref: '#/components/parameters/compartmentId'
+      - name: instanceId
+        in: query
+        description: The OCID of the instance to filter by
+        schema:
+          type: string
+        example: '500123'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: The list of console connections
+          headers:
+            opc-next-page:
+              description: Pagination token for the next page of results
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InstanceConsoleConnection'
+              examples:
+                Listinstanceconsoleconnections200Example:
+                  summary: Default listInstanceConsoleConnections 200 response
+                  x-microcks-default: true
+                  value:
+                  - id: abc123
+                    instanceId: '500123'
+                    compartmentId: '500123'
+                    connectionString: example_value
+                    fingerprint: example_value
+                    vncConnectionString: example_value
+                    lifecycleState: ACTIVE
+                    serviceHostKeyFingerprint: example_value
+                    definedTags: {}
+                    freeformTags: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  schemas:
+    InstanceConsoleConnection:
+      type: object
+      description: The details for a console connection to an instance. A console connection enables you to connect to the serial console or VNC console of an instance for troubleshooting.
+      required:
+      - id
+      - instanceId
+      - compartmentId
+      - lifecycleState
+      properties:
+        id:
+          type: string
+          description: The OCID of the console connection
+          example: abc123
+        instanceId:
+          type: string
+          description: The OCID of the instance the console connection connects to
+          example: '500123'
+        compartmentId:
+          type: string
+          description: The OCID of the compartment
+          example: '500123'
+        connectionString:
+          type: string
+          description: The SSH connection string for the console connection
+          example: example_value
+        fingerprint:
+          type: string
+          description: The SSH public key fingerprint for the console connection
+          example: example_value
+        vncConnectionString:
+          type: string
+          description: The SSH connection string for the VNC console
+          example: example_value
+        lifecycleState:
+          type: string
+          description: The lifecycle state of the console connection
+          enum:
+          - ACTIVE
+          - CREATING
+          - DELETED
+          - DELETING
+          - FAILED
+          example: ACTIVE
+        serviceHostKeyFingerprint:
+          type: string
+          description: The SSH public key fingerprint of the service host
+          example: example_value
+        definedTags:
+          $ref: '#/components/schemas/DefinedTags'
+        freeformTags:
+          $ref: '#/components/schemas/FreeformTags'
+    Error:
+      type: object
+      description: Error response returned by the OCI API
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          description: A short error code that defines the error, meant for programmatic parsing
+          example: example_value
+        message:
+          type: string
+          description: A human-readable error string
+          example: example_value
+        status:
+          type: integer
+          description: The HTTP status code
+          example: 10
+        opcRequestId:
+          type: string
+          description: Unique Oracle-assigned identifier for the request
+          example: '500123'
+    FreeformTags:
+      type: object
+      description: Free-form tags for the resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+      additionalProperties:
+        type: string
+    DefinedTags:
+      type: object
+      description: Defined tags for the resource. Each key is predefined and scoped to a namespace. The value is a map of tag key/value pairs.
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: string
+  responses:
+    NotFound:
+      description: Not found - the specified resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - missing or invalid authentication credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - invalid parameters or missing required fields
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Too many requests - rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    compartmentId:
+      name: compartmentId
+      in: query
+      required: true
+      description: The OCID of the compartment. List operations return resources in the compartment and its sub-compartments unless specified otherwise.
+      schema:
+        type: string
+    page:
+      name: page
+      in: query
+      description: For list pagination. The value of the opc-next-page response header from the previous list call.
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: For list pagination. The maximum number of results per page, or items to return in a paginated list call. The value must be between 1 and 1000.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+  securitySchemes:
+    ociRequestSigning:
+      type: http
+      scheme: bearer
+      description: OCI uses a custom request signing scheme based on RSA key pairs. Each API request must include an Authorization header with the signature computed from the request headers, method, and path. See https://docs.oracle.com/en-us/iaas/Content/API/Concepts/signingrequests.htm
+externalDocs:
+  description: OCI Compute Service Documentation
+  url: https://docs.oracle.com/en-us/iaas/Content/Compute/Concepts/computeoverview.htm

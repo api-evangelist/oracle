@@ -1,0 +1,442 @@
+openapi: 3.1.0
+info:
+  title: Oracle OCI Compute Console Connections Shapes API
+  description: The Oracle Cloud Infrastructure Compute API provides REST endpoints for managing compute instances, shapes, and images. You can launch and manage virtual machine (VM) and bare metal instances, query available compute shapes, list and manage custom images, and configure instance console connections. All API requests require OCI request signing for authentication.
+  version: '20160918'
+  contact:
+    name: Oracle Cloud Infrastructure Support
+    url: https://support.oracle.com
+  license:
+    name: Oracle Technology Network License Agreement
+    url: https://www.oracle.com/downloads/licenses/oracle-oci-api-license.html
+  termsOfService: https://www.oracle.com/legal/terms.html
+servers:
+- url: https://iaas.{region}.oraclecloud.com/20160918
+  description: OCI Compute API regional endpoint
+  variables:
+    region:
+      description: The OCI region identifier (e.g., us-ashburn-1, us-phoenix-1, eu-frankfurt-1, ap-tokyo-1)
+      default: us-ashburn-1
+      enum:
+      - us-ashburn-1
+      - us-phoenix-1
+      - us-chicago-1
+      - us-sanjose-1
+      - ca-toronto-1
+      - ca-montreal-1
+      - eu-frankfurt-1
+      - eu-amsterdam-1
+      - eu-zurich-1
+      - eu-madrid-1
+      - uk-london-1
+      - ap-tokyo-1
+      - ap-osaka-1
+      - ap-seoul-1
+      - ap-mumbai-1
+      - ap-sydney-1
+      - ap-melbourne-1
+      - sa-saopaulo-1
+      - me-jeddah-1
+      - af-johannesburg-1
+security:
+- ociRequestSigning: []
+tags:
+- name: Shapes
+  description: List available compute shapes that define CPU, memory, and networking resources
+paths:
+  /shapes:
+    get:
+      operationId: listShapes
+      summary: Oracle List Shapes
+      description: Lists the shapes that can be used to launch an instance within the specified compartment. Shapes determine the number of CPUs, amount of memory, and other resources allocated to an instance. You can filter the list by compatibility with a specific image.
+      tags:
+      - Shapes
+      parameters:
+      - $ref: '#/components/parameters/compartmentId'
+      - name: availabilityDomain
+        in: query
+        description: The name of the availability domain. If not specified, shapes across all availability domains in the compartment are listed.
+        schema:
+          type: string
+        example: example_value
+      - name: imageId
+        in: query
+        description: The OCID of an image. If specified, only shapes compatible with the image are returned.
+        schema:
+          type: string
+        example: '500123'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: The list of shapes
+          headers:
+            opc-next-page:
+              description: For pagination. When this header appears in the response, additional pages of results remain.
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shape'
+              examples:
+                Listshapes200Example:
+                  summary: Default listShapes 200 response
+                  x-microcks-default: true
+                  value:
+                  - shape: example_value
+                    availabilityDomain: example_value
+                    ocpus: 42.5
+                    memoryInGBs: 42.5
+                    processorDescription: example_value
+                    networkingBandwidthInGbps: 42.5
+                    maxVnicAttachments: 10
+                    gpus: 10
+                    gpuDescription: example_value
+                    localDisks: 10
+                    localDisksTotalSizeInGBs: 42.5
+                    localDiskDescription: example_value
+                    isFlexible: true
+                    ocpuOptions:
+                      min: 42.5
+                      max: 42.5
+                      maxPerNumaNode: 42.5
+                    memoryOptions:
+                      minInGBs: 42.5
+                      maxInGBs: 42.5
+                      defaultPerOcpuInGBs: 42.5
+                      minPerOcpuInGBs: 42.5
+                      maxPerOcpuInGBs: 42.5
+                    networkingBandwidthOptions:
+                      minInGbps: 42.5
+                      maxInGbps: 42.5
+                      defaultPerOcpuInGbps: 42.5
+                    maxVnicAttachmentOptions:
+                      min: 10
+                      max: 42.5
+                      defaultPerOcpu: 42.5
+                    isBilledForStoppedInstance: true
+                    quotaNames:
+                    - example_value
+                    recommendedAlternatives:
+                    - shapeName: example_value
+                    platformConfigOptions:
+                      type: example_value
+                      isSecureBootEnabled: true
+                      isTrustedPlatformModuleEnabled: true
+                      isMeasuredBootEnabled: true
+                      isMemoryEncryptionEnabled: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  responses:
+    NotFound:
+      description: Not found - the specified resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - missing or invalid authentication credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - invalid parameters or missing required fields
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Too many requests - rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      description: Error response returned by the OCI API
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          description: A short error code that defines the error, meant for programmatic parsing
+          example: example_value
+        message:
+          type: string
+          description: A human-readable error string
+          example: example_value
+        status:
+          type: integer
+          description: The HTTP status code
+          example: 10
+        opcRequestId:
+          type: string
+          description: Unique Oracle-assigned identifier for the request
+          example: '500123'
+    ShapePlatformConfigOptions:
+      type: object
+      description: Platform configuration options available for the shape
+      properties:
+        type:
+          type: string
+          description: The type of platform configuration
+          example: example_value
+        isSecureBootEnabled:
+          type: boolean
+          description: Whether Secure Boot is supported
+          example: true
+        isTrustedPlatformModuleEnabled:
+          type: boolean
+          description: Whether the Trusted Platform Module is supported
+          example: true
+        isMeasuredBootEnabled:
+          type: boolean
+          description: Whether Measured Boot is supported
+          example: true
+        isMemoryEncryptionEnabled:
+          type: boolean
+          description: Whether memory encryption is supported
+          example: true
+    Shape:
+      type: object
+      description: A compute shape that can be used to launch an instance. A shape determines the type of resources allocated, including CPUs, memory, and networking bandwidth.
+      required:
+      - shape
+      properties:
+        shape:
+          type: string
+          description: The name of the shape
+          examples:
+          - VM.Standard.E4.Flex
+          - VM.Standard3.Flex
+          - BM.Standard3.64
+          - VM.GPU.A10.1
+          - VM.DenseIO.E4.Flex
+        availabilityDomain:
+          type: string
+          description: The availability domain where the shape is available. Null if the shape is available across all availability domains.
+          example: example_value
+        ocpus:
+          type: number
+          format: float
+          description: The default number of OCPUs available for this shape. For flexible shapes, this is the default when not specifying a custom value.
+          example: 42.5
+        memoryInGBs:
+          type: number
+          format: float
+          description: The default amount of memory available for this shape, in GB
+          example: 42.5
+        processorDescription:
+          type: string
+          description: A short description of the processor
+          examples:
+          - 2.55 GHz AMD EPYC 7J13 (Milan)
+          - 2.0 GHz Intel Xeon Platinum 8167M (Skylake)
+        networkingBandwidthInGbps:
+          type: number
+          format: float
+          description: The networking bandwidth available for this shape, in Gbps
+          example: 42.5
+        maxVnicAttachments:
+          type: integer
+          description: The maximum number of VNICs that can be attached
+          example: 10
+        gpus:
+          type: integer
+          description: The number of GPUs available for this shape
+          example: 10
+        gpuDescription:
+          type: string
+          description: A short description of the GPU
+          example: example_value
+        localDisks:
+          type: integer
+          description: The number of local disks available for this shape
+          example: 10
+        localDisksTotalSizeInGBs:
+          type: number
+          format: float
+          description: The aggregate size of local disks in GB
+          example: 42.5
+        localDiskDescription:
+          type: string
+          description: A short description of the local disks
+          example: example_value
+        isFlexible:
+          type: boolean
+          description: Whether the shape supports flexible OCPU and memory configuration
+          example: true
+        ocpuOptions:
+          $ref: '#/components/schemas/ShapeOcpuOptions'
+        memoryOptions:
+          $ref: '#/components/schemas/ShapeMemoryOptions'
+        networkingBandwidthOptions:
+          $ref: '#/components/schemas/ShapeNetworkingBandwidthOptions'
+        maxVnicAttachmentOptions:
+          $ref: '#/components/schemas/ShapeMaxVnicAttachmentOptions'
+        isBilledForStoppedInstance:
+          type: boolean
+          description: Whether billing continues when the instance using this shape is stopped
+          example: true
+        quotaNames:
+          type: array
+          description: The list of quota names associated with this shape
+          items:
+            type: string
+          example: []
+        recommendedAlternatives:
+          type: array
+          description: The list of shapes recommended as alternatives
+          items:
+            type: object
+            properties:
+              shapeName:
+                type: string
+                description: The name of the alternative shape
+          example: []
+        platformConfigOptions:
+          $ref: '#/components/schemas/ShapePlatformConfigOptions'
+    ShapeMemoryOptions:
+      type: object
+      description: Options for configuring memory on a flexible shape
+      properties:
+        minInGBs:
+          type: number
+          format: float
+          description: The minimum amount of memory, in GB
+          example: 42.5
+        maxInGBs:
+          type: number
+          format: float
+          description: The maximum amount of memory, in GB
+          example: 42.5
+        defaultPerOcpuInGBs:
+          type: number
+          format: float
+          description: The default amount of memory per OCPU, in GB
+          example: 42.5
+        minPerOcpuInGBs:
+          type: number
+          format: float
+          description: The minimum amount of memory per OCPU, in GB
+          example: 42.5
+        maxPerOcpuInGBs:
+          type: number
+          format: float
+          description: The maximum amount of memory per OCPU, in GB
+          example: 42.5
+    ShapeOcpuOptions:
+      type: object
+      description: Options for configuring OCPUs on a flexible shape
+      properties:
+        min:
+          type: number
+          format: float
+          description: The minimum number of OCPUs
+          example: 42.5
+        max:
+          type: number
+          format: float
+          description: The maximum number of OCPUs
+          example: 42.5
+        maxPerNumaNode:
+          type: number
+          format: float
+          description: The maximum number of OCPUs per NUMA node
+          example: 42.5
+    ShapeMaxVnicAttachmentOptions:
+      type: object
+      description: Options for configuring max VNIC attachments on a flexible shape
+      properties:
+        min:
+          type: integer
+          description: The minimum number of VNIC attachments
+          example: 10
+        max:
+          type: number
+          format: float
+          description: The maximum number of VNIC attachments
+          example: 42.5
+        defaultPerOcpu:
+          type: number
+          format: float
+          description: The default number of VNIC attachments per OCPU
+          example: 42.5
+    ShapeNetworkingBandwidthOptions:
+      type: object
+      description: Options for configuring networking bandwidth on a flexible shape
+      properties:
+        minInGbps:
+          type: number
+          format: float
+          description: The minimum networking bandwidth, in Gbps
+          example: 42.5
+        maxInGbps:
+          type: number
+          format: float
+          description: The maximum networking bandwidth, in Gbps
+          example: 42.5
+        defaultPerOcpuInGbps:
+          type: number
+          format: float
+          description: The default networking bandwidth per OCPU, in Gbps
+          example: 42.5
+  parameters:
+    compartmentId:
+      name: compartmentId
+      in: query
+      required: true
+      description: The OCID of the compartment. List operations return resources in the compartment and its sub-compartments unless specified otherwise.
+      schema:
+        type: string
+    page:
+      name: page
+      in: query
+      description: For list pagination. The value of the opc-next-page response header from the previous list call.
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: For list pagination. The maximum number of results per page, or items to return in a paginated list call. The value must be between 1 and 1000.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+  securitySchemes:
+    ociRequestSigning:
+      type: http
+      scheme: bearer
+      description: OCI uses a custom request signing scheme based on RSA key pairs. Each API request must include an Authorization header with the signature computed from the request headers, method, and path. See https://docs.oracle.com/en-us/iaas/Content/API/Concepts/signingrequests.htm
+externalDocs:
+  description: OCI Compute Service Documentation
+  url: https://docs.oracle.com/en-us/iaas/Content/Compute/Concepts/computeoverview.htm

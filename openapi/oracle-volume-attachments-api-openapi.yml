@@ -1,0 +1,304 @@
+openapi: 3.1.0
+info:
+  title: Oracle OCI Compute Console Connections Volume Attachments API
+  description: The Oracle Cloud Infrastructure Compute API provides REST endpoints for managing compute instances, shapes, and images. You can launch and manage virtual machine (VM) and bare metal instances, query available compute shapes, list and manage custom images, and configure instance console connections. All API requests require OCI request signing for authentication.
+  version: '20160918'
+  contact:
+    name: Oracle Cloud Infrastructure Support
+    url: https://support.oracle.com
+  license:
+    name: Oracle Technology Network License Agreement
+    url: https://www.oracle.com/downloads/licenses/oracle-oci-api-license.html
+  termsOfService: https://www.oracle.com/legal/terms.html
+servers:
+- url: https://iaas.{region}.oraclecloud.com/20160918
+  description: OCI Compute API regional endpoint
+  variables:
+    region:
+      description: The OCI region identifier (e.g., us-ashburn-1, us-phoenix-1, eu-frankfurt-1, ap-tokyo-1)
+      default: us-ashburn-1
+      enum:
+      - us-ashburn-1
+      - us-phoenix-1
+      - us-chicago-1
+      - us-sanjose-1
+      - ca-toronto-1
+      - ca-montreal-1
+      - eu-frankfurt-1
+      - eu-amsterdam-1
+      - eu-zurich-1
+      - eu-madrid-1
+      - uk-london-1
+      - ap-tokyo-1
+      - ap-osaka-1
+      - ap-seoul-1
+      - ap-mumbai-1
+      - ap-sydney-1
+      - ap-melbourne-1
+      - sa-saopaulo-1
+      - me-jeddah-1
+      - af-johannesburg-1
+security:
+- ociRequestSigning: []
+tags:
+- name: Volume Attachments
+  description: Manage block volume attachments for instances
+paths:
+  /volumeAttachments:
+    get:
+      operationId: listVolumeAttachments
+      summary: Oracle List Volume Attachments
+      description: Lists the volume attachments in the specified compartment. You can filter by instance OCID or volume OCID.
+      tags:
+      - Volume Attachments
+      parameters:
+      - $ref: '#/components/parameters/compartmentId'
+      - name: instanceId
+        in: query
+        description: The OCID of the instance to filter by
+        schema:
+          type: string
+        example: '500123'
+      - name: volumeId
+        in: query
+        description: The OCID of the volume to filter by
+        schema:
+          type: string
+        example: '500123'
+      - name: availabilityDomain
+        in: query
+        description: The name of the availability domain to filter by
+        schema:
+          type: string
+        example: example_value
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/page'
+      responses:
+        '200':
+          description: The list of volume attachments
+          headers:
+            opc-next-page:
+              description: Pagination token for the next page of results
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VolumeAttachment'
+              examples:
+                Listvolumeattachments200Example:
+                  summary: Default listVolumeAttachments 200 response
+                  x-microcks-default: true
+                  value:
+                  - id: abc123
+                    instanceId: '500123'
+                    volumeId: '500123'
+                    compartmentId: '500123'
+                    availabilityDomain: example_value
+                    displayName: example_value
+                    device: example_value
+                    attachmentType: iscsi
+                    lifecycleState: ATTACHING
+                    timeCreated: '2026-01-15T10:30:00Z'
+                    isReadOnly: true
+                    isShareable: true
+                    isPvEncryptionInTransitEnabled: true
+                    isMultipath: true
+                    iscsiLoginState: UNKNOWN
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-microcks-operation:
+        delay: 0
+        dispatcher: FALLBACK
+components:
+  responses:
+    NotFound:
+      description: Not found - the specified resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - missing or invalid authentication credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - invalid parameters or missing required fields
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    TooManyRequests:
+      description: Too many requests - rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    VolumeAttachment:
+      type: object
+      description: A base object for all types of volume attachments. Represents the attachment between a compute instance and a block volume.
+      required:
+      - id
+      - instanceId
+      - volumeId
+      - compartmentId
+      - availabilityDomain
+      - attachmentType
+      - lifecycleState
+      - timeCreated
+      properties:
+        id:
+          type: string
+          description: The OCID of the volume attachment
+          example: abc123
+        instanceId:
+          type: string
+          description: The OCID of the instance the volume is attached to
+          example: '500123'
+        volumeId:
+          type: string
+          description: The OCID of the volume
+          example: '500123'
+        compartmentId:
+          type: string
+          description: The OCID of the compartment
+          example: '500123'
+        availabilityDomain:
+          type: string
+          description: The availability domain of an instance
+          example: example_value
+        displayName:
+          type: string
+          description: A user-friendly name for the attachment
+          example: example_value
+        device:
+          type: string
+          description: The device name (e.g., /dev/oracleoci/oraclevdb)
+          example: example_value
+        attachmentType:
+          type: string
+          description: The type of volume attachment
+          enum:
+          - iscsi
+          - paravirtualized
+          - emulated
+          example: iscsi
+        lifecycleState:
+          type: string
+          description: The lifecycle state of the volume attachment
+          enum:
+          - ATTACHING
+          - ATTACHED
+          - DETACHING
+          - DETACHED
+          example: ATTACHING
+        timeCreated:
+          type: string
+          format: date-time
+          description: The date and time the volume was attached
+          example: '2026-01-15T10:30:00Z'
+        isReadOnly:
+          type: boolean
+          description: Whether the attachment was created in read-only mode
+          example: true
+        isShareable:
+          type: boolean
+          description: Whether the attachment should be created in shareable mode
+          example: true
+        isPvEncryptionInTransitEnabled:
+          type: boolean
+          description: Whether in-transit encryption is enabled for the attachment
+          example: true
+        isMultipath:
+          type: boolean
+          description: Whether the attachment is multipath
+          example: true
+        iscsiLoginState:
+          type: string
+          description: The iSCSI login state of the volume attachment
+          enum:
+          - UNKNOWN
+          - LOGGING_IN
+          - LOGIN_SUCCEEDED
+          - LOGIN_FAILED
+          - LOGGING_OUT
+          - LOGOUT_SUCCEEDED
+          - LOGOUT_FAILED
+          example: UNKNOWN
+    Error:
+      type: object
+      description: Error response returned by the OCI API
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+          description: A short error code that defines the error, meant for programmatic parsing
+          example: example_value
+        message:
+          type: string
+          description: A human-readable error string
+          example: example_value
+        status:
+          type: integer
+          description: The HTTP status code
+          example: 10
+        opcRequestId:
+          type: string
+          description: Unique Oracle-assigned identifier for the request
+          example: '500123'
+  parameters:
+    compartmentId:
+      name: compartmentId
+      in: query
+      required: true
+      description: The OCID of the compartment. List operations return resources in the compartment and its sub-compartments unless specified otherwise.
+      schema:
+        type: string
+    page:
+      name: page
+      in: query
+      description: For list pagination. The value of the opc-next-page response header from the previous list call.
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: For list pagination. The maximum number of results per page, or items to return in a paginated list call. The value must be between 1 and 1000.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+  securitySchemes:
+    ociRequestSigning:
+      type: http
+      scheme: bearer
+      description: OCI uses a custom request signing scheme based on RSA key pairs. Each API request must include an Authorization header with the signature computed from the request headers, method, and path. See https://docs.oracle.com/en-us/iaas/Content/API/Concepts/signingrequests.htm
+externalDocs:
+  description: OCI Compute Service Documentation
+  url: https://docs.oracle.com/en-us/iaas/Content/Compute/Concepts/computeoverview.htm
