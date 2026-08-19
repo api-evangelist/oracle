@@ -1,0 +1,1035 @@
+swagger: '2.0'
+info:
+  description: "The Document Generator allows to merge JSON Data and Office Templates to produce documents.\
+    \ \nFor the endpoints, see invokeEndpoint in the [Function Reference](/iaas/api/#/en/functions/20181201/Function/).\n"
+  title: Pre-Built Function Document Generator API
+  version: '1.0'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/2759931116bb04dc62de76027c85704524479cd94fcd8b9dffc6f9713fba1481.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Pre-Built Function Document Generator API OCI service
+      and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/2759931116bb04dc62de76027c85704524479cd94fcd8b9dffc6f9713fba1481.yaml
+    what: the harvested document for Pre-Built Function Document Generator API
+host: 127.0.0.1
+basePath: /20181201
+schemes:
+- http
+- https
+paths:
+  /functions/{functionId}/actions/invoke:
+    post:
+      consumes:
+      - application/json
+      description: "Invoke Document Generator. \nSee [InvokeFunction](/iaas/api/#/en/functions/20181201/Function/InvokeFunction).\n"
+      operationId: InvokeFunction
+      parameters:
+      - description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of this function.
+
+          '
+        in: path
+        name: functionId
+        required: true
+        type: string
+      - description: Request to generate document
+        in: body
+        name: RequestDetails
+        required: true
+        schema:
+          $ref: '#/definitions/Request'
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Successfully invoked function. See the `code` in the Response payload.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/Response'
+        default:
+          description: For full details of the response codes, see [invokeFunction](/iaas/api/#/en/functions/20181201/Function/InvokeFunction).
+      summary: Call Document Generator Function
+      tags:
+      - documentgenerator
+definitions:
+  ContentEncoding:
+    description: The type of encoding to use.
+    enum:
+    - BASE64
+    type: string
+  ObjectStorageTier:
+    description: The storage tier that an Object Storage object should be stored in.
+    enum: &id001
+    - STANDARD
+    - INFREQUENT_ACCESS
+    - ARCHIVE
+    type: string
+  Request:
+    description: The Request sent to the Document Generator.
+    discriminator: requestType
+    properties:
+      requestType:
+        description: The type of Request to execute.
+        enum: &id011
+        - SINGLE
+        - BATCH
+        type: string
+    required:
+    - requestType
+    type: object
+  RequestBatch:
+    allOf:
+    - $ref: '#/definitions/Request'
+    - discriminator: BATCH
+      properties:
+        data:
+          $ref: '#/definitions/RequestBatchData'
+        fonts:
+          $ref: '#/definitions/RequestBatchFonts'
+        options:
+          additionalProperties:
+            type: string
+          description: Document generation options (e.g., documentOpenPassword for PDF).
+          type: object
+        output:
+          $ref: '#/definitions/RequestBatchOutput'
+        tagSyntax:
+          description: Document Generator Tag syntax to use.
+          enum: &id006
+          - DOCGEN_1_0
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/TagSyntax'
+        template:
+          $ref: '#/definitions/RequestBatchTemplate'
+      required:
+      - tagSyntax
+      - data
+      - template
+      - output
+    description: The request to generate multiple documents
+    x-example: "{\n  \"requestType\": \"BATCH\",\n  \"tagSyntax\": \"DOCGEN_1_0\",\n  \"data\": {\n  \
+      \  \"source\": \"INLINE\",\n    \"content\": [ { \"name\": \"John\" },{ \"name\": \"Monica\" },{\
+      \ \"name\": \"Jane\" } ]\n  },\n  \"template\": {\n    \"source\": \"OBJECT_STORAGE\",\n    \"namespace\"\
+      : \"your_bucket_namespace\",\n    \"bucketName\": \"your_bucket_name\",\n    \"objectName\": \"\
+      my_folder/SimpleDocument.docx\",\n    \"contentType\": \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\"\
+      \n  },\n  \"fonts\": {\n    \"source\": \"OBJECT_STORAGE\",\n    \"namespace\": \"your_bucket_namespace\"\
+      ,\n    \"bucketName\": \"your_bucket_name\",\n    \"objectName\": \"my_font_bundle.zip\",\n    \"\
+      contentType\": \"application/zip\"\n  },      \n  \"output\": {\n    \"target\": \"OBJECT_STORAGE\"\
+      ,\n    \"namespace\": \"your_bucket_namespace\",\n    \"bucketName\": \"your_bucket_name\",\n  \
+      \  \"objectName\": \"my_folder/SimpleDocument{documentId}.pdf\",\n    \"contentType\": \"application/pdf\"\
+      ,\n  }\n}\n"
+  RequestBatchData:
+    description: The Data for a request of type BATCH.
+    discriminator: source
+    properties:
+      source:
+        description: 'The source for the Data for a request of type BATCH.
+
+          '
+        enum: &id002
+        - OBJECT_STORAGE
+        - INLINE
+        type: string
+    required:
+    - source
+    type: object
+  RequestBatchDataInline:
+    allOf:
+    - $ref: '#/definitions/RequestBatchData'
+    - discriminator: INLINE
+      properties:
+        content:
+          description: 'Array of JSON content embedded directly for each document.
+
+            Example: `[{"name":"John"},{"name":"Monica"},{"name":"Jane"}]`
+
+            '
+          items:
+            type: object
+          maxItems: 50
+          minItems: 1
+          type: array
+      required:
+      - content
+    description: The Data for a request of type BATCH. The Data is specified as JSON in the `content`
+      attribute.
+  RequestBatchDataObjectStorage:
+    allOf:
+    - $ref: '#/definitions/RequestBatchData'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          minLength: 1
+          type: string
+        contentType:
+          description: 'Content-Type for the Data. If not specified, the Content-Type from Object Storage
+            will be used.
+
+            Supported values are: `application/json`.
+
+            '
+          minLength: 1
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          minLength: 1
+          type: string
+        objectName:
+          description: Name of the Data Object in Object Storage.
+          minLength: 1
+          type: string
+      required:
+      - namespace
+      - bucketName
+      - objectName
+    description: The Data for a request of type BATCH. The Data will be read from Object Storage.
+  RequestBatchFonts:
+    description: The Fonts for a request of type BATCH.
+    discriminator: source
+    properties:
+      source:
+        description: 'The source for the Fonts for a request of type BATCH.
+
+          '
+        enum: &id003
+        - OBJECT_STORAGE
+        type: string
+    required:
+    - source
+    type: object
+  RequestBatchFontsObjectStorage:
+    allOf:
+    - $ref: '#/definitions/RequestBatchFonts'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          minLength: 1
+          type: string
+        contentType:
+          description: 'Content-Type for the font bundle. If not specified, the Content-Type from Object
+            Storage will be used.
+
+            Supported values are: `application/zip`.
+
+            '
+          minLength: 1
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          minLength: 1
+          type: string
+        objectName:
+          description: Name of the Fonts Object in Object Storage.
+          minLength: 1
+          type: string
+      required:
+      - namespace
+      - bucketName
+      - objectName
+    description: The Fonts for a request of type BATCH. The font bundle will be read from Object Storage.
+  RequestBatchOutput:
+    description: The Output for a request of type BATCH.
+    discriminator: target
+    properties:
+      contentType:
+        description: 'Content-Type for the generated documents.
+
+          Supported values are: `application/pdf`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`.
+
+          '
+        minLength: 1
+        type: string
+      target:
+        description: 'The target for the generated documents for a request of type BATCH
+
+          '
+        enum: &id004
+        - OBJECT_STORAGE
+        type: string
+    required:
+    - target
+    - contentType
+    type: object
+  RequestBatchOutputObjectStorage:
+    allOf:
+    - $ref: '#/definitions/RequestBatchOutput'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          minLength: 1
+          type: string
+        cacheControl:
+          description: 'The Cache Control.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        contentDisposition:
+          description: 'The Content Disposition.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        contentLanguage:
+          description: 'The Content Language.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          minLength: 1
+          type: string
+        objectName:
+          description: 'Name of the generated document in Object Storage. The object name must include
+            `{documentId}`.
+
+            Example: A/Invoice{documentId}.pdf. See [Document Names in Batch Output](/iaas/Content/Functions/Tasks/functions_pbf_catalog_document_generator.htm#functions_pbf_catalog_document_generator_plus__pbf-document-generator-document-names).
+
+            '
+          minLength: 1
+          type: string
+        opcMeta:
+          additionalProperties:
+            type: string
+          description: 'User-defined metadata key and value.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: object
+        opcSseCustomerAlgorithm:
+          description: 'The Encryption Algorithm.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        opcSseCustomerKey:
+          description: 'The base64-encoded 256-bit encryption key to use.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        opcSseCustomerKeySha256:
+          description: 'The base64-encoded SHA256 hash of the encryption key.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        opcSseKmsKeyId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of a master encryption
+            key.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        storageTier:
+          description: 'The storage tier that the object should be stored in. If not specified, the object
+            will be stored in the same storage tier as the bucket.
+
+            '
+          enum: *id001
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ObjectStorageTier'
+      required:
+      - namespace
+      - bucketName
+      - objectName
+    description: The Output for a request of type BATCH. The generated documents will be written to Object
+      Storage.
+  RequestBatchSourceDataType:
+    description: The source type for Data.
+    enum: *id002
+    type: string
+  RequestBatchSourceFontsType:
+    description: The source type for Fonts.
+    enum: *id003
+    type: string
+  RequestBatchSourcetemplateType:
+    description: The source type for Template.
+    enum: &id005
+    - OBJECT_STORAGE
+    type: string
+  RequestBatchTargetType:
+    description: The target type.
+    enum: *id004
+    type: string
+  RequestBatchTemplate:
+    description: The Template for a request of type BATCH.
+    discriminator: source
+    properties:
+      source:
+        description: 'The source for the Template for a request of type BATCH.
+
+          '
+        enum: *id005
+        type: string
+    required:
+    - source
+    type: object
+  RequestBatchTemplateObjectStorage:
+    allOf:
+    - $ref: '#/definitions/RequestBatchTemplate'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          minLength: 1
+          type: string
+        contentType:
+          description: 'Content-Type for the Template. If not specified, the Content-Type from Object
+            Storage will be used.
+
+            Supported values are: `application/vnd.openxmlformats-officedocument.wordprocessingml.document`.
+
+            '
+          minLength: 1
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          minLength: 1
+          type: string
+        objectName:
+          description: Name of the Template Object in Object Storage.
+          minLength: 1
+          type: string
+      required:
+      - namespace
+      - bucketName
+      - objectName
+    description: The Template for a request of type BATCH. The Template will be read from Object Storage.
+  RequestSingle:
+    allOf:
+    - $ref: '#/definitions/Request'
+    - discriminator: SINGLE
+      properties:
+        data:
+          $ref: '#/definitions/RequestSingleData'
+        fonts:
+          $ref: '#/definitions/RequestSingleFonts'
+        options:
+          additionalProperties:
+            type: string
+          description: Document generation options (e.g., documentOpenPassword for PDF).
+          type: object
+        output:
+          $ref: '#/definitions/RequestSingleOutput'
+        tagSyntax:
+          description: Document Generator Tag syntax to use.
+          enum: *id006
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/TagSyntax'
+        template:
+          $ref: '#/definitions/RequestSingleTemplate'
+      required:
+      - tagSyntax
+      - data
+      - template
+      - output
+    description: The request to generate a single document
+    x-example: "{\n  \"requestType\": \"SINGLE\",\n  \"tagSyntax\": \"DOCGEN_1_0\",\n  \"data\": {\n \
+      \   \"source\": \"OBJECT_STORAGE\",\n    \"namespace\": \"your_bucket_namespace\",\n    \"bucketName\"\
+      : \"your_bucket_name\",\n    \"objectName\": \"my_folder/Invoice.json\",\n    \"contentType\": \"\
+      application/json\"\n  },\n  \"template\": {\n    \"source\": \"OBJECT_STORAGE\",\n    \"namespace\"\
+      : \"your_bucket_namespace\",\n    \"bucketName\": \"your_bucket_name\",\n    \"objectName\": \"\
+      my_folder/Invoice.docx\",\n    \"contentType\": \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\"\
+      \n  },\n  \"fonts\": {\n    \"source\": \"OBJECT_STORAGE\",\n    \"namespace\": \"your_bucket_namespace\"\
+      ,\n    \"bucketName\": \"your_bucket_name\",\n    \"objectName\": \"my_font_bundle.zip\",\n    \"\
+      contentType\": \"application/zip\"\n  },      \n  \"output\": {\n    \"target\": \"OBJECT_STORAGE\"\
+      ,\n    \"namespace\": \"your_bucket_namespace\",\n    \"bucketName\": \"your_bucket_name\",\n  \
+      \  \"objectName\": \"my_folder/Invoice.pdf\",\n    \"contentType\": \"application/pdf\"\n  }\n}\n"
+  RequestSingleData:
+    description: Data for a request of type SINGLE.
+    discriminator: source
+    properties:
+      source:
+        description: 'The source for the Data for a request of type SINGLE.
+
+          '
+        enum: &id008
+        - OBJECT_STORAGE
+        - INLINE
+        type: string
+    required:
+    - source
+    type: object
+  RequestSingleDataInline:
+    allOf:
+    - $ref: '#/definitions/RequestSingleData'
+    - discriminator: INLINE
+      properties:
+        content:
+          description: "The data as JSON content. \nExample: `{\"name\":\"John Smith\", \"age\":33}`\n"
+          type: object
+      required:
+      - content
+    description: Data for a request of type SINGLE. The Data is specified as JSON in the `content` attribute.
+  RequestSingleDataObjectStorage:
+    allOf:
+    - $ref: '#/definitions/RequestSingleData'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          minLength: 1
+          type: string
+        contentType:
+          description: 'Content-Type for the Data. If not specified, the Content-Type from Object Storage
+            will be used.
+
+            Supported values are: `application/json`.
+
+            '
+          minLength: 1
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          minLength: 1
+          type: string
+        objectName:
+          description: Name of the Data Object in Object Storage.
+          minLength: 1
+          type: string
+      required:
+      - namespace
+      - bucketName
+      - objectName
+    description: Data for a request of type SINGLE. The Data will be read from Object Storage.
+  RequestSingleFonts:
+    description: Fonts for a request of type SINGLE. Specified fonts will be made available when generating
+      a PDF.
+    discriminator: source
+    properties:
+      source:
+        description: 'The source for the Fonts for a request of type SINGLE.
+
+          '
+        enum: &id007
+        - OBJECT_STORAGE
+        type: string
+    required:
+    - source
+    type: object
+  RequestSingleFontsObjectStorage:
+    allOf:
+    - $ref: '#/definitions/RequestSingleFonts'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          minLength: 1
+          type: string
+        contentType:
+          description: 'Content-Type for the font bundle. If not specified, the Content-Type from Object
+            Storage will be used.
+
+            Supported values are: `application/zip`.
+
+            '
+          minLength: 1
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          minLength: 1
+          type: string
+        objectName:
+          description: Name of the Fonts Object in Object Storage.
+          minLength: 1
+          type: string
+      required:
+      - namespace
+      - bucketName
+      - objectName
+    description: Fonts for a request of type SINGLE. The font bundle will be read from Object Storage.
+  RequestSingleFontsSourceType:
+    description: The source type for Fonts.
+    enum: *id007
+    type: string
+  RequestSingleOutput:
+    description: The Output for a request of type SINGLE.
+    discriminator: target
+    properties:
+      contentType:
+        description: 'Content-Type for the generated document.
+
+          Supported values are: `application/pdf`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`.
+
+          '
+        minLength: 1
+        type: string
+      target:
+        description: 'The target for the generated document for a request of type SINGLE.
+
+          '
+        enum: &id009
+        - OBJECT_STORAGE
+        type: string
+    required:
+    - target
+    - contentType
+    type: object
+  RequestSingleOutputObjectStorage:
+    allOf:
+    - $ref: '#/definitions/RequestSingleOutput'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          minLength: 1
+          type: string
+        cacheControl:
+          description: 'The Cache Control.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        contentDisposition:
+          description: 'The Content Disposition.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        contentLanguage:
+          description: 'The Content Language.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          minLength: 1
+          type: string
+        objectName:
+          description: 'Name of the generated document in Object Storage. Example: A/invoice.pdf
+
+            '
+          minLength: 1
+          type: string
+        opcMeta:
+          additionalProperties:
+            type: string
+          description: 'User-defined metadata key and value.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: object
+        opcSseCustomerAlgorithm:
+          description: 'The Encryption Algorithm.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        opcSseCustomerKey:
+          description: 'The base64-encoded 256-bit encryption key to use.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        opcSseCustomerKeySha256:
+          description: 'The base64-encoded SHA256 hash of the encryption key.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        opcSseKmsKeyId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of a master encryption
+            key.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          minLength: 1
+          type: string
+        storageTier:
+          description: 'The storage tier that the object should be stored in. If not specified, the object
+            will be stored in the same storage tier as the bucket.
+
+            '
+          enum: *id001
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ObjectStorageTier'
+      required:
+      - namespace
+      - bucketName
+      - objectName
+    description: The Output for a request of type SINGLE. The generated document will be written to Object
+      Storage.
+  RequestSingleSourceDataType:
+    description: The source type for Data.
+    enum: *id008
+    type: string
+  RequestSingleTargetType:
+    description: The target type.
+    enum: *id009
+    type: string
+  RequestSingleTemplate:
+    description: Template for a request of type SINGLE.
+    discriminator: source
+    properties:
+      source:
+        description: 'The source for the Template for a request of type SINGLE.
+
+          '
+        enum: &id010
+        - OBJECT_STORAGE
+        type: string
+    required:
+    - source
+    type: object
+  RequestSingleTemplateObjectStorage:
+    allOf:
+    - $ref: '#/definitions/RequestSingleTemplate'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          minLength: 1
+          type: string
+        contentType:
+          description: 'Content-Type for the Template. If not specified, the Content-Type from Object
+            Storage will be used.
+
+            Supported values are: `application/vnd.openxmlformats-officedocument.wordprocessingml.document`.
+
+            '
+          minLength: 1
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          minLength: 1
+          type: string
+        objectName:
+          description: Name of the Template Object in Object Storage.
+          minLength: 1
+          type: string
+      required:
+      - namespace
+      - bucketName
+      - objectName
+    description: Template for a request of type SINGLE. The Template will be read from Object Storage.
+  RequestSingleTemplateSourceType:
+    description: The source type for Template.
+    enum: *id010
+    type: string
+  RequestType:
+    description: The request type.
+    enum: *id011
+    type: string
+  Response:
+    description: The Response obtained from the Document Generator.
+    discriminator: responseType
+    properties:
+      code:
+        description: 'Response code for this processing.
+
+          200: Success.
+
+          207: Multiple statuses. See the `code` for each document.
+
+          400: Processing error.
+
+          500: Internal Server Error.
+
+          '
+        type: integer
+      metadata:
+        $ref: '#/definitions/ResponseMetadata'
+      responseType:
+        description: Type of Response.
+        enum: &id013
+        - SINGLE
+        - BATCH
+        - ERROR
+        type: string
+      status:
+        description: Status text for this processing.
+        type: string
+    required:
+    - responseType
+    - code
+    - status
+    - metadata
+    type: object
+  ResponseBatch:
+    allOf:
+    - $ref: '#/definitions/Response'
+    - discriminator: BATCH
+      properties:
+        documents:
+          description: Array of generated documents.
+          items:
+            $ref: '#/definitions/ResponseDocumentBatchElement'
+          maxItems: 50
+          minItems: 1
+          type: array
+      required:
+      - documents
+    description: The Response obtained from a request of type BATCH.
+    x-example: "{\n  \"responseType\": \"BATCH\",\n  \"code\": 207,\n  \"status\": \"Multi-Status\",\n\
+      \  \"documents\": [\n    {\n      \"documentId\": 1,\n      \"code\": 200,\n      \"status\": \"\
+      OK\",\n      \"document\": {\n        \"type\": \"OBJECT_STORAGE\",\n        \"namespace\": \"your_bucket_namespace\"\
+      ,\n        \"bucketName\": \"your_bucket_name\",\n        \"objectName\": \"my_folder/SimpleDocument1.pdf\"\
+      ,\n        \"contentType\": \"application/pdf\"\n      }\n    },\n    {\n      \"documentId\": 2,\n\
+      \      \"code\": 200,\n      \"status\": \"OK\",\n      \"document\": {\n        \"type\": \"OBJECT_STORAGE\"\
+      ,\n        \"namespace\": \"your_bucket_namespace\",\n        \"bucketName\": \"your_bucket_name\"\
+      ,\n        \"objectName\": \"my_folder/SimpleDocument2.pdf\",\n        \"contentType\": \"application/pdf\"\
+      \n      }\n    },\n    {\n      \"documentId\": 3,\n      \"code\": 500,\n      \"status\": \"Internal\
+      \ Server Error\",\n      \"error\": \"Object Storage timed out\"\n    }\n  ],\n  \"metadata\": {\n\
+      \    \"version\": \"1.0\",\n    \"configurationParameters\": {\n      \"FN_MEMORY\": \"512\",\n\
+      \      \"FN_TYPE\": \"sync\",\n      \"OCI_REGION_METADATA\": \"{\\\"realmDomainComponent\\\":\\\
+      \"oraclecloud.com\\\",\\\"realmKey\\\":\\\"oc1\\\",\\\"regionIdentifier\\\":\\\"us-phoenix-1\\\"\
+      ,\\\"regionKey\\\":\\\"PHX\\\"}\"\n    }\n  }\n}\n"
+  ResponseDocument:
+    description: The generated Document.
+    discriminator: type
+    properties:
+      type:
+        description: 'Type of Document
+
+          '
+        enum: &id012
+        - OBJECT_STORAGE
+        type: string
+    required:
+    - type
+    type: object
+  ResponseDocumentBatchElement:
+    description: The Response attributes of a document for a BATCH request.
+    properties:
+      code:
+        description: Response code for this generated document.
+        type: integer
+      document:
+        $ref: '#/definitions/ResponseDocument'
+      documentId:
+        description: Unique Id of the document.
+        minimum: 1
+        type: integer
+      error:
+        description: 'Error Message that is specific to a document.
+
+          Example: Object Storage timed out
+
+          '
+        type: string
+      status:
+        description: Status text for this generated document.
+        type: string
+    required:
+    - documentId
+    - code
+    - status
+  ResponseDocumentObjectStorage:
+    allOf:
+    - $ref: '#/definitions/ResponseDocument'
+    - discriminator: OBJECT_STORAGE
+      properties:
+        bucketName:
+          description: Name of the Object Storage bucket.
+          type: string
+        cacheControl:
+          description: 'The Cache Control.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: string
+        contentDisposition:
+          description: 'The Content Disposition.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: string
+        contentLanguage:
+          description: 'The Content Language.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: string
+        contentType:
+          description: 'The Content Type.
+
+            Example: `application/pdf`
+
+            '
+          type: string
+        namespace:
+          description: Object Storage namespace.
+          type: string
+        objectName:
+          description: Name of the generated document Object in Object Storage.
+          type: string
+        opcMeta:
+          additionalProperties:
+            type: string
+          description: 'User-defined metadata key and value.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: object
+        opcSseCustomerAlgorithm:
+          description: 'The Encryption Algorithm.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: string
+        opcSseCustomerKey:
+          description: 'The base64-encoded 256-bit encryption key to use.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: string
+        opcSseCustomerKeySha256:
+          description: 'The base64-encoded SHA256 hash of the encryption key.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: string
+        opcSseKmsKeyId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of a master encryption
+            key.
+
+            See [PutObject](/iaas/api/#/en/objectstorage/20160918/Object/PutObject).
+
+            '
+          type: string
+        storageTier:
+          description: 'The storage tier that the object should be stored in. If not specified, the object
+            will be stored in the same storage tier as the bucket.
+
+            '
+          enum: *id001
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ObjectStorageTier'
+      required:
+      - namespace
+      - bucketName
+      - objectName
+      - contentType
+    description: The output document put in Object Storage.
+  ResponseDocumentType:
+    description: 'The way that the document is returned.
+
+      '
+    enum: *id012
+    type: string
+  ResponseError:
+    allOf:
+    - $ref: '#/definitions/Response'
+    - discriminator: ERROR
+      properties:
+        error:
+          description: 'Error Message.
+
+            Example: No request template has been specified.
+
+            '
+          type: string
+      required:
+      - error
+    description: The Response obtained when an error occurred.
+    x-example: "{\n  \"responseType\": \"ERROR\",\n  \"code\": \"400\",\n  \"status\": \"InvalidParameters\"\
+      ,\n  \"error\": \"No template has been specified.\"\n  \"metadata\": {\n    \"version\": \"1.0\"\
+      ,\n    \"configurationParameters\": {\n      \"FN_MEMORY\": \"512\",\n      \"FN_TYPE\": \"sync\"\
+      ,\n      \"OCI_REGION_METADATA\": \"{\\\"realmDomainComponent\\\":\\\"oraclecloud.com\\\",\\\"realmKey\\\
+      \":\\\"oc1\\\",\\\"regionIdentifier\\\":\\\"us-phoenix-1\\\",\\\"regionKey\\\":\\\"PHX\\\"}\"\n\
+      \    }\n  }\n}\n"
+  ResponseMetadata:
+    description: Metadata related to the processing of the request.
+    properties:
+      configurationParameters:
+        additionalProperties:
+          type: string
+        description: 'Simple key-value pairs that are selected from the Configuration Parameters on the
+          Document Generator.
+
+          Example: `{"FN_FN_ID": "ocid1.fnfunc.oc1.phx.examplej63m5hsm6ha", "FN_MEMORY": "512"}`
+
+          '
+        type: object
+      version:
+        description: 'Document Generator Version.
+
+          Example: 1.0
+
+          '
+        type: string
+    required:
+    - version
+    type: object
+  ResponseSingle:
+    allOf:
+    - $ref: '#/definitions/Response'
+    - discriminator: SINGLE
+      properties:
+        document:
+          $ref: '#/definitions/ResponseDocument'
+      required:
+      - document
+    description: The Response obtained from a request of type SINGLE.
+    x-example: "{\n  \"responseType\": \"SINGLE\",\n  \"code\": 200,\n  \"status\": \"OK\",\n  \"document\"\
+      : {\n    \"type\": \"OBJECT_STORAGE\",\n    \"namespace\": \"your_bucket_namespace\",\n    \"bucketName\"\
+      : \"your_bucket_name\",\n    \"objectName\": \"my_folder/Invoice.pdf\",\n    \"contentType\": \"\
+      application/pdf\"\n  },\n  \"metadata\": {\n    \"version\": \"1.0\",\n    \"configurationParameters\"\
+      : {\n      \"FN_MEMORY\": \"512\",\n      \"FN_TYPE\": \"sync\",\n      \"OCI_REGION_METADATA\"\
+      : \"{\\\"realmDomainComponent\\\":\\\"oraclecloud.com\\\",\\\"realmKey\\\":\\\"oc1\\\",\\\"regionIdentifier\\\
+      \":\\\"us-phoenix-1\\\",\\\"regionKey\\\":\\\"PHX\\\"}\"\n    }\n  }\n}\n"
+  ResponseType:
+    description: The type of response returned from a Document Generator processing.
+    enum: *id013
+    type: string
+  TagSyntax:
+    description: The Tag syntax to use.
+    enum: *id006
+    type: string
+x-obmcs-client-retries-enabled: false
+x-oracle-package: com.oracle.dbtoolbox.docgen

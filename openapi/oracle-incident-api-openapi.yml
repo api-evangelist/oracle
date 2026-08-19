@@ -1,0 +1,1472 @@
+openapi: 3.2.0
+info:
+  description: "Use the Support Management API to manage support requests.\nFor more information, see [Getting Help and Contacting Support](/iaas/Content/GSG/Tasks/contactingsupport.htm).\n**Note**: Before you can create service requests with this API,\ncomplete user registration at My Oracle Cloud Support \nand then ask your tenancy administrator to provide you authorization for the related user groups.\n"
+  license:
+    name: Oracle
+    url: http://www.oracle.com
+  title: Support Management Incident API
+  version: '20181231'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/96b220a47856f2499632dad92b6e7a3e70ec12dd8265cafe0393d33a8c64c564.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Support Management API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/96b220a47856f2499632dad92b6e7a3e70ec12dd8265cafe0393d33a8c64c564.yaml
+    what: the harvested document for Support Management API
+servers:
+- url: http://127.0.0.1/20181231
+tags:
+- name: Incident
+paths:
+  /v2/incidents:
+    get:
+      description: 'Lists support requests for the specified tenancy.
+
+        For more information, see [Listing Support Requests](/iaas/Content/GSG/support/list-incidents.htm).
+
+        '
+      operationId: ListIncidents
+      parameters:
+      - $ref: '#/components/parameters/LimitQueryParam'
+      - $ref: '#/components/parameters/CompartmentId'
+      - $ref: '#/components/parameters/SortByQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/UpdatedAfterQueryParam'
+      - $ref: '#/components/parameters/LifecycleStateQueryParam'
+      - $ref: '#/components/parameters/PageQueryParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/FederatedOcidHeaderParam'
+      - $ref: '#/components/parameters/RegionHeaderParam'
+      - $ref: '#/components/parameters/OptionalProblemTypeQueryParam'
+      - $ref: '#/components/parameters/BearerTokenTypeHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenHeaderParam'
+      - $ref: '#/components/parameters/IdTokenHeaderParam'
+      - $ref: '#/components/parameters/DomainIdHeaderParam'
+      responses:
+        200:
+          description: The list is being retrieved.
+          headers:
+            as-of-time:
+              description: Returns the age of the incidents in the response in epoch milliseconds. This is used because the incidents might be cached.
+              schema:
+                type: string
+            opc-next-page:
+              description: For list pagination. When this header appears in the response, additional pages of results remain. For important details about how pagination works, see [List Pagination](/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-prev-page:
+              description: For list pagination. When this header appears in the response, previous pages of results can be queried. For important details about how pagination works, see [List Pagination](/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/IncidentSummary'
+                type: array
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: ListIncidents
+      tags:
+      - Incident
+      x-example: 'POST /20181231/v2/incidents?compartmentId=<var>&lt;compartment_OCID&gt;</var>
+
+        Host: incidentmanagement.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: 'Creates a support request in the specified tenancy.
+
+        For more information, see [Creating Support Requests](/iaas/Content/GSG/support/create-incident.htm).
+
+        '
+      operationId: CreateIncident
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/FederatedOcidHeaderParam'
+      - $ref: '#/components/parameters/RegionHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenTypeHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenHeaderParam'
+      - $ref: '#/components/parameters/IdTokenHeaderParam'
+      - $ref: '#/components/parameters/DomainIdHeaderParam'
+      responses:
+        200:
+          description: The ticket is being created.
+          headers:
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request identifier.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: CreateIncident
+      tags:
+      - Incident
+      x-example: "Sample 1: Technical support request\n\nPOST /20181231/v2/incidents\nHost: incidentmanagement.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n  {\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleid\",\n    \"problemType\": \"TECH\",\n    \"userGroupId\": \"<var>&lt;user_group_id&gt;</var>\",\n    \"ticket\": {\n      \"severity\": \"MEDIUM\",\n      \"description\": \"Need help connecting to instance\",\n      \"title\": \"Connection Issue\",\n      \"resourceList\": [\n      {\n        \"item\": {\n          \"category\": {\n            \"categoryKey\": \"3f019deb\"\n          },\n          \"subcategory\": {\n            \"subcategoryKey\": \"f8d682ca\"\n          },\n          \"issueType\": {\n            \"issueTypeKey\": \"a5cb0b2e\"\n          },\n          \"type\": \"tech\"\n        },\n        \"region\": \"PHX\"\n      }\n      ]\n    }\n  }\n\nSample 2: Limit Increase Ticket\n\nPOST /20181231/v2/incidents\nHost: incidentmanagement.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n  {\n    \"contactList\": {\n      \"contactList\": [\n      {\n        \"name\": \"John\",\n        \"email\": \"john.doe.example@oracle.com\",\n        \"contactType\": \"PRIMARY\"\n      }\n      ]\n    },\n    \"tenant\": {\n      \"customerSupportIdentifier\": \"123\",\n      \"tenantId\": \"12345\"\n    },\n    \"ticket\": {\n      \"severity\": \"MEDIUM\",\n      \"resourceList\": [\n      {\n        \"item\": {\n          \"type\": \"limit\",\n          \"id\": \"12349\",\n          \"name\": \"VM.Standard2.1\",\n          \"currentLimit\": 10,\n          \"currentUsage\": 10,\n          \"requestedLimit\": 10\n        },\n        \"region\": \"PHX\",\n        \"availabilityDomain\": \"PHX_1\"\n      },\n      {\n        \"item\": {\n          \"type\": \"limit\",\n          \"id\": \"12349\",\n          \"name\": \"VM.Standard2.8\",\n          \"currentLimit\": 10,\n          \"currentUsage\": 10,\n          \"requestedLimit\": 100\n        },\n        \"region\": \"PHX\",\n        \"availabilityDomain\": \"PHX_1\"\n      }\n      ],\n      \"title\": \"VM Increase\",\n      \"description\": \"Need more VM standard 2.1 and 2.8\"\n    },\n    \"incidentType\": {\n      \"name\": \"Limit Increase\",\n      \"label\": \"Compute\",\n      \"description\": \"string\",\n      \"classifierList\": [\n      {\n        \"id\": \"string\",\n        \"name\": \"string\",\n        \"description\": \"Automated Limit Request\"\n      }\n      ]\n    }\n  }\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIncident'
+        description: Incident information
+        required: true
+  /v2/incidents/incidentResourceTypes:
+    get:
+      description: 'Depending on the selected `productType`, either
+
+        lists available products (service groups, services, service categories, and subcategories) for technical support requests or
+
+        lists limits and current usage for limit increase tickets.
+
+        This operation is called during creation of technical support and limit increase tickets.
+
+        For more information about listing products, see
+
+        [Listing Products for Support Requests](/iaas/Content/GSG/support/list-incident-resource-types-taxonomy.htm).
+
+        For more information about listing limits, see
+
+        [Listing Limits for Service Limit Increase Requests](/iaas/Content/GSG/support/list-incident-resource-types-limit.htm).
+
+        '
+      operationId: ListIncidentResourceTypes
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/ProblemTypeQueryParam'
+      - $ref: '#/components/parameters/LimitQueryParam'
+      - $ref: '#/components/parameters/PageQueryParam'
+      - $ref: '#/components/parameters/SortByQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/CompartmentId'
+      - $ref: '#/components/parameters/FederatedOcidHeaderParam'
+      - $ref: '#/components/parameters/RegionHeaderParam'
+      - $ref: '#/components/parameters/DomainIdHeaderParam'
+      responses:
+        200:
+          description: The list is being retrieved.
+          headers:
+            opc-next-page:
+              description: For list pagination. When this header appears in the response, additional pages of results remain. For important details about how pagination works, see [List Pagination](/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/IncidentResourceType'
+                type: array
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: ListIncidentResourceTypes
+      tags:
+      - Incident
+      x-example: 'Listing available products for technical support requests:
+
+
+        GET /20181231/v2/incidents/incidentResourceTypes?compartmentId=<var>&lt;compartment_OCID&gt;</var>&problemType=TAXONOMY
+
+        Host: incidentmanagement.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+
+        Listing limits and current usage for limit increase tickets:
+
+
+        GET /20181231/v2/incidents/incidentResourceTypes?compartmentId=<var>&lt;compartment_OCID&gt;</var>&problemType=LIMIT
+
+        Host: incidentmanagement.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/IncidentResourceType'
+  /v2/incidents/user/validate:
+    get:
+      description: 'Checks whether the requested user is valid.
+
+        For more information, see [Validating a User](/iaas/Content/GSG/support/validate-user.htm).
+
+        '
+      operationId: ValidateUser
+      parameters:
+      - description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+        in: header
+        name: opc-request-id
+        schema:
+          type: string
+      - description: The kind of support request.
+        in: query
+        name: problemType
+        required: false
+        x-default-description: ''
+        x-obmcs-top-level-enum: '#/definitions/ProblemType'
+        schema:
+          type: string
+          enum:
+          - LIMIT
+          - LEGACY_LIMIT
+          - TECH
+          - ACCOUNT
+          - TAXONOMY
+      - $ref: '#/components/parameters/FederatedOcidHeaderParam'
+      - $ref: '#/components/parameters/RegionHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenTypeHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenHeaderParam'
+      - $ref: '#/components/parameters/IdTokenHeaderParam'
+      - $ref: '#/components/parameters/DomainIdHeaderParam'
+      responses:
+        200:
+          description: The user was validated.
+          headers:
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        403:
+          $ref: '#/components/responses/403'
+      summary: ValidateUser
+      tags:
+      - Incident
+      x-example: 'GET /20181231/v2/incidents/user/validate
+
+        Host: incidentmanagement.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+  /v2/incidents/{incidentKey}:
+    get:
+      description: 'Gets the specified support request.
+
+        For more information, see [Getting Details for a Support Request](/iaas/Content/GSG/support/get-incident.htm).
+
+        '
+      operationId: GetIncident
+      parameters:
+      - $ref: '#/components/parameters/IncidentKeyPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/FederatedOcidHeaderParam'
+      - $ref: '#/components/parameters/RegionHeaderParam'
+      - $ref: '#/components/parameters/CompartmentId'
+      - $ref: '#/components/parameters/OptionalProblemTypeHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenTypeHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenHeaderParam'
+      - $ref: '#/components/parameters/IdTokenHeaderParam'
+      - $ref: '#/components/parameters/DomainIdHeaderParam'
+      responses:
+        200:
+          description: The ticket details were retrieved.
+          headers:
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: GetIncident
+      tags:
+      - Incident
+      x-example: 'GET /20181231/v2/incidents<var>&lt;incident_OCID&gt;</var>
+
+        Host: incidentmanagement.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: 'Updates the specified support request.
+
+        For more information, see [Updating Support Requests](/iaas/Content/GSG/support/update-incident.htm).
+
+        '
+      operationId: UpdateIncident
+      parameters:
+      - $ref: '#/components/parameters/IncidentKeyPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/CompartmentId'
+      - $ref: '#/components/parameters/IfMatchHeaderParam'
+      - $ref: '#/components/parameters/FederatedOcidHeaderParam'
+      - $ref: '#/components/parameters/RegionHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenTypeHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenHeaderParam'
+      - $ref: '#/components/parameters/IdTokenHeaderParam'
+      - $ref: '#/components/parameters/DomainIdHeaderParam'
+      responses:
+        200:
+          description: The ticket was updated.
+          headers:
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: UpdateIncident
+      tags:
+      - Incident
+      x-example: "Sample 1: Add a comment (single update)\n\nPUT /20181231/v2/incidents/<var>&lt;incident_OCID&gt;</var>\nHost: incidentmanagement.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n  {\n    ticket: {\n      \"resource\": {\n        \"item\": {\n          \"activityType\": \"UPDATE\",\n          \"comments\":     \"test comment.\",\n          \"type\":         \"activity\"\n        }\n      }\n    }\n  }\n\nSample 2: Resolve ticket and add a comment (multiple updates)\n\nPUT /20181231/v2/incidents/<var>&lt;incident_OCID&gt;</var>\nHost: incidentmanagement.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n  {\n    ticket: {\n      \"resource\": [\n      {\n        \"activityType\": \"UPDATE\",\n        \"comments\":     \"test comment.\",\n        \"type\":         \"activity\"\n      },\n       {\n        \"activityType\": \"Resolve\",\n        \"comments\":     \"test comment.\",\n        \"type\":         \"activity\"\n        }\n      ]\n    }\n  }\n"
+      x-related-resource: '#/definitions/UpdateIncident'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIncident'
+        description: Details about the support request being updated.
+        required: true
+  /v2/incidents/{incidentKey}/attachment:
+    put:
+      description: Uploads the file and attaches it to the support request.
+      operationId: PutAttachment
+      parameters:
+      - $ref: '#/components/parameters/IncidentKeyPathParam'
+      - $ref: '#/components/parameters/AttachmentNameQueryParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/FederatedOcidHeaderParam'
+      - $ref: '#/components/parameters/IfMatchHeaderParam'
+      - $ref: '#/components/parameters/RegionHeaderParam'
+      - $ref: '#/components/parameters/CompartmentId'
+      - $ref: '#/components/parameters/RestrictedFlagQueryParam'
+      - $ref: '#/components/parameters/OptionalProblemTypeHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenTypeHeaderParam'
+      - $ref: '#/components/parameters/BearerTokenHeaderParam'
+      - $ref: '#/components/parameters/IdTokenHeaderParam'
+      - $ref: '#/components/parameters/DomainIdHeaderParam'
+      responses:
+        200:
+          description: The file has been uploaded and attached to the support request.
+          headers:
+            opc-request-id:
+              description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: PutAttachment
+      tags:
+      - Incident
+      x-example: 'PUT /20181231/v2/incidents/<var>&lt;incident_key&gt;</var>/attachment?attachmentName=<var>&lt;file_name&gt;</var>&compartmentId=<var>&lt;tenancy_OCID&gt;</var>&isRestrictedFlag=<var>&lt;false/true&gt;</var>
+
+        Host: incidentmanagement.us-phoenix-1.oraclecloud.com
+
+        Content-Type: application/octet-stream
+
+        <var>&lt;authorization_and_other_headers&gt;</var>
+
+        <var>&lt;contents_of_the_file_as_binary_string&gt;</var>
+
+        '
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              format: binary
+              type: string
+        description: File to be uploaded as attachment to the Service Request.
+        required: true
+components:
+  schemas:
+    UpdateTicketDetails:
+      description: 'Details about the ticket updated.
+
+        '
+      properties:
+        resource:
+          description: The list of resources.
+          items:
+            $ref: '#/components/schemas/UpdateResourceDetails'
+          type: object
+      required:
+      - resource
+      type: object
+    UpdateItemDetails:
+      description: 'Details for updating an item.
+
+        '
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: The type of the ticket.
+          type: string
+      type: object
+    CreateResourceDetails:
+      description: 'Details about the resource that the support request relates to.
+
+        '
+      properties:
+        item:
+          $ref: '#/components/schemas/CreateItemDetails'
+        region:
+          description: The list of available Oracle Cloud Infrastructure regions.
+          type: string
+      type: object
+    Error:
+      description: Details about an error that occurred.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          enum:
+          - CONTENT_EMPTY
+          - CLIENT_EXCEPTION
+          - INVALID_FORMAT
+          - INVALID_JSON_INPUT
+          - SSL_AUTHORIZATION
+          - AUTH_FAILED
+          - AUTHZ_FAILED
+          - USER_POLICY_NOT_AUTHORIZED
+          - EMAIL_NOT_VERIFIED
+          - EMAIL_NOT_FOUND
+          - OCI_EMAIL_NOT_FOUND
+          - IDCS_EMAIL_NOT_VALID
+          - INVALID_PATH
+          - METHOD_NOT_ALLOWED
+          - JSON_PROCESSING
+          - GENERIC_EXCEPTION
+          - EXTERNAL_SERVICE_PROVIDER_UNAVAILABLE
+          - EXTERNAL_SERVICE_PROVIDER_TIMEOUT
+          - TOO_MANY_REQUESTS
+          - IDP_SCIM_NOT_SETUP
+          - INCIDENT_NOT_FOUND
+          - DATA_ALREADY_EXISTS
+          - AUTH_USER_NOT_MATCHING
+          - CONTACT_NOT_APPROVED
+          - CREATE_PROFILE_MOS_FAILURE
+          - CREATE_PROFILE_CREATE_OSSO_FAILURE
+          - CREATE_PROFILE_IDENTITY_FAILURE
+          - CREATE_PROFILE_VERIFY_OSSO_FAILURE
+          - PROFILE_ACCOUNT_NOT_VERIFIED
+          - SUPPORT_ACCOUNT_NOT_FOUND
+          - FREE_TIER_CUSTOMER_SLI_UNSUPPORTED
+          - PROFILE_ACCOUNT_VERIFIED
+          - CREATE_PROFILE_ORGANIZATION_NAME_INVALID
+          - CREATE_PROFILE_EMAIL_INVALID
+          - NOTAUTHENTICATED
+          - CMOS_UNAUTHORIZED_PERMISSION
+          - CMOS_SUPPORT_ACCOUNT_EXISTS
+          - CMOS_INVALID_USER_GROUP_ID
+          - UNSUPPORTED_OPERATION
+          - NOTAUTHORIZEDORNOTFOUND
+          - LIST_SUBSCRIPTION_FAILURE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ErrorCode'
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ContextualData:
+      description: 'Information collected from user context during ticket creation.
+
+        '
+      properties:
+        clientId:
+          description: The unique identifier for the client.
+          type: string
+        payload:
+          description: The payload for the contextual data.
+          type: string
+        schemaName:
+          description: The name assigned to the schema.
+          type: string
+        schemaVersion:
+          description: The version of the schema.
+          type: string
+      required:
+      - clientId
+      - schemaName
+      - schemaVersion
+      - payload
+      type: object
+    CreateIncident:
+      description: 'Details gathered during the creation of the support request.
+
+        '
+      properties:
+        compartmentId:
+          description: The OCID of the tenancy.
+          type: string
+        contacts:
+          description: (Deprecated) - The list of contacts.
+          items:
+            $ref: '#/components/schemas/Contact'
+          type: array
+        problemType:
+          description: "The kind of support request (type of support request).\nFor information about `ACCOUNT` support requests, see \n[Creating a Billing Support Request](/iaas/Content/GSG/support/create-incident-billing.htm).\nFor information about `LIMIT` support requests, see \n[Creating a Service Limit Increase Request](/iaas/Content/GSG/support/create-incident-limit.htm).\nFor information about `TECH` support requests, see \n[Creating a Technical Support Request](/iaas/Content/GSG/support/create-incident-technical.htm).\n"
+          enum:
+          - LIMIT
+          - LEGACY_LIMIT
+          - TECH
+          - ACCOUNT
+          - TAXONOMY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ProblemType'
+        referrer:
+          description: The incident referrer. This value is often the URL that the customer used when creating the support request.
+          type: string
+        ticket:
+          $ref: '#/components/schemas/CreateTicketDetails'
+        userGroupId:
+          description: 'Technical support type (`TECH`) only: Identifier of the user group to assign the new support request to.
+
+            To find identifiers of user groups that you have access to, run the
+
+            [ValidateUser](#/en/incidentmanagement/latest/ValidationResponse/ValidateUser) operation.
+
+            Note: The Customer User Administrator (CUA) can manage user groups by name using
+
+            [My Oracle Cloud Support portal](https://support.oracle.com).
+
+            '
+          type: string
+      required:
+      - ticket
+      - compartmentId
+      - problemType
+      type: object
+    CreateItemDetails:
+      description: 'Details gathered during ticket creation.
+
+        '
+      discriminator:
+        propertyName: type
+      properties:
+        category:
+          $ref: '#/components/schemas/CreateCategoryDetails'
+        issueType:
+          $ref: '#/components/schemas/CreateIssueTypeDetails'
+        name:
+          description: The display name of the ticket. Avoid entering confidential information.
+          type: string
+        subCategory:
+          $ref: '#/components/schemas/CreateSubCategoryDetails'
+        type:
+          description: The type of the ticket.
+          type: string
+      type: object
+    ContactList:
+      description: The list of contacts for the ticket.
+      properties:
+        contactList:
+          description: The list of contacts.
+          items:
+            $ref: '#/components/schemas/Contact'
+          type: array
+      required:
+      - contactList
+      type: object
+    Classifier:
+      description: Details about the incident classifier object.
+      properties:
+        description:
+          description: The description of the classifier.
+          type: string
+        id:
+          description: Unique identifier of the classifier.
+          type: string
+        issueTypeList:
+          description: The list of issues.
+          items:
+            $ref: '#/components/schemas/IssueType'
+          type: array
+        label:
+          description: The label associated with the classifier.
+          type: string
+        name:
+          description: The display name of the classifier.
+          type: string
+        scope:
+          description: The scope of the service category or resource.
+          enum:
+          - AD
+          - REGION
+          - TENANCY
+          - NONE
+          type: string
+        unit:
+          description: The unit to use to measure the service category or resource.
+          enum:
+          - COUNT
+          - GB
+          - NONE
+          type: string
+      type: object
+    Item:
+      description: Details about the item object.
+      discriminator:
+        propertyName: type
+      properties:
+        category:
+          $ref: '#/components/schemas/Category'
+        issueType:
+          $ref: '#/components/schemas/IssueType'
+        itemKey:
+          description: Unique identifier for the item.
+          type: string
+        name:
+          description: The display name of the item. Avoid entering confidential information.
+          type: string
+        subCategory:
+          $ref: '#/components/schemas/SubCategory'
+        type:
+          description: The type of the item.
+          type: string
+      type: object
+    SubCategory:
+      description: Details about the service subcategory associated with the support request.
+      properties:
+        name:
+          description: The name of the service subcategory. For example, `Backup Count` or `Custom Image Count`.
+          type: string
+        subCategoryKey:
+          description: Unique identifier for the service subcategory.
+          type: string
+      type: object
+    Resource:
+      description: Details about the ticket item object.
+      properties:
+        item:
+          $ref: '#/components/schemas/Item'
+        region:
+          description: The list of available Oracle Cloud Infrastructure regions.
+          type: string
+      type: object
+    IssueType:
+      description: Details about the issue type associated with the support request.
+      properties:
+        issueTypeKey:
+          description: Unique identifier for the issue type.
+          type: string
+        label:
+          description: The label for the issue type. For example, `Instance Performance`.
+          type: string
+        name:
+          description: The URL for the contextual documentation.
+          type: string
+      type: object
+    ServiceCategory:
+      description: Information about the support request classifier.
+      properties:
+        description:
+          description: The text describing the classifier.
+          type: string
+        issueTypeList:
+          description: The list of issues.
+          items:
+            $ref: '#/components/schemas/IssueType'
+          type: array
+        key:
+          description: The unique ID that identifies a classifier.
+          type: string
+        label:
+          description: The label for the classifier.
+          type: string
+        limitId:
+          description: The unique ID for the limit.
+          type: string
+        name:
+          description: The name of the classifier.
+          type: string
+        scope:
+          description: The scope of the incident.
+          enum:
+          - AD
+          - REGION
+          - TENANCY
+          - NONE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/Scope'
+        supportedSubscriptions:
+          description: List of supported subscriptions
+          items:
+            type: string
+          type: array
+        unit:
+          description: The unit to use to measure the service category or resource.
+          enum:
+          - COUNT
+          - GB
+          - NONE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/Unit'
+      type: object
+    CreateCategoryDetails:
+      description: 'Details for creating the category of the support request.
+
+        '
+      properties:
+        categoryKey:
+          description: Unique identifier for the service category.
+          type: string
+      type: object
+    IncidentSummary:
+      description: Details about the support request.
+      properties:
+        compartmentId:
+          description: The OCID of the tenancy.
+          type: string
+        contactList:
+          $ref: '#/components/schemas/ContactList'
+        incidentType:
+          $ref: '#/components/schemas/IncidentResourceType'
+        isWritePermitted:
+          description: "Technical support type (`TECH`) only: Allows update of the support request in My Oracle Cloud Support portal, \nwhen the user has write permission to the support request's user group.\n"
+          type: boolean
+        key:
+          description: Unique identifier of the incident.
+          type: string
+        migratedSrNumber:
+          description: 'Technical support type (`TECH`) only: The pre-migration identifier of the support request in My Oracle Support (MOS).
+
+            '
+          type: string
+        primaryContactPartyId:
+          description: 'Technical support type (`TECH`) only: The identifier of the support request''s primary contact (`primaryContactPartyName`) in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        primaryContactPartyName:
+          description: 'Technical support type (`TECH`) only: The name of the support request''s primary contact in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        problemType:
+          description: "The kind of support request (type of support request).\nFor information about `ACCOUNT` support requests, see \n[Creating a Billing Support Request](/iaas/Content/GSG/support/create-incident-billing.htm).\nFor information about `LIMIT` support requests, see \n[Creating a Service Limit Increase Request](/iaas/Content/GSG/support/create-incident-limit.htm).\nFor information about `TECH` support requests, see \n[Creating a Technical Support Request](/iaas/Content/GSG/support/create-incident-technical.htm).\n"
+          enum:
+          - LIMIT
+          - LEGACY_LIMIT
+          - TECH
+          - ACCOUNT
+          - TAXONOMY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ProblemType'
+        tenancyInformation:
+          $ref: '#/components/schemas/TenancyInformation'
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+        userGroupId:
+          description: 'Technical support type (`TECH`) only: The identifier of the support request''s user group in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        userGroupName:
+          description: 'Technical support type (`TECH`) only: Name of the support request''s user group in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        warnMessage:
+          description: 'Technical support type (`TECH`) only: Message indicating the user group (`userGroupId`) that was auto-selected for a new support request. This message appears when no user group was specified in the create request for a new technical support request.
+
+            '
+          type: string
+      required:
+      - key
+      - problemType
+      type: object
+    Incident:
+      description: Details about the support request.
+      properties:
+        compartmentId:
+          description: The OCID of the tenancy.
+          type: string
+        contactList:
+          $ref: '#/components/schemas/ContactList'
+        incidentType:
+          $ref: '#/components/schemas/IncidentType'
+        isWritePermitted:
+          description: "Technical support type (`TECH`) only: Allows update of the support request in My Oracle Cloud Support portal, \nwhen the user has write permission to the support request's user group.\n"
+          type: boolean
+        key:
+          description: Unique identifier for the support request.
+          type: string
+        migratedSrNumber:
+          description: 'Technical support type (`TECH`) only: The pre-migration identifier of the support request in My Oracle Support (MOS).
+
+            '
+          type: string
+        primaryContactPartyId:
+          description: 'Technical support type (`TECH`) only: The identifier of the support request''s primary contact (`primaryContactPartyName`) in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        primaryContactPartyName:
+          description: 'Technical support type (`TECH`) only: The name of the support request''s primary contact in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        problemType:
+          description: "The kind of support request (type of support request).\nFor information about `ACCOUNT` support requests, see \n[Creating a Billing Support Request](/iaas/Content/GSG/support/create-incident-billing.htm).\nFor information about `LIMIT` support requests, see \n[Creating a Service Limit Increase Request](/iaas/Content/GSG/support/create-incident-limit.htm).\nFor information about `TECH` support requests, see \n[Creating a Technical Support Request](/iaas/Content/GSG/support/create-incident-technical.htm).\n"
+          enum:
+          - LIMIT
+          - LEGACY_LIMIT
+          - TECH
+          - ACCOUNT
+          - TAXONOMY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ProblemType'
+        referrer:
+          description: The incident referrer. This value is often the URL that the customer used when creating the support request.
+          type: string
+        tenancyInformation:
+          $ref: '#/components/schemas/TenancyInformation'
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+        userGroupId:
+          description: 'Technical support type (`TECH`) only: The identifier of the support request''s user group in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        userGroupName:
+          description: 'Technical support type (`TECH`) only: Name of the support request''s user group in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        warnMessage:
+          description: 'Technical support type (`TECH`) only: Message indicating the user group (`userGroupId`) that was auto-selected for a new support request. This message appears when no user group was specified in the create request for a new technical support request.
+
+            '
+          type: string
+      required:
+      - key
+      type: object
+    Ticket:
+      description: Details about the ticket created.
+      properties:
+        description:
+          description: The description of the issue addressed in the ticket.
+          maxLength: 1800
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: Additional information about the current `lifecycleState`.
+          enum:
+          - PENDING_WITH_ORACLE
+          - PENDING_WITH_CUSTOMER
+          - PENDING_WITH_SUPPORT
+          - CLOSE_REQUESTED
+          - CLOSED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleDetails'
+        lifecycleState:
+          description: The current state of the ticket.
+          enum:
+          - ACTIVE
+          - CLOSED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        resourceList:
+          description: The list of resources associated with the ticket.
+          items:
+            $ref: '#/components/schemas/Resource'
+          type: array
+        severity:
+          description: The severity assigned to the ticket.
+          enum:
+          - HIGHEST
+          - HIGH
+          - MEDIUM
+          - LOW
+          type: string
+        ticketNumber:
+          description: Unique identifier for the ticket.
+          type: string
+        timeCreated:
+          description: The time when the ticket was created, in seconds since epoch time.
+          format: date-time
+          readOnly: true
+          type: integer
+        timeUpdated:
+          description: The time when the ticket was updated, in seconds since epoch time.
+          format: date-time
+          readOnly: true
+          type: integer
+        title:
+          description: The title of the ticket.
+          type: string
+      required:
+      - description
+      - severity
+      - title
+      type: object
+    CreateIssueTypeDetails:
+      description: 'Details for creating the issue type of the support request.
+
+        '
+      properties:
+        issueTypeKey:
+          description: Unique identifier for the issue type.
+          type: string
+      type: object
+    Services:
+      description: List of Service Categories of a Service for MOS Taxonomy.
+      properties:
+        schema:
+          description: Schema of a Service Category.
+          type: string
+        service:
+          additionalProperties:
+            type: string
+          description: Service Category list.
+          type: object
+        serviceCategories:
+          description: The service categories list for MOS Taxonomy.
+          items:
+            $ref: '#/components/schemas/SubCategories'
+          type: array
+      type: object
+    TenancyInformation:
+      description: Details about the tenancy.
+      properties:
+        tenancyId:
+          description: The OCID of the tenancy.
+          maxLength: 80
+          minLength: 0
+          type: string
+      required:
+      - tenancyId
+      type: object
+    UpdateIncident:
+      description: Details about the support request being updated.
+      properties:
+        problemType:
+          description: "The kind of support request (type of support request).\nFor information about `ACCOUNT` support requests, see \n[Creating a Billing Support Request](/iaas/Content/GSG/support/create-incident-billing.htm).\nFor information about `LIMIT` support requests, see \n[Creating a Service Limit Increase Request](/iaas/Content/GSG/support/create-incident-limit.htm).\nFor information about `TECH` support requests, see \n[Creating a Technical Support Request](/iaas/Content/GSG/support/create-incident-technical.htm).\n"
+          enum:
+          - LIMIT
+          - LEGACY_LIMIT
+          - TECH
+          - ACCOUNT
+          - TAXONOMY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ProblemType'
+        ticket:
+          $ref: '#/components/schemas/UpdateTicketDetails'
+      required:
+      - ticket
+      type: object
+    Category:
+      description: Details about the service category associated with the support request.
+      properties:
+        categoryKey:
+          description: Unique identifier for the service category.
+          type: string
+        name:
+          description: The name of the service category. For example, `Compute` or `Identity`.
+          type: string
+      type: object
+    IncidentResourceType:
+      description: Details about the resource associated with the support request.
+      properties:
+        description:
+          description: The description of the resource.
+          type: string
+        isSubscriptionsSupported:
+          description: Indicates whether multi-subscription is supported
+          type: boolean
+        label:
+          description: The label associated with the resource.
+          type: string
+        name:
+          description: The display name of the resource.
+          type: string
+        resourceTypeKey:
+          description: A unique identifier for the resource.
+          type: string
+        service:
+          additionalProperties:
+            type: string
+          description: The map of services for MOS Taxonomy.
+          type: object
+        serviceCategoryList:
+          description: The service category list.
+          items:
+            $ref: '#/components/schemas/ServiceCategory'
+          type: array
+        services:
+          description: The service categories list for MOS Taxonomy.
+          items:
+            $ref: '#/components/schemas/Services'
+          type: array
+      required:
+      - label
+      type: object
+    CreateSubCategoryDetails:
+      description: 'Details for creating the service subcategory of the support request.
+
+        '
+      properties:
+        subCategoryKey:
+          description: Unique identifier for the service subcategory.
+          type: string
+      type: object
+    CreateTicketDetails:
+      description: 'Details relevant to the support request.
+
+        '
+      properties:
+        contextualData:
+          $ref: '#/components/schemas/ContextualData'
+        description:
+          description: 'The description of the support request. Avoid entering confidential information.
+
+            '
+          maxLength: 1500
+          minLength: 1
+          type: string
+        resourceList:
+          description: The list of resources.
+          items:
+            $ref: '#/components/schemas/CreateResourceDetails'
+          type: array
+        severity:
+          description: The severity of the support request.
+          enum:
+          - HIGHEST
+          - HIGH
+          - MEDIUM
+          - LOW
+          type: string
+        title:
+          description: The title of the support request. Avoid entering confidential information.
+          maxLength: 85
+          minLength: 1
+          type: string
+      required:
+      - description
+      - severity
+      - title
+      type: object
+    CmosUserGroupInfo:
+      description: 'Identifier and name of a user group (`userGroupId` and `userGroupName`) that the current user has access to.
+
+        Note: The Customer User Administrator (CUA) can manage user groups by name using
+
+        [My Oracle Cloud Support portal](https://support.oracle.com).
+
+        '
+      properties:
+        userGroupId:
+          description: 'Technical support type (`TECH`) only: The identifier of a user group in My Oracle Cloud Support portal.
+
+            '
+          type: string
+        userGroupName:
+          description: 'Technical support type (`TECH`) only: Name of a user group in My Oracle Cloud Support portal.
+
+            '
+          type: string
+      type: object
+    ValidationResponse:
+      description: 'The validation response returned when checking whether the requested user is valid.
+
+        '
+      properties:
+        isValidUser:
+          description: Boolean value that indicates whether the requested user is valid.
+          type: boolean
+        writePermittedUserGroupInfos:
+          description: 'Array of user groups that the user has access to for creating technical support type (`TECH`) support requests.
+
+            Each user group is indicated by its identifier and name (`userGroupId` and `userGroupName`).
+
+            Note: The Customer User Administrator (CUA) can manage user groups by name using
+
+            [My Oracle Cloud Support portal](https://support.oracle.com).
+
+            '
+          items:
+            $ref: '#/components/schemas/CmosUserGroupInfo'
+          type: array
+      type: object
+    SubCategories:
+      description: List of subcategories under a service.
+      properties:
+        hasSubCategory:
+          description: Flag to identify if subComponent is present
+          type: string
+        schema:
+          description: Schema of a subcategory.
+          type: string
+        serviceCategory:
+          additionalProperties:
+            type: string
+          description: Subcategory list.
+          type: object
+        subCategories:
+          description: The sub component list for MOS Taxonomy.
+          items:
+            $ref: '#/components/schemas/SubComponents'
+          type: array
+      type: object
+    SubComponents:
+      description: List of subcomponents under a subcategory.
+      properties:
+        schema:
+          description: Schema of a subcategory.
+          type: string
+        subCategory:
+          additionalProperties:
+            type: string
+          description: Subcategory list.
+          type: object
+      type: object
+    IncidentType:
+      description: Details about the incident type associated with the support request.
+      properties:
+        classifierList:
+          description: The list of classifiers.
+          items:
+            $ref: '#/components/schemas/Classifier'
+          type: array
+        description:
+          description: The description of the incident type.
+          type: string
+        id:
+          description: Unique identifier for the incident type.
+          type: string
+        label:
+          description: The label associated with the incident type.
+          type: string
+        name:
+          description: The name of the incident type.
+          type: string
+      type: object
+    UpdateResourceDetails:
+      description: 'Details about updates to the resource.
+
+        '
+      properties:
+        item:
+          $ref: '#/components/schemas/UpdateItemDetails'
+      type: object
+    Contact:
+      description: Contact details for the customer. Avoid entering confidential information.
+      properties:
+        contactEmail:
+          description: The email of the contact person.
+          type: string
+        contactName:
+          description: The name of the contact person.
+          type: string
+        contactPhone:
+          description: The phone number of the contact person.
+          type: string
+        contactType:
+          description: The type of contact, such as primary or alternate.
+          enum:
+          - PRIMARY
+          - ALTERNATE
+          - SECONDARY
+          - ADMIN
+          - MANAGER
+          type: string
+        email:
+          description: The email of the contact person.
+          type: string
+      type: object
+  parameters:
+    SortByQueryParam:
+      description: The key to use to sort the returned items.
+      in: query
+      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/SortBy'
+      schema:
+        type: string
+        enum:
+        - dateUpdated
+        - severity
+        default: dateUpdated
+    ProblemTypeQueryParam:
+      description: The kind of support request.
+      in: query
+      name: problemType
+      required: true
+      schema:
+        type: string
+    IdTokenHeaderParam:
+      description: (Deprecated) - IdToken that provided by multi cloud provider, which help to validate the email.
+      in: header
+      name: idtoken
+      required: false
+      schema:
+        type: string
+    OptionalProblemTypeQueryParam:
+      description: The kind of support request.
+      in: query
+      name: problemType
+      required: false
+      x-default-description: ''
+      schema:
+        type: string
+    BearerTokenHeaderParam:
+      description: (Deprecated) - Token that provided by multi cloud provider, which help to validate the email.
+      in: header
+      name: bearertoken
+      required: false
+      schema:
+        type: string
+    PageQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      required: false
+      schema:
+        type: string
+        default: 1
+    RegionHeaderParam:
+      description: The region of the tenancy.
+      in: header
+      name: homeregion
+      required: false
+      x-default-description: ''
+      schema:
+        type: string
+    BearerTokenTypeHeaderParam:
+      description: (Deprecated) - Token type that determine which cloud provider the request come from.
+      in: header
+      name: bearertokentype
+      required: false
+      schema:
+        type: string
+    IfMatchHeaderParam:
+      description: For optimistic concurrency control. In the PUT or DELETE call for a resource, set the `if-match` parameter to the value of the etag from a previous GET or POST response for that resource. The resource will be updated or deleted only if the etag you provide matches the resource's current etag value.
+      in: header
+      name: if-match
+      schema:
+        type: string
+    LimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        default: 50
+    IncidentKeyPathParam:
+      description: Unique identifier for the support request.
+      in: path
+      name: incidentKey
+      required: true
+      schema:
+        type: string
+    CompartmentId:
+      description: The OCID of the tenancy.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The order to sort the results in.
+      in: query
+      name: sortOrder
+      required: false
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    FederatedOcidHeaderParam:
+      description: 'User OCID for Oracle Identity Cloud Service (IDCS) users who also have a federated Oracle Cloud Infrastructure account.
+
+        User OCID is mandatory for OCI Users and optional for Multicloud users.
+
+        '
+      in: header
+      name: ocid
+      required: false
+      schema:
+        type: string
+    RestrictedFlagQueryParam:
+      description: "Set to `true` when the attachment contains personal information (PI) \nor protected health information (PHI).\n"
+      in: query
+      name: isRestrictedFlag
+      required: true
+      schema:
+        type: boolean
+        default: false
+    OpcRequestIdHeaderParam:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    OptionalProblemTypeHeaderParam:
+      description: The kind of support request.
+      in: header
+      name: problemtype
+      required: false
+      x-default-description: ''
+      schema:
+        type: string
+    AttachmentNameQueryParam:
+      description: The name of the file to attach to the support request. Avoid entering confidential information.
+      in: query
+      name: attachmentName
+      required: true
+      schema:
+        type: string
+    DomainIdHeaderParam:
+      description: 'The OCID of identity domain.
+
+        DomainID is mandatory if the user is part of Non Default Identity domain.
+
+        '
+      in: header
+      name: domainid
+      required: false
+      schema:
+        type: string
+    UpdatedAfterQueryParam:
+      description: Filter to return results updated only after the specified timestamp. Must be an RFC 3339 timestamp (e.g. 2025-12-07T17:42:54Z).
+      in: query
+      name: timeUpdatedGreaterThanOrEqualTo
+      required: false
+      schema:
+        type: string
+        format: date-time
+    LifecycleStateQueryParam:
+      description: The current state of the ticket.
+      in: query
+      name: lifecycleState
+      required: false
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - ACTIVE
+        - CLOSED
+        default: ACTIVE
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If
+
+            you need to contact Oracle about a particular request,
+
+            please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

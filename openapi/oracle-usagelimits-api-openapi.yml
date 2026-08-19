@@ -1,0 +1,329 @@
+openapi: 3.2.0
+info:
+  description: Use the Usage Proxy API to list Oracle Support Rewards, view related detailed usage information, and manage users who redeem rewards. For more information, see [Oracle Support Rewards Overview](/iaas/Content/Billing/Concepts/supportrewardsoverview.htm).
+  title: Usage Proxy Usagelimits API
+  version: '20190111'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/923c4c9e7faf08854042f276c1ca058bf5c0d7901ddbf9c52717a1816a0e8d82.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Usage Proxy API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/923c4c9e7faf08854042f276c1ca058bf5c0d7901ddbf9c52717a1816a0e8d82.yaml
+    what: the harvested document for Usage Proxy API
+servers:
+- url: https://127.0.0.1/20190111
+tags:
+- name: usagelimits
+paths:
+  /usagelimits:
+    get:
+      description: 'Returns the list of usage limits for the subscription ID and tenant ID.
+
+        '
+      operationId: ListUsageLimits
+      parameters:
+      - $ref: '#/components/parameters/ResourceCompartmentIdQueryParam'
+      - $ref: '#/components/parameters/LimitsSubscriptionIdQueryParam'
+      - $ref: '#/components/parameters/LimitTypeQueryParam'
+      - $ref: '#/components/parameters/ResourceTypeQueryParam'
+      - $ref: '#/components/parameters/ServiceTypeQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/PaginationTokenParam'
+      - $ref: '#/components/parameters/PaginationLimitParam'
+      - $ref: '#/components/parameters/SortOrderParam'
+      - $ref: '#/components/parameters/SortByParam'
+      responses:
+        200:
+          description: 'The detailed list of usage limits.
+
+            '
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageLimitCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          description: Unexpected error.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      summary: Returns list of usage limits for the subscription Id.
+      tags:
+      - usagelimits
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/UsageLimitSummary'
+components:
+  parameters:
+    SortOrderParam:
+      description: The sort order to use, which can be ascending (ASC) or descending (DESC).
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    ServiceTypeQueryParam:
+      description: Service name.
+      in: query
+      name: serviceType
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationTokenParam:
+      description: The value of the 'opc-next-page' response header from the previous call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 512
+        minLength: 1
+    SortByParam:
+      description: The field to sort by. Supports one sort order.
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIMECREATED
+        - TIMESTART
+        default: TIMECREATED
+    LimitsSubscriptionIdQueryParam:
+      description: The subscription ID for which usage limits information is requested for.
+      in: query
+      name: subscriptionId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: Unique, Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    LimitTypeQueryParam:
+      description: Hard or soft limit. Hard limits lead to breaches, soft to alerts.
+      in: query
+      name: limitType
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationLimitParam:
+      description: The maximum number of items to return in the paginated response.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 50
+        maximum: 1000
+        minimum: 1
+    ResourceCompartmentIdQueryParam:
+      description: The OCID of the root compartment.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ResourceTypeQueryParam:
+      description: Resource name.
+      in: query
+      name: resourceType
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+  schemas:
+    UsageLimitSummary:
+      description: Encapsulates a collection of hard and soft Limits for a resource within a subscription.
+      properties:
+        action:
+          description: The action when the usage limit has been reached.
+          enum:
+          - QUOTA_BREACH
+          - QUOTA_ALERT
+          example: QUOTA_BREACH
+          type: string
+        alertLevel:
+          description: The alert level of the usage limit.
+          example: 1
+          format: integer
+          type: number
+        createdBy:
+          description: The user who created the limit.
+          example: abcxyz@oracle.com
+          type: string
+        entitlementId:
+          description: Entitlement ID of the usage limit.
+          example: '844328258'
+          format: integer
+          type: string
+        id:
+          description: The usage limit ID.
+          example: '844328274'
+          format: integer
+          type: string
+        lifecycleState:
+          description: The usage limit lifecycle state.
+          enum:
+          - ACTIVE
+          example: ACTIVE
+          type: string
+        limit:
+          description: The limit value.
+          example: '1000'
+          format: integer
+          type: string
+        limitType:
+          description: The limit type of the usage limit.
+          enum:
+          - HARD
+          - SOFT
+          example: HARD
+          type: string
+        maxHardLimit:
+          description: The maximum hard limit set for the usage limit.
+          example: '1000'
+          format: integer
+          type: string
+        modifiedBy:
+          description: The user who modified the limit.
+          example: abcxyz@oracle.com
+          type: string
+        resourceName:
+          description: The resource for which the limit is defined.
+          example: BLOCK_STORAGE
+          type: string
+        serviceName:
+          description: The service for which the limit is defined.
+          example: Compute
+          type: string
+        skuPartId:
+          description: The SKU for which the usage limit is set.
+          example: B78519
+          type: string
+        timeCreated:
+          description: Time when the usage limit was created.
+          example: '2017-05-24T15:54:18.210Z'
+          format: date-time
+          type: string
+        timeModified:
+          description: Time when the usage limit was modified.
+          example: '2017-05-24T15:54:18.210Z'
+          format: date-time
+          type: string
+        valueType:
+          description: The value type of the usage limit.
+          enum:
+          - ABSOLUTE
+          - PERCENTAGE
+          example: ABSOLUTE
+          type: string
+      required:
+      - timeCreated
+      - entitlementId
+      - id
+      - timeModified
+      - resourceName
+      - serviceName
+      - limit
+      - createdBy
+      - modifiedBy
+      - action
+      - alertLevel
+      - limitType
+      - valueType
+      - lifecycleState
+      type: object
+    Error:
+      description: Error object model.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    UsageLimitCollection:
+      description: The usage limit summary list for the requested tenancy ID and subscription ID.
+      properties:
+        items:
+          description: The list of usage limits.
+          items:
+            $ref: '#/components/schemas/UsageLimitSummary'
+          type: array
+      required:
+      - items
+x-anchors:
+  x-headers:
+    opc-next-page:
+      description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+        then a partial list might have been returned. Include this value as the `page` parameter for the
+
+        subsequent GET request to get the next batch of items.
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+x-oracle-package: com.oracle.pic.usage

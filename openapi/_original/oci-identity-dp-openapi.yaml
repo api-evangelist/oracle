@@ -1,0 +1,1225 @@
+swagger: '2.0'
+info:
+  description: APIs for managing identity data plane services. For example, use these APIs to create a
+    scoped-access security token or a user principal session token (UPST). To manage identity domains
+    (for example, creating or deleting an identity domain) or to manage resources (for example, users
+    and groups) within the default identity domain, see [IAM API](https://docs.oracle.com/iaas/api/#/en/identity/).
+  license:
+    name: Oracle Corporation
+  title: Identity and Access Management Data Plane API
+  version: v1
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/7e3c983ab04cba050355f42f4af4739877daa289937575a7498b525ccb4a29f4.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Identity and Access Management Data Plane API OCI
+      service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/7e3c983ab04cba050355f42f4af4739877daa289937575a7498b525ccb4a29f4.yaml
+    what: the harvested document for Identity and Access Management Data Plane API
+host: localhost:9010
+basePath: /v1
+schemes:
+- http
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /actions/generateScopedAccessToken:
+    post:
+      description: 'Based on the calling Principal and the input payload, derive the claims, and generate
+        a scoped-access token for specific resources. For example, set scope to urn:oracle:db::id::<compartment-id>
+        for access to a database in a compartment.
+
+        '
+      operationId: GenerateScopedAccessToken
+      parameters:
+      - description: Scoped access token request
+        in: body
+        name: GenerateScopedAccessTokenDetails
+        required: true
+        schema:
+          $ref: '#/definitions/GenerateScopedAccessTokenDetails'
+      responses:
+        200:
+          description: The security token object.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a
+
+                particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/SecurityToken'
+        default:
+          $ref: '#/responses/Error'
+      summary: Get a scoped-access security token.
+      tags:
+      - dataplane
+      x-example: "POST /v1/actions/generateScopedAccessToken/\nHost: auth.us-phoenix-1.oraclecloud.com\n\
+        <var>&lt;authorization and other headers&gt;</var>\n{\n  'scope': 'urn:oracle:db::id::<var>&lt;compartment-id&gt;</var>'\n\
+        \  'publicKey': 'publicKey'\n}\n"
+  /token/upst/actions/GenerateUpst:
+    post:
+      description: 'Exchanges a valid user token-based signature (API key and UPST) for a short-lived
+        UPST of the authenticated
+
+        user principal. When not specified, the user session duration is set to a default of 60 minutes
+        in all realms. Resulting UPSTs
+
+        are refreshable while the user session has not expired.
+
+        '
+      operationId: GenerateUserSecurityToken
+      parameters:
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - description: The key-value pair object storing the token exchange request parameters required
+          to obtain a UPST for self.
+        in: body
+        name: GenerateUserSecurityTokenDetails
+        required: true
+        schema:
+          $ref: '#/definitions/GenerateUserSecurityTokenDetails'
+      responses:
+        200:
+          description: UPST generation succeeded.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a
+
+                particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/SecurityToken'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Generates a user principal session token (UPST) for the authenticated user principal.
+      tags:
+      - dataplane
+      x-example: "POST /v1/token/upst/actions/GenerateUpst\nHost: auth.us-phoenix-1.oraclecloud.com\n\
+        <var>&lt;authorization and other headers&gt;</var>\n{\n  'publicKey': '[public key]'\n  'sessionExpirationInMinutes':\
+        \ 15\n}\n"
+      x-related-resource: '#/definitions/SecurityToken'
+definitions:
+  AccessibleCompartmentRequest:
+    properties:
+      authorizationRequest:
+        $ref: '#/definitions/AuthorizationRequest'
+        description: The authorization request.
+      compartmentIds:
+        description: The list of compartment ids.
+        items:
+          type: string
+        type: array
+    required:
+    - authorizationRequest
+    - compartmentIds
+  AccessibleCompartmentResponse:
+    properties:
+      compartmentsMetadata:
+        description: The compartments metadata.
+        items:
+          $ref: '#/definitions/CompartmentMetadata'
+        type: array
+    required:
+    - compartmentsMetadata
+  AssociationAuthorizationRequest:
+    properties:
+      requests:
+        description: The list of authorization requests.
+        items:
+          $ref: '#/definitions/AuthorizationRequest'
+        type: array
+    required:
+    - requests
+  AuthServiceUser:
+    properties:
+      compartmentId:
+        description: The id of the compartment.
+        type: string
+      displayName:
+        description: The display name of the user.
+        type: string
+      id:
+        description: The user's Oracle ID (OCID).
+        type: string
+      name:
+        description: The name of the user.
+        type: string
+      tenantId:
+        description: The id of the tenant.
+        type: string
+    required:
+    - compartmentId
+    - tenantId
+    - id
+    - name
+    - displayName
+  AuthenticateClientDetails:
+    properties:
+      requestHeaders:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: The signed headers of the original caller's request.
+        type: object
+    required:
+    - requestHeaders
+  AuthenticateClientResult:
+    properties:
+      errorMessage:
+        description: If the authentication fails for the original caller (not failing authentication of
+          the calling service, in which case we return 401), we return a 200, but with null principal
+          and an error message
+        type: string
+      principal:
+        $ref: '#/definitions/Principal'
+        description: The original caller's resolved principal object if the authentication succeeds, null
+          otherwise.
+  AuthenticateUserResult:
+    description: 'See ValidAuthenticateUserResult, BadUserStateAuthenticateUserResult, UserNotFoundAuthenticateUserResult,
+      TenantNotFoundAuthenticateUserResult
+
+      '
+    properties:
+      tenantInput:
+        description: The tenant name.
+        type: string
+      userInput:
+        description: The user name.
+        type: string
+    required:
+    - tenantInput
+    - userInput
+    type: object
+  AuthenticationPrincipal:
+    properties:
+      tenant:
+        $ref: '#/definitions/Tenant'
+        description: The tenancy object.
+      user:
+        $ref: '#/definitions/User'
+        description: The user object.
+    required:
+    - tenant
+    - user
+  AuthenticationRequest:
+    properties:
+      password:
+        description: The password
+        type: string
+      tenantName:
+        description: The name of the tenancy
+        type: string
+      userName:
+        description: The user name
+        type: string
+    required:
+    - userName
+    - password
+    - tenantName
+  AuthorizationRequest:
+    properties:
+      context:
+        description: A set of permission contexts
+        items:
+          $ref: '#/definitions/PermissionContext'
+        type: array
+      policyHash:
+        description: 'The hash of cached policy on the caller service side. If this is different than
+          what Identity has, it will
+
+          send the most recent policy statements.
+
+          '
+        type: string
+      requestId:
+        description: The id of this request. It is a GUID.
+        type: string
+      serviceName:
+        description: The name of the service that is making this authorization request
+        type: string
+      svcPrincipal:
+        $ref: '#/definitions/Principal'
+        description: The service principal object for service to service calls.
+      userPrincipal:
+        $ref: '#/definitions/Principal'
+        description: The user principal object
+    required:
+    - requestId
+    - userPrincipal
+    - svcPrincipal
+    - serviceName
+    - policyHash
+    - context
+  BadUserStateAuthenticateUserResult:
+    properties:
+      resolvedTenantId:
+        description: The resolved tenant id.
+        type: string
+      resolvedUserId:
+        description: The resolved user id.
+        type: string
+      tenantInput:
+        description: The tenant name.
+        type: string
+      userInput:
+        description: The user name.
+        type: string
+      userState:
+        description: The bad user state.
+        enum:
+        - USER_BLOCKED
+        - USER_DISABLED
+        - ONE_TIME_PASSWORD_EXPIRED
+        - PASSWORD_INVALID
+        type: string
+    required:
+    - tenantInput
+    - userInput
+    - resolvedTenantId
+    - resolvedUserId
+    - userState
+  Claim:
+    properties:
+      issuer:
+        description: The issuer of the claim.
+        type: string
+      key:
+        description: The key of the claim.
+        type: string
+      value:
+        description: The value of the claim.
+        type: string
+    required:
+    - key
+    - value
+  ClientCredentialsResponse:
+    properties:
+      access_token:
+        description: The access token.
+        type: string
+      expires_in:
+        description: The amount of time until the token expires.
+        type: string
+      token_type:
+        description: The token type.
+        type: string
+    required:
+    - access_token
+    - token_type
+    - expires_in
+  CommonPrincipal:
+    properties:
+      tenant:
+        $ref: '#/definitions/Tenant'
+        description: The tenant.
+      user:
+        $ref: '#/definitions/User'
+        description: The user.
+    required:
+    - tenant
+    - user
+  Compartment:
+    properties:
+      displayName:
+        description: The display name of the compartment.
+        type: string
+      fullName:
+        description: The full name of the compartment.
+        type: string
+      id:
+        description: The id of the compartment.
+        type: string
+      name:
+        description: The name of the compartment.
+        type: string
+      parentCompartmentId:
+        description: The id of the parent compartment.
+        type: string
+      propertyMap:
+        additionalProperties:
+          type: string
+        description: The extended properties.
+        type: object
+      status:
+        $ref: '#/definitions/EntityStatus'
+        description: The status of the compartment.
+    required:
+    - id
+    - name
+    - displayName
+    - fullName
+    - parentCompartmentId
+    - status
+    - propertyMap
+  CompartmentMetadata:
+    properties:
+      accessLevel:
+        description: The access level.
+        enum:
+        - accessible
+        - visible
+        - inaccessible
+        type: string
+      compartmentId:
+        description: The compartment id.
+        type: string
+    required:
+    - compartmentId
+    - accessLevel
+  ContextVariable:
+    properties:
+      name:
+        description: The name of the variable.
+        type: string
+      type:
+        description: The type of the variable.
+        enum:
+        - STRING
+        - NUMBER
+        - ENTITY
+        - BOOLEAN
+        - LIST
+        type: string
+      value:
+        description: The value of the variable.
+        type: string
+    required:
+    - name
+    - type
+    - value
+  CostTrackingTag:
+    properties:
+      Tag_Definition_Id:
+        description: The tag definition id.
+        type: string
+      Tag_Definition_Name:
+        description: The tag definition name.
+        type: string
+      Tag_Namespace_Id:
+        description: The tag namespace id.
+        type: string
+      Tag_Namespace_Name:
+        description: The tag namespace name.
+        type: string
+    required:
+    - Tag_Namespace_Id
+    - Tag_Namespace_Name
+    - Tag_Definition_Id
+    - Tag_Definition_Name
+  CredentialAuthenticatorInfo:
+    properties:
+      clientId:
+        description: The id of the client.
+        type: string
+      credentialIdentifier:
+        description: The credential identifier.
+        type: string
+      credentialList:
+        description: The credential list.
+        items:
+          type: string
+        type: array
+      rawCredential:
+        description: The raw credential.
+        type: string
+      service:
+        description: The name of the service that is making this authorization request.
+        type: string
+      tenantId:
+        description: The id of the tenant.
+        type: string
+      tenantName:
+        description: The name of the tenant.
+        type: string
+      userId:
+        description: The id of the user.
+        type: string
+      userName:
+        description: The name of the user.
+        type: string
+    required:
+    - rawCredential
+    - userId
+    - tenantId
+    - userName
+    - tenantName
+    - credentialIdentifier
+    - credentialList
+    - service
+    - clientId
+  DerivedKeyResponse:
+    properties:
+      principal:
+        $ref: '#/definitions/CommonPrincipal'
+        description: The principal.
+      signingKey:
+        description: The derived key.
+        type: string
+    required:
+    - signingKey
+    - principal
+  EntityStatus:
+    properties:
+      inactiveBitMask:
+        description: 'A bit mask showing the reason why the entity is inactive:
+
+          - bit 0: ACTIVE
+
+          - bit 1: SUSPENDED
+
+          - bit 2: DISABLED
+
+          - bit 3: BLOCKED
+
+          - bit 4: LOCKED
+
+          '
+        format: int64
+        type: integer
+      status:
+        description: The entity status.
+        type: string
+    required:
+    - status
+    - inactiveBitMask
+  Error:
+    properties:
+      code:
+        description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+          [API Errors](/Content/API/References/apierrors.htm).
+
+          '
+        type: string
+      message:
+        description: A human-readable error string.
+        type: string
+    required:
+    - code
+    - message
+  FilterGroupMembershipDetails:
+    properties:
+      groupIds:
+        description: An array of group or dynamic group Ids the resolved principal potentially belongs
+          to.
+        items:
+          type: string
+        minItems: 1
+        type: array
+        uniqueItems: true
+      principal:
+        $ref: '#/definitions/Principal'
+        description: A resolved principal object
+    required:
+    - principal
+    - groupIds
+  FilterGroupMembershipResult:
+    properties:
+      groupIds:
+        description: An array of group or dynamic group Ids which present the intersection between the
+          passed-in group/dynamic-group and the actual group/dynamic-group the resovled principal belongs
+          to.
+        items:
+          type: string
+        type: array
+      principal:
+        $ref: '#/definitions/Principal'
+        description: Return passed-in resolved principal object
+    required:
+    - principal
+    - groupIds
+  GenerateScopedAccessTokenDetails:
+    properties:
+      publicKey:
+        description: 'A temporary public key, owned by the service. The service also owns the corresponding
+          private key. This public
+
+          key will be put inside the security token by the auth service after successful validation of
+          the certificate.
+
+          '
+        type: string
+      scope:
+        description: 'Scope definition for the scoped access token
+
+          '
+        type: string
+        x-example: urn:oracle:db::id::<compartment-id>
+    required:
+    - scope
+    - publicKey
+  GenerateUserSecurityTokenDetails:
+    description: Request parameters in body for obtaining a user principal session token (UPST) for self.
+    properties:
+      publicKey:
+        description: 'The user-owned public key in PEM format that corresponds to the RSA key pair used
+          for signing requests.
+
+          The user also owns the corresponding private key. This public key will be put inside the user
+
+          security token by the auth service after successful validation of the request.
+
+          '
+        type: string
+      sessionExpirationInMinutes:
+        description: 'User session expiration in minutes to which the requested user principal session
+          token (UPST) is bounded.
+
+          Valid values are from 5 to 60 for all realms.
+
+          '
+        maximum: 60
+        minimum: 5
+        type: integer
+    required:
+    - publicKey
+  IdentityProvider:
+    properties:
+      authnContextClassRefs:
+        description: Authentication context class refs.
+        items:
+          type: string
+        type: array
+      forceAuthentication:
+        description: Whether to force authentication.
+        type: boolean
+      id:
+        description: The id of the provider.
+        type: string
+      name:
+        description: The name of the provider.
+        type: string
+      protocol:
+        description: The type of the provider.
+        enum:
+        - SAML2
+        type: string
+      redirectUri:
+        description: The SAML endpoint where user will be redirected.
+        type: string
+      serviceProviderEntityId:
+        description: The id of the service provider entity.
+        type: string
+      signingCertificate:
+        description: The signing certificate of the provider.
+        type: string
+      tenantId:
+        description: The id of the tenant.
+        type: string
+      tenantName:
+        description: The name of the tenant.
+        type: string
+    required:
+    - id
+    - name
+    - tenantName
+    - tenantId
+    - redirectUri
+    - signingCertificate
+    - protocol
+    - serviceProviderEntityId
+    - forceAuthentication
+    - authnContextClassRefs
+  JWK:
+    properties:
+      alg:
+        description: The algorithm.
+        type: string
+      e:
+        description: The exponent.
+        type: string
+      kid:
+        description: The key id.
+        type: string
+      kty:
+        description: The key type.
+        type: string
+      n:
+        description: The modulus.
+        type: string
+      use:
+        description: The key use.
+        type: string
+    required:
+    - n
+    - e
+    - kid
+    - use
+    - alg
+    - kty
+  OnBehalfOfRequest:
+    properties:
+      expiration:
+        description: A duration for which the obo token is requested to be valid.
+        type: string
+      oboToken:
+        description: If you have an obo token already, exchange that for a new obo token.
+        type: string
+      requestHeaders:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: The signed headers of the customer call.
+        type: object
+      targetServiceName:
+        description: The name of the target service.
+        type: string
+    required:
+    - requestHeaders
+    - targetServiceName
+  PasswordResetAuthenticationRequest:
+    properties:
+      passwordResetToken:
+        description: The password reset token
+        type: string
+      userId:
+        description: The id of the user
+        type: string
+    required:
+    - userId
+    - passwordResetToken
+  Permission:
+    properties:
+      p:
+        description: The name of the permission.
+        type: string
+    required:
+    - p
+  PermissionContext:
+    properties:
+      permission:
+        $ref: '#/definitions/Permission'
+        description: The permission context.
+      variables:
+        description: The set of variables in this permission context.
+        items:
+          $ref: '#/definitions/ContextVariable'
+        type: array
+    required:
+    - permission
+    - variables
+  Principal:
+    properties:
+      claims:
+        description: The set of claims for this principal.
+        items:
+          $ref: '#/definitions/Claim'
+        type: array
+      subjectId:
+        description: The user's OCID.
+        type: string
+      tenantId:
+        description: The tenancy OCID.
+        type: string
+    required:
+    - subjectId
+    - tenantId
+    - claims
+  RefreshRequest:
+    properties:
+      currentToken:
+        description: The current security token that is to be renewed.
+        type: string
+      newPublicKey:
+        description: An optional new public for the new token. If not supplied, currentToken's public
+          key will be used.
+        type: string
+    required:
+    - currentToken
+  ResourcePrincipalSessionTokenRequest:
+    properties:
+      resourcePrincipalToken:
+        description: The resource principal token.
+        type: string
+      servicePrincipalSessionToken:
+        description: The service principal session token.
+        type: string
+      sessionPublicKey:
+        description: The session public key.
+        type: string
+    required:
+    - resourcePrincipalToken
+    - servicePrincipalSessionToken
+    - sessionPublicKey
+  SecurityToken:
+    properties:
+      token:
+        description: The security token, signed by auth service
+        type: string
+    required:
+    - token
+  Tenant:
+    properties:
+      id:
+        description: The tenant's Oracle ID (OCID).
+        type: string
+      name:
+        description: The name of the tenancy.
+        type: string
+      serviceNamespace:
+        description: The service namespace.
+        type: string
+    required:
+    - id
+    - name
+  TenantNotFoundAuthenticateUserResult:
+    properties:
+      tenantInput:
+        description: The tenant name.
+        type: string
+      userInput:
+        description: The user name.
+        type: string
+    required:
+    - tenantInput
+    - userInput
+  ThickAuthorizationResponse:
+    properties:
+      flushAllCaches:
+        description: If set to true, the SDK should clear the caches.
+        type: boolean
+      groupMembershipCacheDuration:
+        description: 'The duration of how long the user''s group membership should be cached. Note that
+          the type is of type
+
+          java.time.Duration, not string.
+
+          '
+        type: string
+      groups:
+        description: The policy string related to the request.
+        items:
+          type: string
+        type: array
+      policy:
+        description: The policy string related to the request
+        type: string
+      policyCacheDuration:
+        description: 'The duration of how long this policy should be cached. Note that the type is of
+          type java.time.Duration, not
+
+          string.
+
+          '
+        type: string
+    required:
+    - policy
+    - policyCacheDuration
+    - groups
+    - groupMembershipCacheDuration
+  ThinAssociationAuthorizationResponse:
+    properties:
+      associationResult:
+        description: The association verification result.
+        enum:
+        - FAIL_UNKNOWN
+        - FAIL_BAD_REQUEST
+        - FAIL_MISSING_ENDORSE
+        - FAIL_MISSING_ADMIT
+        - SUCCESS
+        type: string
+      decisionCacheDuration:
+        description: The decision cache duration.
+        type: string
+      responses:
+        description: The authorization responses.
+        items:
+          $ref: '#/definitions/ThinAuthorizationResponse'
+        type: array
+    required:
+    - responses
+    - associationResult
+  ThinAuthorizationResponse:
+    properties:
+      authorizationRequest:
+        $ref: '#/definitions/AuthorizationRequest'
+        description: The policy string related to the request.
+      decisionCacheDuration:
+        description: 'The duration of how long this decision should be cached. Note that the type is of
+          type java.time.Duration, not
+
+          string.
+
+          '
+        type: string
+    required:
+    - authorizationRequest
+    - decisionCacheDuration
+  User:
+    properties:
+      id:
+        description: The user's Oracle ID (OCID).
+        type: string
+      isMfaActivated:
+        description: If mfa is activated.
+        type: boolean
+      isMfaVerified:
+        description: If the user has been mfa verified.
+        type: boolean
+      isOTP:
+        description: If the provided password is a one-time password.
+        type: boolean
+      name:
+        description: The name of the user.
+        type: string
+    required:
+    - id
+    - name
+    - isOTP
+    - isMfaActivated
+    - isMfaVerified
+  UserNotFoundAuthenticateUserResult:
+    properties:
+      resolvedTenantId:
+        description: The resolved tenant id.
+        type: string
+      tenantInput:
+        description: The tenant name.
+        type: string
+      userInput:
+        description: The user name.
+        type: string
+    required:
+    - tenantInput
+    - userInput
+    - resolvedTenantId
+  ValidAuthenticateUserResult:
+    properties:
+      resolvedPrincipal:
+        $ref: '#/definitions/AuthenticationPrincipal'
+        description: The resolved principal.
+      tenantInput:
+        description: The tenant name.
+        type: string
+      userInput:
+        description: The user name.
+        type: string
+    required:
+    - tenantInput
+    - userInput
+    - resolvedPrincipal
+  X509FederationRequest:
+    properties:
+      certificate:
+        description: The x509 certificate of the service instance, issued by his CA.
+        type: string
+      intermediateCertificates:
+        description: 'An array of intermediate certificates to form the chain from the leaf certificate
+          to the root CA. If auth
+
+          service already has the intermediate certificate(s), then this is not required.
+
+          '
+        items:
+          type: string
+        type: array
+      publicKey:
+        description: 'A temporary public key, owned by the service. The service also owns the corresponding
+          private key. This public
+
+          key will be put inside the security token by the auth service after successful validation of
+          the certificate.
+
+          '
+        type: string
+    required:
+    - certificate
+    - publicKey
+parameters:
+  AvailabilityDomainQueryParam:
+    description: 'The name of the physical availability domain.
+
+      '
+    in: query
+    name: availabilityDomain
+    type: string
+  CompartmentIdPathParam:
+    description: 'The id of the compartment.
+
+      '
+    in: path
+    name: compartmentId
+    required: true
+    type: string
+  CompartmentIdQueryParam:
+    description: 'The id of the compartment.
+
+      '
+    in: query
+    name: compartmentId
+    type: string
+  DatePathParam:
+    description: 'The date in YYYYMMDD format.
+
+      '
+    in: path
+    name: date
+    required: true
+    type: string
+  FingerprintPathParam:
+    description: 'The fingerprint of the user API public key.
+
+      '
+    in: path
+    name: fingerprint
+    required: true
+    type: string
+  GetTenantNamePathParam:
+    description: 'The name of the tenant.
+
+      '
+    in: path
+    name: name
+    required: true
+    type: string
+  GrantTypeFormParam:
+    description: 'The type of grant (See RFC6749 Access Token Request).
+
+      '
+    in: formData
+    name: grant_type
+    required: true
+    type: string
+  IncludeExtendedPropertiesQueryParam:
+    description: 'Whether to include the extended properties in the response.
+
+      '
+    in: query
+    name: includeExtendedProperties
+    type: boolean
+  KeyIDPathParam:
+    description: 'The key id.
+
+      '
+    in: path
+    name: keyID
+    required: true
+    type: string
+  KeyIdPathParam:
+    description: The key id. Only supported value is 'asw'.
+    in: path
+    name: keyId
+    required: true
+    type: string
+  ModeQueryParam:
+    description: 'The mode of authentication. If null/empty, the UI login credential will be used to authenticate
+      the user. If
+
+      mode=swift, Swift credentials will be used to authenticate the user.
+
+      '
+    in: query
+    name: mode
+    type: string
+  NameQueryParam:
+    description: 'The value of the name.
+
+      '
+    in: query
+    name: name
+    type: string
+  OpcRequestIdHeaderParam:
+    description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+      a
+
+      particular request, please provide the request ID.
+
+      '
+    in: header
+    name: opc-request-id
+    required: false
+    type: string
+  ProtocolQueryParam:
+    description: 'The type of the identity provider.
+
+      '
+    in: query
+    name: protocol
+    type: string
+  ProviderNameQueryParam:
+    description: 'The name of the identity provider
+
+      '
+    in: query
+    name: providerName
+    type: string
+  RegionPathParam:
+    description: 'The region for which the key is being used.
+
+      '
+    in: path
+    name: region
+    required: true
+    type: string
+  RelayStateFormParam:
+    description: 'The relay state.
+
+      '
+    in: formData
+    name: relayState
+    type: string
+  SAMLResponseFormParam:
+    description: 'The SAML token in deflate encoding format
+
+      '
+    in: formData
+    name: samlResponse
+    required: true
+    type: string
+  ScopeFormParam:
+    description: 'The requested scope.
+
+      '
+    in: formData
+    name: scope
+    required: true
+    type: string
+  ServiceNamePathParam:
+    description: 'The name of the service.
+
+      '
+    in: path
+    name: serviceName
+    required: true
+    type: string
+  TenantIdPathParam:
+    description: 'The id of the tenant.
+
+      '
+    in: path
+    name: tenantId
+    required: true
+    type: string
+  TenantNamePathParam:
+    description: 'The name of the tenant.
+
+      '
+    in: path
+    name: tenantName
+    required: true
+    type: string
+  UserIdPathParam:
+    description: 'The user ocid.
+
+      '
+    in: path
+    name: userId
+    required: true
+    type: string
+responses:
+  Error:
+    description: 'An error has occurred. The `opc-request-id` response header contains the request ID.
+
+      '
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about
+
+          a particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  400:
+    description: Bad Request
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a
+
+          particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  401:
+    description: Unauthorized
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a
+
+          particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  403:
+    description: Forbidden
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a
+
+          particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  404:
+    description: Not Found
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a
+
+          particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  429:
+    description: Too Many Requests
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a
+
+          particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: Internal Server Error
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a
+
+          particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'

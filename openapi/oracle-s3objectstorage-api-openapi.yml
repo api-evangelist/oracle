@@ -1,0 +1,816 @@
+openapi: 3.2.0
+info:
+  description: 'Amazon S3 Compatibility API supported by the Oracle Cloud Infrastructure Object Storage Service.
+
+
+    See [Understanding Object Storage Namespaces](/Content/Object/Tasks/understandingnamespaces.htm) for information about Object Storage namespaces and how to get your namespace string.
+
+    '
+  license:
+    name: Oracle Corporation
+  title: Amazon S3 Compatibility S3 Object Storage API
+  version: '20160918'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/9e2da9aadeefd1443d7c5b128aaa328b373918e6b46cc11aa15a86db6ec8107b.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Amazon S3 Compatibility API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/9e2da9aadeefd1443d7c5b128aaa328b373918e6b46cc11aa15a86db6ec8107b.yaml
+    what: the harvested document for Amazon S3 Compatibility API
+servers:
+- url: https://localhost:9060/
+tags:
+- name: s3ObjectStorage
+paths:
+  /:
+    get:
+      description: 'Lists all buckets owned by the authenticated sender of the request.
+
+        '
+      operationId: GetService
+      parameters:
+      - $ref: '#/components/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: A list of all of the buckets owned by the authenticated sender of the request.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ListAllMyBuckets'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthenticated'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        408:
+          $ref: '#/components/responses/RequestTimeout'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: GET Service (List Buckets)
+      tags:
+      - s3ObjectStorage
+      x-example: 'GET / HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:42:15 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+  /{bucketName}:
+    delete:
+      description: 'Deletes a bucket. All objects in the bucket must be deleted before the bucket itself can be deleted.
+
+        '
+      operationId: DeleteBucket
+      parameters:
+      - $ref: '#/components/parameters/BucketPathParam'
+      - $ref: '#/components/parameters/OptionalDateTimeHeader'
+      responses:
+        204:
+          description: The response body is always empty.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/components/responses/RequestTimeout'
+        409:
+          $ref: '#/components/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: DELETE Bucket
+      tags:
+      - s3ObjectStorage
+      x-example: 'DELETE /example_bucket HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+    get:
+      description: 'Lists up to 1000 objects in the specified bucket.
+
+        '
+      operationId: ListObjects
+      parameters:
+      - $ref: '#/components/parameters/BucketPathParam'
+      - $ref: '#/components/parameters/DelimiterQueryParam'
+      - $ref: '#/components/parameters/EncodingTypeQueryParam'
+      - $ref: '#/components/parameters/MaxKeysQueryParam'
+      - $ref: '#/components/parameters/PrefixQueryParam'
+      - $ref: '#/components/parameters/ContinuationTokenQueryParam'
+      - $ref: '#/components/parameters/StartAfterQueryParam'
+      - $ref: '#/components/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: A list of objects in the bucket.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ListBucket'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/components/responses/RequestTimeout'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: GET Bucket (List Objects)
+      tags:
+      - s3ObjectStorage
+      x-example: 'GET /example_bucket HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+    head:
+      description: 'Checks to see if a bucket exists and that the requester has permission to access it.
+
+        '
+      operationId: HeadBucket
+      parameters:
+      - $ref: '#/components/parameters/BucketPathParam'
+      - $ref: '#/components/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: The bucket exists and access is authorized.
+          headers:
+            ETag:
+              description: The current entity tag for the bucket.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/components/responses/RequestTimeout'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: HEAD Bucket
+      tags:
+      - s3ObjectStorage
+      x-example: 'HEAD /example_bucket HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        Connection: Keep-Alive
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+    put:
+      description: 'Creates a new bucket.
+
+        '
+      operationId: PutBucket
+      parameters:
+      - $ref: '#/components/parameters/BucketPathParam'
+      - $ref: '#/components/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: The bucket was successfully created.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/components/responses/RequestTimeout'
+        409:
+          $ref: '#/components/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: PUT Bucket (Create Bucket)
+      tags:
+      - s3ObjectStorage
+      x-example: 'PUT /example_bucket HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Content-Length: 0
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+  /{bucketName}?tagging:
+    delete:
+      description: 'Delete the tags from a bucket.
+
+        '
+      operationId: DeleteBucketTagging
+      parameters:
+      - $ref: '#/components/parameters/BucketPathParam'
+      - $ref: '#/components/parameters/OptionalDateTimeHeader'
+      responses:
+        204:
+          description: The response body is always empty.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/components/responses/RequestTimeout'
+        409:
+          $ref: '#/components/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: DeleteBucketTagging
+      tags:
+      - s3ObjectStorage
+      x-example: 'DELETE /example_bucket?tagging HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Tagging'
+    get:
+      description: 'Gets the list of tags for a bucket.
+
+        '
+      operationId: GetBucketTagging
+      parameters:
+      - $ref: '#/components/parameters/BucketPathParam'
+      - $ref: '#/components/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: List of tags for a given bucket.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Tagging'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/components/responses/RequestTimeout'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: GetBucketTagging
+      tags:
+      - s3ObjectStorage
+      x-example: 'GET /example_bucket?tagging HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Tagging'
+    put:
+      description: 'Add tags to a bucket.
+
+        '
+      operationId: PutBucketTagging
+      parameters:
+      - $ref: '#/components/parameters/BucketPathParam'
+      - $ref: '#/components/parameters/OptionalDateTimeHeader'
+      responses:
+        204:
+          description: The tags were successfully added to the bucket.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/components/responses/RequestTimeout'
+        409:
+          $ref: '#/components/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: PutBucketTagging
+      tags:
+      - s3ObjectStorage
+      x-example: 'PUT /example_bucket?tagging HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Content-Length: 1660
+
+        x-amz-date: Thu, 12 Apr 2012 20:04:21 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-example-literal: "<Tagging>\n  <TagSet>\n    <Tag>\n      <Key>Project</Key>\n      <Value>ProjectX</Value>\n    </Tag>\n    <Tag>\n      <Key>User</Key>\n      <Value>jdoe</Value>\n    </Tag>\n  </TagSet>\n</Tagging>\n"
+      x-related-resource: '#/definitions/Tagging'
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Tagging'
+        description: Adds tags to the given bucket.
+        required: true
+components:
+  responses:
+    NotAuthorizedOrInternalConflict:
+      description: Conflict
+      headers:
+        opc-request-id:
+          description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      headers:
+        opc-request-id:
+          description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RequestTimeout:
+      description: Request Timeout
+      headers:
+        opc-request-id:
+          description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal Server Error
+      headers:
+        opc-request-id:
+          description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotAuthenticated:
+      description: Unauthorized
+      headers:
+        opc-request-id:
+          description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad Request
+      headers:
+        opc-request-id:
+          description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotAuthorizedOrNotFound:
+      description: Not Found
+      headers:
+        opc-request-id:
+          description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error:
+      description: A description of an error that occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+            request, provide this request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    BucketPathParam:
+      description: 'The name of the bucket. Avoid entering confidential information.
+
+
+        Example: `my-new-bucket1`
+
+        '
+      in: path
+      name: bucketName
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        pattern: '[A-Za-z0-9\\-_\\.]+'
+    ContinuationTokenQueryParam:
+      description: The token at which to start listing the next set of results when the previous response is truncated.
+      in: query
+      name: continuation-token
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    OptionalDateTimeHeader:
+      description: The current date and time according to the requester. Takes precedence over the Date header.
+      in: header
+      name: x-amz-date
+      schema:
+        type: string
+        format: date-time
+    EncodingTypeQueryParam:
+      description: 'When this parameter is set, the response is encoded with the specified encoding method. This
+
+        can be used for object keys containing characters that XML 1.0 parsers cannot parse.
+
+        '
+      in: query
+      name: encoding-type
+      schema:
+        type: string
+    StartAfterQueryParam:
+      description: Object keys returned by a list query must be after this parameter in lexicographical order.
+      in: query
+      name: start-after
+      schema:
+        type: string
+    MaxKeysQueryParam:
+      description: The maximum number of keys to return in the response body.
+      in: query
+      name: max-keys
+      schema:
+        type: integer
+        maximum: 1000
+        minimum: 1
+    DelimiterQueryParam:
+      description: 'When this parameter is set, only objects whose names do not contain the delimiter character
+
+        (after an optionally specified prefix) are returned. Scanned objects whose names contain the
+
+        delimiter have part of their name up to the last occurrence of the delimiter (after the optional
+
+        prefix) returned as a set of prefixes. Note that only ''/'' is a supported delimiter character at
+
+        this time.
+
+        '
+      in: query
+      name: delimiter
+      schema:
+        type: string
+    PrefixQueryParam:
+      description: The string to use for matching against the start of keys in a list query.
+      in: query
+      name: prefix
+      schema:
+        type: string
+  schemas:
+    Error:
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    Owner:
+      description: Container for information about the bucket owner.
+      properties:
+        displayName:
+          description: Bucket owner's display name.
+          type: string
+          xml:
+            name: DisplayName
+        id:
+          description: Bucket owner's user ID.
+          type: string
+          xml:
+            name: ID
+      required:
+      - id
+      - displayName
+    Tagging:
+      description: Container for one TagSet.
+      items:
+        $ref: '#/components/schemas/TagSet'
+      type: array
+    CommonPrefixes:
+      description: Contains a key (if it exists) between Prefix and the next occurrence of the delimiter.
+      properties:
+        prefix:
+          description: A substring from the beginning to the first occurrence of the specified delimiter after the prefix.
+          type: string
+          xml:
+            name: Prefix
+      required:
+      - prefix
+    ListBucket:
+      description: 'To use any of the API operations, you must be authorized in an IAM policy. If you''re not authorized,
+
+        talk to an administrator. If you''re an administrator who needs to write policies to give users access, see
+
+        [Getting Started with Policies](/Content/Identity/Concepts/policygetstarted.htm).
+
+        '
+      properties:
+        commonPrefixes:
+          description: Contains all (existing) keys between Prefix and the next occurrence of the delimiter.
+          items:
+            $ref: '#/components/schemas/CommonPrefixes'
+          type: array
+        contents:
+          description: Metadata returned for each object.
+          items:
+            $ref: '#/components/schemas/Contents'
+          type: array
+        continuationToken:
+          description: Included in the response if it was sent with the request.
+          type: string
+          xml:
+            name: ContinuationToken
+        delimiter:
+          description: Included in the response if it was sent with the request.
+          type: string
+          xml:
+            name: Delimiter
+        isTruncated:
+          description: Specifies whether or not all of the results are returned.
+          type: boolean
+          xml:
+            name: IsTruncated
+        keyCount:
+          description: The number of keys included in the response.
+          type: integer
+          xml:
+            name: KeyCount
+        maxKeys:
+          description: The maximum number of keys included in the response body.
+          type: integer
+          xml:
+            name: MaxKeys
+        name:
+          description: Name of the bucket. Avoid entering confidential information.
+          type: string
+          xml:
+            name: Name
+        nextContinuationToken:
+          description: If the response is truncated, this can be used in the next request to retrieve the next set of keys.
+          type: string
+          xml:
+            name: NextContinuationToken
+        prefix:
+          description: The specified prefix that returned keys should start with.
+          type: string
+          xml:
+            name: Prefix
+        startAfter:
+          description: Included in the response if it was sent with the request.
+          type: string
+          xml:
+            name: StartAfter
+      required:
+      - name
+      - keyCount
+      - maxKeys
+      - isTruncated
+      - contents
+    TagSet:
+      description: Container for a list of tags.
+      items:
+        $ref: '#/components/schemas/Tag'
+      type: array
+    ListAllMyBuckets:
+      description: 'To use any of the API operations, you must be authorized in an IAM policy. If you''re not authorized,
+
+        talk to an administrator. If you''re an administrator who needs to write policies to give users access, see
+
+        [Getting Started with Policies](/Content/Identity/Concepts/policygetstarted.htm).
+
+        '
+      properties:
+        buckets:
+          $ref: '#/components/schemas/Buckets'
+        owner:
+          $ref: '#/components/schemas/Owner'
+      required:
+      - owner
+      - buckets
+    Bucket:
+      description: Container for bucket information.
+      properties:
+        creationDate:
+          description: Date the bucket was created.
+          format: date-time
+          type: string
+          xml:
+            name: CreationDate
+        name:
+          description: The bucket name. Avoid entering confidential information.
+          type: string
+          xml:
+            name: Name
+      required:
+      - name
+      - creationDate
+    Tag:
+      description: Container of key-value pair of a tag.
+      properties:
+        key:
+          description: The key of a tag.
+          type: string
+          xml:
+            name: Key
+        value:
+          description: The value of a tag.
+          type: string
+          xml:
+            name: Value
+      required:
+      - key
+      - value
+    Contents:
+      description: Object metadata returned.
+      properties:
+        eTag:
+          description: The entity tag, an MD5 hash of the object.
+          type: string
+          xml:
+            name: ETag
+        key:
+          description: The object's key.
+          type: string
+          xml:
+            name: Key
+        lastModified:
+          description: Date and time the object was last modified.
+          format: date-time
+          type: string
+          xml:
+            name: LastModified
+        size:
+          description: Size, in bytes, of the object.
+          type: integer
+          xml:
+            name: Size
+        storageClass:
+          description: Storage class of the object.
+          enum:
+          - STANDARD
+          - STANDARD_IA
+          - GLACIER
+          type: string
+          xml:
+            name: StorageClass
+      required:
+      - key
+      - lastModified
+      - eTag
+      - size
+      - storageClass
+    Buckets:
+      description: Container for one or more buckets.
+      items:
+        $ref: '#/components/schemas/Bucket'
+      type: array

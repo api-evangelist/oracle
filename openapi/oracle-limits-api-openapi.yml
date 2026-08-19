@@ -1,0 +1,1034 @@
+openapi: 3.2.0
+info:
+  description: APIs that interact with the resource limits of a specific resource type.
+  license:
+    name: Oracle Corporation
+  title: Service Limits API
+  version: '20181025'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/f53888752d8587dafc869a8e72064cc4c2534d0a7c7effd93169f88bfc49904d.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Service Limits APIs OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/f53888752d8587dafc869a8e72064cc4c2534d0a7c7effd93169f88bfc49904d.yaml
+    what: the harvested document for Service Limits APIs
+servers:
+- url: http://localhost:9090/
+tags:
+- name: limits
+paths:
+  /20190729/limitDefinitions:
+    get:
+      description: 'Includes a list of resource limits that are currently supported.
+
+        If the subscription ID is provided, then only resource limits supported by the subscription will be returned.
+
+        If the `areQuotasSupported` property is true, you can create quota policies on top of this limit at the compartment level.
+
+        '
+      operationId: ListLimitDefinitions
+      parameters:
+      - $ref: '#/components/parameters/RootCompartmentIdQueryParam'
+      - $ref: '#/components/parameters/SubscriptionIdQueryParam'
+      - description: The target service name.
+        in: query
+        name: serviceName
+        required: false
+        x-default-description: If not present, returns all definitions for all services.
+        schema:
+          type: string
+      - description: Optional field, filter for a specific resource limit.
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+      - $ref: '#/components/parameters/SortByForDefinitionsQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitForServiceLimitsQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        400:
+          description: A bad request was made or the request is not supported for the current tenant.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: User authentication has failed.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Not authorized or not found.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        429:
+          description: You have issued too many requests to the Oracle Cloud Infrastructure APIs in too short of an amount of time.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Internal server error.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: An error has occurred.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        200:
+          description: The list of definitions has been successfully loaded, sorted alphabetically by the description field.
+          headers:
+            opc-next-page:
+              description: 'For list pagination. When this header appears in the response, additional pages
+
+                of results remain. For important details about how pagination works, see
+
+                [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/LimitDefinitionSummary'
+                type: array
+      summary: Get the list of resource limits for a service.
+      tags:
+      - limits
+      x-obmcs-client-retries-enabled: true
+  /20190729/limitValues:
+    get:
+      description: 'Includes a full list of resource limits belonging to a given service.
+
+        If the subscription ID is provided, the limit value for the subscription will be returned.
+
+        '
+      operationId: ListLimitValues
+      parameters:
+      - $ref: '#/components/parameters/RootCompartmentIdQueryParam'
+      - $ref: '#/components/parameters/SubscriptionIdQueryParam'
+      - $ref: '#/components/parameters/ExternalLocationQueryParam'
+      - description: The target service name.
+        in: query
+        name: serviceName
+        required: true
+        schema:
+          type: string
+      - description: Filter entries by scope type.
+        in: query
+        name: scopeType
+        required: false
+        x-default-description: By default, returns values for all scope types.
+        schema:
+          type: string
+          enum:
+          - GLOBAL
+          - REGION
+          - AD
+      - description: 'Filter entries by availability domain. This implies that only AD-specific values are returned.
+
+          '
+        in: query
+        name: availabilityDomain
+        required: false
+        x-default-description: 'By default, returns all values across all ADs, if the values are AD-specific.
+
+          '
+        schema:
+          type: string
+      - description: Optional field, can be used to see a specific resource limit value.
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+      - $ref: '#/components/parameters/SortByForLimitValuesQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitForServiceLimitsQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        400:
+          description: A bad request was made or the request is not supported for the current tenant.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: User authentication has failed.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Not authorized or not found.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        429:
+          description: You have issued too many requests to the Oracle Cloud Infrastructure APIs in too short of an amount of time.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Internal server error.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: An error has occurred.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        200:
+          description: The list of resource limits, ordered alphabetically by description.
+          headers:
+            opc-next-page:
+              description: 'For list pagination. When this header appears in the response, additional pages
+
+                of results remain. For important details about how pagination works, see
+
+                [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/LimitValueSummary'
+                type: array
+      summary: Get the full list of resource limit values for the given service.
+      tags:
+      - limits
+      x-obmcs-client-retries-enabled: true
+  /20190729/services:
+    get:
+      description: 'Returns the list of supported services. If subscription ID is provided then only services supported by subscription will be returned.
+
+        This includes the programmatic service name, along with the friendly service name.
+
+        '
+      operationId: ListServices
+      parameters:
+      - $ref: '#/components/parameters/RootCompartmentIdQueryParam'
+      - $ref: '#/components/parameters/SortByForServicesQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitForServiceLimitsQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/SubscriptionIdQueryParam'
+      responses:
+        400:
+          description: A bad request was made or the request is not supported for the current tenant.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: User authentication has failed.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Not authorized or not found.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        429:
+          description: You have issued too many requests to the Oracle Cloud Infrastructure APIs in too short of an amount of time.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Internal server error.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: An error has occurred.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        200:
+          description: Returns the list of services, sorted alphabetically.
+          headers:
+            opc-next-page:
+              description: 'For list pagination. When this header appears in the response, additional pages
+
+                of results remain. For important details about how pagination works, see
+
+                [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ServiceSummary'
+                type: array
+      summary: Returns the list of supported services that have resource limits exposed.
+      tags:
+      - limits
+      x-obmcs-client-retries-enabled: true
+  /20190729/services/{serviceName}/limits/{limitName}/resourceAvailability:
+    get:
+      description: "For a given compartmentId, resource limit name, and scope, returns the following:\n  * The number of available resources associated with the given limit.\n  * The usage in the selected compartment for the given limit.\nIf the subscription ID is provided, then usage for resource created in that subscription will be returned.\nNote that not all resource limits support this API. If the value is not available, the API returns a 404 response.\n"
+      operationId: GetResourceAvailability
+      parameters:
+      - description: The service name of the target quota.
+        in: path
+        name: serviceName
+        required: true
+        schema:
+          type: string
+      - description: The limit name for which to fetch the data.
+        in: path
+        name: limitName
+        required: true
+        schema:
+          type: string
+      - description: The OCID of the compartment for which data is being fetched.
+        in: query
+        name: compartmentId
+        required: true
+        schema:
+          type: string
+      - description: 'This field is mandatory if the scopeType of the target resource limit is AD.
+
+          Otherwise, this field should be omitted.
+
+          If the above requirements are not met, the API returns a 400 - InvalidParameter response.
+
+          '
+        in: query
+        name: availabilityDomain
+        required: false
+        x-default-description: 'Ignored if the scope type of the target limit is not AD.
+
+          Otherwise, this field is mandatory and should represent the target availability domain.
+
+          '
+        schema:
+          type: string
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/SubscriptionIdQueryParam'
+      - $ref: '#/components/parameters/ExternalLocationQueryParam'
+      responses:
+        400:
+          description: A bad request was made or the request is not supported for the current tenant.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        401:
+          description: User authentication has failed.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Not authorized or not found.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        429:
+          description: You have issued too many requests to the Oracle Cloud Infrastructure APIs in too short of an amount of time.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Internal server error.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: An error has occurred.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        200:
+          description: Successfully retrieved the result for the given quota.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceAvailability'
+      summary: 'Get the availability and usage within a compartment for a given resource limit.
+
+        '
+      tags:
+      - limits
+      x-obmcs-client-retries-enabled: true
+components:
+  parameters:
+    SortByForLimitValuesQueryParam:
+      description: 'The field to sort by. The sorting is by availabilityDomain, as a second level field, if available.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - name
+        default: name
+    SortByForDefinitionsQueryParam:
+      description: 'The field to sort by.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - name
+        - description
+        default: name
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` response header from the previous "List" call.
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        default: 0
+        maxLength: 512
+        minLength: 1
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationLimitForServiceLimitsQueryParam:
+      description: 'The maximum number of items to return in a paginated "List" call.
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    RootCompartmentIdQueryParam:
+      description: 'The OCID of the parent compartment (remember that the tenancy is simply the root compartment).
+
+        '
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 1
+    SortByForServicesQueryParam:
+      description: 'The field to sort by.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - name
+        - description
+        default: name
+    ExternalLocationQueryParam:
+      description: 'The external cloud provider location.
+
+        '
+      in: query
+      name: externalLocation
+      required: false
+      x-default-description: 'Defaults to null.
+
+        '
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 1
+    SubscriptionIdQueryParam:
+      description: 'The subscription OCID assigned to the tenant.
+
+        '
+      in: query
+      name: subscriptionId
+      required: false
+      x-default-description: 'Defaults to null.
+
+        '
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ''asc'' or ''desc''. By default, it is ascending.
+
+        '
+      in: query
+      name: sortOrder
+      required: false
+      x-obmcs-inline-enum: true
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+  schemas:
+    ResourceAvailability:
+      description: 'The availability of a given resource limit, based on the usage, tenant service limits, and quotas set for the tenancy.
+
+        Note: We cannot guarantee this data for all the limits. In such cases, these fields will be empty.
+
+        '
+      properties:
+        available:
+          description: 'The count of available resources. To support resources with fractional counts,
+
+            the field rounds down to the nearest integer.
+
+            '
+          format: int64
+          type: integer
+        effectiveQuotaValue:
+          description: 'The effective quota value for the given compartment. This field is only present if there is a
+
+            current quota policy affecting the current resource in the target region or availability domain.
+
+            '
+          type: number
+        fractionalAvailability:
+          description: 'The most accurate count of available resources.
+
+            '
+          type: number
+        fractionalUsage:
+          description: 'The current most accurate usage in the given compartment.
+
+            '
+          type: number
+        used:
+          description: 'The current usage in the given compartment. To support resources with fractional counts,
+
+            the field rounds up to the nearest integer.
+
+            '
+          format: int64
+          type: integer
+      type: object
+    LimitDefinitionSummary:
+      description: The metadata specific to a resource limit definition.
+      properties:
+        areQuotasSupported:
+          description: 'If true, quota policies can be created on top of this resource limit.
+
+            '
+          type: boolean
+        description:
+          description: The limit description.
+          type: string
+        externalLocationSupportedSubscriptions:
+          description: 'An array of subscription types that support external cloud provider locations.
+
+            '
+          items:
+            type: string
+          maxItems: 20
+          type: array
+        isDeprecated:
+          description: 'Indicates if the limit has been deprecated.
+
+            '
+          type: boolean
+        isDynamic:
+          description: 'The limit for this resource has a dynamic value that is based on consumption across all OCI services.
+
+            '
+          type: boolean
+        isEligibleForLimitIncrease:
+          description: 'Indicates if the customer can request a limit increase for this resource.
+
+            '
+          type: boolean
+        isResourceAvailabilitySupported:
+          description: 'Reflects whether or not the GetResourceAvailability API is supported for this limit.
+
+            If not, the API returns an empty JSON response.
+
+            '
+          type: boolean
+        name:
+          description: 'The resource limit name. To be used for writing policies (in case of quotas) or other programmatic calls.
+
+            '
+          type: string
+        scopeType:
+          description: 'Reflects the scope of the resource limit, whether Global (across all regions), regional, or availability domain-specific.
+
+            '
+          enum:
+          - GLOBAL
+          - REGION
+          - AD
+          type: string
+        serviceName:
+          description: The service name of the limit.
+          type: string
+        supportedQuotaFamilies:
+          description: 'Supported quota family names for creation of quota policy.
+
+            '
+          items:
+            type: string
+          type: array
+        supportedSubscriptions:
+          description: 'An array of subscription types supported by the limit. For example, the type of subscription, such as SAAS, ERP, or CRM.
+
+            '
+          items:
+            type: string
+          type: array
+      type: object
+    ServiceSummary:
+      description: A specific OCI service supported by resource limits.
+      properties:
+        description:
+          description: The friendly service name.
+          type: string
+        name:
+          description: The service name. Use this when calling other APIs.
+          type: string
+        supportedSubscriptions:
+          description: 'An array of subscription types supported by the service. For example, the type of subscription, such as SAAS, ERP, or CRM.
+
+            '
+          items:
+            type: string
+          type: array
+      type: object
+    Error:
+      description: Generic error object.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    LimitValueSummary:
+      description: The value of a specific resource limit.
+      properties:
+        availabilityDomain:
+          description: If present, the returned value is only specific to this availability domain.
+          type: string
+        name:
+          description: 'The resource limit name. To be used for writing policies (in case of quotas) or other programmatic calls.
+
+            '
+          type: string
+        scopeType:
+          description: 'The scope type of the limit.
+
+            '
+          enum:
+          - GLOBAL
+          - REGION
+          - AD
+          type: string
+        value:
+          description: The resource limit value.
+          format: int64
+          type: integer
+      type: object
+x-anchors:
+  x-headers:
+    etag:
+      description: For optimistic concurrency control. See `if-match`.
+      type: string
+    opc-next-page:
+      description: 'For list pagination. When this header appears in the response, additional pages
+
+        of results remain. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+x-httpStatuses:
+  400:
+    description: A bad request was made or the request is not supported for the current tenant.
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+          Oracle about a particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/components/schemas/Error'
+  401:
+    description: User authentication has failed.
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+          Oracle about a particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/components/schemas/Error'
+  404:
+    description: Not authorized or not found.
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+          Oracle about a particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/components/schemas/Error'
+  429:
+    description: You have issued too many requests to the Oracle Cloud Infrastructure APIs in too short of an amount of time.
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+          Oracle about a particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/components/schemas/Error'
+  500:
+    description: Internal server error.
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+          Oracle about a particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/components/schemas/Error'
+  default:
+    description: An error has occurred.
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+          Oracle about a particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/components/schemas/Error'
+x-oracle-package: com.oracle.oci.quotas

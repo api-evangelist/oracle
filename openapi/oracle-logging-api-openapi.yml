@@ -1,0 +1,255 @@
+openapi: 3.2.0
+info:
+  description: Use the Logging Ingestion API to ingest your application logs. For more information, see [Logging Overview](/iaas/Content/Logging/Concepts/loggingoverview.htm).
+  license:
+    name: Oracle Corporation
+  title: Ingestion Logging API
+  version: '20200831'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/b5e593674a1320aba186c2ad796b0b8bea99c3dc847ba47dfb7246ccb9f4dc81.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Logging Ingestion API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/b5e593674a1320aba186c2ad796b0b8bea99c3dc847ba47dfb7246ccb9f4dc81.yaml
+    what: the harvested document for Logging Ingestion API
+servers:
+- url: https://127.0.0.1/20200831
+tags:
+- name: Logging
+paths:
+  /logs/{logId}/actions/push:
+    post:
+      description: 'This API allows ingesting logs associated with a logId. A success
+
+        response implies the data has been accepted.
+
+        '
+      operationId: PutLogs
+      parameters:
+      - $ref: '#/components/parameters/LogIdPathParam'
+      - description: 'Effective timestamp, for when the agent started processing the log
+
+          segment being sent. An RFC3339-formatted date-time string with milliseconds precision.
+
+          '
+        in: header
+        name: timestamp-opc-agent-processing
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - description: Version of the agent sending the request.
+        in: header
+        name: opc-agent-version
+        required: false
+        x-default-description: 'null'
+        schema:
+          type: string
+          maxLength: 127
+          minLength: 1
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Logs have been successfully accepted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Ingests logs for a logId.
+      tags:
+      - Logging
+      x-related-resource: '#/definitions/LogEntry'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutLogsDetails'
+        description: The logs to emit.
+        required: true
+components:
+  parameters:
+    LogIdPathParam:
+      description: OCID of a log to work with.
+      in: path
+      name: logId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+        a particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+  schemas:
+    LogEntryBatch:
+      description: A single batch of Log Entries.
+      properties:
+        defaultlogentrytime:
+          description: 'The timestamp for all log entries in this batch. This can be
+
+            considered as the default timestamp for each entry, unless it is
+
+            overwritten by the entry time. An RFC3339-formatted date-time string
+
+            with milliseconds precision.
+
+            '
+          format: date-time
+          type: string
+        entries:
+          description: List of data entries.
+          items:
+            $ref: '#/components/schemas/LogEntry'
+          minItems: 1
+          type: array
+        source:
+          description: 'Source of the logs that generated the message. This could be the
+
+            instance name, hostname, or the source used to read the event. For example, "ServerA".
+
+            '
+          type: string
+        subject:
+          description: 'This optional field is useful for specifying the specific sub-resource
+
+            or input file used to read the event.
+
+            For example: "/var/log/application.log".
+
+            '
+          type: string
+        type:
+          description: 'This field signifies the type of logs being ingested.
+
+            For example: ServerA.requestLogs.
+
+            '
+          type: string
+      required:
+      - source
+      - type
+      - defaultlogentrytime
+      - entries
+      type: object
+    PutLogsDetails:
+      description: The request body for the PutLogs request.
+      properties:
+        logEntryBatches:
+          description: 'List of log-batches. Each batch has a single source, type and subject.
+
+            '
+          items:
+            $ref: '#/components/schemas/LogEntryBatch'
+          minItems: 1
+          type: array
+        specversion:
+          description: 'Required for identifying the version of the data format being used.
+
+            Permitted values include: "1.0"
+
+            '
+          type: string
+      required:
+      - specversion
+      - logEntryBatches
+      type: object
+    LogEntry:
+      description: 'Contains the log content with the associated timestamp and ID. Each
+
+        entry should be less than 1 MB size. Any log data field cannot be more than 10,000 characters. If your data exceeds this limit, the field is truncated during ingestion.
+
+        '
+      properties:
+        data:
+          description: The log entry content.
+          type: string
+        id:
+          description: 'UUID uniquely representing this logEntry. This is not an OCID related
+
+            to any oracle resource.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        time:
+          description: 'Optional. The timestamp associated with the log entry. An RFC3339-formatted date-time string with milliseconds precision.
+
+            If unspecified, defaults to PutLogsDetails.defaultlogentrytime.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - data
+      - id
+      type: object
+    Error:
+      description: An error has occurred.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+  responses:
+    DefaultError:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-anchors:
+  x-headers:
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+x-oracle-package: com.oracle.bmc.logging

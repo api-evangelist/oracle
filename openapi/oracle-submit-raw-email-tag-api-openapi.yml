@@ -1,0 +1,309 @@
+openapi: 3.2.0
+info:
+  description: 'Use the Email Delivery API to send high-volume and application-generated emails.
+
+    For more information, see [Overview of the Email Delivery Service](/iaas/Content/Email/Concepts/overview.htm).
+
+    '
+  license:
+    name: Oracle Corporation
+  title: Email Delivery Submission ${submit Raw Email Tag} ${submit Raw Email Tag} API
+  version: '20220926'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/4e3a56bac2b61ee8cac57b79e304d7ea39b7d9d7a505e3b06e38116ff0b5f8e8.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Email Delivery Submission API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/4e3a56bac2b61ee8cac57b79e304d7ea39b7d9d7a505e3b06e38116ff0b5f8e8.yaml
+    what: the harvested document for Email Delivery Submission API
+servers:
+- url: https://127.0.0.1/20220926
+tags:
+- name: ${submit-raw-email-tag}
+paths:
+  /actions/submitRawEmail:
+    post:
+      description: Submits a raw email.
+      operationId: SubmitRawEmail
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/OptionalContentLengthHeader'
+      - $ref: '#/components/parameters/RequiredContentTypeHeader'
+      - $ref: '#/components/parameters/RequiredCompartmentIdHeader'
+      - $ref: '#/components/parameters/RequiredSenderHeader'
+      - $ref: '#/components/parameters/RequiredRecipientsHeader'
+      responses:
+        '200':
+          description: Email accepted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailRawSubmittedResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '413':
+          $ref: '#/components/responses/413'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: Submits a raw email.
+      tags:
+      - ${submit-raw-email-tag}
+      requestBody:
+        content:
+          message/rfc822:
+            schema:
+              format: binary
+              type: string
+          message/global:
+            schema:
+              format: binary
+              type: string
+        description: This should be formatted in valid MIME format. Message can include attachments. MIME libraries should be used to convert the content into the appropriate format.
+        required: true
+components:
+  parameters:
+    RequiredSenderHeader:
+      description: The envelope and the header from email address, that is sending the email. Email address must be an approved sender.
+      in: header
+      name: sender
+      required: true
+      schema:
+        type: string
+        maxLength: 256
+        minLength: 1
+    RequiredCompartmentIdHeader:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the approved sender resource.
+      in: header
+      name: compartment-id
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RequiredRecipientsHeader:
+      description: "The destination for the email, all recipients including to, cc and bcc addresses. \n"
+      in: header
+      name: recipients
+      required: true
+      schema:
+        type: array
+        items:
+          maxLength: 256
+          minLength: 1
+          type: string
+        maxItems: 50
+        minItems: 1
+    RequiredContentTypeHeader:
+      description: The media type of the body.
+      in: header
+      name: content-type
+      required: true
+      schema:
+        type: string
+        enum:
+        - message/rfc822
+        - message/global
+    RequestIdHeader:
+      description: The request ID for tracing from the system
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    OptionalContentLengthHeader:
+      description: The content length of the body.
+      in: header
+      name: content-length
+      x-default-description: 'null'
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '413':
+      description: The request entity is larger than limits defined by server for your tenancy.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '400':
+      description: Incorrectly formatted request. | Limit exceeded. | Related resource not authorized or not found
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'The required information to complete authentication was not provided or
+
+        was incorrect. Extra detail may be provided in the response body.
+
+        '
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Authorization failed or the requested resource was not found.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too Many Requests
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      description: An error has occurred.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    EmailRawSubmittedResponse:
+      description: Response object that is returned to sender upon successfully submitting the email request.
+      properties:
+        envelopeId:
+          description: Email Delivery generated unique Envelope ID of the email submission. If you need to contact Email Delivery about a particular request, please provide the Envelope ID.
+          maxLength: 100
+          minLength: 1
+          type: string
+        messageId:
+          description: 'The unique ID for the email''s Message-ID header used for service log correlation.
+
+            Example: sdiofu234qwermls24fd@mail.example.com
+
+            '
+          maxLength: 320
+          minLength: 1
+          type: string
+        suppressedRecipients:
+          description: Return list of suppressed email addresses.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 50
+          minItems: 1
+          type: array
+      required:
+      - envelopeId
+      - suppressedRecipients
+      type: object
+x-anchors:
+  x-headers:
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+x-obmcs-client-retries-enabled: true
+x-oracle-package: com.oracle.pic.email

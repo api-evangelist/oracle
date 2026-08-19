@@ -1,0 +1,788 @@
+openapi: 3.2.0
+info:
+  description: Use the Streaming API to produce and consume messages, create streams and stream pools, and manage related items. For more information, see [Streaming](/Content/Streaming/Concepts/streamingoverview.htm).
+  title: Streaming Stream API
+  version: '20180418'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/45f06290ec3f949690d1ae9b8f7d2adeeea531cfb0142678cd2e791be8c625d9.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Streaming API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/45f06290ec3f949690d1ae9b8f7d2adeeea531cfb0142678cd2e791be8c625d9.yaml
+    what: the harvested document for Streaming API
+servers:
+- url: https://streaming.{region}.oci.oraclecloud.com/20180418
+tags:
+- name: stream
+paths:
+  /streams/{streamId}/commit:
+    post:
+      description: 'Provides a mechanism to manually commit offsets, if not using commit-on-get consumer semantics.
+
+        This commits offsets assicated with the provided cursor, extends the timeout on each of the affected partitions, and returns an updated cursor.
+
+        '
+      operationId: ConsumerCommit
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/GroupCursorQueryParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Offsets were committeed successfully.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cursor'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Commits processed offsets to consumer group state.
+      tags:
+      - stream
+      x-related-resource: '#/definitions/Group'
+  /streams/{streamId}/cursors:
+    post:
+      description: 'Creates a cursor. Cursors are used to consume a stream, starting from a specific point in the partition and going forward from there.
+
+        You can create a cursor based on an offset, a time, the trim horizon, or the most recent message in the stream. As the oldest message
+
+        inside the retention period boundary, using the trim horizon effectively lets you consume all messages in the stream. A cursor based
+
+        on the most recent message allows consumption of only messages that are added to the stream after you create the cursor. Cursors expire
+
+        five minutes after you receive them from the service.
+
+        '
+      operationId: CreateCursor
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Created
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cursor'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Creates a cursor for the specified stream. A cursor is used to consume a stream.
+      tags:
+      - stream
+      x-example: "POST /20180418/streams/<var>&lt;streamId&gt;</var>/cursors\nHost: streaming-api.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"partition\": \"0\",\n  \"type\": \"TRIM_HORIZON\"  # Cursor will point to the oldest message in the partition that is within the retention period window.\n}\nOR\n{\n  \"partition\": \"0\",\n  \"type\": \"LATEST\",  # Cursor will point to the most recent message in the partition that was added after the cursor was created\n}\nOR\n{\n  \"partition\": \"0\",\n  \"type\": \"AT_OFFSET\", # Cursor will point to the offset specified in the offset parameter\n  \"offset\": 342334L\n}\nOR\n{\n  \"partition\": \"0\",\n  \"type\": \"AFTER_OFFSET\", # Cursor will point to the position immediately following the offset specified in the offset parameter\n  \"offset\": 34233434L\n}\nOR\n{\n  \"partition\": \"0\",\n  \"type\": \"AT_TIME\", # Cursor will point to the specific point in time\n  \"time\": \"Fri Feb 21 15:36:49 UTC 2042\"\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCursorDetails'
+        description: The information used to create the cursor.
+        required: true
+  /streams/{streamId}/groupCursors:
+    post:
+      description: 'Creates a group-cursor.
+
+        '
+      operationId: CreateGroupCursor
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Created
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cursor'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Creates a group-cursor for the specified stream. A cursor is used to consume a stream.
+      tags:
+      - stream
+      x-related-resource: '#/definitions/Cursor'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupCursorDetails'
+        description: The information used to create the cursor.
+        required: true
+  /streams/{streamId}/groups/{groupName}:
+    get:
+      description: 'Returns the current state of a consumer group.
+
+        '
+      operationId: GetGroup
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - description: The name of the consumer group.
+        in: path
+        name: groupName
+        required: true
+        schema:
+          type: string
+          maxLength: 255
+          minLength: 1
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Group State
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Returns the current state of a consumer group.
+      tags:
+      - stream
+      x-example: "GET /20180418/<var>&lt;streamId&gt;</var>/groups/<var>&lt;groupName&gt;</var>\nHost: streaming.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n\nHTTP/1.1 200 OK\nContent-Length: 276\nContent-Type: application/json\nDate: Mon, 09 Jul 2018 21:19:03 GMT\nopc-request-id: /A8E351184AEE4F026738B89AD2058120/B484F7819E9FE5A487EA3091D2E4G5A9\n{\n    \"group\": {\n        \"groupName\": \"group1\",\n        \"reservations\": [\n            {\n                \"committedOffset\": 20,\n                \"partition\": \"0\",\n                \"reservedInstance\": \"51464135-9edd-4857-909c-fbfbf1c2ca8e\",\n                \"timeReservedUntil\": \"2018-07-09T21:17:44.554Z\"\n            }, {\n                \"committedOffset\": 32,\n                \"partition\": \"1\",\n                \"reservedInstance\": \"51464135-9edd-4857-909c-fbfbfabcdefg\",\n                \"timeReservedUntil\": \"2018-07-09T21:17:44.554Z\"\n            }, {\n                \"committedOffset\": 103,\n                \"partition\": \"2\",\n                \"reservedInstance\": \"51464135-9edd-4857-909c-fbfbf1c2ca8e\",\n                \"timeReservedUntil\": \"2018-07-09T21:17:44.554Z\"\n            }\n        ],\n        \"streamId\": \"ocid1.stream.desktop..aaaaaaaaiegcfiu3pprvc3p4uase4pvaazbspmxfq6ztzu72skwlabcdefga\"\n    }\n}\n"
+    put:
+      description: 'Forcefully changes the current location of a group as a whole; reseting processing location of all consumers to a particular location in the stream.
+
+        '
+      operationId: UpdateGroup
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - description: The name of the consumer group.
+        in: path
+        name: groupName
+        required: true
+        schema:
+          type: string
+          maxLength: 255
+          minLength: 1
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Group details updated.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Forcefully changes the committed location of a group on a stream.
+      tags:
+      - stream
+      x-related-resource: '#/definitions/Group'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupDetails'
+        description: The information used to modify the group.
+        required: true
+  /streams/{streamId}/heartbeat:
+    post:
+      description: 'Allows long-running processes to extend the timeout on partitions reserved by a consumer instance.
+
+        '
+      operationId: ConsumerHeartbeat
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/GroupCursorQueryParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Success
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cursor'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Extends the reservation timeout on partitions reserved by the provided cursor.
+      tags:
+      - stream
+      x-related-resource: '#/definitions/Group'
+  /streams/{streamId}/messages:
+    get:
+      description: 'Returns messages from the specified stream using the specified cursor as the starting point for consumption. By default, the number of messages returned is undefined, but the service returns as many as possible.
+
+        To get messages, you must first obtain a cursor using the [CreateCursor](#/en/streaming/20180418/Cursor/CreateCursor) operation.
+
+        In the response, retrieve the value of the ''opc-next-cursor'' header to pass as a parameter to get the next batch of messages in the stream.
+
+        '
+      operationId: GetMessages
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - description: 'The cursor used to consume the stream.
+
+          '
+        in: query
+        name: cursor
+        required: true
+        schema:
+          type: string
+      - description: 'The maximum number of messages to return. You can specify any value up to 10000. By default, the service returns as many messages as possible.
+
+          Consider your average message size to help avoid exceeding throughput on the stream.
+
+          '
+        in: query
+        name: limit
+        required: false
+        x-default-description: By default, the service will return as much as possible within the preset limit for total bytes transferred per call.
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Success
+          headers:
+            opc-next-cursor:
+              description: The cursor to use to get the next batch of messages.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Message'
+                type: array
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets messages from a stream.
+      tags:
+      - stream
+      x-example: 'GET /20180418/streams/<var>&lt;streamId&gt;</var>/messages?cursor=<var>&lt;cursor&gt;</var>&limit=100
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: 'Emits messages to a stream. There''s no limit to the number of messages in a request, but the total size of a message or request must be 1 MiB or less.
+
+        The service calculates the partition ID from the message key and stores messages that share a key on the same partition.
+
+        If a message does not contain a key or if the key is null, the service generates a message key for you.
+
+        The partition ID cannot be passed as a parameter.
+
+        '
+      operationId: PutMessages
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Success
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutMessagesResult'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Puts messages in a stream.
+      tags:
+      - stream
+      x-example: "POST /20180418/streams/<var>&lt;streamId&gt;</var>/messages\nHost: streaming-api.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"messages\":\n  {\n    {\n      \"key\": null,\n      \"value\": \"VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2cu\"\n    },\n    {\n      \"key\": null,\n      \"value\": \"UGFjayBteSBib3ggd2l0aCBmaXZlIGRvemVuIGxpcXVvciBqdWdzLg==\"\n    }\n  }\n}\n"
+      x-obmcs-signing-strategy: exclude_body
+      x-related-resource: '#/definitions/Message'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutMessagesDetails'
+        description: Array of messages to put into the stream.
+        required: true
+components:
+  schemas:
+    PutMessagesResult:
+      description: 'The response to a [PutMessages](#/en/streaming/20180418/methods/PutMessages) request. It indicates the number
+
+        of failed messages as well as an array of results for successful and failed messages.
+
+        '
+      properties:
+        entries:
+          description: 'An array of items representing the result of each message.
+
+            The order is guaranteed to be the same as in the `PutMessagesDetails` object.
+
+            If a message was successfully appended to the stream, the entry includes the `offset`, `partition`, and `timestamp`.
+
+            If a message failed to be appended to the stream, the entry includes the `error` and `errorMessage`.
+
+            '
+          items:
+            $ref: '#/components/schemas/PutMessagesResultEntry'
+          minItems: 1
+          type: array
+        failures:
+          description: The number of messages that failed to be added to the stream.
+          type: integer
+      required:
+      - failures
+      - entries
+      type: object
+      x-example: "{\n  \"failures\": 0,\n  \"entries\": {\n    \"partition\": \"3\",\n    \"offset\": 0,\n    \"timestamp\": \"2018-04-20T23:21:12.428Z\"\n  }\n}\n"
+    PutMessagesDetails:
+      description: Object that represents an array of messages to emit to a stream.
+      properties:
+        messages:
+          description: The array of messages to put into a stream.
+          items:
+            $ref: '#/components/schemas/PutMessagesDetailsEntry'
+          minItems: 1
+          type: array
+      required:
+      - messages
+      type: object
+      x-example: "{\n  \"messages\":\n  [\n    {\n      \"key\": null,\n      \"value\": \"VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2cu\"\n    }\n  ]\n}\n"
+    CreateCursorDetails:
+      description: Object used to create a cursor to consume messages in a stream.
+      properties:
+        offset:
+          description: The offset to consume from if the cursor type is `AT_OFFSET` or `AFTER_OFFSET`.
+          example: 42
+          format: int64
+          type: integer
+        partition:
+          description: The partition to get messages from.
+          minimum: 0
+          type: string
+        time:
+          description: 'The time to consume from if the cursor type is `AT_TIME`, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+            '
+          format: date-time
+          type: string
+        type:
+          description: 'The type of cursor, which determines the starting point from which the stream will be consumed:
+
+
+            - `AFTER_OFFSET:` The partition position immediately following the offset you specify. (Offsets are assigned when you successfully append a message to a partition in a stream.)
+
+            - `AT_OFFSET:` The exact partition position indicated by the offset you specify.
+
+            - `AT_TIME:` A specific point in time.
+
+            - `LATEST:` The most recent message in the partition that was added after the cursor was created.
+
+            - `TRIM_HORIZON:` The oldest message in the partition that is within the retention period window.
+
+            '
+          enum:
+          - AFTER_OFFSET
+          - AT_OFFSET
+          - AT_TIME
+          - LATEST
+          - TRIM_HORIZON
+          type: string
+      required:
+      - type
+      - partition
+      type: object
+      x-example: "{\n  \"partition\": \"0\",\n  \"type\": \"TRIM_HORIZON\"\n}\n"
+    PutMessagesDetailsEntry:
+      description: Object that represents a message to emit to a stream.
+      properties:
+        key:
+          description: 'The key of the message, expressed as a byte array up to 256 bytes in size. Messages with the same key are stored in the same partition.
+
+            '
+          format: byte
+          maxItems: 256
+          type: string
+        value:
+          description: The message, expressed as a byte array up to 1 MiB in size.
+          format: byte
+          maxItems: 1048576
+          minItems: 1
+          type: string
+      required:
+      - value
+      type: object
+    UpdateGroupDetails:
+      description: 'Request body for operationally managing a group.
+
+        '
+      properties:
+        time:
+          description: The time to consume from if type is AT_TIME.
+          format: date-time
+          type: string
+        type:
+          description: The type of the cursor.
+          enum:
+          - AT_TIME
+          - LATEST
+          - TRIM_HORIZON
+          type: string
+      type: object
+    Message:
+      description: A message in a stream.
+      properties:
+        key:
+          description: The key associated with the message, expressed as a byte array.
+          format: byte
+          type: string
+        offset:
+          description: The offset of the message, which uniquely identifies it within the partition.
+          example: 42
+          format: int64
+          type: integer
+        partition:
+          description: The ID of the partition where the message is stored.
+          example: '1'
+          type: string
+        stream:
+          description: The name of the stream that the message belongs to.
+          example: ocid1.stream.realm.region.mnopqr789
+          type: string
+        timestamp:
+          description: The timestamp indicating when the server appended the message to the stream.
+          format: date-time
+          type: string
+        value:
+          description: The value associated with the message, expressed as a byte array.
+          format: byte
+          type: string
+      required:
+      - stream
+      - partition
+      - key
+      - value
+      - offset
+      - timestamp
+      type: object
+      x-example: "{\n  \"stream\": \"mynewstream\",\n  \"partition\": \"0\",\n  \"key\": null,\n  \"value\": \"VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2cu\",\n  \"offset\": 0,\n  \"timestamp\": \"2018-04-26T01:03:06.051Z\"\n}\n"
+    CreateGroupCursorDetails:
+      description: Object used to create a group cursor.
+      properties:
+        commitOnGet:
+          default: true
+          description: 'When using consumer-groups, the default commit-on-get behaviour can be overriden by setting this value to false.
+
+            If disabled, a consumer must manually commit their cursors.
+
+            '
+          type: boolean
+        groupName:
+          description: Name of the consumer group.
+          type: string
+        instanceName:
+          description: A unique identifier for the instance joining the consumer group. If an instanceName is not provided, a UUID will be generated and used.
+          type: string
+        time:
+          description: The time to consume from if type is AT_TIME.
+          format: date-time
+          type: string
+        timeoutInMs:
+          default: 30000
+          description: The amount of a consumer instance inactivity time, before partition reservations are released.
+          format: int32
+          minimum: 5000
+          type: integer
+        type:
+          description: The type of the cursor. This value is only used when the group is created.
+          enum:
+          - AT_TIME
+          - LATEST
+          - TRIM_HORIZON
+          type: string
+      required:
+      - groupName
+      - type
+      type: object
+    Cursor:
+      description: 'A cursor that indicates the position in the stream from which you want to begin consuming messages and which is required by the [GetMessages](#/en/streaming/20180418/Message/GetMessages) operation.
+
+        '
+      properties:
+        value:
+          description: The cursor to pass to the `GetMessages` operation.
+          type: string
+      required:
+      - value
+      type: object
+      x-example: "{\n  \"value\": \"examplelIjoiVHJpbUhcvbl6b24iLCJvZmZzZXQiOm51bGwsInRpbWUiOm51bGwsInBhcnRpdGlvbiI6IjAiLCJzdHJlYW1JZCI6Im9jaWQxLnN0cmVhbS5kZXNrdG9wLi5hYWFhYWFhYWN1ZG5udHFjeXN4dHF6NTZuNWVoYWZ3c3JudHp5dHhjNmF3cDM0N3dxa2R0Ymt2d3VpaXEiLCJleHBfaux0aW9uIjoxNTI0Njg0MDE3NzUwfQ==\"\n}\n"
+    Error:
+      description: The representation of an error.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    PartitionReservation:
+      description: 'Represents the state of a single partition reservation.
+
+        '
+      properties:
+        committedOffset:
+          description: The latest offset which has been committed for this partition.
+          format: int64
+          type: integer
+        partition:
+          description: The partition for which the reservation applies.
+          type: string
+        reservedInstance:
+          description: The consumer instance which currently has the partition reserved.
+          type: string
+        timeReservedUntil:
+          description: A timestamp when the current reservation expires.
+          format: date-time
+          type: string
+      type: object
+    Group:
+      description: 'Represents the current state of a consumer group, including partition reservations and committed offsets.
+
+        '
+      properties:
+        groupName:
+          description: The name of the consumer group.
+          type: string
+        reservations:
+          description: An array of the partition reservations of a group.
+          items:
+            $ref: '#/components/schemas/PartitionReservation'
+          type: array
+        streamId:
+          description: The streamId for which the group exists.
+          type: string
+      required:
+      - streamId
+      - groupName
+      type: object
+    PutMessagesResultEntry:
+      description: 'Represents the result of a [PutMessages](#/en/streaming/20180418/methods/PutMessages) request, whether it was successful or not.
+
+        If a message was successfully appended to the stream, the entry includes the `offset`, `partition`, and `timestamp`.
+
+        If the message failed to be appended to the stream, the entry includes the `error` and `errorMessage`.
+
+        '
+      properties:
+        error:
+          description: The error code, in case the message was not successfully appended to the stream.
+          type: string
+        errorMessage:
+          description: A human-readable error message associated with the error code.
+          type: string
+        offset:
+          description: The offset of the message in the partition.
+          example: 42
+          format: int64
+          type: integer
+        partition:
+          description: The ID of the partition where the message was stored.
+          example: '1'
+          type: string
+        timestamp:
+          description: The timestamp indicating when the server appended the message to the stream.
+          format: date-time
+          type: string
+      type: object
+  parameters:
+    GroupCursorQueryParam:
+      description: 'The group-cursor representing the offsets of the group. This cursor is retrieved from the CreateGroupCursor API call.
+
+        '
+      in: query
+      name: cursor
+      required: true
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    OpcRequestIdHeaderParam:
+      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    StreamIdPathParam:
+      description: 'The OCID of the stream.
+
+        '
+      in: path
+      name: streamId
+      required: true
+      schema:
+        type: string
+        maxLength: 256
+        minLength: 1
+  responses:
+    DefaultError:
+      description: An error has occurred
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+            a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-oracle-package: com.oracle.pic.oss.api

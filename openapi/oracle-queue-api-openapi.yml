@@ -1,0 +1,1032 @@
+openapi: 3.2.0
+info:
+  description: Use the Queue API to produce and consume messages, create queues, and manage related items. For more information, see [Queue](/iaas/Content/queue/overview.htm).
+  title: Queue API
+  version: '20210201'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/49b73908fe2a44b79dc0e48d624a171339887f6587b79da8d22e48eeae28a8ce.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Queue API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/49b73908fe2a44b79dc0e48d624a171339887f6587b79da8d22e48eeae28a8ce.yaml
+    what: the harvested document for Queue API
+servers:
+- url: http://127.0.0.1/20210201
+- url: https://127.0.0.1/20210201
+tags:
+- name: queue
+paths:
+  /queues/{queueId}/channels:
+    get:
+      description: "Gets the list of IDs of non-empty channels.\nIt will return an approximate list of IDs of non-empty channels. That information is based on the queue level statistics. \nAPI supports optional channelFilter parameter which will filter the returned results according to the specified filter.\nList of channel IDs is approximate, because statistics is refreshed once per-second, and that list represents a snapshot of the past information. API is paginated.\n"
+      operationId: ListChannels
+      parameters:
+      - $ref: '#/components/parameters/QueueIdentifierPathParam'
+      - $ref: '#/components/parameters/ConsumerGroupQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/ChannelFilter'
+      responses:
+        200:
+          description: The list of IDs of non-empty channels.
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Gets the list of IDs of non-empty channels.
+      tags:
+      - queue
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/ChannelCollection'
+  /queues/{queueId}/messages:
+    get:
+      description: 'Consumes messages from the queue.
+
+        You must use the [messages endpoint](/iaas/Content/queue/messages.htm#messages__messages-endpoint) to consume messages.
+
+        The messages endpoint may be different for different queues. Use [`GetQueue`](#/en/queue/latest/Queue/GetQueue/) to find the queue''s `messagesEndpoint`.
+
+        GetMessages accepts optional channelFilter query parameter that can filter source channels of the messages.
+
+        When channelFilter is present, service will return available messages from the channel which ID exactly matched the filter.
+
+        When filter is not specified, messages will be returned from a random non-empty channel within a queue.
+
+        '
+      operationId: GetMessages
+      parameters:
+      - $ref: '#/components/parameters/QueueIdentifierPathParam'
+      - $ref: '#/components/parameters/VisibilityQueryParam'
+      - $ref: '#/components/parameters/TimeoutQueryParam'
+      - $ref: '#/components/parameters/LimitQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/ChannelFilter'
+      - $ref: '#/components/parameters/ConsumerGroupQueryParam'
+      responses:
+        200:
+          description: A list of messages.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMessages'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Consumes message from the queue.
+      tags:
+      - queue
+      x-related-resource: '#/definitions/GetMessage'
+    post:
+      description: 'Puts messages into the queue.
+
+        You must use the [messages endpoint](/iaas/Content/queue/messages.htm#messages__messages-endpoint) to produce messages.
+
+        The messages endpoint may be different for different queues. Use [`GetQueue`](#/en/queue/latest/Queue/GetQueue/) to find the queue''s `messagesEndpoint`.
+
+        '
+      operationId: PutMessages
+      parameters:
+      - $ref: '#/components/parameters/QueueIdentifierPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The messages have been published in the queue.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutMessages'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Puts messages in the queue.
+      tags:
+      - queue
+      x-related-resource: '#/definitions/PutMessage'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutMessagesDetails'
+        description: Details for the messages to publish.
+        required: true
+  /queues/{queueId}/messages/actions/deleteMessages:
+    post:
+      description: 'Deletes multiple messages from the queue or the consumer group. Only messages from the same queue/consumer group can be deleted at once.
+
+        You must use the [messages endpoint](/iaas/Content/queue/messages.htm#messages__messages-endpoint) to delete messages.
+
+        The messages endpoint may be different for different queues. Use [`GetQueue`](#/en/queue/latest/Queue/GetQueue/) to find the queue''s `messagesEndpoint`.
+
+        '
+      operationId: DeleteMessages
+      parameters:
+      - $ref: '#/components/parameters/QueueIdentifierPathParam'
+      - $ref: '#/components/parameters/ConsumerGroupQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The request has been processed. Receiving a 200 error code does not mean that all messages have been deleted. Instead you have to look at the response body.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteMessagesResult'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Deletes multiple messages from the queue.
+      tags:
+      - queue
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/GetMessage'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteMessagesDetails'
+        description: Details for the messages to delete.
+        required: true
+  /queues/{queueId}/messages/actions/updateMessages:
+    post:
+      description: 'Updates multiple messages in the queue or the consumer group. Only messages from the same queue/consumer group can be updated at once.
+
+        You must use the [messages endpoint](/iaas/Content/queue/messages.htm#messages__messages-endpoint) to update messages.
+
+        The messages endpoint may be different for different queues. Use [`GetQueue`](#/en/queue/latest/Queue/GetQueue/) to find the queue''s `messagesEndpoint`.
+
+        '
+      operationId: UpdateMessages
+      parameters:
+      - $ref: '#/components/parameters/QueueIdentifierPathParam'
+      - $ref: '#/components/parameters/ConsumerGroupQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The request has been processed. Receiving a 200 error code does not mean that all messages have been updated. Instead you have to look at the response body.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateMessagesResult'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Updates multiple messages in the queue.
+      tags:
+      - queue
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/GetMessage'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMessagesDetails'
+        description: Details for the messages to update.
+        required: true
+  /queues/{queueId}/messages/{messageReceipt}:
+    delete:
+      description: 'Deletes the message represented by the receipt from the queue.
+
+        You must use the [messages endpoint](/iaas/Content/queue/messages.htm#messages__messages-endpoint) to delete messages.
+
+        The messages endpoint may be different for different queues. Use [`GetQueue`](#/en/queue/latest/Queue/GetQueue/) to find the queue''s `messagesEndpoint`.
+
+        '
+      operationId: DeleteMessage
+      parameters:
+      - $ref: '#/components/parameters/QueueIdentifierPathParam'
+      - $ref: '#/components/parameters/MessageReceiptPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/ConsumerGroupQueryParam'
+      responses:
+        204:
+          description: The message has been deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Deletes a message from the queue.
+      tags:
+      - queue
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/GetMessage'
+    put:
+      description: 'Updates the visibility of the message represented by the receipt.
+
+        You must use the [messages endpoint](/iaas/Content/queue/messages.htm#messages__messages-endpoint) to update messages.
+
+        The messages endpoint may be different for different queues. Use [`GetQueue`](#/en/queue/latest/Queue/GetQueue/) to find the queue''s `messagesEndpoint`.
+
+        '
+      operationId: UpdateMessage
+      parameters:
+      - $ref: '#/components/parameters/QueueIdentifierPathParam'
+      - $ref: '#/components/parameters/MessageReceiptPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/ConsumerGroupQueryParam'
+      responses:
+        200:
+          description: The visibility of the message has been updated.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatedMessage'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Updates the visibility of a message to extend (or reduce) it.
+      tags:
+      - queue
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/UpdatedMessage'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMessageDetails'
+        description: Details for the message to update.
+        required: true
+  /queues/{queueId}/stats:
+    get:
+      description: 'Gets the statistics for the queue and its dead letter queue.
+
+        You must use the [messages endpoint](/iaas/Content/queue/messages.htm#messages__messages-endpoint) to get a queue''s statistics.
+
+        The messages endpoint may be different for different queues. Use [`GetQueue`](#/en/queue/latest/Queue/GetQueue/) to find the queue''s `messagesEndpoint`.
+
+        '
+      operationId: GetStats
+      parameters:
+      - $ref: '#/components/parameters/QueueIdentifierPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/ChannelId'
+      - $ref: '#/components/parameters/ConsumerGroupQueryParam'
+      responses:
+        200:
+          description: The stats for the queue and its dead letter queue.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueStats'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Gets the statistics for the queue and its dead letter queue.
+      tags:
+      - queue
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/QueueStats'
+components:
+  parameters:
+    TimeoutQueryParam:
+      description: 'If the `timeoutInSeconds parameter` isn''t set or it is set to a value greater than 0, the request is using the long-polling mode and will only return when a message is available for consumption (it does not wait for limit messages but still only returns at-most limit messages) or after `timeoutInSeconds` seconds (in which case it will return an empty response), whichever comes first.
+
+
+        If the parameter is set to 0, the request is using the short-polling mode and immediately returns whether messages have been retrieved or not.
+
+        In same rare-cases a long-polling request could be interrupted (returned with empty response) before the end of the timeout.
+
+        '
+      in: query
+      name: timeoutInSeconds
+      x-default-description: If the parameter isn't set, or it is set to a value greater than 0, the request is using the long-polling mode.
+      schema:
+        type: integer
+        default: 30
+        maximum: 30
+        minimum: 0
+    PaginationTokenQueryParam:
+      description: For list pagination. The value of the opc-next-page response header from the previous "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    QueueIdentifierPathParam:
+      description: The unique queue identifier.
+      in: path
+      name: queueId
+      required: true
+      schema:
+        type: string
+    ConsumerGroupQueryParam:
+      description: Optional parameter to specify a consumer group.
+      in: query
+      name: consumerGroupId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ChannelId:
+      description: Id to specify channel.
+      in: query
+      name: channelId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: For list pagination. The maximum number of results per page, or items to return in a paginated "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    LimitQueryParam:
+      description: 'The limit parameter controls how many messages is returned at-most.
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 1
+        maximum: 20
+        minimum: 1
+    ChannelFilter:
+      description: Optional parameter to filter the channels.
+      in: query
+      name: channelFilter
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    MessageReceiptPathParam:
+      description: The receipt of the message retrieved from a GetMessages call.
+      in: path
+      name: messageReceipt
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    VisibilityQueryParam:
+      description: 'If the `visibilityInSeconds` parameter is set, messages will be hidden for `visibilityInSeconds` seconds and won''t be consumable by other consumers during that time.
+
+        If it isn''t set it defaults to the value set at the queue level.
+
+
+        Using a `visibilityInSeconds` value of 0 effectively acts as a peek functionality.
+
+        Messages retrieved that way aren''t meant to be deleted because they will most likely be delivered to another consumer as their visibility won''t change, but will still increase the delivery count by one.
+
+        '
+      in: query
+      name: visibilityInSeconds
+      x-default-description: If the parameter isn't set it defaults to the value set at the queue level.
+      schema:
+        type: integer
+        maximum: 43200
+        minimum: 0
+  schemas:
+    UpdatedMessage:
+      description: An updated message with the new visibility.
+      properties:
+        id:
+          description: The ID of the message that's been updated.
+          format: int64
+          type: integer
+        visibleAfter:
+          description: 'The time after which the message will be visible to other consumers, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - visibleAfter
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    GetMessages:
+      description: A list of messages from a queue.
+      properties:
+        messages:
+          description: List of messages from a queue.
+          items:
+            $ref: '#/components/schemas/GetMessage'
+          type: array
+      required:
+      - messages
+      type: object
+    GetMessage:
+      description: A message consumed from a queue.
+      properties:
+        content:
+          description: The content of the message.
+          type: string
+        createdAt:
+          description: 'The time when message was created in queue.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+        deliveryCount:
+          description: The number of times that the message has been delivered to a consumer.
+          type: integer
+        expireAfter:
+          description: 'The time after which the message will be automatically deleted, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+        id:
+          description: The ID of the message. This ID is only used for tracing and debugging purposes and isn't used as a parameter in any request.
+          format: int64
+          type: integer
+        metadata:
+          $ref: '#/components/schemas/MessageMetadata'
+        receipt:
+          description: 'A receipt is a base64urlencode opaque token, uniquely representing a message.
+
+            The receipt can be used to delete a message or update its visibility.
+
+            '
+          type: string
+        visibleAfter:
+          description: 'The time after which the message will be visible to other consumers, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - content
+      - receipt
+      - deliveryCount
+      - visibleAfter
+      - expireAfter
+      - createdAt
+      type: object
+    UpdateMessagesDetails:
+      description: The details of an UpdateMessages request.
+      properties:
+        entries:
+          description: The array of messages to update in a queue.
+          items:
+            $ref: '#/components/schemas/UpdateMessagesDetailsEntry'
+          minItems: 1
+          type: array
+      required:
+      - entries
+      type: object
+    UpdateMessagesDetailsEntry:
+      description: Object that represents a message to update in a queue.
+      properties:
+        receipt:
+          description: The receipt of the message to update.
+          type: string
+        visibilityInSeconds:
+          description: The new visibility of the message relative to the current time (as-per the clock of the server receiving the request).
+          maximum: 43200
+          minimum: 0
+          type: integer
+      required:
+      - receipt
+      - visibilityInSeconds
+      type: object
+    PutMessagesDetails:
+      description: The details of a PutMessages request.
+      properties:
+        messages:
+          description: The array of messages to put into a queue.
+          items:
+            $ref: '#/components/schemas/PutMessagesDetailsEntry'
+          minItems: 1
+          type: array
+      required:
+      - messages
+      type: object
+    DeleteMessagesResultEntry:
+      description: 'Represents the result of a DeleteMessages request, whether it was successful or not.
+
+        If a message was successfully deleted from the queue, the entry does not contain any fields.
+
+        If a message failed to be deleted from the queue, the entry includes the `errorCode` and `errorMessage` fields.
+
+        '
+      properties:
+        errorCode:
+          description: The error code, in case the message was not successfully deleted from the queue.
+          type: integer
+        errorMessage:
+          description: A human-readable error message associated with the error code.
+          type: string
+      type: object
+    MessageMetadata:
+      description: Object that represents metadata for message.
+      properties:
+        channelId:
+          description: The channel ID which specifies the channel to publish or retrieve messages.
+          maxLength: 64
+          minLength: 1
+          type: string
+        customProperties:
+          additionalProperties:
+            type: string
+          description: Additional message properties
+          type: object
+      required:
+      - channelId
+      type: object
+    ChannelCollection:
+      description: List of IDs of non-empty channels.
+      properties:
+        items:
+          description: The approximate list of IDs of non-empty channels.
+          items:
+            maxLength: 64
+            minLength: 1
+            type: string
+          type: array
+      required:
+      - items
+      type: object
+    QueueStats:
+      description: The stats for a queue and its dead letter queue. If channelId is specified in request field, it will return channel specific stats response.
+      properties:
+        channelId:
+          description: If channelId is present in GetStats call, the channel id will be returned in the GetStats response.
+          maxLength: 64
+          minLength: 1
+          type: string
+        consumerGroupId:
+          description: If consumerGroupId is present in GetStats call, the consumer group id will be returned in the GetStats response.
+          type: string
+        dlq:
+          $ref: '#/components/schemas/Stats'
+        queue:
+          $ref: '#/components/schemas/Stats'
+      required:
+      - queue
+      - dlq
+      type: object
+    PutMessage:
+      description: A message that has been published to a queue.
+      properties:
+        expireAfter:
+          description: 'The time after which the message will be automatically deleted, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+        id:
+          description: The ID of the message.
+          format: int64
+          type: integer
+      required:
+      - id
+      type: object
+    UpdateMessagesResult:
+      description: The response to a UpdateMessages request. It indicates the number of server and client failures as well as an array of entries for successful and failed actions.
+      properties:
+        clientFailures:
+          description: The number of messages that failed to be updated in the queue because of a client failure such as an invalid receipt or invalid `visibilityInSeconds`.
+          type: integer
+        entries:
+          description: 'An array of items representing the result of each action.
+
+            The order is guaranteed to be the same as in the `UpdateMessagesDetails` object.
+
+            If a message was successfully updated in the queue, the entry includes the `id` and `visibleAfter` fields.
+
+            If a message failed to be updated in the queue, the entry includes the `errorCode` and `errorMessage` fields.
+
+            '
+          items:
+            $ref: '#/components/schemas/UpdateMessagesResultEntry'
+          minItems: 1
+          type: array
+        serverFailures:
+          description: The number of messages that failed to be updated in the queue because of a server failure.
+          type: integer
+      required:
+      - serverFailures
+      - clientFailures
+      - entries
+    UpdateMessageDetails:
+      description: Updates the visibility of a message
+      properties:
+        visibilityInSeconds:
+          description: The new visibility of the message relative to the current time (as-per the clock of the server receiving the request).
+          maximum: 43200
+          minimum: 0
+          type: integer
+      required:
+      - visibilityInSeconds
+      type: object
+    DeleteMessagesDetailsEntry:
+      description: Object that represents a message to delete from a queue.
+      properties:
+        receipt:
+          description: The receipt of the message to delete.
+          type: string
+      required:
+      - receipt
+      type: object
+    PutMessages:
+      description: A list of the messages published to a queue.
+      properties:
+        messages:
+          description: The messages that have been published to a queue.
+          items:
+            $ref: '#/components/schemas/PutMessage'
+          minItems: 1
+          type: array
+      required:
+      - messages
+      type: object
+    Stats:
+      description: The stats for a queue or a dead letter queue.
+      properties:
+        inFlightMessages:
+          description: The approximate number of messages delivered to a consumer but not yet deleted and so unavailable for re-delivery.
+          format: int64
+          type: integer
+        sizeInBytes:
+          description: The approximate size of the queue in bytes. Sum of the size of visible and in-flight messages.
+          format: int64
+          type: integer
+        visibleMessages:
+          description: The approximate number of visible messages (available for delivery) currently in the queue.
+          format: int64
+          type: integer
+      required:
+      - visibleMessages
+      - inFlightMessages
+      - sizeInBytes
+      type: object
+    PutMessagesDetailsEntry:
+      description: Object that represents a message to publish into a queue.
+      properties:
+        content:
+          description: The content of the message
+          type: string
+        metadata:
+          $ref: '#/components/schemas/MessageMetadata'
+      required:
+      - content
+      type: object
+    UpdateMessagesResultEntry:
+      description: 'Represents the result of a UpdateMessages request, whether it was successful or not.
+
+        If a message was successfully updated in the queue, the entry includes the `id` and `visibleAfter` fields.
+
+        If a message failed to be updated in the queue, the entry includes the `errorCode` and `errorMessage` fields.
+
+        '
+      properties:
+        errorCode:
+          description: The error code, in case the message was not successfully updated in the queue.
+          type: integer
+        errorMessage:
+          description: A human-readable error message associated with the error code.
+          type: string
+        id:
+          description: The ID of the message that's been updated.
+          format: int64
+          type: integer
+        visibleAfter:
+          description: 'The time after which the message will be visible to other consumers, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      type: object
+    DeleteMessagesDetails:
+      description: The details of a DeleteMessages request.
+      properties:
+        entries:
+          description: The array of messages to delete from a queue.
+          items:
+            $ref: '#/components/schemas/DeleteMessagesDetailsEntry'
+          minItems: 1
+          type: array
+      required:
+      - entries
+      type: object
+    DeleteMessagesResult:
+      description: The response to a DeleteMessages request. It indicates the number of server and client failures as well as an array of entries for successful and failed actions.
+      properties:
+        clientFailures:
+          description: The number of messages that failed to be deleted from the queue because of a client failure such as an invalid receipt.
+          type: integer
+        entries:
+          description: 'An array of items representing the result of each action.
+
+            The order is guaranteed to be the same as in the `DeleteMessagesDetails` object.
+
+            If a message was successfully deleted from the queue, the entry does not contain any fields.
+
+            If a message failed to be deleted from the queue, the entry includes the `errorCode` and `errorMessage` fields.
+
+            '
+          items:
+            $ref: '#/components/schemas/DeleteMessagesResultEntry'
+          minItems: 1
+          type: array
+        serverFailures:
+          description: The number of messages that failed to be deleted from the queue because of a server failure.
+          type: integer
+      required:
+      - serverFailures
+      - clientFailures
+      - entries
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-anchors:
+  x-headers:
+    etag:
+      description: 'For optimistic concurrency control. See `if-match`.
+
+        '
+      type: string
+    opc-next-page:
+      description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+        then a partial list might have been returned. Include this value as the `page` parameter for the
+
+        subsequent GET request to get the next batch of items.
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+    opc-work-request-id:
+      description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+        '
+      type: string
+    retry-after:
+      description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+      type: integer
+  x-properties:
+    definedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+        Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+        '
+      type: object
+    freeformTags:
+      additionalProperties:
+        type: string
+      description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+        Example: `{"bar-key": "value"}`
+
+        '
+      type: object
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+x-oracle-package: com.oracle.pic.queue.cp

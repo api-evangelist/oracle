@@ -1,0 +1,1220 @@
+openapi: 3.2.0
+info:
+  description: "Use the Email Delivery API to do the necessary set up to send high-volume and application-generated emails through the OCI Email Delivery service.\nFor more information, see [Overview of the Email Delivery Service](/iaas/Content/Email/Concepts/overview.htm).\n\n **Note:** Write actions (POST, UPDATE, DELETE) may take several minutes to propagate and be reflected by the API.\n If a subsequent read request fails to reflect your changes, wait a few minutes and try again.\n"
+  license:
+    name: Oracle Corporation
+  title: Email Delivery ${dkim Tag} ${dkim Tag} API
+  version: '20170907'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/2b8421e2e819f20bff147090f9d2586190bb5c6d3b8562ffb01d9f9fa99542be.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Email Delivery API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/2b8421e2e819f20bff147090f9d2586190bb5c6d3b8562ffb01d9f9fa99542be.yaml
+    what: the harvested document for Email Delivery API
+servers:
+- url: https://127.0.0.1/20170907
+tags:
+- name: ${dkim-tag}
+paths:
+  /dkims:
+    get:
+      description: Lists DKIMs for an email domain.
+      operationId: ListDkims
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/EmailDomainIdQueryParam'
+      - $ref: '#/components/parameters/FilterByIdQueryParam'
+      - $ref: '#/components/parameters/FilterByNameQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - description: 'Filter returned list by specified lifecycle state. This parameter is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        x-obmcs-enumref: '#/definitions/Dkim/lifecycleState'
+        schema:
+          type: string
+      - description: 'Specifies the attribute with which to sort the DKIMs.
+
+
+          Default: `TIMECREATED`
+
+
+          * **TIMECREATED:** Sorts by timeCreated.
+
+          * **NAME:** Sorts by name.
+
+          * **ID:** Sorts by id.
+
+          '
+        in: query
+        name: sortBy
+        required: false
+        schema:
+          type: string
+          enum:
+          - TIMECREATED
+          - ID
+          - NAME
+          default: TIMECREATED
+      responses:
+        '200':
+          description: Success
+          headers:
+            opc-next-page:
+              description: 'For list pagination. When this header appears in the response, additional pages of results remain.
+
+                For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DkimCollection'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: Lists DKIMs for an email domain.
+      tags:
+      - ${dkim-tag}
+      x-example: 'Sample: List all DKIMs, sorted by newest first
+
+
+        GET /20170907/dkims HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+    post:
+      description: 'Creates a new DKIM for an email domain.
+
+        This DKIM signs all approved senders in the tenancy that are in this email domain.
+
+        Best security practices indicate to periodically rotate the DKIM that is doing the signing.
+
+        When a second DKIM is applied, all senders seamlessly pick up the new key
+
+        without interruption in signing.
+
+        '
+      operationId: CreateDkim
+      parameters:
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        '201':
+          description: Success
+          headers:
+            Content-Location:
+              description: 'The full URI of the resource related to the request
+
+                '
+              schema:
+                type: string
+                format: uri-reference
+            Location:
+              description: 'The full URI of the resource related to the request
+
+                '
+              schema:
+                type: string
+                format: uri-reference
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dkim'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: Creates a new DKIM for an email domain.
+      tags:
+      - ${dkim-tag}
+      x-example: 'POST /20170907/dkims HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDkimDetails'
+        description: The DKIM details.
+        required: true
+  /dkims/{dkimId}:
+    delete:
+      description: 'Deletes a DKIM.
+
+        If this key is currently the active key for the email domain, deleting the key
+
+        will stop signing the domain''s outgoing mail.
+
+        DKIM keys are left in DELETING state for about a day to allow DKIM signatures on
+
+        in-transit mail to be validated.
+
+        Consider creating a new DKIM for this domain so the signing can be rotated to it instead of deletion.
+
+        '
+      operationId: DeleteDkim
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/DkimIdPathParam'
+      responses:
+        '202':
+          description: 'The request to delete DKIM was accepted for processing.
+
+            '
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '412':
+          $ref: '#/components/responses/412'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: Deletes a DKIM.
+      tags:
+      - ${dkim-tag}
+      x-example: 'DELETE /20170907/dkims/ocid1.emaildkim.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+    get:
+      description: Retrieves the specified DKIM.
+      operationId: GetDkim
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/DkimIdPathParam'
+      responses:
+        '200':
+          description: Success
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dkim'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: Retrieves the specified DKIM.
+      tags:
+      - ${dkim-tag}
+      x-example: 'GET /20170907/dkims/ocid1.emaildkim.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+    put:
+      description: Modifies a DKIM.
+      operationId: UpdateDkim
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/DkimIdPathParam'
+      responses:
+        '202':
+          description: 'The request to update DKIM was accepted for processing.
+
+            '
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: Modifies a DKIM.
+      tags:
+      - ${dkim-tag}
+      x-example: 'PUT /20170907/dkims/ocid1.emaildkim.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDkimDetails'
+        description: The new DKIM attributes to apply.
+        required: true
+components:
+  parameters:
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous "List" call.
+
+        For important details about how pagination works,
+
+        see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 2000
+        minLength: 1
+    EmailDomainIdQueryParam:
+      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email domain to which this DKIM belongs.
+
+        '
+      in: query
+      name: emailDomainId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    DkimIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of this DKIM.
+      in: path
+      name: dkimId
+      required: true
+      schema:
+        type: string
+    FilterByIdQueryParam:
+      description: 'A filter to only return resources that match the given id exactly.
+
+        '
+      in: query
+      name: id
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IfMatchHeader:
+      description: 'Used for optimistic concurrency control. In the update or delete call for a resource, set the `if-match`
+
+        parameter to the value of the etag from a previous get, create, or update response for that resource.  The resource
+
+        will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+        paginated "List" call. `1` is the minimum, `1000` is the maximum. For important details about
+
+        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      x-default-description: 'null'
+      schema:
+        type: integer
+        maximum: 1000
+        minimum: 1
+    FilterByNameQueryParam:
+      description: 'A filter to only return resources that match the given name exactly.
+
+        '
+      in: query
+      name: name
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending or descending order.
+
+        '
+      in: query
+      name: sortOrder
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    RequestIdHeader:
+      description: The request ID for tracing from the system
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+  schemas:
+    UpdateDkimDetails:
+      description: 'The attributes to update in the DKIM.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported as valid value type.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: 'A string that describes the details about the DKIM. It does not have to be unique,
+
+            and you can change it. Avoid entering confidential information.
+
+            '
+          maxLength: 400
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      type: object
+    Error:
+      description: An error has occurred.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    Dkim:
+      description: 'The properties that define a DKIM.
+
+        '
+      properties:
+        cnameRecordValue:
+          description: 'The DNS CNAME record value to provision to the DKIM DNS subdomain, when using the CNAME method for DKIM setup (preferred).
+
+            '
+          maxLength: 255
+          type: string
+          x-default-description: 'null'
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this DKIM.
+
+            '
+          maxLength: 255
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported as valid value type.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: The description of the DKIM. Avoid entering confidential information.
+          maxLength: 400
+          type: string
+        dnsSubdomainName:
+          description: 'The name of the DNS subdomain that must be provisioned to enable email recipients to verify DKIM signatures.
+
+            It is usually created with a CNAME record set to the cnameRecordValue.
+
+            '
+          maxLength: 255
+          type: string
+          x-default-description: 'null'
+        emailDomainId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email domain
+
+            that this DKIM belongs to.
+
+            '
+          maxLength: 255
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the DKIM.
+
+            '
+          maxLength: 255
+          type: string
+        isImported:
+          default: false
+          description: Indicates whether the DKIM was imported.
+          type: boolean
+        keyLength:
+          default: 2048
+          description: Length of the RSA key used in the DKIM.
+          maximum: 2048
+          minimum: 1024
+          type: integer
+        lifecycleDetails:
+          description: 'A message describing the current state in more detail.
+
+            For example, can be used to provide actionable information for a resource.
+
+            '
+          type: string
+          x-default-description: 'null'
+        lifecycleState:
+          description: The current state of the DKIM.
+          enum:
+          - ACTIVE
+          - CREATING
+          - DELETING
+          - DELETED
+          - FAILED
+          - INACTIVE
+          - NEEDS_ATTENTION
+          - UPDATING
+          type: string
+          x-default-description: 'null'
+        name:
+          description: 'The DKIM selector.
+
+            If the same domain is managed in more than one region, each region must use different selectors.
+
+            '
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The time the DKIM was created.
+
+            Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+            Example: `2021-02-12T22:47:12.613Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time of the last change to the DKIM configuration, due to a state change or
+
+            an update operation.
+
+            Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            timestamp format, "YYYY-MM-ddThh:mmZ".
+
+            '
+          format: date-time
+          type: string
+        txtRecordValue:
+          description: 'The DNS TXT record value to provision to the DKIM DNS subdomain in place of using a CNAME record.
+
+            This is used in cases where a CNAME cannot be used, such as when the cnameRecordValue would exceed the maximum length for a DNS entry.
+
+            You can also use this if you have an existing procedure to directly provision TXT records for DKIM.
+
+            Many DNS APIs require you to break this string into segments of fewer than 255 characters.
+
+            '
+          maxLength: 450
+          type: string
+          x-default-description: 'null'
+      required:
+      - name
+      - id
+      - emailDomainId
+      type: object
+    CreateDkimDetails:
+      description: 'Properties to create a new DKIM.
+
+        The new object will be created in the same compartment as the EmailDomain.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported as valid value type.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: 'A string that describes the details about the DKIM. It does not have to be unique,
+
+            and you can change it. Avoid entering confidential information.
+
+            '
+          maxLength: 400
+          minLength: 1
+          type: string
+        emailDomainId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain for this DKIM.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        name:
+          description: 'The DKIM selector. This selector is required to be globally unique for this email domain.
+
+            If you do not provide the selector, we will generate one for you.
+
+            If you do provide the selector, we suggest adding a short region indicator
+
+            to differentiate from your signing of emails in other regions you might be subscribed to.
+
+            Selectors limited to ASCII characters can use alphanumeric, dash ("-"), and dot (".") characters.
+
+            Non-ASCII selector names should adopt IDNA2008 normalization (RFC 5891-5892).
+
+
+            Avoid entering confidential information.
+
+
+            Example: `mydomain-phx-20210228`
+
+            '
+          maxLength: 63
+          minLength: 1
+          type: string
+        privateKey:
+          description: The DKIM RSA Private Key in Privacy-Enhanced Mail (PEM) format. It is a text-based representation of the private key used for signing email messages.
+          example: '-----BEGIN RSA PRIVATE KEY-----
+
+            MIIEpAIBAAKCAQEA7...
+
+            -----END RSA PRIVATE KEY-----
+
+            '
+          maxLength: 2000
+          type: string
+      required:
+      - emailDomainId
+      type: object
+    DkimCollection:
+      description: Results of a search. Contains both DkimSummary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of dkims.
+          items:
+            $ref: '#/components/schemas/DkimSummary'
+          type: array
+      required:
+      - items
+      type: object
+    DkimSummary:
+      description: 'The properties that define a DKIM.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains this DKIM.
+
+            '
+          maxLength: 255
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported as valid value type.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: The description of a DKIM. Avoid entering confidential information.
+          maxLength: 400
+          type: string
+        emailDomainId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email domain
+
+            that this DKIM belongs to.
+
+            '
+          maxLength: 255
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the DKIM.
+
+            '
+          maxLength: 255
+          type: string
+        isImported:
+          default: false
+          description: Indicates whether the DKIM was imported.
+          type: boolean
+        keyLength:
+          default: 2048
+          description: Length of the RSA key used in the DKIM.
+          maximum: 2048
+          minimum: 1024
+          type: integer
+        lifecycleState:
+          description: The current state of the DKIM.
+          type: string
+          x-obmcs-enumref: '#/definitions/Dkim/lifecycleState'
+        name:
+          description: 'The DKIM selector. This selector is required to be globally unique for this email domain.
+
+            '
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The time the DKIM was created.
+
+            Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+            Example: `2021-02-12T22:47:12.613Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time of the last change to the DKIM configuration, due to a state change or
+
+            an update operation.
+
+            Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            timestamp format, "YYYY-MM-ddThh:mmZ".
+
+            '
+          format: date-time
+          type: string
+      required:
+      - name
+      - id
+      - emailDomainId
+      type: object
+  responses:
+    '400':
+      description: Incorrectly formatted request.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Authorization failed or the requested resource was not found.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '412':
+      description: Precondition Failed.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'The required information to complete authentication was not provided or
+
+        was incorrect. Extra detail may be provided in the response body.
+
+        '
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too Many Requests
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '409':
+      description: Authorization failed or the requested resource already exists.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-anchors:
+  x-headers:
+    etag:
+      description: 'For optimistic concurrency control. See `if-match`.
+
+        '
+      type: string
+    location:
+      description: 'The full URI of the resource related to the request
+
+        '
+      format: uri-reference
+      type: string
+    opc-next-page:
+      description: 'For list pagination. When this header appears in the response, additional pages of results remain.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      type: string
+    opc-previous-page:
+      description: 'For list pagination. When this header appears in the response, previous pages of results remain.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+    opc-total-items:
+      description: 'The total number of items returned from the request.
+
+        '
+      type: integer
+    opc-work-request-id:
+      description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+        '
+      type: string
+    retry-after:
+      description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+      type: integer
+  x-properties:
+    definedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string type is supported as valid value type.
+
+            '
+          type: object
+        description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+        For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+        Example: `{"Operations": {"CostCenter": "42"}}`
+
+        '
+      type: object
+    freeformTags:
+      additionalProperties:
+        type: string
+      description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+        For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+        Example: `{"Department": "Finance"}`
+
+        '
+      type: object
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+x-oracle-package: com.oracle.pic.email

@@ -1,0 +1,393 @@
+swagger: '2.0'
+info:
+  description: Use the Logging Search API to search for logs in your compartments, log groups, and log
+    objects. For more information, see [Logging Overview](/iaas/Content/Logging/Concepts/loggingoverview.htm).
+  license:
+    name: Oracle Corporation
+  title: Logging Search API
+  version: '20190909'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/fd5acb9f4afddc0bd60d889427e4e5c00b1fb46c44219453ae87af5b23e0b823.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Logging Search API OCI service and stored verbatim;
+      API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/fd5acb9f4afddc0bd60d889427e4e5c00b1fb46c44219453ae87af5b23e0b823.yaml
+    what: the harvested document for Logging Search API
+host: logging.$region.oraclecloud.com
+basePath: /20190909
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /search:
+    post:
+      description: 'Submit a query to search logs.
+
+
+        See [Using the API](/Content/Logging/Concepts/using_the_api_searchlogs.htm) for SDK examples.
+
+        '
+      operationId: SearchLogs
+      parameters:
+      - $ref: '#/parameters/OpcRequestIdHeader'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - description: 'Search request.
+
+          '
+        in: body
+        name: SearchLogsDetails
+        required: true
+        schema:
+          $ref: '#/definitions/SearchLogsDetails'
+      responses:
+        200:
+          description: 'Search response list is being retrieved.
+
+            '
+          headers:
+            opc-next-page: &id002
+              description: 'For list pagination. When this header appears in the response,
+
+                additional pages of results remain.
+
+                For important details about how pagination works, see
+
+                [List Pagination](/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              type: string
+            opc-request-id: &id001
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/SearchResponse'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: Search logs.
+      tags:
+      - logSearch
+      x-example: "POST /20190909/search\nHost: logging.us-phoenix-1.oci.oraclecloud.com\n<var>&lt;authorization\
+        \ and other headers&gt;</var>\n{\n  \"timeStart\": \"2019-06-19T01:02:29.600Z\",\n  \"timeEnd\"\
+        : \"2019-06-19T02:02:29.600Z\",\n  \"isReturnFieldInfo\": true,\n  \"searchQuery\": \"search \\\
+        \"<var>&lt;compartment_OCID&gt;</var>/<var>&lt;log_group_OCID&gt;</var>/<var>&lt;log_OCID&gt;</var>\\\
+        \" | where level = 'ERROR';\"\n}\n"
+      x-related-resource: '#/definitions/SearchResult'
+definitions:
+  Error:
+    description: Error response object.
+    properties:
+      code:
+        description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+          [API Errors](/Content/API/References/apierrors.htm).
+
+          '
+        type: string
+      message:
+        description: A human-readable error string.
+        type: string
+    required:
+    - code
+    - message
+    type: object
+  FieldInfo:
+    description: Contains field schema information.
+    properties:
+      fieldName:
+        description: Field name
+        maxLength: 1024
+        minLength: 1
+        type: string
+      fieldType:
+        description: 'Field type -
+
+          * `STRING`: A sequence of characters.
+
+          * `NUMBER`: Numeric type which can be an integer or floating point.
+
+          * `BOOLEAN`: Either true or false.
+
+          * `ARRAY`: An ordered collection of values.
+
+          '
+        enum:
+        - STRING
+        - NUMBER
+        - BOOLEAN
+        - ARRAY
+        type: string
+    required:
+    - fieldName
+    - fieldType
+    type: object
+  SearchLogsDetails:
+    description: Search request object.
+    properties:
+      isReturnFieldInfo:
+        description: 'Whether to return field schema information for the log stream specified in searchQuery.
+
+          '
+        type: boolean
+      searchQuery:
+        description: 'Query corresponding to the search operation. This query is parsed and validated
+          before execution and
+
+          should follow the specification. For more information on the query language specification, see
+
+          [Logging Query Language Specification](/Content/Logging/Reference/query_language_specification.htm).
+
+          '
+        example: search "<var>&lt;compartment_OCID&gt;</var>/<var>&lt;log_group_OCID&gt;</var>/<var>&lt;log_name_OCID&gt;</var>"
+          | where level = 'ERROR';
+        type: string
+      timeEnd:
+        description: 'End filter log''s date and time, in the format defined by RFC 3339.
+
+          '
+        example: 2019-06-19 02:02:29.600000+00:00
+        format: date-time
+        type: string
+      timeStart:
+        description: 'Start filter log''s date and time, in the format defined by RFC 3339.
+
+          '
+        example: 2019-06-19 01:02:29.600000+00:00
+        format: date-time
+        type: string
+    required:
+    - timeStart
+    - timeEnd
+    - searchQuery
+    type: object
+    x-example: "{\n  \"timeStart\": \"2019-06-19T01:02:29.600Z\",\n  \"timeEnd\": \"2019-06-19T02:02:29.600Z\"\
+      ,\n  \"isReturnFieldInfo\": true,\n  \"searchQuery\": \"search \\\"<var>&lt;compartment_OCID&gt;</var>/<var>&lt;log_group_OCID&gt;</var>/<var>&lt;log_OCID&gt;</var>\\\
+      \" | where level = 'ERROR'\";\n}\n"
+  SearchResponse:
+    description: Search response object.
+    properties:
+      fields:
+        description: List of log field schema information.
+        items:
+          $ref: '#/definitions/FieldInfo'
+        type: array
+      results:
+        description: List of search results
+        items:
+          $ref: '#/definitions/SearchResult'
+        type: array
+      summary:
+        $ref: '#/definitions/SearchResultSummary'
+    required:
+    - summary
+    type: object
+    x-example: "{\n  \"results\": [\n    {\n      \"data\": {\"ts\": \"2019-06-19T02:58:33Z\", \"severity\"\
+      : \"ERROR\", \"msg\": \"ERROR 2019-06-19 02:58:33,932 Service error\"},\n    },\n    {\n      \"\
+      data\": {\"ts\": \"2019-06-19T02:59:33Z\", \"severity\": \"ERROR\", \"msg\": \"ERROR 2019-06-19\
+      \ 02:59:33,950 Service error\"},\n    },\n  ],\n  \"fields\": [\n      { \"fieldName\": \"ts\",\
+      \ \"fieldType\": \"STRING\" },\n      { \"fieldName\": \"severity\", \"fieldType\": \"STRING\" },\n\
+      \      { \"fieldName\": \"msg\", \"fieldType\": \"STRING\" }\n    ]\n  \"summary\": {\n      \"\
+      resultCount\": 2,\n      \"fieldCount\": 3\n  }\n}\n"
+  SearchResult:
+    description: A log search result entry.
+    properties:
+      data:
+        description: JSON blob containing the search entry with the projected fields.
+        example: '{"ts": "2019-06-19T02:58:33Z", "severity": "ERROR", "msg": "ERROR 2019-06-19 20:58:25,932
+          Service error"}'
+        type: object
+    required:
+    - data
+    type: object
+  SearchResultSummary:
+    description: Summary of results.
+    properties:
+      fieldCount:
+        description: Total number of field schema information.
+        type: integer
+      resultCount:
+        description: Total number of search results.
+        type: integer
+    type: object
+parameters:
+  OpcRequestIdHeader:
+    description: "Unique Oracle-assigned identifier for the request. The input value can be null but an\
+      \ empty string will return an error. \nIf you need to contact Oracle about a particular request,\
+      \ please provide the request ID.\n"
+    in: header
+    name: opc-request-id
+    required: false
+    type: string
+  PaginationLimitQueryParam:
+    default: 100
+    description: 'The maximum number of items to return in a response.
+
+      '
+    in: query
+    maximum: 1000
+    minimum: 1
+    name: limit
+    required: false
+    type: integer
+  PaginationTokenQueryParam:
+    description: "For list pagination. The value of the opc-next-page response header from the previous\
+      \ \"Search\" call. \nThe input value can be null but an empty string will return an error. \nFor\
+      \ important details about how pagination works, see [List Pagination](/Content/API/Concepts/usingapi.htm#nine).\n"
+    in: query
+    maxLength: 1024
+    minLength: 1
+    name: page
+    required: false
+    type: string
+    x-default-description: 'null'
+responses:
+  400:
+    description: Bad Request
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  401:
+    description: Unauthorized
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  404:
+    description: NotAuthorizedOrNotFound
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  409:
+    description: Conflict
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  412:
+    description: Precondition failed
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  429:
+    description: Too many requests
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: Internal Server Error
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  DefaultError:
+    description: An error has occurred.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+x-anchors:
+  x-headers:
+    etag:
+      description: 'For optimistic concurrency control. See `if-match`.
+
+        '
+      type: string
+    opc-next-page: *id002
+    opc-previous-page:
+      description: 'Reserved for future use. Pagination is not supported in this API.
+
+        '
+      type: string
+    opc-request-id: *id001
+    opc-work-request-id:
+      description: 'The OCID of the work request.
+
+        '
+      type: string
+  x-properties:
+    compartmentId:
+      description: The OCID of the compartment that the log search belongs to.
+      maxLength: 255
+      minLength: 1
+      type: string
+    definedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only the String type is supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+          Example: `{"CostCenter": "42"}`
+
+          '
+        type: object
+      description: 'Defined tags for this resource. Each key is predefined and scoped to a
+
+        namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+        Example: `{"Operations": {"CostCenter": "42"}}`
+
+        '
+      type: object
+    freeformTags:
+      additionalProperties:
+        type: string
+      description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no
+
+        predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+        Example: `{"Department": "Finance"}`
+
+        '
+      type: object
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+x-oracle-package: com.oracle.hydra.ibex.frontend.public

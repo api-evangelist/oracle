@@ -1,0 +1,1763 @@
+openapi: 3.2.0
+info:
+  description: 'Use the Network Monitoring API to troubleshoot routing and security issues for resources such as virtual cloud networks (VCNs) and compute instances. For more information, see the console
+
+    documentation for the [Network Path Analyzer](/iaas/Content/Network/Concepts/path_analyzer.htm) tool.
+
+    '
+  title: Network Monitoring Vn Monitoring API
+  version: '20160918'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/8af785f2fcabba899f4f05867f7d2cb38cc822b3b1658fecd6e9a5db669bc30c.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Network Monitoring API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/8af785f2fcabba899f4f05867f7d2cb38cc822b3b1658fecd6e9a5db669bc30c.yaml
+    what: the harvested document for Network Monitoring API
+servers:
+- url: /20160918
+tags:
+- name: vnMonitoring
+paths:
+  /pathAnalysis:
+    post:
+      description: "Use this method to initiate a [Network Path Analyzer](/iaas/Content/Network/Concepts/path_analyzer.htm) analysis. This method returns\nan opc-work-request-id, and you can poll the status of the work request until it either fails or succeeds.\n\nIf the work request status is successful, use [ListWorkRequestResults](#/en/VnConfigAdvisor/latest/WorkRequestResult/ListWorkRequestResults)\nwith the work request ID to ask for the successful analysis results. If the work request status is failed, use\n[ListWorkRequestErrors](#/en/VnConfigAdvisor/latest/WorkRequestError/ListWorkRequestErrors)\nwith the work request ID to ask for the analysis failure information. The information \nreturned from either of these methods can be used to build a final report. \n"
+      operationId: GetPathAnalysis
+      parameters:
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/CacheControlHeader'
+      responses:
+        202:
+          description: The path analysis request was successfully received.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: A path analysis query.
+      tags:
+      - vnMonitoring
+      x-example: "Example 1: Path analysis with an Adhoc query\nPOST /20160918/pathAnalysis\nHost: vnca-api.us-ashburn-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"type\" : \"ADHOC_QUERY\",\n  \"compartmentId\" : \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"protocol\" : 6,\n  \"sourceEndpoint\" : {\n    \"type\" : \"COMPUTE_INSTANCE\",\n    \"address\" : \"172.16.1.50\",\n    \"instanceId\" : \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n    \"vnicId\" : \"ocid1.vnic.oc1..<var>&lt;unique_ID&gt;</var>\"\n  },\n  \"destinationEndpoint\" : {\n    \"type\" : \"COMPUTE_INSTANCE\",\n    \"address\" : \"172.16.2.100\",\n    \"instanceId\" : \"ocid1.instance.oc1..<var>&lt;unique_ID_two&gt;</var>\"\n    \"vnicId\" : \"ocid1.vnic.oc1..<var>&lt;unique_ID_two&gt;</var>\"\n  },\n  \"protocolParameters\" : {\n    \"type\" : \"TCP\",\n    \"destinationPort\" : 80\n  }\n}\n\nExample 1: Path analysis with persisted query\nPOST /20160918/pathAnalysis\nHost: vnca-api.us-ashburn-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"type\" : \"PERSISTED_QUERY\",\n  \"pathAnalyzerTestId\" : \"ocid1.pathanalyzertest.oc1..<var>&lt;unique_ID&gt;</var>\"\n}\n"
+      x-related-resource: '#/definitions/PathAnalysisWorkRequestResult'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetPathAnalysisDetails'
+        description: Details for the path analysis query.
+        required: true
+  /pathAnalyzerTests:
+    get:
+      description: 'Returns a list of all `PathAnalyzerTests` in a compartment.
+
+        '
+      operationId: ListPathAnalyzerTests
+      parameters:
+      - $ref: '#/components/parameters/CompartmentIdQueryParam'
+      - $ref: '#/components/parameters/LifecycleStateQueryParam'
+      - $ref: '#/components/parameters/DisplayNameQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/SortByQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: A list of `PathAnalyzerTest` resources is successfully returned.
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PathAnalyzerTestCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets a list of all PathAnalyzerTests in a compartment
+      tags:
+      - vnMonitoring
+      x-example: 'GET /20160918/pathAnalyzerTests?compartmentId=<var>&lt;compartment_OCID&gt;</var>&limit=10
+
+        Host: vnca-api.us-ashburn-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/PathAnalyzerTestCollection'
+    post:
+      description: Creates a new `PathAnalyzerTest` resource.
+      operationId: CreatePathAnalyzerTest
+      parameters:
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: A new `PathAnalyzerTest` resource was successfully created.
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PathAnalyzerTest'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Creates a new PathAnalyzerTest
+      tags:
+      - vnMonitoring
+      x-example: "POST /20160918/pathAnalyzerTests\nHost: vnca-api.us-ashburn-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"displayName\" : \"Path Analyzer Test\",\n  \"compartmentId\" : \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"protocol\" : 6,\n  \"sourceEndpoint\" : {\n    \"type\" : \"COMPUTE_INSTANCE\",\n    \"address\" : \"172.16.1.50\",\n    \"instanceId\" : \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n    \"vnicId\" : \"ocid1.vnic.oc1..<var>&lt;unique_ID&gt;</var>\"\n  },\n  \"destinationEndpoint\" : {\n    \"type\" : \"COMPUTE_INSTANCE\",\n    \"address\" : \"172.16.2.100\",\n    \"instanceId\" : \"ocid1.instance.oc1..<var>&lt;unique_ID_two&gt;</var>\"\n    \"vnicId\" : \"ocid1.vnic.oc1..<var>&lt;unique_ID_two&gt;</var>\"\n  },\n  \"protocolParameters\" : {\n    \"type\" : \"TCP\",\n    \"destinationPort\" : 80\n  }\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePathAnalyzerTestDetails'
+        description: Details for creating a new PathAnalyzerTest.
+        required: true
+  /pathAnalyzerTests/{pathAnalyzerTestId}:
+    delete:
+      description: Deletes a `PathAnalyzerTest` resource using its identifier.
+      operationId: DeletePathAnalyzerTest
+      parameters:
+      - $ref: '#/components/parameters/PathAnalyzerTestIdPathParam'
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        204:
+          description: The `PathAnalyzerTest` resource was deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Deletes PathAnalyzerTest
+      tags:
+      - vnMonitoring
+      x-example: 'DELETE /20160918/pathAnalyzerTests/<var>&lt;pathanalyzertest_OCID&gt;</var>
+
+        Host: vnca-api.us-ashburn-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/PathAnalyzerTest'
+    get:
+      description: Gets a `PathAnalyzerTest` using its identifier.
+      operationId: GetPathAnalyzerTest
+      parameters:
+      - $ref: '#/components/parameters/PathAnalyzerTestIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The `PathAnalyzerTest` resource was successfully returned.
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PathAnalyzerTest'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets PathAnalyzerTest
+      tags:
+      - vnMonitoring
+      x-example: 'GET /20160918/pathAnalyzerTests/<var>&lt;pathanalyzertest_OCID&gt;</var>
+
+        Host: vnca-api.us-ashburn-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: Updates a `PathAnalyzerTest` using its identifier.
+      operationId: UpdatePathAnalyzerTest
+      parameters:
+      - $ref: '#/components/parameters/PathAnalyzerTestIdPathParam'
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: The `PathAnalyzerTest` resource was successfully updated.
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PathAnalyzerTest'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        412:
+          $ref: '#/components/responses/412'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Updates PathAnalyzerTest
+      tags:
+      - vnMonitoring
+      x-example: "PUT /20160918/pathAnalyzerTests/<var>&lt;pathanalyzertest_OCID&gt;</var>\nHost: vnca-api.us-ashburn-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"displayName\" : \"Updated Path Analyzer Test\",\n  \"protocol\" : 17,\n  \"protocolParameters\" : {\n    \"type\" : \"UDP\",\n    \"destinationPort\" : 100\n  }\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePathAnalyzerTestDetails'
+        description: The information to update.
+        required: true
+  /pathAnalyzerTests/{pathAnalyzerTestId}/actions/changeCompartment:
+    post:
+      description: 'Moves a `PathAnalyzerTest` resource from one compartment to another based on the identifier.
+
+        '
+      operationId: ChangePathAnalyzerTestCompartment
+      parameters:
+      - $ref: '#/components/parameters/PathAnalyzerTestIdPathParam'
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        204:
+          description: The `PathAnalyzerTest` resource was moved to the specified compartment.
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        412:
+          $ref: '#/components/responses/412'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Moves PathAnalyzerTest resource into a different compartment.
+      tags:
+      - vnMonitoring
+      x-example: "POST /20160918/pathAnalyzerTests/<var>&lt;pathanalyzertest_OCID&gt;</var>/actions/changeCompartment\nHost: vnca-api.us-ashburn-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\"\n}\n"
+      x-related-resource: '#/definitions/PathAnalyzerTest'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePathAnalyzerTestCompartmentDetails'
+        description: The information to update.
+        required: true
+  /workRequests:
+    get:
+      description: Lists the work requests in a compartment.
+      operationId: ListWorkRequests
+      parameters:
+      - $ref: '#/components/parameters/CompartmentIdQueryParam'
+      - $ref: '#/components/parameters/WorkRequestIdQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/WorkRequestSortByQueryParam'
+      - $ref: '#/components/parameters/WorkRequestStatusQueryParam'
+      - $ref: '#/components/parameters/ResourceIdentifierQueryParam'
+      responses:
+        200:
+          description: A list of work request summaries.
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequestSummaryCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists work requests in a compartment.
+      tags:
+      - vnMonitoring
+      x-example: 'GET /20160918/workRequests?compartmentId=<var>&lt;compartment_OCID&gt;</var>&limit=10
+
+        Host: vnca-api.us-ashburn-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/WorkRequest'
+  /workRequests/{workRequestId}:
+    get:
+      description: Gets the details of a work request.
+      operationId: GetWorkRequest
+      parameters:
+      - $ref: '#/components/parameters/WorkRequestIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The details of the work request.
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            retry-after:
+              description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequest'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets the details of a work request.
+      tags:
+      - vnMonitoring
+      x-example: 'GET /20160918/workRequests/<var>&lt;workrequest_OCID&gt;</var>
+
+        Host: iaas.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/WorkRequest'
+  /workRequests/{workRequestId}/errors:
+    get:
+      description: 'Returns a (paginated) list of errors for the work request with the given ID. This information is used to build the final report output.
+
+        '
+      operationId: ListWorkRequestErrors
+      parameters:
+      - $ref: '#/components/parameters/WorkRequestIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/WorkRequestErrorSortByQueryParam'
+      responses:
+        200:
+          description: A list of work request errors.
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequestErrorCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists work request errors.
+      tags:
+      - vnMonitoring
+      x-example: 'GET /20160918/workRequests/<var>&lt;workrequest_OCID&gt;</var>/errors?limit=10
+
+        Host: vnca-api.us-ashburn-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/WorkRequestError'
+  /workRequests/{workRequestId}/logs:
+    get:
+      description: 'Returns a (paginated) list of logs for the work request with the given ID.
+
+        '
+      operationId: ListWorkRequestLogs
+      parameters:
+      - $ref: '#/components/parameters/WorkRequestIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/WorkRequestLogSortByQueryParam'
+      responses:
+        200:
+          description: A list of work request logs.
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequestLogEntryCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists work request logs.
+      tags:
+      - vnMonitoring
+      x-example: 'GET /20160918/workRequests/<var>&lt;workrequest_OCID&gt;</var>/logs?limit=10
+
+        Host: vnca-api.us-ashburn-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/WorkRequestLogEntry'
+  /workRequests/{workRequestId}/results:
+    get:
+      description: 'Returns a (paginated) list of results for a successful work request. This information is used to
+
+        build the final report output.
+
+        '
+      operationId: ListWorkRequestResults
+      parameters:
+      - $ref: '#/components/parameters/WorkRequestIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/WorkRequestResultTypeQueryParam'
+      responses:
+        200:
+          description: A list of work request results.
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequestResultCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists work request results.
+      tags:
+      - vnMonitoring
+      x-example: 'GET /20160918/workRequests/<var>&lt;workrequest_OCID&gt;</var>/results?limit=10
+
+        Host: vnca-api.us-ashburn-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/WorkRequestResult'
+components:
+  schemas:
+    UpdatePathAnalyzerTestDetails:
+      description: Details to update a `PathAnalyzerTest` resource.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        destinationEndpoint:
+          $ref: '#/components/schemas/Endpoint'
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        protocol:
+          description: The IP protocol to use in the `PathAnalyzerTest` resource.
+          maximum: 255
+          minimum: 0
+          type: integer
+        protocolParameters:
+          $ref: '#/components/schemas/ProtocolParameters'
+        queryOptions:
+          $ref: '#/components/schemas/QueryOptions'
+        sourceEndpoint:
+          $ref: '#/components/schemas/Endpoint'
+      type: object
+    ChangePathAnalyzerTestCompartmentDetails:
+      description: Details of the new `compartmentId` for the `PathAnalyzerTest` resource.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which the `PathAnalyzerTest` resource should be moved.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    Error:
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+      required:
+      - code
+      - message
+    PathAnalyzerTestSummary:
+      description: 'Defines the summary of a `PathAnalyzerTest` resource.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the `PathAnalyzerTest` resource's compartment.
+          maxLength: 100
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        destinationEndpoint:
+          $ref: '#/components/schemas/Endpoint'
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: A unique identifier established when the resource is created. The identifier can't be changed later.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current state of the `PathAnalyzerTest` resource.
+          type: string
+          x-obmcs-enumref: '#/definitions/PathAnalyzerTest/lifecycleState'
+        protocol:
+          description: The IP protocol to use for the `PathAnalyzerTest` resource.
+          maximum: 255
+          minimum: 0
+          type: integer
+        protocolParameters:
+          $ref: '#/components/schemas/ProtocolParameters'
+        queryOptions:
+          $ref: '#/components/schemas/QueryOptions'
+        sourceEndpoint:
+          $ref: '#/components/schemas/Endpoint'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the `PathAnalyzerTest` resource was created, in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the `PathAnalyzerTest` resource was last updated, in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - compartmentId
+      - protocol
+      - sourceEndpoint
+      - destinationEndpoint
+      - queryOptions
+      - timeCreated
+      - timeUpdated
+      - lifecycleState
+      type: object
+    Endpoint:
+      description: 'Information describing a source or destination in a `PathAnalyzerTest` resource.
+
+        '
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: The type of the `Endpoint`.
+          enum:
+          - IP_ADDRESS
+          - SUBNET
+          - COMPUTE_INSTANCE
+          - VNIC
+          - LOAD_BALANCER
+          - LOAD_BALANCER_LISTENER
+          - NETWORK_LOAD_BALANCER
+          - NETWORK_LOAD_BALANCER_LISTENER
+          - VLAN
+          - ON_PREM
+          type: string
+      required:
+      - type
+      type: object
+    PathAnalyzerTest:
+      description: 'Defines the details saved in a `PathAnalyzerTest` resource. These configuration details are used to
+
+        run a [Network Path Analyzer](/iaas/Content/Network/Concepts/path_analyzer.htm) analysis.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the `PathAnalyzerTest` resource's compartment.
+          maxLength: 100
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        destinationEndpoint:
+          $ref: '#/components/schemas/Endpoint'
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: 'A unique identifier established when the resource is created. The identifier can''t be changed later.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current state of the `PathAnalyzerTest` resource.
+          enum:
+          - ACTIVE
+          - DELETED
+          type: string
+        protocol:
+          description: The IP protocol to use for the `PathAnalyzerTest` resource.
+          maximum: 255
+          minimum: 0
+          type: integer
+        protocolParameters:
+          $ref: '#/components/schemas/ProtocolParameters'
+        queryOptions:
+          $ref: '#/components/schemas/QueryOptions'
+        sourceEndpoint:
+          $ref: '#/components/schemas/Endpoint'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the `PathAnalyzerTest` resource was created, in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the `PathAnalyzerTest` resource was last updated, in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - compartmentId
+      - protocol
+      - sourceEndpoint
+      - destinationEndpoint
+      - queryOptions
+      - timeCreated
+      - timeUpdated
+      - lifecycleState
+      type: object
+      x-example: "{\n  \"id\" : \"ocid1.pathanalyzertest.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"displayName\" : \"Path Analyzer Test\",\n  \"compartmentId\" : \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"protocol\" : 6,\n  \"sourceEndpoint\" : {\n    \"type\" : \"COMPUTE_INSTANCE\",\n    \"address\" : \"172.16.1.50\",\n    \"instanceId\" : \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n    \"vnicId\" : \"ocid1.vnic.oc1..<var>&lt;unique_ID&gt;</var>\"\n  },\n  \"destinationEndpoint\" : {\n    \"type\" : \"COMPUTE_INSTANCE\",\n    \"address\" : \"172.16.2.100\",\n    \"instanceId\" : \"ocid1.instance.oc1..<var>&lt;unique_ID_two&gt;</var>\"\n    \"vnicId\" : \"ocid1.vnic.oc1..<var>&lt;unique_ID_two&gt;</var>\"\n  },\n  \"protocolParameters\" : {\n    \"type\" : \"TCP\",\n    \"destinationPort\" : 80\n  },\n  \"queryOptions\" : {\n    \"isBiDirectionalAnalysis\" : true\n  },\n  \"timeCreated\": \"2016-10-03T17:04:47.627Z\",\n  \"timeUpdated\": \"2016-10-04T17:04:47.627Z\",\n  \"lifecycleState\": \"ACTIVE\"\n}\n"
+    WorkRequestResult:
+      description: 'Ephemeral data resulting from an asynchronous operation.
+
+        '
+      discriminator:
+        propertyName: resultType
+      properties:
+        resultType:
+          description: Type of `WorkRequestResult`.
+          enum:
+          - PATH_ANALYSIS
+          type: string
+      required:
+      - resultType
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
+
+            A resource being created, updated, or deleted will remain in the `IN_PROGRESS` state until
+
+            work is complete for that resource at which point it will transition to `CREATED`, `UPDATED`,
+
+            or `DELETED`, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type the work request affects.
+          type: string
+        entityUri:
+          description: The URI path that you can do a GET operation on to access the resource metadata.
+          type: string
+        identifier:
+          description: The identifier of the resource the work request affects.
+          type: string
+      required:
+      - entityType
+      - actionType
+      - identifier
+    WorkRequestSummaryCollection:
+      description: Results of a `WorkRequest` search.
+      properties:
+        items:
+          description: List of `WorkRequestSummary` objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "[{\n  \"operationType\" : \"CREATE_PATH_ANALYIS_RESULT\",\n  \"compartmentId\" : \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"id\" : \"ocid1.workrequest.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"resources\" : [],\n  \"percentComplete\" : 50.0,\n  \"status\" : \"IN_PROGRESS\",\n  \"timeAccepted\": \"2016-10-03T17:04:47.627Z\",\n  \"timeStarted\": \"2016-10-03T17:05:47.627Z\",\n  \"timeFinished\": \"2016-10-03T17:06:47.627Z\"\n}]\n"
+    ProtocolParameters:
+      description: Defines the IP protocol parameters for a `PathAnalyzerTest` resource.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: The type of the `ProtocolParameters` object.
+          enum:
+          - TCP
+          - UDP
+          - ICMP
+          type: string
+      required:
+      - type
+      type: object
+    PathAnalyzerTestCollection:
+      description: The results of a `ListPathAnalyzerTests` call in the current compartment.
+      properties:
+        items:
+          description: A list of `PathAnalyzerTestSummary` items.
+          items:
+            $ref: '#/components/schemas/PathAnalyzerTestSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "[{\n  \"id\" : \"ocid1.pathanalyzertest.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"displayName\" : \"Path Analyzer Test\",\n  \"compartmentId\" : \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"protocol\" : 6,\n  \"sourceEndpoint\" : {\n    \"type\" : \"COMPUTE_INSTANCE\",\n    \"address\" : \"172.16.1.50\",\n    \"instanceId\" : \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n    \"vnicId\" : \"ocid1.vnic.oc1..<var>&lt;unique_ID&gt;</var>\"\n  },\n  \"destinationEndpoint\" : {\n    \"type\" : \"COMPUTE_INSTANCE\",\n    \"address\" : \"172.16.2.100\",\n    \"instanceId\" : \"ocid1.instance.oc1..<var>&lt;unique_ID_two&gt;</var>\"\n    \"vnicId\" : \"ocid1.vnic.oc1..<var>&lt;unique_ID_two&gt;</var>\"\n  },\n  \"protocolParameters\" : {\n    \"type\" : \"TCP\",\n    \"destinationPort\" : 80\n  },\n  \"queryOptions\" : {\n    \"isBiDirectionalAnalysis\" : true\n  },\n  \"timeCreated\": \"2016-10-03T17:04:47.627Z\",\n  \"timeUpdated\": \"2016-10-04T17:04:47.627Z\",\n  \"lifecycleState\": \"ACTIVE\"\n}]\n"
+    QueryOptions:
+      description: Defines the query options required for a `PathAnalyzerTest` resource.
+      properties:
+        isBiDirectionalAnalysis:
+          default: true
+          description: If true, a path analysis is done for both the forward and reverse routes.
+          type: boolean
+      type: object
+    WorkRequestErrorCollection:
+      description: Results of a `WorkRequestError` search.
+      properties:
+        items:
+          description: List of `WorkRequestError` objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "[{\n  \"code\" : \"InternalError\",\n  \"message\" : \"Failed to process request.\",\n  \"timestamp\": \"2016-10-03T17:04:47.627Z\"\n}]\n"
+    CreatePathAnalyzerTestDetails:
+      description: Details used to create a `PathAnalyzerTest` resource.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the `PathAnalyzerTest` resource's compartment.
+          maxLength: 100
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        destinationEndpoint:
+          $ref: '#/components/schemas/Endpoint'
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        protocol:
+          description: The IP protocol to use in the `PathAnalyzerTest` resource.
+          maximum: 255
+          minimum: 0
+          type: integer
+        protocolParameters:
+          $ref: '#/components/schemas/ProtocolParameters'
+        queryOptions:
+          $ref: '#/components/schemas/QueryOptions'
+        sourceEndpoint:
+          $ref: '#/components/schemas/Endpoint'
+      required:
+      - compartmentId
+      - protocol
+      - sourceEndpoint
+      - destinationEndpoint
+      type: object
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment
+
+            that contains the work request.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+          maxLength: 255
+          minLength: 1
+          type: string
+        operationType:
+          description: Type of the work request.
+          enum:
+          - CREATE_PATH_ANALYSIS_RESULT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the work request was created, in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the work request reached a terminal state, either `FAILED` or `SUCCEEDED`,
+
+            in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the work request transitioned from `ACCEPTED` to `IN_PROGRESS`,
+
+            in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - compartmentId
+      - id
+      - resources
+      - percentComplete
+      - status
+      - timeAccepted
+    WorkRequestError:
+      description: An error encountered while executing an operation that is tracked by a work request.
+      properties:
+        code:
+          description: A machine-usable code for the error that occured.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+        timestamp:
+          description: 'The date and time the error occurred, in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    WorkRequestLogEntry:
+      description: A log message from executing an operation that is tracked by a work request.
+      properties:
+        message:
+          description: A human-readable log message.
+          type: string
+        timestamp:
+          description: 'The date and time the log message was written, in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    WorkRequestResultCollection:
+      description: Results of a `WorkRequestResult` search.
+      properties:
+        items:
+          description: List of `WorkRequestResult` objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestResult'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "[{\n  \"resultType\" : \"PATH_ANALYSIS\",\n  \"paths\" : [{\n    \"forwardRoute\" : {\n      \"reachabilityStatus\" : \"REACHABLE\",\n      \"nodes\" : [{\n        \"type\" : \"VISIBLE\",\n        \"egressTraffic\" : {\n          \"protocol\" : 6,\n          \"sourceAddress\" : \"172.16.1.50\",\n          \"destinationAddress\" : \"172.16.2.100\",\n          \"trafficProtocolParameters\" : {\n            \"type\" : \"TCP\",\n            \"destinationPort\" : 80\n          }\n        },\n        \"nextHopRoutingAction\" : {\n          \"action\" : \"FORWARD\",\n          \"actionType\": \"IMPLICIT\"\n        },\n        \"egressSecurityAction\" : {\n          \"action\" : \"ALLOWED\",\n          \"actionType\": \"IMPLICIT\"\n        },\n        \"ingressSecurityAction\" : {\n          \"action\" : \"ALLOWED\",\n          \"actionType\": \"IMPLICIT\"\n        }\n      }]\n    },\n    \"topology\" : {\n      \"type\" : \"PATH\",\n      \"entities\" : [{}],\n      \"relationships\" : [{\n        \"id1\" : \"ocid1.entity1.oc1..<var>&lt;unique_ID&gt;</var>\",\n        \"id2\" : \"ocid1.entity2.oc1..<var>&lt;unique_ID&gt;</var>\",\n        \"type\" : \"CONTAINS\"\n      }],\n      \"timeCreated\": \"2016-10-03T17:03:47.627Z\"\n    }\n  }],\n  \"timeCreated\": \"2016-10-03T17:04:47.627Z\"\n}]\n"
+    WorkRequestLogEntryCollection:
+      description: Results of a `WorkRequestLog` search.
+      properties:
+        items:
+          description: List of work request log entries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "[{\n  \"message\" : \"Retrieving tenancy snapshot\",\n  \"timestamp\": \"2016-10-03T17:04:47.627Z\"\n}]\n"
+    WorkRequest:
+      description: An asynchronous work request.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment
+
+            that contains the work request.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+          maxLength: 255
+          minLength: 1
+          type: string
+        operationType:
+          description: Type of the work request.
+          enum:
+          - CREATE_PATH_ANALYSIS_RESULT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the work request was created, in the format defined by  [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the work request reached a terminal state, either `FAILED` or `SUCCEEDED`.
+
+            Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the work request transitioned from `ACCEPTED` to `IN_PROGRESS`,
+
+            in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - compartmentId
+      - id
+      - resources
+      - percentComplete
+      - status
+      - timeAccepted
+      x-example: "{\n  \"operationType\" : \"CREATE_PATH_ANALYIS_RESULT\",\n  \"compartmentId\" : \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"id\" : \"ocid1.workrequest.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"resources\" : [],\n  \"percentComplete\" : 50.0,\n  \"status\" : \"IN_PROGRESS\",\n  \"timeAccepted\": \"2016-10-03T17:04:47.627Z\",\n  \"timeStarted\": \"2016-10-03T17:05:47.627Z\",\n  \"timeFinished\": \"2016-10-03T17:06:47.627Z\"\n}\n"
+    GetPathAnalysisDetails:
+      description: Defines the configuration for getting a path analysis.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: The type of the `PathAnalysis` query.
+          enum:
+          - PERSISTED_QUERY
+          - ADHOC_QUERY
+          type: string
+      required:
+      - type
+      type: object
+  parameters:
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List"
+
+        call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide one sort order (`sortOrder`). Default order for
+
+        TIMECREATED is descending. Default order for DISPLAYNAME is ascending. The DISPLAYNAME
+
+        sort order is case sensitive.
+
+
+        **Note:** In general, some "List" operations (for example, `ListInstances`) let you
+
+        optionally filter by availability domain if the scope of the resource type is within a
+
+        single availability domain. If you call one of these "List" operations without specifying
+
+        an availability domain, the resources are grouped by availability domain, then sorted.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      x-default-description: The default field to sort by varies by API.
+      schema:
+        type: string
+        enum:
+        - TIMECREATED
+        - DISPLAYNAME
+    ResourceIdentifierQueryParam:
+      description: The ID of the resource affected by the work request.
+      in: query
+      name: resourceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    PathAnalyzerTestIdPathParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the `PathAnalyzerTest` resource.
+      in: path
+      name: pathAnalyzerTestId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the `if-match`
+
+        parameter to the value of the etag from a previous GET or POST response for that resource. The resource
+
+        will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      schema:
+        type: string
+    WorkRequestStatusQueryParam:
+      description: A filter to return only resources whose `lifecycleState` matches the given `OperationStatus`.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+    CacheControlHeader:
+      description: 'The Cache-Control HTTP header holds directives (instructions)
+
+        for caching in both requests and responses.
+
+        '
+      in: header
+      name: cache-control
+      x-default-description: ''
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `50`
+
+        '
+      in: query
+      name: limit
+      x-default-description: The default maximum results per page varies by API.
+      schema:
+        type: integer
+        maximum: 100
+        minimum: 1
+    WorkRequestLogSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. The default order for `timeCreated` is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        default: timeCreated
+    LifecycleStateQueryParam:
+      description: A filter that returns only resources whose `lifecycleState` matches the given `lifecycleState`.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/PathAnalyzerTest/lifecycleState'
+      schema:
+        type: string
+    WorkRequestIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The DISPLAYNAME sort order
+
+        is case sensitive.
+
+        '
+      in: query
+      name: sortOrder
+      required: false
+      x-default-description: The default sort order varies by API.
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestResultTypeQueryParam:
+      description: The type of results to return.
+      in: query
+      name: resultType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/WorkRequestResult/resultType'
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations (for example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        may be rejected).
+
+        '
+      in: header
+      name: opc-retry-token
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter that returns only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. The default order for `timeAccepted` is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    RequestIdHeader:
+      description: 'Unique identifier for the request.
+
+        If you need to contact Oracle about a particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+        pattern: '[A-Za-z0-9\-_\.]+'
+    WorkRequestErrorSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. The default order for `timeCreated` is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        default: timeCreated
+  responses:
+    DefaultError:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-anchors:
+  x-headers:
+    displayName:
+      description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+        Avoid entering confidential information.
+
+        '
+      maxLength: 255
+      minLength: 1
+      type: string
+    etag:
+      description: 'For optimistic concurrency control. See `if-match`.
+
+        '
+      type: string
+    opc-next-page:
+      description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+        then a partial list might have been returned. Include this value as the `page` parameter for the
+
+        subsequent GET request to get the next batch of items.
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+    opc-work-request-id:
+      description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+        '
+      type: string
+    retry-after:
+      description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+      type: integer
+  x-properties:
+    definedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+        Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+        '
+      type: object
+    freeformTags:
+      additionalProperties:
+        type: string
+      description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+        Example: `{"bar-key": "value"}`
+
+        '
+      type: object
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+x-oracle-package: com.oracle.pic.vnmonitoring

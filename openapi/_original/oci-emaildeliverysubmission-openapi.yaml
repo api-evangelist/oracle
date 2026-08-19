@@ -1,0 +1,427 @@
+swagger: '2.0'
+info:
+  description: 'Use the Email Delivery API to send high-volume and application-generated emails.
+
+    For more information, see [Overview of the Email Delivery Service](/iaas/Content/Email/Concepts/overview.htm).
+
+    '
+  license:
+    name: Oracle Corporation
+  title: Email Delivery Submission API
+  version: '20220926'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/4e3a56bac2b61ee8cac57b79e304d7ea39b7d9d7a505e3b06e38116ff0b5f8e8.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Email Delivery Submission API OCI service and stored
+      verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/4e3a56bac2b61ee8cac57b79e304d7ea39b7d9d7a505e3b06e38116ff0b5f8e8.yaml
+    what: the harvested document for Email Delivery Submission API
+host: 127.0.0.1
+basePath: /20220926
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /actions/submitEmail:
+    post:
+      description: Submits a formatted email.
+      operationId: SubmitEmail
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - description: Parameters for submitEmail API.
+        in: body
+        name: SubmitEmailDetails
+        required: true
+        schema:
+          $ref: '#/definitions/SubmitEmailDetails'
+      responses:
+        '200':
+          description: Email accepted.
+          headers:
+            opc-request-id: &id001
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/EmailSubmittedResponse'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '413':
+          $ref: '#/responses/413'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Submits an email.
+      tags:
+      - ${submit-email-tag}
+  /actions/submitRawEmail:
+    post:
+      consumes:
+      - message/rfc822
+      - message/global
+      description: Submits a raw email.
+      operationId: SubmitRawEmail
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/OptionalContentLengthHeader'
+      - $ref: '#/parameters/RequiredContentTypeHeader'
+      - $ref: '#/parameters/RequiredCompartmentIdHeader'
+      - $ref: '#/parameters/RequiredSenderHeader'
+      - $ref: '#/parameters/RequiredRecipientsHeader'
+      - description: This should be formatted in valid MIME format. Message can include attachments. MIME
+          libraries should be used to convert the content into the appropriate format.
+        in: body
+        name: RawMessage
+        required: true
+        schema:
+          format: binary
+          type: string
+      responses:
+        '200':
+          description: Email accepted.
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailRawSubmittedResponse'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '413':
+          $ref: '#/responses/413'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Submits a raw email.
+      tags:
+      - ${submit-raw-email-tag}
+definitions:
+  EmailAddress:
+    description: Email address Object that holds display name and email address.
+    properties:
+      email:
+        description: ASCII only email address.
+        maxLength: 256
+        minLength: 1
+        type: string
+      name:
+        description: Display name for the email address. UTF-8 is supported for display name [RFC 2047](https://www.rfc-editor.org/rfc/rfc2047).
+        maxLength: 256
+        minLength: 1
+        type: string
+    required:
+    - email
+    type: object
+  EmailRawSubmittedResponse:
+    description: Response object that is returned to sender upon successfully submitting the email request.
+    properties:
+      envelopeId:
+        description: Email Delivery generated unique Envelope ID of the email submission. If you need
+          to contact Email Delivery about a particular request, please provide the Envelope ID.
+        maxLength: 100
+        minLength: 1
+        type: string
+      messageId:
+        description: 'The unique ID for the email''s Message-ID header used for service log correlation.
+
+          Example: sdiofu234qwermls24fd@mail.example.com
+
+          '
+        maxLength: 320
+        minLength: 1
+        type: string
+      suppressedRecipients:
+        description: Return list of suppressed email addresses.
+        items:
+          maxLength: 256
+          minLength: 1
+          type: string
+        maxItems: 50
+        minItems: 1
+        type: array
+    required:
+    - envelopeId
+    - suppressedRecipients
+    type: object
+  EmailSubmittedResponse:
+    description: Response object that is returned to sender upon successfully submitting the email request.
+    properties:
+      envelopeId:
+        description: Email Delivery generated unique Envelope ID of the email submission. If you need
+          to contact Email Delivery about a particular request, please provide the Envelope ID.
+        maxLength: 100
+        minLength: 1
+        type: string
+      messageId:
+        description: 'The unique ID for the email''s Message-ID header used for service log correlation.
+
+          Example: sdiofu234qwermls24fd@mail.example.com
+
+          '
+        maxLength: 320
+        minLength: 1
+        type: string
+      suppressedRecipients:
+        description: Return list of suppressed email addresses.
+        items:
+          $ref: '#/definitions/EmailAddress'
+        type: array
+    required:
+    - messageId
+    - envelopeId
+    - suppressedRecipients
+    type: object
+  Error:
+    description: An error has occurred.
+    properties:
+      code:
+        description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+          [API Errors](/Content/API/References/apierrors.htm).
+
+          '
+        type: string
+      message:
+        description: A human-readable error string.
+        type: string
+    required:
+    - code
+    - message
+  Recipients:
+    description: 'The destination for the email, composed of To, CC, and BCC fields.
+
+      NOTE: At least one of To, CC, and BCC must be provided. And max 50 recipients are allowed across
+      the To:, CC: and BCC: fields.
+
+      '
+    properties:
+      bcc:
+        description: Array of BCC address. Bcc headers can only be viewed by non bcc recipients.
+        items:
+          $ref: '#/definitions/EmailAddress'
+        type: array
+      cc:
+        description: Array of CC address.
+        items:
+          $ref: '#/definitions/EmailAddress'
+        type: array
+      to:
+        description: Array of To address.
+        items:
+          $ref: '#/definitions/EmailAddress'
+        type: array
+    type: object
+  Sender:
+    description: The envelope and the header from email address details, that is sending the email. Email
+      address must be an approved sender.
+    properties:
+      compartmentId:
+        description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains the approved sender resource.
+        maxLength: 255
+        minLength: 1
+        type: string
+      senderAddress:
+        $ref: '#/definitions/EmailAddress'
+    required:
+    - senderAddress
+    - compartmentId
+    type: object
+  SubmitEmailDetails:
+    description: Details that are required by the sender to submit a request to send email.
+    properties:
+      bodyHtml:
+        description: 'HTML body content in UTF-8.
+
+          NOTE: Even though bodytext and bodyhtml are both optional, at least one of them must be provided.
+
+          '
+        maxLength: 62000000
+        minLength: 1
+        type: string
+      bodyText:
+        description: 'Text body content.
+
+          NOTE: Even though bodytext and bodyhtml are both optional, at least one of them must be provided.
+
+          '
+        maxLength: 62000000
+        minLength: 1
+        type: string
+      headerFields:
+        additionalProperties:
+          type: string
+        description: 'The header used by the customer for the email sent. Reserved headers are not allowed
+          e.g "subject", "from", and "to" etc.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      messageId:
+        description: 'The unique ID for the email''s Message-ID header used for service log correlation.
+          The submission will return an error if the syntax is not a valid [RFC 5322](https://www.rfc-editor.org/rfc/rfc5322)
+          Message-ID. This will be generated if not provided.
+
+          Example: sdiofu234qwermls24fd@mail.example.com
+
+          '
+        maxLength: 320
+        minLength: 1
+        type: string
+      recipients:
+        $ref: '#/definitions/Recipients'
+      replyTo:
+        description: The email address for the recipient to reply to. If left blank, defaults to the sender
+          address.
+        items:
+          $ref: '#/definitions/EmailAddress'
+        type: array
+      sender:
+        $ref: '#/definitions/Sender'
+      subject:
+        description: A short summary of the content, which will appear in the recipient's inbox. UTF-8
+          supported [RFC 2047](https://www.rfc-editor.org/rfc/rfc2047).
+        maxLength: 256
+        minLength: 1
+        type: string
+    required:
+    - sender
+    - recipients
+    - subject
+    type: object
+parameters:
+  OptionalContentLengthHeader:
+    description: The content length of the body.
+    format: int64
+    in: header
+    name: content-length
+    type: integer
+    x-default-description: 'null'
+  RequestIdHeader:
+    description: The request ID for tracing from the system
+    in: header
+    name: opc-request-id
+    type: string
+  RequiredCompartmentIdHeader:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains
+      the approved sender resource.
+    in: header
+    maxLength: 255
+    minLength: 1
+    name: compartment-id
+    required: true
+    type: string
+  RequiredContentTypeHeader:
+    description: The media type of the body.
+    enum:
+    - message/rfc822
+    - message/global
+    in: header
+    name: content-type
+    required: true
+    type: string
+  RequiredRecipientsHeader:
+    description: "The destination for the email, all recipients including to, cc and bcc addresses. \n"
+    in: header
+    items:
+      maxLength: 256
+      minLength: 1
+      type: string
+    maxItems: 50
+    minItems: 1
+    name: recipients
+    required: true
+    type: array
+  RequiredSenderHeader:
+    description: The envelope and the header from email address, that is sending the email. Email address
+      must be an approved sender.
+    in: header
+    maxLength: 256
+    minLength: 1
+    name: sender
+    required: true
+    type: string
+responses:
+  '400':
+    description: Incorrectly formatted request. | Limit exceeded. | Related resource not authorized or
+      not found
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '401':
+    description: 'The required information to complete authentication was not provided or
+
+      was incorrect. Extra detail may be provided in the response body.
+
+      '
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '404':
+    description: Authorization failed or the requested resource was not found.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '413':
+    description: The request entity is larger than limits defined by server for your tenancy.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '429':
+    description: Too Many Requests
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '500':
+    description: Internal Server Error.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  Error:
+    description: An error has occurred.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  default:
+    description: Unknown Error
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+x-anchors:
+  x-headers:
+    opc-request-id: *id001
+x-obmcs-client-retries-enabled: true
+x-oracle-package: com.oracle.pic.email

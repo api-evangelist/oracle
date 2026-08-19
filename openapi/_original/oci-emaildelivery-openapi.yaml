@@ -1,0 +1,4828 @@
+swagger: '2.0'
+info:
+  description: "Use the Email Delivery API to do the necessary set up to send high-volume and application-generated\
+    \ emails through the OCI Email Delivery service.\nFor more information, see [Overview of the Email\
+    \ Delivery Service](/iaas/Content/Email/Concepts/overview.htm).\n\n **Note:** Write actions (POST,\
+    \ UPDATE, DELETE) may take several minutes to propagate and be reflected by the API.\n If a subsequent\
+    \ read request fails to reflect your changes, wait a few minutes and try again.\n"
+  license:
+    name: Oracle Corporation
+  title: Email Delivery API
+  version: '20170907'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/2b8421e2e819f20bff147090f9d2586190bb5c6d3b8562ffb01d9f9fa99542be.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Email Delivery API OCI service and stored verbatim;
+      API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/2b8421e2e819f20bff147090f9d2586190bb5c6d3b8562ffb01d9f9fa99542be.yaml
+    what: the harvested document for Email Delivery API
+host: 127.0.0.1
+basePath: /20170907
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /configuration:
+    get:
+      description: 'Returns  email configuration associated with the specified compartment.
+
+        '
+      operationId: GetEmailConfiguration
+      parameters:
+      - $ref: '#/parameters/compartmentIdQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        '200':
+          description: Email configuration object.
+          headers:
+            opc-request-id: &id001
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/Configuration'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Get Email Configuration
+      tags:
+      - ${email-configuration-tag}
+      x-related-resource: '#/definitions/Configuration'
+  /dkims:
+    get:
+      description: Lists DKIMs for an email domain.
+      operationId: ListDkims
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/EmailDomainIdQueryParam'
+      - $ref: '#/parameters/FilterByIdQueryParam'
+      - $ref: '#/parameters/FilterByNameQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - description: 'Filter returned list by specified lifecycle state. This parameter is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        type: string
+        x-obmcs-enumref: '#/definitions/Dkim/lifecycleState'
+      - default: TIMECREATED
+        description: 'Specifies the attribute with which to sort the DKIMs.
+
+
+          Default: `TIMECREATED`
+
+
+          * **TIMECREATED:** Sorts by timeCreated.
+
+          * **NAME:** Sorts by name.
+
+          * **ID:** Sorts by id.
+
+          '
+        enum:
+        - TIMECREATED
+        - ID
+        - NAME
+        in: query
+        name: sortBy
+        required: false
+        type: string
+      responses:
+        '200':
+          description: Success
+          headers:
+            opc-next-page: &id005
+              description: 'For list pagination. When this header appears in the response, additional
+                pages of results remain.
+
+                For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              type: string
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/DkimCollection'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Lists DKIMs for an email domain.
+      tags:
+      - ${dkim-tag}
+      x-example: 'Sample: List all DKIMs, sorted by newest first
+
+
+        GET /20170907/dkims HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+    post:
+      description: 'Creates a new DKIM for an email domain.
+
+        This DKIM signs all approved senders in the tenancy that are in this email domain.
+
+        Best security practices indicate to periodically rotate the DKIM that is doing the signing.
+
+        When a second DKIM is applied, all senders seamlessly pick up the new key
+
+        without interruption in signing.
+
+        '
+      operationId: CreateDkim
+      parameters:
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - description: The DKIM details.
+        in: body
+        name: CreateDkimDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateDkimDetails'
+      responses:
+        '201':
+          description: Success
+          headers:
+            Content-Location: &id002
+              description: 'The full URI of the resource related to the request
+
+                '
+              format: uri-reference
+              type: string
+            Location: *id002
+            etag: &id004
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              type: string
+            opc-request-id: *id001
+            opc-work-request-id: &id003
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use
+                this to query status of the asynchronous operation.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/Dkim'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Creates a new DKIM for an email domain.
+      tags:
+      - ${dkim-tag}
+      x-example: 'POST /20170907/dkims HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+  /dkims/{dkimId}:
+    delete:
+      description: 'Deletes a DKIM.
+
+        If this key is currently the active key for the email domain, deleting the key
+
+        will stop signing the domain''s outgoing mail.
+
+        DKIM keys are left in DELETING state for about a day to allow DKIM signatures on
+
+        in-transit mail to be validated.
+
+        Consider creating a new DKIM for this domain so the signing can be rotated to it instead of deletion.
+
+        '
+      operationId: DeleteDkim
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/DkimIdPathParam'
+      responses:
+        '202':
+          description: 'The request to delete DKIM was accepted for processing.
+
+            '
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '412':
+          $ref: '#/responses/412'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Deletes a DKIM.
+      tags:
+      - ${dkim-tag}
+      x-example: 'DELETE /20170907/dkims/ocid1.emaildkim.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+    get:
+      description: Retrieves the specified DKIM.
+      operationId: GetDkim
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/DkimIdPathParam'
+      responses:
+        '200':
+          description: Success
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Dkim'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Retrieves the specified DKIM.
+      tags:
+      - ${dkim-tag}
+      x-example: 'GET /20170907/dkims/ocid1.emaildkim.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+    put:
+      description: Modifies a DKIM.
+      operationId: UpdateDkim
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/DkimIdPathParam'
+      - description: The new DKIM attributes to apply.
+        in: body
+        name: UpdateDkimDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateDkimDetails'
+      responses:
+        '202':
+          description: 'The request to update DKIM was accepted for processing.
+
+            '
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Modifies a DKIM.
+      tags:
+      - ${dkim-tag}
+      x-example: 'PUT /20170907/dkims/ocid1.emaildkim.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Dkim'
+  /emailDomains:
+    get:
+      description: Lists email domains in the specified compartment.
+      operationId: ListEmailDomains
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/compartmentIdQueryParam'
+      - $ref: '#/parameters/FilterByIdQueryParam'
+      - $ref: '#/parameters/FilterByNameQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - description: 'Filter returned list by specified lifecycle state. This parameter is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        type: string
+        x-obmcs-enumref: '#/definitions/EmailDomain/lifecycleState'
+      - default: TIMECREATED
+        description: 'Specifies the attribute with which to sort the email domains.
+
+
+          Default: `TIMECREATED`
+
+
+          * **TIMECREATED:** Sorts by timeCreated.
+
+          * **NAME:** Sorts by name.
+
+          * **ID:** Sorts by id.
+
+          '
+        enum:
+        - TIMECREATED
+        - ID
+        - NAME
+        in: query
+        name: sortBy
+        required: false
+        type: string
+      responses:
+        '200':
+          description: Success
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailDomainCollection'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Lists email domains.
+      tags:
+      - ${email-domain-tag}
+      x-example: 'Sample: List all email domains in a compartment, sorted by newest first
+
+
+        GET /20170907/emailDomains?compartmentId=ocid1.compartment.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailDomain'
+    post:
+      description: Creates a new email domain. Avoid entering confidential information.
+      operationId: CreateEmailDomain
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - description: The email domain to create.
+        in: body
+        name: CreateEmailDomainDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateEmailDomainDetails'
+      responses:
+        '201':
+          description: Success
+          headers:
+            Content-Location: *id002
+            Location: *id002
+            etag: *id004
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+          schema:
+            $ref: '#/definitions/EmailDomain'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Creates a new email domain.
+      tags:
+      - ${email-domain-tag}
+      x-example: 'POST /20170907/emailDomains HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailDomain'
+  /emailDomains/{emailDomainId}:
+    delete:
+      description: Deletes an email domain.
+      operationId: DeleteEmailDomain
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/EmailDomainIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      responses:
+        '202':
+          description: 'The request to delete the email domain was accepted for processing.
+
+            '
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '412':
+          $ref: '#/responses/412'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Deletes an email domain.
+      tags:
+      - ${email-domain-tag}
+      x-example: 'DELETE /20170907/emailDomains/ocid1.emailemaildomain.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailDomain'
+    get:
+      description: Retrieves the specified email domain.
+      operationId: GetEmailDomain
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/EmailDomainIdPathParam'
+      responses:
+        '200':
+          description: Success
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailDomain'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Retrieves the specified email domain.
+      tags:
+      - ${email-domain-tag}
+      x-example: 'GET /20170907/emailDomains/ocid1.emailemaildomain.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailDomain'
+    put:
+      description: Modifies an email domain.
+      operationId: UpdateEmailDomain
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/EmailDomainIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      - description: The new email domain attributes to apply.
+        in: body
+        name: UpdateEmailDomainDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateEmailDomainDetails'
+      responses:
+        '202':
+          description: 'The request to update the email domain was accepted for processing.
+
+            '
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Modifies an email domain.
+      tags:
+      - ${email-domain-tag}
+      x-example: 'PUT /20170907/emailDomains/ocid1.emailemaildomain.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailDomain'
+  /emailDomains/{emailDomainId}/actions/addLock:
+    post:
+      description: Adds a lock to a resource.
+      operationId: AddEmailDomainLock
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/EmailDomainIdPathParam'
+      - description: Details for adding a lock to a resource.
+        in: body
+        name: AddLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/AddLockDetails'
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Lock is added.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailDomain'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Adds a lock to a resource.
+      tags:
+      - ${email-domain-tag}
+      x-related-resource: '#/definitions/EmailDomain'
+  /emailDomains/{emailDomainId}/actions/changeCompartment:
+    post:
+      description: 'Moves an email domain into a different compartment.
+
+        When provided, If-Match is checked against ETag value of the resource.
+
+        For information about moving resources between compartments, see
+
+        [Moving Resources to a Different Compartment](/iaas/Content/Identity/Tasks/managingcompartments.htm#moveRes).
+
+
+        **Note:** All DKIM objects associated with this email domain will also be moved into the provided
+        compartment.
+
+        '
+      operationId: ChangeEmailDomainCompartment
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/EmailDomainIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      - description: The configuration details for the move operation.
+        in: body
+        name: ChangeEmailDomainCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeEmailDomainCompartmentDetails'
+      responses:
+        202:
+          description: 'The request to move the email domain to a different compartment was accepted for
+            processing.
+
+            '
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Moves an email domain into a different compartment.
+      tags:
+      - ${email-domain-tag}
+      x-example: "POST /20170907/emailDomains/ocid1.emailemaildomain.oc1.../actions/changeCompartment\
+        \ HTTP/1.1\nHost: ctrl.email.us-phoenix-1.oci.oraclecloud.com\n <var>&lt;authorization and other\
+        \ headers&gt;</var>\n"
+      x-related-resource: '#/definitions/EmailDomain'
+  /emailDomains/{emailDomainId}/actions/removeLock:
+    post:
+      description: Remove a lock to a resource.
+      operationId: RemoveEmailDomainLock
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/EmailDomainIdPathParam'
+      - description: Details for removing a lock from a resource.
+        in: body
+        name: RemoveLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/RemoveLockDetails'
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Lock is Removed.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailDomain'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Remove a lock to a resource.
+      tags:
+      - ${email-domain-tag}
+      x-related-resource: '#/definitions/EmailDomain'
+  /emailIpPools:
+    get:
+      description: Returns a list of EmailIpPools.
+      operationId: ListEmailIpPools
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/compartmentIdQueryParam'
+      - $ref: '#/parameters/FilterByIdQueryParam'
+      - $ref: '#/parameters/FilterByNameQueryParam'
+      - description: 'Filter returned list by specified lifecycle state. This parameter is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        type: string
+        x-obmcs-enumref: '#/definitions/EmailIpPool/lifecycleState'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - default: TIMECREATED
+        description: 'Specifies the attribute with which to sort the Email IpPools.
+
+
+          Default: `TIMECREATED`
+
+
+          * **TIMECREATED:** Sorts by timeCreated.
+
+          '
+        enum:
+        - TIMECREATED
+        - NAME
+        in: query
+        name: sortBy
+        required: false
+        type: string
+      responses:
+        200:
+          description: Success
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailIpPoolCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Gets a list of all EmailIpPools in the specified compartment
+      tags:
+      - ${email-ippool-tag}
+      x-example: 'GET /20170907/emailIpPools?compartmentId=ocid1.compartment.oc1...HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: Creates a new EmailIpPool.
+      operationId: CreateEmailIpPool
+      parameters:
+      - description: Details for the new EmailIpPool.
+        in: body
+        name: CreateEmailIpPoolDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateEmailIpPoolDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        201:
+          description: Success
+          headers:
+            Content-Location: *id002
+            Location: *id002
+            etag: *id004
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+          schema:
+            $ref: '#/definitions/EmailIpPool'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates a new EmailIpPool
+      tags:
+      - ${email-ippool-tag}
+      x-example: 'POST /20170907/emailIpPools HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailIpPool'
+  /emailIpPools/{emailIpPoolId}:
+    delete:
+      description: Deletes an EmailIpPool resource by identifier
+      operationId: DeleteEmailIpPool
+      parameters:
+      - $ref: '#/parameters/IpPoolIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      responses:
+        202:
+          description: Accepted the request. The EmailIpPool will be deleted.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Delete a provisioned EmailIpPool
+      tags:
+      - ${email-ippool-tag}
+      x-example: 'DELETE /20170907/emailIpPools/ocid1.emailippool.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailIpPool'
+    get:
+      description: Retrieves the specified IpPool by identifier
+      operationId: GetEmailIpPool
+      parameters:
+      - $ref: '#/parameters/IpPoolIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Retrieves the IpPool with the given id
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailIpPool'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Get EmailIpPool
+      tags:
+      - ${email-ippool-tag}
+      x-example: 'GET /20170907/emailIpPools/ocid1.emailippool.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: Updates the EmailIpPool
+      operationId: UpdateEmailIpPool
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IpPoolIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      - description: The information to be updated.
+        in: body
+        name: UpdateEmailIpPoolDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateEmailIpPoolDetails'
+      responses:
+        202:
+          description: Accepted the request. The IpPool will be updated.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Updates the EmailIpPool identified by the id
+      tags:
+      - ${email-ippool-tag}
+      x-example: 'PUT /20170907/emailIpPools/ocid1.emailippool.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailIpPool'
+  /emailIpPools/{emailIpPoolId}/actions/addEmailOutboundIp:
+    post:
+      description: Add OutboundIps to EmailIpPool.
+      operationId: AddEmailOutboundIp
+      parameters:
+      - description: Details to add IPs to EmailIpPool.
+        in: body
+        name: AddEmailOutboundIpDetails
+        required: true
+        schema:
+          $ref: '#/definitions/AddEmailOutboundIpDetails'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IpPoolIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        202:
+          description: Accepted the request. OutboundIPs will be added to EmailIpPool.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Add OutboundIps to EmailIpPool.
+      tags:
+      - ${email-ippool-tag}
+      x-example: 'POST /20170907/emailIpPools/ocid1.emailippool.oc1.../actions/addEmailOutboundIp HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-obmcs-terraform:
+        actionType: UPDATE_FIELD
+      x-related-resource: '#/definitions/EmailIpPool'
+  /emailIpPools/{emailIpPoolId}/actions/addLock:
+    post:
+      description: Adds a lock to a resource.
+      operationId: AddEmailIpPoolLock
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/IpPoolIdPathParam'
+      - description: Details for adding a lock to a resource.
+        in: body
+        name: AddLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/AddLockDetails'
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Lock is added.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailIpPool'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Adds a lock to a resource.
+      tags:
+      - ${email-ippool-tag}
+      x-related-resource: '#/definitions/EmailIpPool'
+  /emailIpPools/{emailIpPoolId}/actions/changeCompartment:
+    post:
+      description: Moves a resource into a different compartment. When provided, If-Match is checked against
+        ETag values of the resource.
+      operationId: ChangeEmailIpPoolCompartment
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/IpPoolIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      - description: Details for the compartment move.
+        in: body
+        name: ChangeEmailIpPoolCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeEmailIpPoolCompartmentDetails'
+      responses:
+        202:
+          description: Accepted the request. The IpPool will be moved.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+      summary: Moves a resource into a different compartment.
+      tags:
+      - ${email-ippool-tag}
+      x-example: "POST /20170907/emailIpPools/ocid1.emailippool.oc1.../actions/changeCompartment HTTP/1.1\n\
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com\n <var>&lt;authorization and other headers&gt;</var>\n"
+      x-related-resource: '#/definitions/EmailIpPool'
+  /emailIpPools/{emailIpPoolId}/actions/removeEmailOutboundIp:
+    post:
+      description: Remove OutboundIps from EmailIpPool.
+      operationId: RemoveEmailOutboundIp
+      parameters:
+      - description: Details to remove IPs from EmailIpPool.
+        in: body
+        name: RemoveEmailOutboundIpDetails
+        required: true
+        schema:
+          $ref: '#/definitions/RemoveEmailOutboundIpDetails'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IpPoolIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        202:
+          description: Accepted the request. OutboundIPs will be removed from EmailIpPool.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Remove OutboundIps from EmailIpPool
+      tags:
+      - ${email-ippool-tag}
+      x-example: 'POST /20170907/emailIpPools/ocid1.emailippool.oc1.../actions/removeEmailOutboundIp HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-obmcs-terraform:
+        actionType: UPDATE_FIELD
+      x-related-resource: '#/definitions/EmailIpPool'
+  /emailIpPools/{emailIpPoolId}/actions/removeLock:
+    post:
+      description: Remove a lock to a resource.
+      operationId: RemoveEmailIpPoolLock
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/IpPoolIdPathParam'
+      - description: Details for removing a lock to a resource.
+        in: body
+        name: RemoveLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/RemoveLockDetails'
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Lock is Removed.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailIpPool'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Remove a lock to a resource.
+      tags:
+      - ${email-ippool-tag}
+      x-related-resource: '#/definitions/EmailIpPool'
+  /emailOutboundIps:
+    get:
+      description: Returns a list of all Outbound Public IPs assigned for a given tenant.
+      operationId: ListEmailOutboundIps
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/compartmentIdQueryParam'
+      - $ref: '#/parameters/FilterByOutboundIpQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - description: 'Filter returned list by specified lifecycle state. This parameter is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        type: string
+        x-obmcs-enumref: '#/definitions/EmailOutboundIpSummary/lifecycleState'
+      - default: AVAILABLE
+        description: 'Filter returned list by specified assignment state.
+
+          '
+        in: query
+        name: assignmentState
+        required: false
+        type: string
+        x-obmcs-enumref: '#/definitions/EmailOutboundIpSummary/assignmentState'
+      - default: OUTBOUNDIP
+        description: 'The field to sort by. The `OUTBOUNDIP` value returns the list in
+
+          ascending order or Outbound Ip address by default. Use the `SortOrderQueryParam` to change the
+
+          direction of the returned list of items.
+
+          '
+        enum:
+        - OUTBOUNDIP
+        in: query
+        name: sortBy
+        required: false
+        type: string
+      responses:
+        200:
+          description: Success
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailOutboundIpCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Gets a list of all Outbound Public IPs assigned for the given tenant.
+      tags:
+      - ${email-ippool-tag}
+      x-example: 'GET /20170907/emailOutboundIps?compartmentId=ocid1.compartment.oc1...HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+  /emailReturnPaths:
+    get:
+      description: Lists email return paths in the specified compartment or emaildomain.
+      operationId: ListEmailReturnPaths
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/OptionalCompartmentIdQueryParam'
+      - $ref: '#/parameters/ParentResourceIdQueryParam'
+      - $ref: '#/parameters/FilterByIdQueryParam'
+      - $ref: '#/parameters/FilterByNameQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - description: 'Filter returned list by specified lifecycle state. This parameter is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        type: string
+        x-obmcs-enumref: '#/definitions/EmailReturnPath/lifecycleState'
+      - default: TIMECREATED
+        description: 'Specifies the attribute with which to sort the return paths.
+
+
+          Default: `TIMECREATED`
+
+
+          * **TIMECREATED:** Sorts by timeCreated.
+
+          * **NAME:** Sorts by name.
+
+          * **ID:** Sorts by id.
+
+          '
+        enum:
+        - TIMECREATED
+        - ID
+        - NAME
+        in: query
+        name: sortBy
+        required: false
+        type: string
+      responses:
+        200:
+          description: Success
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailReturnPathCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Lists email return paths.
+      tags:
+      - ${email-return-path-tag}
+      x-example: 'Sample: List all return paths in a compartment, sorted by newest first
+
+
+        GET /20170907/emailReturnPaths?compartmentId=ocid1.compartment.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailReturnPath'
+    post:
+      description: Creates a new email return path. Avoid entering confidential information.
+      operationId: CreateEmailReturnPath
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - description: The email return path to create.
+        in: body
+        name: CreateEmailReturnPathDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateEmailReturnPathDetails'
+      responses:
+        '201':
+          description: Success
+          headers:
+            Content-Location: *id002
+            Location: *id002
+            etag: *id004
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+          schema:
+            $ref: '#/definitions/EmailReturnPath'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Creates a new email return path.
+      tags:
+      - ${email-return-path-tag}
+      x-example: 'POST /20170907/emailreturnPaths HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailReturnPath'
+  /emailReturnPaths/{emailReturnPathId}:
+    delete:
+      description: Deletes an email return path.
+      operationId: DeleteEmailReturnPath
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/EmailReturnPathIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      responses:
+        '202':
+          description: 'The request to delete the email return path was accepted for processing.
+
+            '
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Deletes an email return path.
+      tags:
+      - ${email-return-path-tag}
+      x-example: 'DELETE /20170907/emailReturnPaths/ocid1.emailreturnpath.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailReturnPath'
+    get:
+      description: Retrieves the specified email return path.
+      operationId: GetEmailReturnPath
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/EmailReturnPathIdPathParam'
+      responses:
+        '200':
+          description: Success
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailReturnPath'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Retrieves the specified email return path.
+      tags:
+      - ${email-return-path-tag}
+      x-example: 'GET /20170907/emailReturnPaths/ocid1.emailreturnpath.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailReturnPath'
+    put:
+      description: Modifies an email return path.
+      operationId: UpdateEmailReturnPath
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/EmailReturnPathIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      - description: The new email return path attributes to apply.
+        in: body
+        name: UpdateEmailReturnPathDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateEmailReturnPathDetails'
+      responses:
+        '202':
+          description: 'The request to update the email return path was accepted for processing.
+
+            '
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id003
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        403:
+          $ref: '#/responses/403'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Modifies an email return path.
+      tags:
+      - ${email-return-path-tag}
+      x-example: 'PUT /20170907/emailReturnPaths/ocid1.emailreturnpath.oc1... HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/EmailReturnPath'
+  /emailReturnPaths/{emailReturnPathId}/actions/addLock:
+    post:
+      description: Adds a lock to a resource.
+      operationId: AddReturnPathLock
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/EmailReturnPathIdPathParam'
+      - description: Details for adding a lock to a resource.
+        in: body
+        name: AddLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/AddLockDetails'
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Lock is added.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailReturnPath'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Adds a lock to a resource.
+      tags:
+      - ${email-return-path-tag}
+      x-related-resource: '#/definitions/EmailReturnPath'
+  /emailReturnPaths/{emailReturnPathId}/actions/removeLock:
+    post:
+      description: Remove a lock to a resource.
+      operationId: RemoveReturnPathLock
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/EmailReturnPathIdPathParam'
+      - description: Details for removing a lock from a resource.
+        in: body
+        name: RemoveLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/RemoveLockDetails'
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Lock is removed.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/EmailReturnPath'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Remove a lock to a resource.
+      tags:
+      - ${email-return-path-tag}
+      x-related-resource: '#/definitions/EmailReturnPath'
+  /senders:
+    get:
+      description: 'Gets a collection of approved sender email addresses and sender IDs.
+
+        '
+      operationId: ListSenders
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/compartmentIdQueryParam'
+      - $ref: '#/parameters/lifecycleStateQueryParam'
+      - $ref: '#/parameters/FilterByDomainQueryParam'
+      - $ref: '#/parameters/senderEmailAddressQueryParam'
+      - $ref: '#/parameters/FilterByIpPoolQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      responses:
+        '200':
+          description: 'A list of approved senders for the user.
+
+            '
+          examples:
+            application-json: "[\n  {\n    \"emailAddress\" : \"test.user1@mydomain.example.com\",\n \
+              \   \"id\": \"ocid1.sender.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"lifecycleState\"\
+              : \"ACTIVE\",\n    \"timeCreated\": \"2016-12-19T16:39:57.600Z\"\n  },\n  {\n    \"emailAddress\"\
+              \ : \"test.user2@mydomain.example.com\",\n    \"id\" : \"ocid1.sender.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+              ,\n    \"lifecycleState\": \"ACTIVE\",\n    \"timeCreated\": \"2017-01-13T21:30:14.600Z\"\
+              \n  }\n]\n"
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+            opc-total-items:
+              description: 'The total number of items returned from the request.
+
+                '
+              type: integer
+          schema:
+            items:
+              $ref: '#/definitions/SenderSummary'
+            type: array
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Get a list of approved sender summaries.
+      tags:
+      - ${sender-tag}
+      x-example: 'GET /20170907/senders?compartmentId=ocid1.compartment.oc1...HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Sender'
+    post:
+      description: Creates a sender for a tenancy in a given compartment.
+      operationId: CreateSender
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - description: Create a sender.
+        in: body
+        name: CreateSenderDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateSenderDetails'
+      responses:
+        '200':
+          description: The newly created sender.
+          examples:
+            application-json: "{\n  \"emailAddress\": \"test.user@mydomain.example.com\",\n  \"id\": \"\
+              ocid1.sender.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n  \"isSpf\": true,\n  \"\
+              lifecycleState\": \"ACTIVE\",\n  \"timeCreated\": \"2017-02-15T22:30:14.600Z\"\n}\n"
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Sender'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Creates a sender for a tenancy in a given compartment.
+      tags:
+      - ${sender-tag}
+      x-example: "POST /20170907/senders HTTP/1.1\nHost: ctrl.email.us-phoenix-1.oci.oraclecloud.com\n\
+        <var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+        ,\n  \"emailAddress\": \"test.user@mydomain.example.com\"\n}\n"
+  /senders/{senderId}:
+    delete:
+      description: 'Deletes an approved sender for a tenancy in a given compartment for a
+
+        provided `senderId`.
+
+        '
+      operationId: DeleteSender
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/senderIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      responses:
+        '204':
+          $ref: '#/responses/204'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '412':
+          $ref: '#/responses/412'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Deletes a sender for a tenancy in a given compartment.
+      tags:
+      - ${sender-tag}
+      x-example: 'DELETE /20170907/senders/ocid1.emailsender.oc1.phx...HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Sender'
+    get:
+      description: Gets an approved sender for a given `senderId`.
+      operationId: GetSender
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/senderIdPathParam'
+      responses:
+        '200':
+          description: The approved sender for the specified OCID.
+          examples:
+            application-json: "{\n  \"emailAddress\": \"test.user@mydomain.example.com\",\n  \"id\": \"\
+              ocid1.sender.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n  \"isSpf\": true,\n  \"\
+              lifecycleState\": \"ACTIVE\",\n  \"timeCreated\": \"2016-01-13T29:30:14.600Z\"\n}\n"
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Sender'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Gets an approved sender.
+      tags:
+      - ${sender-tag}
+      x-example: 'GET /20170907/senders/ocid1.emailsender.oc1.phx...HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: 'Replaces the set of tags for a sender with the tags provided. If either freeform
+
+        or defined tags are omitted, the tags for that set remain the same. Each set must
+
+        include the full set of tags for the sender, partial updates are not permitted.
+
+        For more information about tagging, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+        '
+      operationId: UpdateSender
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/senderIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      - description: update details for sender.
+        in: body
+        name: UpdateSenderDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateSenderDetails'
+      responses:
+        '200':
+          description: The newly updated sender.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Sender'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '412':
+          $ref: '#/responses/412'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Updates the tags for a given sender.
+      tags:
+      - ${sender-tag}
+      x-example: "PUT /20170907/senders/ocid1.emailsender.oc1.phx...HTTP/1.1\nHost: ctrl.email.us-phoenix-1.oci.oraclecloud.com\n\
+        <var>&lt;authorization and other headers&gt;</var>\n{\n  \"freeformTags\": {\"Department\": \"\
+        Finance\"}\n}\n"
+  /senders/{senderId}/actions/addLock:
+    post:
+      description: Adds a lock to a resource.
+      operationId: AddSenderLock
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/senderIdPathParam'
+      - description: Details for adding a lock to a resource.
+        in: body
+        name: AddLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/AddLockDetails'
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Lock is added.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Sender'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Adds a lock to a resource.
+      tags:
+      - ${sender-tag}
+      x-related-resource: '#/definitions/Sender'
+  /senders/{senderId}/actions/changeCompartment:
+    post:
+      description: Moves a sender into a different compartment. When provided, If-Match is checked against
+        ETag values of the resource.
+      operationId: ChangeSenderCompartment
+      parameters:
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/senderIdPathParam'
+      - $ref: '#/parameters/OverrideLocksQueryParameter'
+      - description: Details for moving a sender into a different compartment.
+        in: body
+        name: ChangeSenderCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeSenderCompartmentDetails'
+      responses:
+        '204':
+          $ref: '#/responses/204'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        default:
+          $ref: '#/responses/Error'
+      summary: Moves a sender into a different compartment.
+      tags:
+      - ${sender-tag}
+      x-example: "POST /20170907/senders/ocid1.emailsender.oc1.phx...HTTP/1.1\nHost: ctrl.email.us-phoenix-1.oci.oraclecloud.com\n\
+        \ <var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+        \n}\n"
+      x-related-resource: '#/definitions/Sender'
+  /senders/{senderId}/actions/removeLock:
+    post:
+      description: Remove a lock to a resource.
+      operationId: RemoveSenderLock
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/senderIdPathParam'
+      - description: Details for removing a lock from a resource.
+        in: body
+        name: RemoveLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/RemoveLockDetails'
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Lock is Removed.
+          headers:
+            etag: *id004
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Sender'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '412':
+          $ref: '#/responses/412'
+        '429':
+          $ref: '#/responses/429'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Remove a lock to a resource.
+      tags:
+      - ${sender-tag}
+      x-related-resource: '#/definitions/Sender'
+  /suppressions:
+    get:
+      description: 'Gets a list of suppressed recipient email addresses for a user. The
+
+        `compartmentId` for suppressions must be a tenancy OCID. The returned list
+
+        is sorted by creation time in descending order.
+
+        '
+      operationId: ListSuppressions
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/compartmentIdQueryParam'
+      - $ref: '#/parameters/suppressionEmailAddressQueryParam'
+      - $ref: '#/parameters/suppressionStartTimeCreatedQueryParam'
+      - $ref: '#/parameters/suppressionEndTimeCreatedQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      responses:
+        '200':
+          description: The list of suppression summary information.
+          examples:
+            application-json: "[\n  {\n    \"emailAddress\" : \"test.user1@mydomain.example.com\",\n \
+              \   \"id\": \"ocid1.suppression.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n   \
+              \ \"reason\": \"HARDBOUNCE\",\n    \"timeCreated\": \"2016-12-19T16:39:57.600Z\"\n  },\n\
+              \  {\n    \"emailAddress\" : \"test.user2@mydomain.example.com\",\n    \"id\" : \"ocid1.suppression.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+              ,\n    \"reason\": \"HARDBOUNCE\",\n    \"timeCreated\": \"2015-01-13T21:30:14.600Z\"\n\
+              \  }\n]\n"
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+          schema:
+            items:
+              $ref: '#/definitions/SuppressionSummary'
+            type: array
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Get a summary of suppressed email addresses.
+      tags:
+      - ${suppression-tag}
+      x-example: 'GET /20170907/suppressions/?compartmentId=ocid1.tenancy.oc1...HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Suppression'
+    post:
+      description: 'Adds recipient email addresses to the suppression list for a tenancy.
+
+        Addresses added to the suppression list via the API are denoted as
+
+        "MANUAL" in the `reason` field. *Note:* All email addresses added to the
+
+        suppression list are normalized to include only lowercase letters.
+
+        '
+      operationId: CreateSuppression
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - description: 'Adds a single email address to the suppression list for a compartment''s tenancy.
+
+          '
+        in: body
+        name: CreateSuppressionDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateSuppressionDetails'
+      responses:
+        '200':
+          description: The newly created suppression.
+          examples:
+            application-json: "{\n  \"emailAddress\": \"test.user@mydomain.example.com\",\n  \"id\": \"\
+              ocid1.suppression.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n  \"reason\": \"MANUAL\"\
+              ,\n  \"timeCreated\": \"2017-02-15T22:30:14.600Z\"\n}\n"
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Suppression'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '409':
+          $ref: '#/responses/409'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Creates an email suppression for a tenancy.
+      tags:
+      - ${suppression-tag}
+      x-example: "POST /20170907/suppressions HTTP/1.1\nHost: ctrl.email.us-phoenix-1.oci.oraclecloud.com\n\
+        <var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.tenancy.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+        ,\n  \"emailAddress\": \"test.user@mydomain.example.com\"\n}\n"
+  /suppressions/{suppressionId}:
+    delete:
+      description: 'Removes a suppressed recipient email address from the suppression list
+
+        for a tenancy in a given compartment for a provided `suppressionId`.
+
+        '
+      operationId: DeleteSuppression
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/suppressionIdPathParam'
+      responses:
+        '204':
+          $ref: '#/responses/204'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Deletes a suppressed email address.
+      tags:
+      - ${suppression-tag}
+      x-example: 'DELETE /20170907/suppressions/ocid1.emailsuppression.oc1...HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Suppression'
+    get:
+      description: 'Gets the details of a suppressed recipient email address for a given
+
+        `suppressionId`. Each suppression is given a unique OCID.
+
+        '
+      operationId: GetSuppression
+      parameters:
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/suppressionIdPathParam'
+      responses:
+        '200':
+          description: The suppression details for the specified OCID.
+          examples:
+            application-json: "{\n  \"emailAddress\": \"test.user@mydomain.example.com\",\n  \"id\": \"\
+              ocid1.suppression.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n  \"reason\": \"HARDBOUNCE\"\
+              ,\n  \"timeCreated\": \"2016-01-13T29:30:14.600Z\"\n}\n"
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Suppression'
+        '400':
+          $ref: '#/responses/400'
+        '401':
+          $ref: '#/responses/401'
+        '404':
+          $ref: '#/responses/404'
+        '500':
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/Error'
+      summary: Get a suppressed email address.
+      tags:
+      - ${suppression-tag}
+      x-example: 'GET /20170907/suppressions/ocid1.emailsuppression.oc1...HTTP/1.1
+
+        Host: ctrl.email.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+  /workRequests:
+    get:
+      description: 'Lists the work requests in a compartment.
+
+        '
+      operationId: ListWorkRequests
+      parameters:
+      - $ref: '#/parameters/compartmentIdQueryParam'
+      - $ref: '#/parameters/WorkRequestIdQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/WorkRequestStatusQueryParam'
+      - $ref: '#/parameters/WorkRequestSortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/WorkRequestOperationTypeQueryParam'
+      - $ref: '#/parameters/ResourceIdentifierQueryParam'
+      responses:
+        200:
+          description: The list is being retrieved.
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/WorkRequestSummaryCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: List Work Requests
+      tags:
+      - ${work-request-tag}
+      x-related-resource: '#/definitions/WorkRequestSummaryCollection'
+  /workRequests/{workRequestId}:
+    get:
+      description: Gets the status of the work request with the given ID.
+      operationId: GetWorkRequest
+      parameters:
+      - $ref: '#/parameters/WorkRequestIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The detail of the work request.
+          headers:
+            opc-request-id: *id001
+            retry-after: &id015
+              description: A decimal number representing the number of seconds the client should wait
+                before polling this endpoint again.
+              type: integer
+          schema:
+            $ref: '#/definitions/WorkRequest'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: GET Work Request Status
+      tags:
+      - ${work-request-tag}
+      x-related-resource: '#/definitions/WorkRequest'
+  /workRequests/{workRequestId}/errors:
+    get:
+      description: 'Return a (paginated) list of errors for a given work request.
+
+        '
+      operationId: ListWorkRequestErrors
+      parameters:
+      - $ref: '#/parameters/WorkRequestIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/WorkRequestLogAndErrorSortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      responses:
+        200:
+          description: List of work request errors.
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/WorkRequestErrorCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Lists work request errors
+      tags:
+      - ${work-request-tag}
+      x-related-resource: '#/definitions/WorkRequestErrorCollection'
+  /workRequests/{workRequestId}/logs:
+    get:
+      description: 'Return a (paginated) list of logs for a given work request.
+
+        '
+      operationId: ListWorkRequestLogs
+      parameters:
+      - $ref: '#/parameters/WorkRequestIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/WorkRequestLogAndErrorSortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      responses:
+        200:
+          description: List of work request logs.
+          headers:
+            opc-next-page: *id005
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/WorkRequestLogEntryCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Lists work request logs
+      tags:
+      - ${work-request-tag}
+      x-related-resource: '#/definitions/WorkRequestLogEntryCollection'
+definitions:
+  ActionType:
+    description: Possible types of actions.
+    enum: &id013
+    - CREATED
+    - UPDATED
+    - DELETED
+    - IN_PROGRESS
+    - RELATED
+    - FAILED
+    type: string
+  AddEmailOutboundIpDetails:
+    description: 'Outbound IP details to be assigned to the IpPool.
+
+      '
+    properties:
+      outboundIps:
+        description: 'List of public IPs to ADD to the IpPool.
+
+          Public IPs must be in the AVAILABLE state to be assigned to the IpPool.
+
+          '
+        items:
+          type: string
+        maxItems: 3
+        type: array
+        uniqueItems: true
+    required:
+    - outboundIps
+    type: object
+  AddLockDetails:
+    description: 'Request payload to add lock to the resource.
+
+      '
+    properties:
+      compartmentId:
+        description: The lock compartment ID.
+        type: string
+      message:
+        description: 'A message added by the lock creator. The message typically gives an
+
+          indication of why the resource is locked.
+
+          '
+        type: string
+      relatedResourceId:
+        description: 'The resource ID that is locking this resource. Indicates that deleting this resource
+          removes the lock.
+
+          '
+        type: string
+      type:
+        description: Lock type.
+        enum:
+        - FULL
+        - DELETE
+        type: string
+    required:
+    - type
+    type: object
+  ChangeEmailDomainCompartmentDetails:
+    description: The configuration details for the move operation.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to
+          move the specified
+
+          resource to.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+    x-example: "{\n  \"compartmentId\": \"ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+      \n}\n"
+  ChangeEmailIpPoolCompartmentDetails:
+    description: Information about the change compartment for the IpPool resource.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment into which
+          the resource should be moved.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+  ChangeSenderCompartmentDetails:
+    description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+      into which the resource should be moved.
+
+      '
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+          into which the sender should be moved.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+  Configuration:
+    description: Tenancy level customer email configuration details.
+    properties:
+      compartmentId:
+        description: The root compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) (same
+          as the tenancy OCID)
+        maxLength: 255
+        minLength: 1
+        type: string
+      httpSubmitEndpoint:
+        description: Endpoint used to submit emails via the HTTP email submission API
+        maxLength: 255
+        minLength: 1
+        type: string
+      smtpSubmitEndpoint:
+        description: Endpoint used to submit emails via the standard SMTP submission protocol. Note that
+          TLS 1.2 and standard SMTP authentication is required for submission.
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    - httpSubmitEndpoint
+    - smtpSubmitEndpoint
+    type: object
+  CreateDkimDetails:
+    description: 'Properties to create a new DKIM.
+
+      The new object will be created in the same compartment as the EmailDomain.
+
+      '
+    properties:
+      definedTags: &id006
+        additionalProperties:
+          additionalProperties:
+            description: 'The value of the tag. Only string type is supported as valid value type.
+
+              '
+            type: object
+          description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+          For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+          Example: `{"Operations": {"CostCenter": "42"}}`
+
+          '
+        type: object
+      description:
+        description: 'A string that describes the details about the DKIM. It does not have to be unique,
+
+          and you can change it. Avoid entering confidential information.
+
+          '
+        maxLength: 400
+        minLength: 1
+        type: string
+      emailDomainId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain for
+          this DKIM.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: &id007
+        additionalProperties:
+          type: string
+        description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined
+          name, type, or namespace.
+
+          For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+          Example: `{"Department": "Finance"}`
+
+          '
+        type: object
+      name:
+        description: 'The DKIM selector. This selector is required to be globally unique for this email
+          domain.
+
+          If you do not provide the selector, we will generate one for you.
+
+          If you do provide the selector, we suggest adding a short region indicator
+
+          to differentiate from your signing of emails in other regions you might be subscribed to.
+
+          Selectors limited to ASCII characters can use alphanumeric, dash ("-"), and dot (".") characters.
+
+          Non-ASCII selector names should adopt IDNA2008 normalization (RFC 5891-5892).
+
+
+          Avoid entering confidential information.
+
+
+          Example: `mydomain-phx-20210228`
+
+          '
+        maxLength: 63
+        minLength: 1
+        type: string
+      privateKey:
+        description: The DKIM RSA Private Key in Privacy-Enhanced Mail (PEM) format. It is a text-based
+          representation of the private key used for signing email messages.
+        example: '-----BEGIN RSA PRIVATE KEY-----
+
+          MIIEpAIBAAKCAQEA7...
+
+          -----END RSA PRIVATE KEY-----
+
+          '
+        maxLength: 2000
+        type: string
+    required:
+    - emailDomainId
+    type: object
+  CreateEmailDomainDetails:
+    description: 'The configuration details for creating a new email domain.
+
+      '
+    properties:
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment for
+          this email domain.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      description:
+        description: 'A string that describes the details about the domain. It does not have to be unique,
+
+          and you can change it. Avoid entering confidential information.
+
+          '
+        maxLength: 400
+        minLength: 1
+        type: string
+      domainVerificationId:
+        default: null
+        description: Id for Domain in Domain Management (under governance) if DOMAINID verification method
+          used.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id007
+      name:
+        description: 'The name of the email domain in the Internet Domain Name System (DNS).
+
+          The email domain name must be unique in the region for this tenancy.
+
+          Domain names limited to ASCII characters use alphanumeric, dash ("-"), and dot (".") characters.
+
+          The dash and dot are only allowed between alphanumeric characters.
+
+          For details, see [RFC 5321, section 4.1.2](https://tools.ietf.org/html/rfc5321#section-4.1.2)
+
+          Non-ASCII domain names should adopt IDNA2008 normalization (RFC 5891-5892).
+
+          '
+        maxLength: 253
+        minLength: 3
+        type: string
+    required:
+    - name
+    - compartmentId
+    type: object
+    x-example: "{\n  \"name\": \"mydomain.example.com\",\n  \"compartmentId\": \"ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+      \n}\n"
+  CreateEmailIpPoolDetails:
+    description: The configuration details required to create a new IpPool which will be used to route
+      emails.
+    properties:
+      compartmentId:
+        description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment for
+          this IpPool.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      description:
+        description: The description of the IpPool. Avoid entering confidential information.
+        maxLength: 400
+        type: string
+      freeformTags: *id007
+      lastIpDrainPeriodInHours:
+        default: 24
+        description: 'Last IP will be unassigned from the IP Pool after the period of time (in hours)
+          specified by this parameter. Default is 24 hours.
+
+          '
+        maximum: 24
+        minimum: 0
+        type: integer
+      name:
+        description: "The name of the IpPool. The name must be unique within a region. \nThe name is case\
+          \ sensitive and supported characters include alphanumeric, hyphens (\"-\") and underscore (\"\
+          _\") characters.\n\nExample: green_pool-1\n"
+        type: string
+      outboundIps:
+        description: A list of outbound public IPs for assignment to the IpPool. These IPs must be in
+          the AVAILABLE state to be eligible for assignment.
+        items:
+          type: string
+        maxItems: 3
+        minItems: 1
+        type: array
+        uniqueItems: true
+    required:
+    - name
+    - compartmentId
+    - outboundIps
+    type: object
+    x-example: "{\n  \"name\": \"green_pool-1\"\n  \"compartmentId\": \"ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+      \n}\n"
+  CreateEmailReturnPathDetails:
+    description: 'Properties to create a new email return path.
+
+      The new object will be created in the same compartment as the parent resource.
+
+      '
+    properties:
+      definedTags: *id006
+      description:
+        description: 'A string that describes the details about the email return path. It does not have
+          to be unique,
+
+          and you can change it. Avoid entering confidential information.
+
+          '
+        maxLength: 400
+        minLength: 1
+        type: string
+      freeformTags: *id007
+      name:
+        description: 'The name of the email return path domain in the Internet Domain Name System (DNS).
+
+          The name must be a subdomain of the email domain used to send emails.
+
+          The email return path name must be globally unique for this tenancy.
+
+          If you do not provide the email return path name, we will generate one for you.
+
+          If you do provide the email return path name, we suggest adding a short region indicator to
+
+          allow using the same parent domain in other regions you might be subscribed to.
+
+          Domain names limited to ASCII characters use alphanumeric, dash ("-"), and dot (".") characters.
+
+          The dash and dot are only allowed between alphanumeric characters.
+
+          Non-ASCII domain names should adopt IDNA2008 normalization (RFC 5891-5892).
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      parentResourceId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain for
+          this email return path.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - parentResourceId
+    type: object
+    x-example: "{\n  \"name\":\"iad1.rp.mydomain.example.com\",\n  \"parentResourceId\":\"pcod1.emaildomain.oc1.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\
+      \n}\n"
+  CreateSenderDetails:
+    description: 'The details needed for creating a sender.
+
+      '
+    properties:
+      compartmentId:
+        description: The OCID of the compartment that contains the sender.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      emailAddress:
+        description: The email address of the sender.
+        format: email
+        maxLength: 254
+        minLength: 6
+        type: string
+      emailIpPoolId:
+        description: An optional field. The IpPool [OCID](/iaas/Content/General/Concepts/identifiers.htm)
+          used to submit an email by Email Delivery when sent from this sender.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id007
+    required:
+    - compartmentId
+    - emailAddress
+  CreateSuppressionDetails:
+    description: The details needed for creating a single suppression.
+    properties:
+      compartmentId:
+        description: 'The OCID of the compartment to contain the suppression. Since
+
+          suppressions are at the customer level, this must be the tenancy
+
+          OCID.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      emailAddress:
+        description: The recipient email address of the suppression.
+        format: email
+        minLength: 6
+        type: string
+    required:
+    - compartmentId
+    - emailAddress
+  Dkim:
+    description: 'The properties that define a DKIM.
+
+      '
+    properties:
+      cnameRecordValue:
+        description: 'The DNS CNAME record value to provision to the DKIM DNS subdomain, when using the
+          CNAME method for DKIM setup (preferred).
+
+          '
+        maxLength: 255
+        type: string
+        x-default-description: 'null'
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains this DKIM.
+
+          '
+        maxLength: 255
+        type: string
+      definedTags: *id006
+      description:
+        description: The description of the DKIM. Avoid entering confidential information.
+        maxLength: 400
+        type: string
+      dnsSubdomainName:
+        description: 'The name of the DNS subdomain that must be provisioned to enable email recipients
+          to verify DKIM signatures.
+
+          It is usually created with a CNAME record set to the cnameRecordValue.
+
+          '
+        maxLength: 255
+        type: string
+        x-default-description: 'null'
+      emailDomainId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email domain
+
+          that this DKIM belongs to.
+
+          '
+        maxLength: 255
+        type: string
+      freeformTags: *id007
+      id:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the DKIM.
+
+          '
+        maxLength: 255
+        type: string
+      isImported:
+        default: false
+        description: Indicates whether the DKIM was imported.
+        type: boolean
+      keyLength:
+        default: 2048
+        description: Length of the RSA key used in the DKIM.
+        maximum: 2048
+        minimum: 1024
+        type: integer
+      lifecycleDetails:
+        description: 'A message describing the current state in more detail.
+
+          For example, can be used to provide actionable information for a resource.
+
+          '
+        type: string
+        x-default-description: 'null'
+      lifecycleState:
+        description: The current state of the DKIM.
+        enum:
+        - ACTIVE
+        - CREATING
+        - DELETING
+        - DELETED
+        - FAILED
+        - INACTIVE
+        - NEEDS_ATTENTION
+        - UPDATING
+        type: string
+        x-default-description: 'null'
+      name:
+        description: 'The DKIM selector.
+
+          If the same domain is managed in more than one region, each region must use different selectors.
+
+          '
+        type: string
+      systemTags: &id008
+        additionalProperties:
+          additionalProperties:
+            description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+              '
+            type: object
+          description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+          Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+          '
+        type: object
+      timeCreated:
+        description: 'The time the DKIM was created.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The time of the last change to the DKIM configuration, due to a state change or
+
+          an update operation.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+          '
+        format: date-time
+        type: string
+      txtRecordValue:
+        description: 'The DNS TXT record value to provision to the DKIM DNS subdomain in place of using
+          a CNAME record.
+
+          This is used in cases where a CNAME cannot be used, such as when the cnameRecordValue would
+          exceed the maximum length for a DNS entry.
+
+          You can also use this if you have an existing procedure to directly provision TXT records for
+          DKIM.
+
+          Many DNS APIs require you to break this string into segments of fewer than 255 characters.
+
+          '
+        maxLength: 450
+        type: string
+        x-default-description: 'null'
+    required:
+    - name
+    - id
+    - emailDomainId
+    type: object
+  DkimCollection:
+    description: Results of a search. Contains both DkimSummary items and other information, such as metadata.
+    properties:
+      items:
+        description: List of dkims.
+        items:
+          $ref: '#/definitions/DkimSummary'
+        type: array
+    required:
+    - items
+    type: object
+  DkimSummary:
+    description: 'The properties that define a DKIM.
+
+      '
+    properties:
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains this DKIM.
+
+          '
+        maxLength: 255
+        type: string
+      definedTags: *id006
+      description:
+        description: The description of a DKIM. Avoid entering confidential information.
+        maxLength: 400
+        type: string
+      emailDomainId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email domain
+
+          that this DKIM belongs to.
+
+          '
+        maxLength: 255
+        type: string
+      freeformTags: *id007
+      id:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the DKIM.
+
+          '
+        maxLength: 255
+        type: string
+      isImported:
+        default: false
+        description: Indicates whether the DKIM was imported.
+        type: boolean
+      keyLength:
+        default: 2048
+        description: Length of the RSA key used in the DKIM.
+        maximum: 2048
+        minimum: 1024
+        type: integer
+      lifecycleState:
+        description: The current state of the DKIM.
+        type: string
+        x-obmcs-enumref: '#/definitions/Dkim/lifecycleState'
+      name:
+        description: 'The DKIM selector. This selector is required to be globally unique for this email
+          domain.
+
+          '
+        type: string
+      systemTags: *id008
+      timeCreated:
+        description: 'The time the DKIM was created.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The time of the last change to the DKIM configuration, due to a state change or
+
+          an update operation.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+          '
+        format: date-time
+        type: string
+    required:
+    - name
+    - id
+    - emailDomainId
+    type: object
+  DomainVerificationStatusType:
+    default: NONE
+    description: The current domain verification status.
+    enum: &id009
+    - NONE
+    - DOMAINID
+    - OTHER
+    type: string
+  EmailDomain:
+    description: 'The properties that define an email domain.
+
+      An email domain contains configuration used to assert responsibility for emails sent from that domain.
+
+      '
+    properties:
+      activeDkimId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the DKIM key
+
+          that will be used to sign mail sent from this email domain.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains this email domain.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      description:
+        description: The description of an email domain.
+        maxLength: 400
+        type: string
+      domainVerificationId:
+        description: Id for Domain in Domain Management (under governance) if DOMAINID verification method
+          used.
+        type: string
+      domainVerificationStatus:
+        description: The current domain verification status.
+        enum: *id009
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/DomainVerificationStatusType'
+      freeformTags: *id007
+      id:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email domain.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      isSpf:
+        default: false
+        description: 'Value of the SPF field. For more information about SPF, please see
+
+          [SPF Authentication](/iaas/Content/Email/Concepts/overview.htm#components).
+
+          '
+        type: boolean
+      lifecycleState:
+        description: The current state of the email domain.
+        enum:
+        - ACTIVE
+        - CREATING
+        - DELETING
+        - DELETED
+        - FAILED
+        - UPDATING
+        type: string
+        x-default-description: 'null'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        type: array
+      name:
+        description: 'The name of the email domain in the Internet Domain Name System (DNS).
+
+
+          Example: `mydomain.example.com`
+
+          '
+        maxLength: 253
+        minLength: 1
+        type: string
+      systemTags: *id008
+      timeCreated:
+        description: 'The time the email domain was created, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - name
+    - id
+    type: object
+  EmailDomainCollection:
+    description: Results of an EmailDomain search. Contains both EmailDomainSummary items and other information,
+      such as metadata.
+    properties:
+      items:
+        description: List of email domains.
+        items:
+          $ref: '#/definitions/EmailDomainSummary'
+        type: array
+    required:
+    - items
+    type: object
+  EmailDomainSummary:
+    description: 'The properties that define an email domain.
+
+      An email domain contains configuration used to assert responsibility for emails sent from that domain.
+
+      '
+    properties:
+      activeDkimId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the DKIM key
+
+          that is adding the DKIM signature for this email domain.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains this email domain.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      description:
+        description: The description of an email domain.
+        maxLength: 400
+        type: string
+      freeformTags: *id007
+      id:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email domain.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleState:
+        description: The current state of the email domain.
+        type: string
+        x-obmcs-enumref: '#/definitions/EmailDomain/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        type: array
+      name:
+        description: 'The name of the email domain in the Internet Domain Name System (DNS).
+
+
+          Example: `mydomain.example.com`
+
+          '
+        maxLength: 253
+        minLength: 1
+        type: string
+      systemTags: *id008
+      timeCreated:
+        description: 'The time the email domain was created, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - name
+    - id
+    type: object
+  EmailIpPool:
+    description: A collection of IP addresses used by the Email Delivery service to submit an email.
+    properties:
+      compartmentId:
+        description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing
+          the IpPool.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      description:
+        description: The description of the IpPool. Avoid entering confidential information.
+        maxLength: 400
+        type: string
+      freeformTags: *id007
+      id:
+        description: The unique [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the IpPool resource
+          that is immutable on creation.
+        maxLength: 255
+        minLength: 1
+        type: string
+      lastIpDrainPeriodInHours:
+        default: 24
+        description: 'Last IP will be unassigned from the IP Pool after the period of time (in hours)
+          specified by this parameter. Default is 24 hours.
+
+          '
+        maximum: 24
+        minimum: 0
+        type: integer
+      lifecycleDetails:
+        description: 'A message describing the current state in more detail. For example, can be used
+          to provide actionable information for a
+
+          resource in ''INACTIVE'' state.
+
+          '
+        type: string
+      lifecycleState:
+        description: The current state of the IpPool.
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - DELETING
+        - DELETED
+        - FAILED
+        - INACTIVE
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        type: array
+      name:
+        description: 'The name of the IpPool. The name must be unique within a region.
+
+          The name is case sensitive and supported characters include alphanumeric, hyphens ("-") and
+          underscore ("_") characters.
+
+
+          Example: green_pool-1
+
+          '
+        type: string
+      outboundIps:
+        description: Summary of outbound IPs assigned to the IpPool.
+        items:
+          $ref: '#/definitions/EmailOutboundIpSummary'
+        maxItems: 100
+        type: array
+      systemTags: *id008
+      timeCreated:
+        description: 'The time the IpPool was created.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The time of the last change to the IpPool, due to a state change or
+
+          an update operation.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+          '
+        format: date-time
+        type: string
+    required:
+    - id
+    - name
+    - compartmentId
+    type: object
+  EmailIpPoolCollection:
+    description: Results of an IpPool search. Contains EmailIpPoolSummary items.
+    properties:
+      items:
+        description: List of IpPools.
+        items:
+          $ref: '#/definitions/EmailIpPoolSummary'
+        type: array
+    required:
+    - items
+    type: object
+  EmailIpPoolSummary:
+    description: The properties that define an IpPool.
+    properties:
+      compartmentId:
+        description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing
+          the IpPool.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      freeformTags: *id007
+      id:
+        description: The unique [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the IpPool resource
+          that is immutable on creation.
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleDetails:
+        description: 'A message describing the current state in more detail. For example, can be used
+          to provide actionable information for a
+
+          resource in ''INACTIVE'' state.
+
+          '
+        type: string
+      lifecycleState:
+        description: The current state of the IpPool.
+        type: string
+        x-obmcs-enumref: '#/definitions/EmailIpPool/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        type: array
+      name:
+        description: 'The name of the IpPool. The name must be unique within a region.
+
+          The name is case sensitive and supported characters include alphanumeric, hyphens ("-") and
+          underscore ("_") characters.
+
+
+          Example: green_pool-1
+
+          '
+        type: string
+      systemTags: *id008
+      timeCreated:
+        description: 'The time the IpPool was created.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The time of the last change to the IpPool, due to a state change or
+
+          an update operation.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+          '
+        format: date-time
+        type: string
+    required:
+    - id
+    - name
+    - compartmentId
+    type: object
+  EmailOutboundIpCollection:
+    description: Results of an outbound public IP search. Contains EmailOutboundIpSummary items.
+    properties:
+      items:
+        description: List of public IPs.
+        items:
+          $ref: '#/definitions/EmailOutboundIpSummary'
+        type: array
+    required:
+    - items
+    type: object
+  EmailOutboundIpSummary:
+    description: Summary of the Outbound IP address assigned to the tenancy.
+    properties:
+      assignmentState:
+        description: The assignment state of the public IP address.
+        enum:
+        - AVAILABLE
+        - ASSIGNED
+        type: string
+      lifecycleDetails:
+        description: 'A message describing the current state in more detail. For example, can be used
+          to provide actionable information for a
+
+          resource in ''DRAINING'' state.
+
+          '
+        type: string
+      lifecycleState:
+        description: The current state of the Email Outbound Public IP.
+        enum:
+        - UPDATING
+        - ACTIVE
+        - FAILED
+        - DRAINING
+        type: string
+      outboundIp:
+        description: The public IP address assigned to the tenancy.
+        type: string
+      timeUnassigned:
+        description: 'The time IP was removed from IP Pool.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - outboundIp
+    - assignmentState
+    type: object
+  EmailReturnPath:
+    description: 'The properties that define a Email Return Path
+
+      '
+    properties:
+      cnameRecordValue:
+        description: 'The DNS CNAME record value to provision to the Return Patn DNS subdomain, when using
+          the CNAME method for Email Return Path setup (preferred).
+
+          '
+        maxLength: 255
+        type: string
+        x-default-description: 'null'
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains this email return path.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      description:
+        description: The description of the email return path. Avoid entering confidential information.
+        maxLength: 400
+        type: string
+      dnsSubdomainName:
+        description: 'The name of the DNS subdomain that must be provisioned to enable email recipients
+          to verify Email Return Path.
+
+          It is usually created with a CNAME record set to the cnameRecordValue.
+
+          '
+        maxLength: 255
+        type: string
+        x-default-description: 'null'
+      freeformTags: *id007
+      id:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email return path.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleDetails:
+        description: 'A message describing the current state in more detail. For example, can be used
+          to provide actionable information for a
+
+          resource in ''Failed'' state.
+
+          '
+        type: string
+      lifecycleState:
+        description: The current state of the email return path.
+        enum:
+        - ACTIVE
+        - CREATING
+        - DELETING
+        - DELETED
+        - FAILED
+        - NEEDS_ATTENTION
+        - UPDATING
+        type: string
+        x-default-description: 'null'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        type: array
+      name:
+        description: 'The email return path domain in the Internet Domain Name System (DNS).
+
+
+          Example: `iad1.rp.example.com`
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      parentResourceId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain
+
+          that this email return path belongs to.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      systemTags: *id008
+      timeCreated:
+        description: 'The time the email return path was created.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The time of the last change to the Email Return Path configuration, due to a state
+          change or
+
+          an update operation.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+          '
+        format: date-time
+        type: string
+    required:
+    - name
+    - id
+    - parentResourceId
+    type: object
+  EmailReturnPathCollection:
+    description: Results of a ReturnPath search. Contains both ReturnPathSummary items and other information,
+      such as metadata.
+    properties:
+      items:
+        description: List of email return paths.
+        items:
+          $ref: '#/definitions/EmailReturnPathSummary'
+        type: array
+    required:
+    - items
+    type: object
+  EmailReturnPathSummary:
+    description: 'The properties that define a Email Return Path.
+
+      '
+    properties:
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains this email return path.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      description:
+        description: The description of the email return path. Avoid entering confidential information.
+        maxLength: 400
+        type: string
+      freeformTags: *id007
+      id:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email return path.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleState:
+        description: The current state of the email return path.
+        type: string
+        x-default-description: 'null'
+        x-obmcs-enumref: '#/definitions/EmailReturnPath/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        type: array
+      name:
+        description: 'The email return path domain in the Internet Domain Name System (DNS).
+
+
+          Example: `iad1.rp.example.com`
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      parentResourceId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the EmailDomain
+
+          that this email return path belongs to.
+
+          '
+        maxLength: 255
+        type: string
+      systemTags: *id008
+      timeCreated:
+        description: 'The time the email return path was created.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+
+          Example: `2021-02-12T22:47:12.613Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The time of the last change to the Email Return Path configuration, due to a state
+          change or
+
+          an update operation.
+
+          Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+          timestamp format, "YYYY-MM-ddThh:mmZ".
+
+          '
+        format: date-time
+        type: string
+    required:
+    - name
+    - id
+    - parentResourceId
+    type: object
+  Error:
+    description: An error has occurred.
+    properties:
+      code:
+        description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+          [API Errors](/Content/API/References/apierrors.htm).
+
+          '
+        type: string
+      message:
+        description: A human-readable error string.
+        type: string
+    required:
+    - code
+    - message
+  OperationStatus:
+    description: Possible operation status.
+    enum: &id012
+    - ACCEPTED
+    - IN_PROGRESS
+    - WAITING
+    - NEEDS_ATTENTION
+    - FAILED
+    - SUCCEEDED
+    - CANCELING
+    - CANCELED
+    type: string
+  OperationType:
+    description: Possible operation types.
+    enum: &id011
+    - CREATE_DKIM
+    - DELETE_DKIM
+    - MOVE_DKIM
+    - UPDATE_DKIM
+    - CREATE_EMAIL_DOMAIN
+    - DELETE_EMAIL_DOMAIN
+    - MOVE_EMAIL_DOMAIN
+    - UPDATE_EMAIL_DOMAIN
+    - CREATE_RETURN_PATH
+    - DELETE_RETURN_PATH
+    - UPDATE_RETURN_PATH
+    - CREATE_IP_POOL
+    - UPDATE_IP_POOL
+    - DELETE_IP_POOL
+    - MOVE_IP_POOL
+    type: string
+  RemoveEmailOutboundIpDetails:
+    description: 'Outbound IP details to be unassigned from the IpPool.
+
+      '
+    properties:
+      outboundIps:
+        description: "List of public IPs to REMOVE from the IpPool.\nAfter a public IP is unassigned,\
+          \ it will be marked as AVAILABLE and can be assigned to another IpPool. \nThe last IP removed\
+          \ from the Pool will be deleted from the IP Pool after 24 hours.\n"
+        items:
+          type: string
+        maxItems: 3
+        type: array
+        uniqueItems: true
+    required:
+    - outboundIps
+    type: object
+  RemoveLockDetails:
+    description: 'Request payload to remove the resource lock.
+
+      '
+    properties:
+      compartmentId:
+        description: The lock compartment ID.
+        type: string
+      type:
+        description: Lock type.
+        enum:
+        - FULL
+        - DELETE
+        type: string
+    required:
+    - type
+    type: object
+  ResourceLock:
+    description: 'Resource locks prevent certain APIs from being called for the resource.
+
+      A full lock prevents both updating and deleting the resource. A delete lock
+
+      prevents deleting the resource.
+
+      '
+    properties:
+      compartmentId:
+        description: The lock compartment ID.
+        type: string
+      message:
+        description: 'A message added by the lock creator. The message typically gives an
+
+          indication of why the resource is locked.
+
+          '
+        type: string
+      relatedResourceId:
+        description: 'The resource ID that is locking this resource. Indicates that deleting this resource
+          removes the lock.
+
+          '
+        type: string
+      timeCreated:
+        description: Indicates when the lock was created, in the format defined by RFC 3339.
+        format: date-time
+        type: string
+      type:
+        description: Lock type.
+        enum:
+        - FULL
+        - DELETE
+        type: string
+    required:
+    - type
+    - compartmentId
+    type: object
+  Sender:
+    description: The full information representing an approved sender.
+    properties:
+      compartmentId:
+        description: The OCID for the compartment.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      emailAddress:
+        description: Email address of the sender.
+        format: email
+        maxLength: 254
+        minLength: 6
+        type: string
+      emailDomainId:
+        description: 'The email domain used to assert responsibility for emails sent from this sender.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      emailIpPoolId:
+        description: The IpPool [OCID](/iaas/Content/General/Concepts/identifiers.htm) used to submit
+          an email by Email Delivery when sent from this sender.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id007
+      id:
+        description: The unique OCID of the sender.
+        maxLength: 255
+        minLength: 1
+        type: string
+      isSpf:
+        default: false
+        description: 'Value of the SPF field. For more information about SPF, please see
+
+          [SPF Authentication](https://docs.us-phoenix-1.oraclecloud.com/Content/Email/Concepts/overview.htm#components).
+
+          '
+        type: boolean
+      lifecycleState:
+        description: The sender's current lifecycle state.
+        enum:
+        - CREATING
+        - ACTIVE
+        - NEEDS_ATTENTION
+        - INACTIVE
+        - FAILED
+        - DELETING
+        - DELETED
+        - UPDATING
+        type: string
+        x-default-description: 'null'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        type: array
+      systemTags: *id008
+      timeCreated:
+        description: 'The date and time the approved sender was added in "YYYY-MM-ddThh:mmZ"
+
+          format with a Z offset, as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - emailAddress
+  SenderSummary:
+    description: The email addresses and `senderId` representing an approved sender.
+    properties:
+      compartmentId:
+        description: The OCID for the compartment.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id006
+      emailAddress:
+        description: The email address of the sender.
+        maxLength: 254
+        minLength: 6
+        type: string
+      emailIpPoolId:
+        description: The IpPool [OCID](/iaas/Content/General/Concepts/identifiers.htm) used to submit
+          an email by Email Delivery when sent from this sender.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id007
+      id:
+        description: The unique ID of the sender.
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleState:
+        description: The current status of the approved sender.
+        type: string
+        x-obmcs-enumref: '#/definitions/Sender/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        type: array
+      systemTags: *id008
+      timeCreated:
+        description: 'Date time the approved sender was added, in "YYYY-MM-ddThh:mmZ"
+
+          format with a Z offset, as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - emailAddress
+  SortOrder:
+    description: Sort orders.
+    enum: &id014
+    - ASC
+    - DESC
+    type: string
+  Suppression:
+    description: The full information representing an email suppression.
+    properties:
+      compartmentId:
+        description: 'The OCID of the compartment to contain the suppression. Since
+
+          suppressions are at the customer level, this must be the tenancy
+
+          OCID.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      emailAddress:
+        description: Email address of the suppression.
+        format: email
+        maxLength: 254
+        minLength: 6
+        type: string
+      errorDetail:
+        description: 'The specific error message returned by a system that resulted in the suppression.
+
+          This message is usually an SMTP error code with additional descriptive text.
+
+          Not provided for all types of suppressions.
+
+          '
+        maxLength: 255
+        type: string
+      errorSource:
+        description: 'DNS name of the source of the error that caused the suppression.
+
+          Will be set to either the remote-mta or reporting-mta field from a delivery status notification
+          (RFC 3464) when available.
+
+          Not provided for all types of suppressions, and not always known.
+
+
+          Note: Most SMTP errors that cause suppressions come from software run by email receiving systems
+          rather than from OCI email delivery itself.
+
+          '
+        maxLength: 1024
+        type: string
+      id:
+        description: The unique ID of the suppression.
+        maxLength: 255
+        minLength: 1
+        type: string
+      messageId:
+        description: 'The value of the Message-ID header from the email that triggered a suppression.
+
+          This value is as defined in RFC 5322 section 3.6.4, excluding angle-brackets.
+
+          Not provided for all types of suppressions.
+
+          '
+        maxLength: 255
+        type: string
+      reason:
+        description: The reason that the email address was suppressed. For more information on the types
+          of bounces, see [Suppression List](https://docs.us-phoenix-1.oraclecloud.com/Content/Email/Concepts/overview.htm#components).
+        enum: &id010
+        - UNKNOWN
+        - HARDBOUNCE
+        - COMPLAINT
+        - MANUAL
+        - SOFTBOUNCE
+        - UNSUBSCRIBE
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/SuppressionReason'
+      timeCreated:
+        description: 'The date and time the suppression was added in "YYYY-MM-ddThh:mmZ"
+
+          format with a Z offset, as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        maxLength: 254
+        type: string
+      timeLastSuppressed:
+        description: 'The last date and time the suppression prevented submission
+
+          in "YYYY-MM-ddThh:mmZ"
+
+          format with a Z offset, as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - emailAddress
+  SuppressionReason:
+    description: 'The reason that the email address was suppressed. For more information
+
+      on the types of bounces, see [Suppression List](https://docs.us-phoenix-1.oraclecloud.com/Content/Email/Concepts/overview.htm#components).
+
+      '
+    enum: *id010
+    type: string
+  SuppressionSummary:
+    description: The full information representing a suppression.
+    properties:
+      compartmentId:
+        description: The OCID for the compartment.
+        maxLength: 255
+        minLength: 1
+        type: string
+      emailAddress:
+        description: The email address of the suppression.
+        format: email
+        maxLength: 254
+        minLength: 6
+        type: string
+      id:
+        description: The unique OCID of the suppression.
+        maxLength: 255
+        minLength: 1
+        type: string
+      reason:
+        description: The reason that the email address was suppressed.
+        enum: *id010
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/SuppressionReason'
+      timeCreated:
+        description: 'The date and time a recipient''s email address was added to the
+
+          suppression list, in "YYYY-MM-ddThh:mmZ" format with a Z offset, as
+
+          defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        maxLength: 254
+        type: string
+    required:
+    - id
+    - compartmentId
+    - emailAddress
+  UpdateDkimDetails:
+    description: 'The attributes to update in the DKIM.
+
+      '
+    properties:
+      definedTags: *id006
+      description:
+        description: 'A string that describes the details about the DKIM. It does not have to be unique,
+
+          and you can change it. Avoid entering confidential information.
+
+          '
+        maxLength: 400
+        minLength: 1
+        type: string
+      freeformTags: *id007
+    type: object
+  UpdateEmailDomainDetails:
+    description: 'The attributes to update in the email domain.
+
+      '
+    properties:
+      definedTags: *id006
+      description:
+        description: 'A string that describes the details about the domain. It does not have to be unique,
+
+          and you can change it. Avoid entering confidential information.
+
+          '
+        maxLength: 400
+        minLength: 1
+        type: string
+      domainVerificationId:
+        default: null
+        description: Id for Domain in Domain Management (under governance) if DOMAINID verification method
+          used.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id007
+    type: object
+  UpdateEmailIpPoolDetails:
+    description: The attributes to update an IpPool which will be used to route emails.
+    properties:
+      definedTags: *id006
+      description:
+        description: The description of the IpPool. Avoid entering confidential information.
+        maxLength: 400
+        type: string
+      freeformTags: *id007
+      lastIpDrainPeriodInHours:
+        default: 24
+        description: 'Last IP will be unassigned from the IP Pool after the period of time (in hours)
+          specified by this parameter. Default is 24 hours.
+
+          '
+        maximum: 24
+        minimum: 0
+        type: integer
+    type: object
+  UpdateEmailReturnPathDetails:
+    description: 'The attributes to update in the email return path.
+
+      '
+    properties:
+      definedTags: *id006
+      description:
+        description: 'A string that describes the details about the email return path. It does not have
+          to be unique,
+
+          and you can change it. Avoid entering confidential information.
+
+          '
+        maxLength: 400
+        minLength: 1
+        type: string
+      freeformTags: *id007
+    type: object
+  UpdateSenderDetails:
+    description: 'The details allowed for updating a sender.
+
+      '
+    properties:
+      definedTags: *id006
+      emailIpPoolId:
+        description: The IpPool [OCID](/iaas/Content/General/Concepts/identifiers.htm) used to submit
+          an email by Email Delivery when sent from this sender.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id007
+  WorkRequest:
+    description: A description of workrequest status
+    properties:
+      compartmentId:
+        description: 'The OCID of the compartment that contains the work request. Work requests should
+          be scoped to
+
+          the same compartment as the resource the work request affects. If the work request affects multiple
+          resources,
+
+          and those resources are not in the same compartment, it is up to the service team to pick the
+          primary
+
+          resource whose compartment should be used
+
+          '
+        type: string
+      id:
+        description: The id of the work request.
+        type: string
+      operationType:
+        description: Type of the work request
+        enum: *id011
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/OperationType'
+      percentComplete:
+        description: Percentage of the request completed.
+        format: float
+        type: number
+      resources:
+        description: The resources affected by this work request.
+        items:
+          $ref: '#/definitions/WorkRequestResource'
+        type: array
+      status:
+        description: Status of current work request.
+        enum: *id012
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      timeAccepted:
+        description: 'The date and time the request was created, as described in
+
+          [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+          '
+        format: date-time
+        type: string
+      timeFinished:
+        description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+          '
+        format: date-time
+        type: string
+      timeStarted:
+        description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+          section 14.29.
+
+          '
+        format: date-time
+        type: string
+    required:
+    - operationType
+    - status
+    - id
+    - compartmentId
+    - resources
+    - percentComplete
+    - timeAccepted
+  WorkRequestError:
+    description: An error encountered while executing a work request.
+    properties:
+      code:
+        description: 'A machine-usable code for the error that occurred. Refer to [API Errors](https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+          for a list of error codes.
+
+          '
+        type: string
+      message:
+        description: A human readable description of the issue encountered.
+        type: string
+      timestamp:
+        description: The time the error occurred. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+    required:
+    - code
+    - message
+    - timestamp
+  WorkRequestErrorCollection:
+    description: Results of a workRequestError search. Contains both WorkRequestError items and other
+      information, such as metadata.
+    properties:
+      items:
+        description: List of workRequestError objects.
+        items:
+          $ref: '#/definitions/WorkRequestError'
+        type: array
+    required:
+    - items
+    type: object
+  WorkRequestLogEntry:
+    description: A log message from the execution of a work request.
+    properties:
+      message:
+        description: Human-readable log message.
+        type: string
+      timestamp:
+        description: The time the log message was written. An RFC3339 formatted datetime string
+        format: date-time
+        type: string
+    required:
+    - message
+    - timestamp
+  WorkRequestLogEntryCollection:
+    description: Results of a workRequestLog search. Contains both workRequestLog items and other information,
+      such as metadata.
+    properties:
+      items:
+        description: List of workRequestLogEntries.
+        items:
+          $ref: '#/definitions/WorkRequestLogEntry'
+        type: array
+    required:
+    - items
+    type: object
+  WorkRequestResource:
+    description: A resource created or operated on by a work request.
+    properties:
+      actionType:
+        description: 'The way in which this resource is affected by the work tracked in the work request.
+
+          A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
+
+          work is complete for that resource at which point it will transition to CREATED, UPDATED,
+
+          or DELETED, respectively.
+
+          '
+        enum: *id013
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/ActionType'
+      entityType:
+        description: The resource type the work request affects.
+        type: string
+      entityUri:
+        description: The URI path that the user can do a GET on to access the resource metadata
+        type: string
+      identifier:
+        description: The identifier of the resource the work request affects.
+        type: string
+    required:
+    - actionType
+    - entityType
+    - identifier
+  WorkRequestSummary:
+    description: A summary of the status of a work request.
+    properties:
+      compartmentId:
+        description: 'The OCID of the compartment that contains the work request. Work requests should
+          be scoped to
+
+          the same compartment as the resource the work request affects. If the work request affects multiple
+          resources,
+
+          and those resources are not in the same compartment, it is up to the service team to pick the
+          primary
+
+          resource whose compartment should be used
+
+          '
+        type: string
+      id:
+        description: The id of the work request.
+        type: string
+      operationType:
+        description: Type of the work request
+        enum: *id011
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/OperationType'
+      percentComplete:
+        description: Percentage of the request completed.
+        format: float
+        type: number
+      resources:
+        description: The resources affected by this work request.
+        items:
+          $ref: '#/definitions/WorkRequestResource'
+        type: array
+      status:
+        description: Status of current work request.
+        enum: *id012
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      timeAccepted:
+        description: 'The date and time the request was created, as described in
+
+          [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+          '
+        format: date-time
+        type: string
+      timeFinished:
+        description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+          '
+        format: date-time
+        type: string
+      timeStarted:
+        description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+          section 14.29.
+
+          '
+        format: date-time
+        type: string
+    required:
+    - operationType
+    - status
+    - id
+    - compartmentId
+    - resources
+    - percentComplete
+    - timeAccepted
+  WorkRequestSummaryCollection:
+    description: Results of a workRequest search. Contains both WorkRequest items and other information,
+      such as metadata.
+    properties:
+      items:
+        description: List of workRequestSummary objects.
+        items:
+          $ref: '#/definitions/WorkRequestSummary'
+        type: array
+    required:
+    - items
+    type: object
+parameters:
+  DkimIdPathParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of this DKIM.
+    in: path
+    name: dkimId
+    required: true
+    type: string
+  EmailDomainIdPathParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of this email domain.
+    in: path
+    name: emailDomainId
+    required: true
+    type: string
+  EmailDomainIdQueryParam:
+    description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the email domain to which
+      this DKIM belongs.
+
+      '
+    in: query
+    maxLength: 255
+    minLength: 1
+    name: emailDomainId
+    required: true
+    type: string
+  EmailReturnPathIdPathParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of this email return path.
+    in: path
+    name: emailReturnPathId
+    required: true
+    type: string
+  FilterByDomainQueryParam:
+    description: A filter to only return resources that match the given domain exactly.
+    in: query
+    name: domain
+    required: false
+    type: string
+    x-default-description: 'null'
+  FilterByIdQueryParam:
+    description: 'A filter to only return resources that match the given id exactly.
+
+      '
+    in: query
+    maxLength: 255
+    minLength: 1
+    name: id
+    required: false
+    type: string
+    x-default-description: 'null'
+  FilterByIpPoolQueryParam:
+    description: A filter to only return resources that match the given IpPool resource exactly.
+    in: query
+    name: emailIpPoolId
+    required: false
+    type: string
+    x-default-description: 'null'
+  FilterByNameQueryParam:
+    description: 'A filter to only return resources that match the given name exactly.
+
+      '
+    in: query
+    maxLength: 1024
+    minLength: 1
+    name: name
+    required: false
+    type: string
+    x-default-description: 'null'
+  FilterByOutboundIpQueryParam:
+    description: The outbound IP address assigned to the tenancy.
+    in: query
+    name: outboundIp
+    type: string
+    x-default-description: 'null'
+  IfMatchHeader:
+    description: 'Used for optimistic concurrency control. In the update or delete call for a resource,
+      set the `if-match`
+
+      parameter to the value of the etag from a previous get, create, or update response for that resource.  The
+      resource
+
+      will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+
+      '
+    in: header
+    maxLength: 64
+    minLength: 1
+    name: if-match
+    required: false
+    type: string
+  IpPoolIdPathParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the IpPool.
+    in: path
+    maxLength: 255
+    minLength: 1
+    name: emailIpPoolId
+    required: true
+    type: string
+  OptionalCompartmentIdQueryParam:
+    description: The OCID for the compartment.
+    in: query
+    maxLength: 255
+    minLength: 1
+    name: compartmentId
+    required: false
+    type: string
+  OverrideLocksQueryParameter:
+    default: false
+    description: Whether to override locks (if any exist).
+    in: query
+    name: isLockOverride
+    type: boolean
+  PaginationLimitQueryParam:
+    description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+      paginated "List" call. `1` is the minimum, `1000` is the maximum. For important details about
+
+      how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+      '
+    in: query
+    maximum: 1000
+    minimum: 1
+    name: limit
+    type: integer
+    x-default-description: 'null'
+  PaginationTokenQueryParam:
+    description: 'For list pagination. The value of the opc-next-page response header from the previous
+      "List" call.
+
+      For important details about how pagination works,
+
+      see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+      '
+    in: query
+    maxLength: 2000
+    minLength: 1
+    name: page
+    type: string
+    x-default-description: 'null'
+  ParentResourceIdQueryParam:
+    description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Email Domain to which
+      this Email Return Path belongs.
+
+      '
+    in: query
+    maxLength: 255
+    minLength: 1
+    name: parentResourceId
+    required: false
+    type: string
+  RequestIdHeader:
+    description: The request ID for tracing from the system
+    in: header
+    name: opc-request-id
+    type: string
+  ResourceIdentifierQueryParam:
+    description: The ID of the resource affected by the work request.
+    in: query
+    name: resourceId
+    type: string
+    x-default-description: 'null'
+  RetryTokenHeader:
+    description: 'A token that uniquely identifies a request so it can be retried in case of a timeout
+      or
+
+      server error without risk of executing that same action again. Retry tokens expire after 24
+
+      hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+      has been deleted and purged from the system, then a retry of the original creation request
+
+      might be rejected.
+
+      '
+    in: header
+    maxLength: 64
+    minLength: 1
+    name: opc-retry-token
+    required: false
+    type: string
+  SortByQueryParam:
+    description: 'The field to sort by. The `TIMECREATED` value returns the list in in
+
+      descending order by default. The `EMAILADDRESS` value returns the list in
+
+      ascending order by default. Use the `SortOrderQueryParam` to change the
+
+      direction of the returned list of items.
+
+      '
+    enum:
+    - TIMECREATED
+    - EMAILADDRESS
+    in: query
+    name: sortBy
+    required: false
+    type: string
+    x-default-description: 'null'
+  SortOrderQueryParam:
+    description: 'The sort order to use, either ascending or descending order.
+
+      '
+    enum: *id014
+    in: query
+    name: sortOrder
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-top-level-enum: '#/definitions/SortOrder'
+  WorkRequestIdPathParam:
+    description: The ID of the asynchronous request.
+    in: path
+    name: workRequestId
+    required: true
+    type: string
+  WorkRequestIdQueryParam:
+    description: The ID of the asynchronous work request.
+    in: query
+    name: workRequestId
+    type: string
+    x-default-description: 'null'
+  WorkRequestLogAndErrorSortByQueryParam:
+    default: timestamp
+    description: 'The field to sort by. Only one sort order may be provided. Default order for timestamp
+      is descending.
+
+      '
+    enum:
+    - timestamp
+    in: query
+    name: sortBy
+    type: string
+  WorkRequestOperationTypeQueryParam:
+    description: A filter to return only resources matching the given operation type.
+    enum: *id011
+    in: query
+    name: operationType
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-top-level-enum: '#/definitions/OperationType'
+  WorkRequestSortByQueryParam:
+    default: timeAccepted
+    description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted
+      is descending.
+
+      '
+    enum:
+    - timeAccepted
+    in: query
+    name: sortBy
+    type: string
+  WorkRequestStatusQueryParam:
+    description: A filter to return only resources their lifecycleState matches the given OperationStatus.
+    enum: *id012
+    in: query
+    name: status
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+  compartmentIdQueryParam:
+    description: The OCID for the compartment.
+    in: query
+    name: compartmentId
+    required: true
+    type: string
+  lifecycleStateQueryParam:
+    description: The current state of a sender.
+    in: query
+    name: lifecycleState
+    type: string
+    x-default-description: 'null'
+    x-obmcs-enumref: '#/definitions/Sender/lifecycleState'
+  senderEmailAddressQueryParam:
+    description: The email address of the approved sender.
+    format: email
+    in: query
+    maxLength: 254
+    minLength: 6
+    name: emailAddress
+    type: string
+    x-default-description: 'null'
+  senderIdPathParam:
+    description: The unique OCID of the sender.
+    in: path
+    maxLength: 255
+    minLength: 1
+    name: senderId
+    required: true
+    type: string
+  suppressionEmailAddressQueryParam:
+    description: The email address of the suppression.
+    format: email
+    in: query
+    maxLength: 254
+    minLength: 6
+    name: emailAddress
+    type: string
+    x-default-description: 'null'
+  suppressionEndTimeCreatedQueryParam:
+    description: 'Search for suppressions that were created within a specific date range,
+
+      using this parameter to specify the latest creation date for the returned
+
+      list (exclusive). Specifying this parameter without the corresponding
+
+      `timeCreatedGreaterThanOrEqualTo` parameter will retrieve all suppressions created before the
+
+      specified end date, in "YYYY-MM-ddThh:mmZ" format with a Z offset, as
+
+      defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+      **Example:** 2016-12-19T16:39:57.600Z
+
+      '
+    format: date-time
+    in: query
+    maxLength: 254
+    name: timeCreatedLessThan
+    required: false
+    type: string
+    x-default-description: 'null'
+  suppressionIdPathParam:
+    description: The unique OCID of the suppression.
+    in: path
+    maxLength: 255
+    minLength: 1
+    name: suppressionId
+    required: true
+    type: string
+  suppressionStartTimeCreatedQueryParam:
+    description: 'Search for suppressions that were created within a specific date range,
+
+      using this parameter to specify the earliest creation date for the
+
+      returned list (inclusive). Specifying this parameter without the
+
+      corresponding `timeCreatedLessThan` parameter will retrieve suppressions created from the
+
+      given `timeCreatedGreaterThanOrEqualTo` to the current time, in "YYYY-MM-ddThh:mmZ" format with
+      a
+
+      Z offset, as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+      **Example:** 2016-12-19T16:39:57.600Z
+
+      '
+    format: date-time
+    in: query
+    maxLength: 254
+    name: timeCreatedGreaterThanOrEqualTo
+    required: false
+    type: string
+    x-default-description: 'null'
+responses:
+  '204':
+    description: The operation completed successfully.
+    headers:
+      opc-request-id: *id001
+  '400':
+    description: Incorrectly formatted request.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '401':
+    description: 'The required information to complete authentication was not provided or
+
+      was incorrect. Extra detail may be provided in the response body.
+
+      '
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '403':
+    description: Forbidden
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '404':
+    description: Authorization failed or the requested resource was not found.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '405':
+    description: Method Not Allowed
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '409':
+    description: Authorization failed or the requested resource already exists.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '412':
+    description: Precondition Failed.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '429':
+    description: Too Many Requests
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  '500':
+    description: Internal Server Error.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  Error:
+    description: An error has occurred.
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  default:
+    description: Unknown Error
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+x-anchors:
+  x-headers:
+    etag: *id004
+    location: *id002
+    opc-next-page: *id005
+    opc-previous-page:
+      description: 'For list pagination. When this header appears in the response, previous pages of results
+        remain.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      type: string
+    opc-request-id: *id001
+    opc-total-items:
+      description: 'The total number of items returned from the request.
+
+        '
+      type: integer
+    opc-work-request-id: *id003
+    retry-after: *id015
+  x-properties:
+    definedTags: *id006
+    freeformTags: *id007
+    systemTags: *id008
+x-oracle-package: com.oracle.pic.email

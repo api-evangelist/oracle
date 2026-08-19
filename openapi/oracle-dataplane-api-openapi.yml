@@ -1,0 +1,204 @@
+openapi: 3.2.0
+info:
+  description: APIs for managing identity data plane services. For example, use these APIs to create a scoped-access security token or a user principal session token (UPST). To manage identity domains (for example, creating or deleting an identity domain) or to manage resources (for example, users and groups) within the default identity domain, see [IAM API](https://docs.oracle.com/iaas/api/#/en/identity/).
+  license:
+    name: Oracle Corporation
+  title: Identity and Access Management Data Plane Dataplane API
+  version: v1
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/7e3c983ab04cba050355f42f4af4739877daa289937575a7498b525ccb4a29f4.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Identity and Access Management Data Plane API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/7e3c983ab04cba050355f42f4af4739877daa289937575a7498b525ccb4a29f4.yaml
+    what: the harvested document for Identity and Access Management Data Plane API
+servers:
+- url: http://localhost:9010/v1
+tags:
+- name: dataplane
+paths:
+  /actions/generateScopedAccessToken:
+    post:
+      description: 'Based on the calling Principal and the input payload, derive the claims, and generate a scoped-access token for specific resources. For example, set scope to urn:oracle:db::id::<compartment-id> for access to a database in a compartment.
+
+        '
+      operationId: GenerateScopedAccessToken
+      responses:
+        200:
+          description: The security token object.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+                particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityToken'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: Get a scoped-access security token.
+      tags:
+      - dataplane
+      x-example: "POST /v1/actions/generateScopedAccessToken/\nHost: auth.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  'scope': 'urn:oracle:db::id::<var>&lt;compartment-id&gt;</var>'\n  'publicKey': 'publicKey'\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateScopedAccessTokenDetails'
+        description: Scoped access token request
+        required: true
+  /token/upst/actions/GenerateUpst:
+    post:
+      description: 'Exchanges a valid user token-based signature (API key and UPST) for a short-lived UPST of the authenticated
+
+        user principal. When not specified, the user session duration is set to a default of 60 minutes in all realms. Resulting UPSTs
+
+        are refreshable while the user session has not expired.
+
+        '
+      operationId: GenerateUserSecurityToken
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: UPST generation succeeded.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+                particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityToken'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
+      summary: Generates a user principal session token (UPST) for the authenticated user principal.
+      tags:
+      - dataplane
+      x-example: "POST /v1/token/upst/actions/GenerateUpst\nHost: auth.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  'publicKey': '[public key]'\n  'sessionExpirationInMinutes': 15\n}\n"
+      x-related-resource: '#/definitions/SecurityToken'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateUserSecurityTokenDetails'
+        description: The key-value pair object storing the token exchange request parameters required to obtain a UPST for self.
+        required: true
+components:
+  schemas:
+    GenerateUserSecurityTokenDetails:
+      description: Request parameters in body for obtaining a user principal session token (UPST) for self.
+      properties:
+        publicKey:
+          description: 'The user-owned public key in PEM format that corresponds to the RSA key pair used for signing requests.
+
+            The user also owns the corresponding private key. This public key will be put inside the user
+
+            security token by the auth service after successful validation of the request.
+
+            '
+          type: string
+        sessionExpirationInMinutes:
+          description: 'User session expiration in minutes to which the requested user principal session token (UPST) is bounded.
+
+            Valid values are from 5 to 60 for all realms.
+
+            '
+          maximum: 60
+          minimum: 5
+          type: integer
+      required:
+      - publicKey
+    GenerateScopedAccessTokenDetails:
+      properties:
+        publicKey:
+          description: 'A temporary public key, owned by the service. The service also owns the corresponding private key. This public
+
+            key will be put inside the security token by the auth service after successful validation of the certificate.
+
+            '
+          type: string
+        scope:
+          description: 'Scope definition for the scoped access token
+
+            '
+          type: string
+          x-example: urn:oracle:db::id::<compartment-id>
+      required:
+      - scope
+      - publicKey
+    Error:
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    SecurityToken:
+      properties:
+        token:
+          description: The security token, signed by auth service
+          type: string
+      required:
+      - token
+  responses:
+    Error:
+      description: 'An error has occurred. The `opc-request-id` response header contains the request ID.
+
+        '
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+            a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    OpcRequestIdHeaderParam:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string

@@ -1,0 +1,2634 @@
+swagger: '2.0'
+info:
+  description: Use the SELF Service API to manage Subscriptions in Oracle Cloud Infrastructure Marketplace.
+    For more information, see [Overview of Marketplace](/Content/Marketplace/Concepts/marketoverview.htm)
+  title: SELF Service API
+  version: '20260129'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/cfd2e0a7b06e7fe7f63b265844c1c5992d39e9c7460b8bb019b058fd9bbcd555.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the SELF Service API OCI service and stored verbatim;
+      API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/cfd2e0a7b06e7fe7f63b265844c1c5992d39e9c7460b8bb019b058fd9bbcd555.yaml
+    what: the harvested document for SELF Service API
+host: 127.0.0.1
+basePath: /20260129
+schemes:
+- http
+- https
+produces:
+- application/json
+paths:
+  /partners:
+    get:
+      description: 'Lists marketplace publisher partner info for a compartment.
+
+        '
+      operationId: ListPartners
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Lists marketplace publisher partners for the compartment.
+          headers:
+            opc-next-page: &id002
+              description: 'For list pagination. When this header appears in the response, additional
+                pages of results remain. For
+
+                important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              type: string
+            opc-request-id: &id001
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/PartnerCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Lists partner info
+      tags:
+      - PartnerIntegeration
+      x-related-resource: '#/definitions/Partner'
+  /partners/actions/batchUsageRecords:
+    post:
+      description: 'Asynchronously submits a UTF-8 CSV usage file for marketplace offers. The file
+
+        must not exceed 50 MB or 30,000 rows and must include required usage columns.
+
+        '
+      operationId: SubmitSubscriptionUsageBatch
+      parameters:
+      - $ref: '#/parameters/CompartmentIdHeader'
+      - description: 'UTF-8 CSV file with no more than 30,000 usage records and a maximum size of 50 MB.
+
+          Required columns are `MarketplaceOfferId`, `Id`, `Amount`, `CurrencyCode`,
+
+          `UsageStartTime`, `UsageEndTime`, and `UsageDimensionName`.
+
+          Optional columns are `ConsumedQuantity`, `CustomerTenancyId`,
+
+          `BillingIdentifier`, `ProductSku`, `UnitOfMeasure`, `UnitPrice`,
+
+          `ContractDuration`, and `AdditionalMetadata`.
+
+          When provided in CSV, `AdditionalMetadata` must be a JSON array of `ExtendedMetadata`
+
+          objects. `MarketplaceOfferId` must be a subscription or private offer OCID.
+
+          '
+        in: body
+        name: SubmitSubscriptionUsageBatchDetails
+        required: true
+        schema:
+          format: binary
+          type: string
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        202:
+          description: The usage batch was accepted for asynchronous processing.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: &id004
+              description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous
+                work request.
+
+                Use GetWorkRequest with this ID to track the status of the request.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Submits a CSV batch of usage records for marketplace offers.
+      tags:
+      - PartnerIntegeration
+      x-related-resource: '#/definitions/CreateSubscriptionUsageRecordDetails'
+  /partners/actions/submitUsageRecords:
+    post:
+      description: 'Synchronously submits usage records for marketplace offers. Each record must include
+
+        `id`, `marketplaceOfferId`, `amount`, `currencyCode`, `timeUsageStarted`,
+
+        `timeUsageEnded`, and `usageDimensionName`.
+
+        '
+      operationId: SubmitSubscriptionUsageRecords
+      parameters:
+      - $ref: '#/parameters/CompartmentIdHeader'
+      - description: 'Usage records to submit for marketplace offers.
+
+          '
+        in: body
+        name: SubmitSubscriptionUsageRecordsDetails
+        required: true
+        schema:
+          $ref: '#/definitions/SubmitSubscriptionUsageRecordsDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The usage records were validated and stored synchronously.
+          headers:
+            opc-request-id: *id001
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Submits one or more usage records for marketplace offers.
+      tags:
+      - PartnerIntegeration
+      x-related-resource: '#/definitions/CreateSubscriptionUsageRecordDetails'
+  /partners/subscriptions:
+    get:
+      description: Gets information about a Subscription.
+      operationId: ListingSubscriptions
+      parameters:
+      - $ref: '#/parameters/ListingIdQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: The Subscription was retrieved.
+          headers:
+            opc-next-page: *id002
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/ListingSubscriptionsCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets the summary of subscriptions for a particular Listing.
+      tags:
+      - PartnerIntegeration
+      x-related-resource: '#/definitions/ListingSubscriptionsCollection'
+  /partners/subscriptions/actions/resolve:
+    post:
+      description: 'This API returns the subscription details by resolving JWT token to corresponding
+        subscription and move its state to Pending Activation state.
+
+        '
+      operationId: ResolveSubscription
+      parameters:
+      - description: Details for the new Subscription.
+        in: body
+        name: ResolveSubscriptionDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ResolveSubscriptionDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        200:
+          description: Returns the resolved subscription details.
+          headers:
+            etag: &id003
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              type: string
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/PartnerSubscription'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Resolve a Subscription.
+      tags:
+      - PartnerIntegeration
+      x-obmcs-terraform:
+        actionType: SPECIAL_UPDATE
+      x-related-resource: '#/definitions/PartnerSubscription'
+  /partners/subscriptions/{subscriptionId}/actions/activate:
+    post:
+      description: 'Activates a subscription identified by the provided subscription ID and updates its
+        status.
+
+        '
+      operationId: ActivateSubscription
+      parameters:
+      - $ref: '#/parameters/SubscriptionIdPathParam'
+      - description: The details for activating the subscription.
+        in: body
+        name: ActivateSubscriptionDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ActivateSubscriptionDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        200:
+          description: The subscription was successfully activated.
+          headers:
+            etag: *id003
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/ActivateSubscriptionResult'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Activates a Subscription.
+      tags:
+      - PartnerIntegeration
+      x-obmcs-terraform:
+        actionType: SPECIAL_UPDATE
+      x-related-resource: '#/definitions/PartnerSubscription'
+  /subscriptions:
+    get:
+      description: 'Lists the subscriptions which have been created in the specified compartment.
+
+        You can filter results by specifying query parameters.
+
+        '
+      operationId: ListSubscriptions
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/LifecycleDetailQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/SubscriptionIdentifierQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: A page of SubscriptionSummary objects.
+          headers:
+            opc-next-page: *id002
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/SubscriptionCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets the list of subscriptions in the specified compartment.
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/SubscriptionCollection'
+    post:
+      description: 'Creates a Subscription.
+
+        '
+      operationId: CreateSubscription
+      parameters:
+      - description: Details for the new Subscription.
+        in: body
+        name: CreateSubscriptionDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateSubscriptionDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        201:
+          description: Accepted the request. The Subscription will be created.
+          headers:
+            content-location:
+              description: Same as location.
+              format: uri-reference
+              type: string
+            etag: *id003
+            location:
+              description: URL for the created subscription. The subscription OCID is generated after
+                this request is sent.
+              format: uri-reference
+              type: string
+            opc-request-id: *id001
+            opc-work-request-id: *id004
+          schema:
+            $ref: '#/definitions/Subscription'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates a Subscription.
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/Subscription'
+  /subscriptions/{subscriptionId}:
+    delete:
+      description: Deletes a Subscription.
+      operationId: DeleteSubscription
+      parameters:
+      - $ref: '#/parameters/SubscriptionIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        202:
+          description: Accepted the request. The Subscription will be deleted.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id004
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Deletes a Subscription.
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/Subscription'
+    get:
+      description: Gets information about a Subscription.
+      operationId: GetSubscription
+      parameters:
+      - $ref: '#/parameters/SubscriptionIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The Subscription was retrieved.
+          headers:
+            etag: *id003
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Subscription'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Get Subscription
+      tags:
+      - subscription
+    put:
+      description: Updates a Subscription.
+      operationId: UpdateSubscription
+      parameters:
+      - $ref: '#/parameters/SubscriptionIdPathParam'
+      - description: The information to be updated.
+        in: body
+        name: UpdateSubscriptionDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateSubscriptionDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        202:
+          description: Accepted the request. The Subscription will be updated.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id004
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        405:
+          $ref: '#/responses/405'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Updates a Subscription.
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/Subscription'
+  /subscriptions/{subscriptionId}/actions/cancel:
+    post:
+      description: 'Requests cancellation of a Subscription. The subscription transitions to PendingCancellation
+
+        and remains active until the end of the current billing cycle, at which point it transitions
+
+        to Canceled. The subscription must be in the Active state to be canceled.
+
+        '
+      operationId: CancelSubscription
+      parameters:
+      - $ref: '#/parameters/SubscriptionIdPathParam'
+      - description: Details for the cancellation request.
+        in: body
+        name: CancelSubscriptionDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CancelSubscriptionDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: The Subscription cancellation was accepted. The Subscription is now in PendingCancellation
+            state.
+          headers:
+            etag: *id003
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Subscription'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Cancels a Subscription.
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/Subscription'
+  /subscriptions/{subscriptionId}/actions/changeCompartment:
+    post:
+      description: 'Moves a Subscription into a different compartment within the same tenancy. For information
+        about moving resources between
+
+        compartments, see [Moving Resources to a Different Compartment](/iaas/Content/Identity/Tasks/managingcompartments.htm#moveRes).
+
+        '
+      operationId: ChangeSubscriptionCompartment
+      parameters:
+      - $ref: '#/parameters/SubscriptionIdPathParam'
+      - description: The information to be updated.
+        in: body
+        name: ChangeSubscriptionCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeSubscriptionCompartmentDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        202:
+          description: Accepted the request. The Subscription will be moved into a different compartment.
+          headers:
+            opc-request-id: *id001
+            opc-work-request-id: *id004
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+      summary: Moves a Subscription into a different compartment.
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/Subscription'
+  /subscriptions/{subscriptionId}/token:
+    get:
+      description: 'Gets a token of Subscriptions.
+
+        '
+      operationId: GetSubscriptionToken
+      parameters:
+      - $ref: '#/parameters/SubscriptionIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: A page of SubscriptionSummary objects.
+          headers:
+            opc-next-page: *id002
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/SubscriptionToken'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets a token of Subscriptions.
+      tags:
+      - subscription
+  /workRequests:
+    get:
+      description: 'Lists the work requests in a compartment.
+
+        '
+      operationId: ListWorkRequests
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/WorkRequestIdQueryParam'
+      - $ref: '#/parameters/WorkRequestStatusQueryParam'
+      - $ref: '#/parameters/ResourceIdentifierQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/WorkRequestSortByQueryParam'
+      responses:
+        200:
+          description: The list of work requests was retrieved.
+          headers:
+            opc-next-page: *id002
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/WorkRequestSummaryCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: List work requests
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/WorkRequest'
+  /workRequests/{workRequestId}:
+    delete:
+      description: Cancels a work request.
+      operationId: CancelWorkRequest
+      parameters:
+      - $ref: '#/parameters/WorkRequestIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        202:
+          description: The work request will be canceled.
+          headers:
+            opc-request-id: *id001
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Cancel work request
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/WorkRequest'
+    get:
+      description: Gets the details of a work request.
+      operationId: GetWorkRequest
+      parameters:
+      - $ref: '#/parameters/WorkRequestIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The work request was retrieved.
+          headers:
+            etag: *id003
+            opc-request-id: *id001
+            retry-after: &id018
+              description: A decimal number representing the number of seconds the client should wait
+                before polling this endpoint again.
+              type: integer
+          schema:
+            $ref: '#/definitions/WorkRequest'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Get work request status
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/WorkRequest'
+  /workRequests/{workRequestId}/errors:
+    get:
+      description: 'Lists the errors for a work request.
+
+        '
+      operationId: ListWorkRequestErrors
+      parameters:
+      - $ref: '#/parameters/WorkRequestIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/WorkRequestLogAndErrorSortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      responses:
+        200:
+          description: The list of work request errors was retrieved.
+          headers:
+            opc-next-page: *id002
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/WorkRequestErrorCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: List work request errors
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/WorkRequestError'
+  /workRequests/{workRequestId}/logs:
+    get:
+      description: 'Lists the logs for a work request.
+
+        '
+      operationId: ListWorkRequestLogs
+      parameters:
+      - $ref: '#/parameters/WorkRequestIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/WorkRequestLogAndErrorSortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      responses:
+        200:
+          description: The list of work request logs.
+          headers:
+            opc-next-page: *id002
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/WorkRequestLogEntryCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: List work request logs
+      tags:
+      - subscription
+      x-related-resource: '#/definitions/WorkRequestLogEntry'
+definitions:
+  ActionType:
+    description: Possible types of actions.
+    enum: &id015
+    - CREATED
+    - UPDATED
+    - DELETED
+    - IN_PROGRESS
+    - RELATED
+    - FAILED
+    type: string
+  ActivateSubscriptionDetails:
+    description: Request model for activating a subscription. Contains necessary details to perform the
+      activation.
+    properties:
+      definedTags: &id005
+        additionalProperties:
+          additionalProperties:
+            description: 'The value of the tag. Only the String type is supported.
+
+              '
+            type: object
+          description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+            Example: `{"CostCenter": "42"}`
+
+            '
+          type: object
+        description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+          For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+          Example: `{"Operations": {"CostCenter": "42"}}`
+
+          '
+        type: object
+      freeformTags: &id006
+        additionalProperties:
+          type: string
+        description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined
+          name, type, or namespace.
+
+          For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+          Example: `{"Department": "Finance"}`
+
+          '
+        type: object
+      productId:
+        description: 'The unique identifier of the marketplace product listing.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - productId
+    type: object
+  ActivateSubscriptionResult:
+    description: Response model for the activation of a subscription. Includes the details of the activated
+      subscription.
+    properties:
+      displayName:
+        description: The subscription name. Must be unique within the compartment. This value can be updated.
+        example: Premium Cloud Subscription
+        maxLength: 1000
+        minLength: 1
+        type: string
+      lifecycleDetails:
+        description: 'A message that describes the current state of the Subscription in more detail. For
+          example,
+
+          can be used to provide actionable information for a resource in the Failed state.
+
+          '
+        enum: &id008
+        - CREATED
+        - PENDING_ACTIVATION
+        - PROVISIONING_STARTED
+        - PROVISIONING_COMPLETED
+        - PROVISIONING_FAILED
+        - ACTIVE
+        - EXPIRED
+        - TERMINATED
+        - FAILED
+        - DELETING
+        - UPDATING
+        - DELETED
+        - PENDING_CANCELLATION
+        - SUSPENDED
+        - CANCELED
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+      lifecycleState:
+        description: The current state of the Subscription.
+        enum: &id009
+        - ACTIVE
+        - INACTIVE
+        - DELETED
+        - FAILED
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
+      subscriptionId:
+        description: The unique identifier of the activated subscription.
+        type: string
+      timeEnd:
+        description: The end date of the subscription.
+        example: '2025-01-01T00:00:00Z'
+        format: date-time
+        type: string
+      timeStart:
+        description: The start date of the subscription.
+        example: '2024-01-01T00:00:00Z'
+        format: date-time
+        type: string
+    required:
+    - subscriptionId
+    type: object
+  BillingDetails:
+    description: Billing detail entry associated with a subscription.
+    properties:
+      billingModel:
+        description: The billing model this billing detail applies to.
+        enum:
+        - FLAT_RATE
+        - USAGE_BASED
+        type: string
+      hasGovSku:
+        description: Whether this sku is assign to gov product.
+        type: boolean
+      meters:
+        description: The meters associated with sku.
+        items:
+          $ref: '#/definitions/Meter'
+        type: array
+      metricType:
+        description: The part's metric.
+        enum: &id010
+        - OCPU_HOURS
+        - INSTANCE_HOURS
+        - CORE_HOURS
+        - EACH
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/MetricType'
+      pricingPlanKey:
+        description: Unique key used to map this SKU to the pricing plan.
+        type: string
+      rateAllocation:
+        description: Tha rate of this sku meter.
+        format: float
+        maximum: 1
+        minimum: 0
+        type: number
+      sku:
+        description: Sku for service.
+        type: string
+    required:
+    - pricingPlanKey
+    - billingModel
+    - sku
+    - metricType
+    - rateAllocation
+    - meters
+    type: object
+  BillingFrequency:
+    description: Supported billing frequencies for subscription plans and usage dimensions.
+    enum: &id007
+    - MONTHLY
+    - QUARTERLY
+    - SEMI_ANNUAL
+    - ANNUAL
+    - BIENNIAL
+    - TRIENNIAL
+    - YEARLY
+    type: string
+  CancelSubscriptionDetails:
+    description: The data to cancel a Subscription.
+    properties:
+      reason:
+        description: Optional reason provided by the customer for the cancellation.
+        maxLength: 1000
+        type: string
+    type: object
+  ChangeSubscriptionCompartmentDetails:
+    description: The configuration details for the move operation.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to
+          move the Subscription to.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+  CreateSubscriptionDetails:
+    description: The data to create a Subscription.
+    properties:
+      additionalDetails:
+        description: Additional details that are specific for this subscription such as activation details.
+        items:
+          $ref: '#/definitions/ExtendedMetadata'
+        type: array
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to
+          create the subscription in.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id005
+      displayName:
+        description: 'The subscription name. Must be unique within the compartment. This value can be
+          updated.
+
+          '
+        maxLength: 1000
+        minLength: 1
+        type: string
+      freeformTags: *id006
+      productId:
+        description: The unique identifier of the marketplace listing in Oracle Cloud Infrastructure.
+        maxLength: 255
+        minLength: 1
+        type: string
+      realm:
+        description: The realm from where customer is buying the subscription.
+        maxLength: 255
+        type: string
+      region:
+        description: The region from where customer is buying the subscription.
+        maxLength: 255
+        type: string
+      sellerId:
+        description: The OCID for the seller in SELF Service.
+        maxLength: 255
+        minLength: 1
+        type: string
+      sourceType:
+        description: The type of seller in SELF Service.
+        enum: &id012
+        - OCI_NATIVE
+        - THIRD_PARTY
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/SourceType'
+      subscriptionDetails:
+        $ref: '#/definitions/SubscriptionDetails'
+      tenantId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenant to create
+          the subscription in.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    - subscriptionDetails
+    - sellerId
+    - productId
+    - tenantId
+    type: object
+  CreateSubscriptionUsageRecordDetails:
+    description: 'A single usage record to submit for a marketplace offer. The usage window must have
+
+      `timeUsageStarted` before `timeUsageEnded`.
+
+      '
+    properties:
+      additionalMetadata:
+        description: Additional key/value metadata associated with this usage record for extensibility.
+        items:
+          $ref: '#/definitions/ExtendedMetadata'
+        type: array
+      amount:
+        description: The non-negative usage cost computed by the partner for the submitted usage quantity.
+        format: double
+        minimum: 0
+        type: number
+      billingIdentifier:
+        description: The partner billing identifier associated with this usage record.
+        maxLength: 255
+        minLength: 1
+        type: string
+      billingPeriod:
+        description: The billing period associated with this usage record in `YYYY-MM` format.
+        maxLength: 7
+        minLength: 7
+        pattern: ^[0-9]{4}-(0[1-9]|1[0-2])$
+        type: string
+      billingType:
+        description: The billing type this usage record applies to.
+        enum:
+        - FLAT_RATE
+        - USAGE_BASED
+        type: string
+      consumedQuantity:
+        description: An optional non-negative usage quantity being reported.
+        format: double
+        minimum: 0
+        type: number
+      contractDuration:
+        description: The contract duration associated with this usage record.
+        enum: *id007
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/BillingFrequency'
+      currencyCode:
+        description: The ISO-4217 currency submitted for the computed usage cost.
+        format: x-obmcs-currency-code
+        maxLength: 3
+        minLength: 3
+        type: string
+      customerTenancyId:
+        description: The [OCID](/Content/General/Concepts/identifiers.htm) of the customer tenancy associated
+          with this usage record.
+        maxLength: 255
+        minLength: 1
+        type: string
+      id:
+        description: Partner-provided unique identifier for this usage record. This identifier must be
+          unique per partner.
+        maxLength: 255
+        minLength: 1
+        type: string
+      marketplaceOfferId:
+        description: The [OCID](/Content/General/Concepts/identifiers.htm) of the marketplace offer being
+          billed. A submit request can contain records for multiple marketplace offers.
+        maxLength: 255
+        minLength: 1
+        type: string
+      productSku:
+        description: The product SKU associated with this usage record.
+        maxLength: 255
+        minLength: 1
+        type: string
+      timeUsageEnded:
+        description: The exclusive end timestamp for the usage window. This value must be after `timeUsageStarted`.
+        format: date-time
+        type: string
+      timeUsageStarted:
+        description: The inclusive start timestamp for the usage window. This value must be before `timeUsageEnded`.
+        format: date-time
+        type: string
+      unitOfMeasure:
+        description: The unit of measure associated with the reported usage quantity.
+        maxLength: 255
+        minLength: 1
+        type: string
+      unitPrice:
+        description: The unit price associated with this usage record.
+        format: double
+        minimum: 0
+        type: number
+      usageDimensionName:
+        description: The pricing dimension against which usage is being reported.
+        maxLength: 255
+        minLength: 1
+        type: string
+      usageRecordId:
+        description: Partner-provided usage record identifier for traceability.
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - id
+    - marketplaceOfferId
+    - usageDimensionName
+    - amount
+    - currencyCode
+    - timeUsageStarted
+    - timeUsageEnded
+    type: object
+  Error:
+    description: Error information.
+    properties:
+      code:
+        description: A short error code that defines the error, meant for programmatic parsing.
+        type: string
+      message:
+        description: A human-readable error message.
+        type: string
+    required:
+    - code
+    - message
+  ExtendedMetadata:
+    description: Additional metadata key/value pairs.
+    properties:
+      key:
+        description: Additional attribute for extendedMetadata.
+        type: string
+      value:
+        description: It contains the value of above key.
+        type: string
+    required:
+    - key
+    - value
+    type: object
+  LifecycleDetailsEnum:
+    description: 'A message that describes the current state of the Subscription in more detail. For example,
+
+      can be used to provide actionable information for a resource in the Failed state.
+
+      '
+    enum: *id008
+    type: string
+  LifecycleStateEnum:
+    description: The current lifecycle state of the Subscription.
+    enum: *id009
+    type: string
+  ListingSubscriptionSummary:
+    description: 'The summary information about a Subscription.
+
+      '
+    properties:
+      definedTags: *id005
+      displayName:
+        description: The subscription name. Must be unique within the compartment. This value can be updated.
+        maxLength: 1000
+        minLength: 1
+        type: string
+      freeformTags: *id006
+      lifecycleDetails:
+        description: 'A message that describes the current state of the Subscription in more detail. For
+          example,
+
+          can be used to provide actionable information for a resource in the Failed state.
+
+          '
+        enum: *id008
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+      lifecycleState:
+        description: The current state of the Subscription.
+        enum: *id009
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
+      productId:
+        description: The unique identifier of marketplace listing in Oracle Cloud Infrastructure.
+        maxLength: 255
+        minLength: 1
+        type: string
+      systemTags: &id011
+        additionalProperties:
+          additionalProperties:
+            description: 'The value of the tag. Only the String type is supported.
+
+              '
+            type: object
+          description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
+
+
+            Example: `{"free-tier-retained": "true"}`
+
+            '
+          type: object
+        description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+
+          Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+          '
+        type: object
+      timeEnded:
+        description: 'The date and time the Subscription was ended, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeStarted:
+        description: 'The date and time the Subscription was started, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - displayName
+    type: object
+  ListingSubscriptionsCollection:
+    description: Results of a subscription search. Contains both SubscriptionSummary items and other information,
+      such as metadata.
+    properties:
+      items:
+        description: List of subscriptions for particular listing.
+        items:
+          $ref: '#/definitions/ListingSubscriptionSummary'
+        type: array
+    required:
+    - items
+    type: object
+  Meter:
+    description: Details provide by seller for activation of its product.
+    properties:
+      extendedMetadata:
+        description: Additional data give by sku.
+        items:
+          $ref: '#/definitions/ExtendedMetadata'
+        type: array
+      name:
+        description: Name of meter.
+        type: string
+      rateAllocation:
+        description: Tha rate of this sku meter.
+        format: float
+        maximum: 1
+        minimum: 0
+        type: number
+    required:
+    - name
+    - rateAllocation
+    type: object
+  MetricType:
+    description: Possible values for metric types.
+    enum: *id010
+    type: string
+  OperationStatus:
+    description: The status of the work request.
+    enum: &id014
+    - ACCEPTED
+    - IN_PROGRESS
+    - WAITING
+    - NEEDS_ATTENTION
+    - FAILED
+    - SUCCEEDED
+    - CANCELING
+    - CANCELED
+    type: string
+  OperationType:
+    description: The asynchronous operation tracked by the work request.
+    enum: &id013
+    - CREATE_SUBSCRIPTION
+    - UPDATE_SUBSCRIPTION
+    - DELETE_SUBSCRIPTION
+    - MOVE_SUBSCRIPTION
+    - SUBMIT_SUBSCRIPTION_USAGE_BATCH
+    type: string
+  Partner:
+    description: Marketplace publisher partner details.
+    properties:
+      compartmentId:
+        description: 'The unique identifier of the compartment of partner.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id005
+      displayName:
+        description: The display name of marketplace publisher partner.
+        type: string
+      freeformTags: *id006
+      id:
+        description: 'The unique identifier of the marketplace publisher partner.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleState:
+        description: The current lifecycle state of the marketplace publisher partner.
+        enum:
+        - ACTIVE
+        - DELETED
+        type: string
+      systemTags: *id011
+    required:
+    - id
+    - compartmentId
+    - lifecycleState
+    type: object
+  PartnerCollection:
+    description: Results of listing marketplace publisher partners.
+    properties:
+      items:
+        description: The list of marketplace publisher partners.
+        items:
+          $ref: '#/definitions/PartnerSummary'
+        type: array
+    required:
+    - items
+    type: object
+  PartnerSubscription:
+    description: 'These api for partner to communicate to OCI.
+
+      '
+    properties:
+      additionalDetails:
+        description: Additional details that are specific for this subscription such as activation details.
+        items:
+          $ref: '#/definitions/ExtendedMetadata'
+        type: array
+      displayName:
+        description: The subscription name. Must be unique within the compartment. This value can be updated.
+        maxLength: 1000
+        minLength: 1
+        type: string
+      isAutoRenew:
+        description: Whether subscription should be auto-renewed at the end of cycle.
+        type: boolean
+      lifecycleDetails:
+        description: 'A message that describes the current state of the Subscription in more detail. For
+          example,
+
+          can be used to provide actionable information for a resource in the Failed state.
+
+          '
+        enum: *id008
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+      lifecycleState:
+        description: The current state of the Subscription.
+        enum: *id009
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
+      pricingPlan:
+        $ref: '#/definitions/PricingPlan'
+      productId:
+        description: The unique OCID of the product, effectively functioning as the listing ID.
+        maxLength: 255
+        minLength: 1
+        type: string
+      sourceType:
+        description: The type of seller in SELF Service.
+        enum: *id012
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/SourceType'
+      subscriptionId:
+        description: The unique identifier of the Subscription.
+        type: string
+      timeCreated:
+        description: 'The date and time the Subscription was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeEnded:
+        description: 'The date and time the Subscription was ended, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeStarted:
+        description: 'The date and time the Subscription was started, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The date and time the Subscription was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - subscriptionId
+    type: object
+  PartnerSummary:
+    description: Summary of a marketplace publisher partner.
+    properties:
+      compartmentId:
+        description: 'The unique identifier of the compartment of partner.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id005
+      displayName:
+        description: The display name of marketplace publisher partner.
+        type: string
+      freeformTags: *id006
+      id:
+        description: 'The unique identifier of the marketplace publisher partner.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleState:
+        description: The current lifecycle state of the marketplace publisher partner.
+        type: string
+        x-obmcs-enumref: '#/definitions/Partner/lifecycleState'
+      systemTags: *id011
+    required:
+    - id
+    - compartmentId
+    - lifecycleState
+    type: object
+  PricingPlan:
+    description: A pricing plan details provided by the Publisher.
+    properties:
+      billingFrequency:
+        description: Specifies the interval at which billing occurs for the subscription plan or usage
+          dimension.
+        enum: *id007
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/BillingFrequency'
+      dimensions:
+        description: Metered usage dimensions associated with the pricing plan.
+        example:
+        - dimensionBillingFrequency: MONTHLY
+          dimensionDescription: Requests included in the base plan.
+          dimensionKey: included_api_requests
+          dimensionName: Included API Requests
+          includedQuantity: 10000
+          metricType: EACH
+          rates:
+          - currency: USD
+            rate: 0.1
+        - dimensionBillingFrequency: MONTHLY
+          dimensionDescription: Requests billed beyond the included quantity.
+          dimensionKey: overage_api_requests
+          dimensionName: Overage API Requests
+          metricType: EACH
+          rates:
+          - currency: USD
+            rate: 0.02
+        items:
+          $ref: '#/definitions/UsageDimension'
+        maxItems: 10
+        type: array
+      planDescription:
+        description: A detailed explanation of the subscription plan.
+        maxLength: 4000
+        minLength: 1
+        type: string
+      planDuration:
+        description: Specifies the duration of the subscription plan.
+        enum:
+        - MONTHLY
+        - QUARTERLY
+        - SEMI_ANNUAL
+        - ANNUAL
+        - BIENNIAL
+        - TRIENNIAL
+        type: string
+      planName:
+        description: The name of the subscription plan used to identify the plan.
+        maxLength: 255
+        minLength: 1
+        type: string
+      planType:
+        description: The type of the subscription plan.
+        enum:
+        - FIXED
+        - USAGE_BASED
+        - HYBRID
+        type: string
+      rates:
+        description: The pricing details of the subscription plan in various supported currencies.
+        items:
+          $ref: '#/definitions/PricingRate'
+        type: array
+    required:
+    - planType
+    - planName
+    - billingFrequency
+    - rates
+    type: object
+  PricingRate:
+    description: A pricing plan rate provided by the Publisher.
+    properties:
+      currency:
+        description: The currency supported, in the format specified by ISO-4217
+        example: USD
+        maxLength: 3
+        minLength: 3
+        type: string
+      rate:
+        description: The amount charged for the plan in the specified currency.
+        format: float
+        type: number
+    required:
+    - currency
+    - rate
+    type: object
+  ResolveSubscriptionDetails:
+    description: Request model used to resolve and retrieve subscription details for a customer subscription,
+      given a selfToken and the productId.
+    properties:
+      definedTags: *id005
+      freeformTags: *id006
+      productId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the marketplace product
+          listing.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      selfToken:
+        description: The base 64 encoded JWT token which is mapped to a particular subscription
+        type: string
+    required:
+    - selfToken
+    - productId
+    type: object
+  SortOrder:
+    description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The `displayName`
+
+      sort order is case sensitive.
+
+      '
+    enum: &id017
+    - ASC
+    - DESC
+    type: string
+  SourceType:
+    description: The type of seller in SELF Service.
+    enum: *id012
+    type: string
+  SubmitSubscriptionUsageRecordsDetails:
+    description: 'Request payload to submit one or more usage records for marketplace offers.
+
+      '
+    properties:
+      subscriptionUsageRecords:
+        description: The usage records to submit. The array must contain at least one record and no more
+          than 1,000 records.
+        items:
+          $ref: '#/definitions/CreateSubscriptionUsageRecordDetails'
+        maxItems: 1000
+        minItems: 1
+        type: array
+    required:
+    - subscriptionUsageRecords
+    type: object
+  Subscription:
+    description: The model for a listing subscription.
+    properties:
+      additionalDetails:
+        description: Additional details that are specific for this subscription such as activation details.
+        items:
+          $ref: '#/definitions/ExtendedMetadata'
+        type: array
+      compartmentId:
+        description: The unique identifier for the compartment where the subscription was purchased.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id005
+      displayName:
+        description: The subscription name. Must be unique within the compartment. This value can be updated.
+        maxLength: 1000
+        minLength: 1
+        type: string
+      freeformTags: *id006
+      id:
+        description: The unique identifier for the subscription within a specific compartment.
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleDetails:
+        description: 'A message that describes the current state of the Subscription in more detail. For
+          example,
+
+          can be used to provide actionable information for a resource in the Failed state.
+
+          '
+        enum: *id008
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+      lifecycleState:
+        description: The current lifecycle state of the Subscription.
+        enum: *id009
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
+      productId:
+        description: The unique OCID of the product, effectively functioning as the listing ID.
+        maxLength: 255
+        minLength: 1
+        type: string
+      realm:
+        description: The realm from where customer is buying the subscription.
+        maxLength: 255
+        type: string
+      region:
+        description: The region from where customer is buying the subscription.
+        maxLength: 255
+        type: string
+      sellerId:
+        description: The OCID that identifies the seller within the platform.
+        maxLength: 255
+        minLength: 1
+        type: string
+      sourceType:
+        description: The type of seller in SELF Service.
+        enum: *id012
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/SourceType'
+      subscriptionDetails:
+        $ref: '#/definitions/SubscriptionDetails'
+      systemTags: *id011
+      tenantId:
+        description: The unique identifier for the tenant where the subscription was purchased.
+        type: string
+      timeCreated:
+        description: 'The date and time the Subscription was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeEnded:
+        description: 'The date and time the Subscription was ended, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeStarted:
+        description: 'The date and time the Subscription was started, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The date and time the Subscription was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - lifecycleState
+    - timeCreated
+    - displayName
+    - freeformTags
+    - definedTags
+    - tenantId
+    type: object
+  SubscriptionCollection:
+    description: Results of a subscription search. Contains both SubscriptionSummary items and other information,
+      such as metadata.
+    properties:
+      items:
+        description: List of subscriptions.
+        items:
+          $ref: '#/definitions/SubscriptionSummary'
+        type: array
+    required:
+    - items
+    type: object
+  SubscriptionDetails:
+    description: The details of a subscription
+    properties:
+      amount:
+        description: Tha amount for the currency type.
+        format: float
+        type: number
+      billingDetails:
+        description: Billing details associated with the subscription plan and its usage dimensions.
+        example:
+        - billingModel: USAGE_BASED
+          hasGovSku: false
+          meters:
+          - name: API_CALLS
+            rateAllocation: 1
+          - name: STORAGE_USAGE
+            rateAllocation: 1
+          metricType: EACH
+          pricingPlanKey: USAGE_BASED
+          rateAllocation: 1
+          sku: USAGE-001
+        items:
+          $ref: '#/definitions/BillingDetails'
+        maxItems: 10
+        type: array
+      currency:
+        description: The currency supported, in the format specified by ISO-4217
+        example: USD
+        maxLength: 3
+        minLength: 3
+        type: string
+      isAutoRenew:
+        description: Whether subscription should be auto-renewed at the end of cycle.
+        type: boolean
+      partnerRegistrationUrl:
+        description: The activation link given by the partner.
+        maxLength: 255
+        minLength: 1
+        type: string
+      pricingPlan:
+        $ref: '#/definitions/PricingPlan'
+    required:
+    - pricingPlan
+    - partnerRegistrationUrl
+    - billingDetails
+    type: object
+  SubscriptionSummary:
+    description: The model for a summary of a subscription.
+    properties:
+      compartmentId:
+        description: The unique identifier for the compartment where subscription was created.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id005
+      displayName:
+        description: The subscription name. Must be unique within the compartment. This value can be updated.
+        maxLength: 1000
+        minLength: 1
+        type: string
+      freeformTags: *id006
+      id:
+        description: The unique identifier for the subscription within a specific compartment.
+        maxLength: 255
+        minLength: 1
+        type: string
+      lifecycleDetails:
+        description: 'A message that describes the current state of the Subscription in more detail. For
+          example,
+
+          can be used to provide actionable information for a resource in the Failed state.
+
+          '
+        enum: *id008
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+      lifecycleState:
+        description: The current state of the Subscription.
+        enum: *id009
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
+      productId:
+        description: The unique OCID of the product, effectively functioning as the listing ID.
+        maxLength: 255
+        minLength: 1
+        type: string
+      sellerId:
+        description: The OCID that identifies the seller within the platform.
+        maxLength: 255
+        minLength: 1
+        type: string
+      subscriptionDetails:
+        $ref: '#/definitions/SubscriptionDetails'
+      systemTags: *id011
+      tenantId:
+        description: The unique identifier for the tenant where the subscription was purchased.
+        type: string
+      timeCreated:
+        description: 'The date and time the Subscription was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeEnded:
+        description: 'The date and time the Subscription was ended, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeStarted:
+        description: 'The date and time the Subscription was started, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The date and time the Subscription was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - lifecycleDetails
+    - timeCreated
+    - displayName
+    - freeformTags
+    - definedTags
+    - tenantId
+  SubscriptionToken:
+    description: The base 64 encoded JWT token which is mapped to a particular subscription.
+    properties:
+      definedTags: *id005
+      freeformTags: *id006
+      subscriptionId:
+        description: The unique identifier for the subscription within a specific compartment.
+        type: string
+      systemTags: *id011
+      token:
+        description: JWT token of subscriptions.
+        type: string
+    required:
+    - token
+    type: object
+  UpdateSubscriptionDetails:
+    description: The data to update a Subscription.
+    properties:
+      definedTags: *id005
+      displayName:
+        description: The subscription name. Must be unique within the compartment. This value can be updated.
+        maxLength: 1000
+        minLength: 1
+        type: string
+      freeformTags: *id006
+    type: object
+  UsageDimension:
+    description: A metered usage dimension associated with a usage-based or hybrid pricing plan.
+    properties:
+      dimensionBillingFrequency:
+        description: Specifies the interval at which the usage dimension is billed.
+        enum: *id007
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/BillingFrequency'
+      dimensionDescription:
+        description: A detailed explanation of the usage dimension.
+        maxLength: 4000
+        minLength: 1
+        type: string
+      dimensionKey:
+        description: The stable key used internally to map this usage dimension to billing details.
+        maxLength: 255
+        minLength: 1
+        type: string
+      dimensionName:
+        description: The name of the usage dimension.
+        maxLength: 1000
+        minLength: 1
+        type: string
+      includedQuantity:
+        description: Quantity included in the base fee for hybrid plans.
+        format: float
+        minimum: 0
+        type: number
+      metricType:
+        description: The metric type in which usage is measured.
+        enum: *id010
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/MetricType'
+      rates:
+        description: Dimension-level rates in various supported currencies.
+        items:
+          $ref: '#/definitions/PricingRate'
+        maxItems: 50
+        type: array
+    required:
+    - dimensionName
+    - dimensionKey
+    - dimensionDescription
+    - metricType
+    - dimensionBillingFrequency
+    - rates
+    type: object
+  WorkRequest:
+    description: 'An asynchronous work request. Work requests help you monitor long-running operations.
+      When you start a long-running operation,
+
+      the service creates a work request. A work request is an activity log that lets you track each step
+      in the operation''s
+
+      progress. Each work request has an OCID that lets you interact with it programmatically and use
+      it for automation.
+
+      '
+    properties:
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains the work request.
+
+          '
+        type: string
+      id:
+        description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+        type: string
+      operationType:
+        description: The asynchronous operation tracked by this work request.
+        enum: *id013
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/OperationType'
+      percentComplete:
+        description: 'Shows the progress of the operation tracked by the work request, as a percentage
+          of the total work
+
+          that must be performed.
+
+          '
+        format: float
+        type: number
+      resources:
+        description: The resources that are affected by the work request.
+        items:
+          $ref: '#/definitions/WorkRequestResource'
+        type: array
+      status:
+        description: The status of the work request.
+        enum: *id014
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      timeAccepted:
+        description: 'The date and time the work request was created, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+      timeFinished:
+        description: 'The date and time the work request was finished, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+          '
+        format: date-time
+        type: string
+      timeStarted:
+        description: 'The date and time the work request was started, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The date and time the work request was updated, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+          '
+        format: date-time
+        type: string
+    required:
+    - operationType
+    - status
+    - id
+    - compartmentId
+    - resources
+    - percentComplete
+    - timeAccepted
+  WorkRequestError:
+    description: An error encountered while performing an operation that is tracked by a work request.
+    properties:
+      code:
+        description: 'A machine-usable code for the error that occurred. For a list of error codes, see
+
+          [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+          '
+        type: string
+      message:
+        description: A human-readable error message.
+        type: string
+      timestamp:
+        description: 'The date and time the error occurred, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+    required:
+    - code
+    - message
+    - timestamp
+  WorkRequestErrorCollection:
+    description: A list of work request errors. Can contain both errors and other information, such as
+      metadata.
+    properties:
+      items:
+        description: A list of work request errors.
+        items:
+          $ref: '#/definitions/WorkRequestError'
+        type: array
+    required:
+    - items
+    type: object
+  WorkRequestLogEntry:
+    description: A log message from performing an operation that is tracked by a work request.
+    properties:
+      message:
+        description: A human-readable log message.
+        type: string
+      timestamp:
+        description: 'The date and time the log message was written, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+    required:
+    - message
+    - timestamp
+  WorkRequestLogEntryCollection:
+    description: A list of work request logs. Can contain both logs and other information, such as metadata.
+    properties:
+      items:
+        description: A list of work request log entries.
+        items:
+          $ref: '#/definitions/WorkRequestLogEntry'
+        type: array
+    required:
+    - items
+    type: object
+  WorkRequestResource:
+    description: A resource created or operated on by a work request.
+    properties:
+      actionType:
+        description: 'The way in which this resource is affected by the operation tracked in the work
+          request.
+
+          A resource being created, updated, or deleted remains in the IN_PROGRESS state until
+
+          work is complete for that resource, at which point it transitions to CREATED, UPDATED,
+
+          or DELETED, respectively.
+
+          '
+        enum: *id015
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/ActionType'
+      entityType:
+        description: The resource type that the work request affects.
+        type: string
+      entityUri:
+        description: The URI path that you can use for a GET request to access the resource metadata.
+        type: string
+      identifier:
+        description: An [OCID](/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier
+          for the resource.
+        type: string
+      metadata:
+        additionalProperties:
+          type: string
+        description: Additional information that helps to explain the resource.
+        enum: &id016
+        - IS_DRY_RUN
+        type: object
+        x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
+    required:
+    - actionType
+    - entityType
+    - identifier
+  WorkRequestResourceMetadataKey:
+    description: Possible metadata keys for work request resource metadata.
+    enum: *id016
+    type: string
+  WorkRequestSummary:
+    description: Summary information about an asynchronous work request.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that
+          contains the work request.
+
+          '
+        type: string
+      id:
+        description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+        type: string
+      operationType:
+        description: The asynchronous operation tracked by this work request.
+        enum: *id013
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/OperationType'
+      percentComplete:
+        description: 'Shows the progress of the operation tracked by the work request, as a percentage
+          of the total work
+
+          that must be performed.
+
+          '
+        format: float
+        type: number
+      resources:
+        description: The resources that are affected by this work request.
+        items:
+          $ref: '#/definitions/WorkRequestResource'
+        type: array
+      status:
+        description: The status of the work request.
+        enum: *id014
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      timeAccepted:
+        description: 'The date and time the work request was created, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+      timeFinished:
+        description: 'The date and time the work request was finished, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+          '
+        format: date-time
+        type: string
+      timeStarted:
+        description: 'The date and time the work request was started, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+          '
+        format: date-time
+        type: string
+      timeUpdated:
+        description: 'The date and time the work request was updated, in the format defined by
+
+          [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+          '
+        format: date-time
+        type: string
+    required:
+    - operationType
+    - status
+    - id
+    - compartmentId
+    - resources
+    - percentComplete
+    - timeAccepted
+  WorkRequestSummaryCollection:
+    description: A list of work requests. Can contain both work requests and other information, such as
+      metadata.
+    properties:
+      items:
+        description: A list of work requests.
+        items:
+          $ref: '#/definitions/WorkRequestSummary'
+        type: array
+    required:
+    - items
+    type: object
+parameters:
+  CompartmentIdHeader:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment associated
+      with the usage records request.
+    in: header
+    name: compartment-id
+    required: true
+    type: string
+  CompartmentIdQueryParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which
+      to list resources.
+    in: query
+    name: compartmentId
+    type: string
+    x-default-description: 'null'
+  DisplayNameQueryParam:
+    description: A filter to return only resources that match the given name.
+    in: query
+    name: displayName
+    required: false
+    type: string
+    x-default-description: 'null'
+  IdQueryParam:
+    description: A filter to return only resources that match the given id
+    in: query
+    name: id
+    required: false
+    type: string
+    x-default-description: 'null'
+  IfMatchHeader:
+    description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+      `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+      that resource. The resource will be updated or deleted only if the etag you provide
+
+      matches the resource''s current etag value.
+
+      '
+    in: header
+    name: if-match
+    required: false
+    type: string
+  LifecycleDetailQueryParam:
+    description: 'A filter to return only resources that match the given lifecycle state. The
+
+      state value is case-insensitive.
+
+      '
+    enum: *id008
+    in: query
+    name: lifecycleDetails
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+  LifecycleStateQueryParam:
+    description: A filter to return only resources that match the given lifecycle state.
+    in: query
+    name: lifecycleState
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-enumref: '#/definitions/Subscription/lifecycleState'
+  LimitQueryParam:
+    description: A filter to limit results of resources
+    in: query
+    name: limit
+    required: false
+    type: integer
+    x-default-description: 100
+  ListingIdQueryParam:
+    description: The unique identifier for the listing.
+    in: query
+    name: listingId
+    required: true
+    type: string
+  OpcRequestIdHeaderParam:
+    description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+      a particular request,
+
+      please provide the request ID.
+
+      '
+    in: header
+    name: opc-request-id
+    required: false
+    type: string
+  PageQueryParam:
+    description: A filter for list pagination
+    in: query
+    name: page
+    required: false
+    type: string
+    x-default-description: 'null'
+  PaginationLimitQueryParam:
+    default: 10
+    description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+      paginated "List" call. For important details about how pagination works, see
+
+      [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+      '
+    in: query
+    maximum: 1000
+    minimum: 1
+    name: limit
+    type: integer
+  PaginationTokenQueryParam:
+    description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+      "List" call. For important details about how pagination works, see
+
+      [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+      '
+    in: query
+    minLength: 1
+    name: page
+    type: string
+  PartnerIdPathParam:
+    description: The unique identifier of the marketplace partner.
+    in: path
+    name: partnerId
+    required: true
+    type: string
+  ProductIdPathParam:
+    description: The unique identifier of the product.
+    in: path
+    name: productId
+    required: true
+    type: string
+  ProductIdQueryParam:
+    description: The unique identifier of the marketplace product listing.
+    in: query
+    name: productId
+    required: true
+    type: string
+  RequestIdHeader:
+    description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+      Oracle about a particular request, please provide the request ID.
+
+      The only valid characters for request IDs are letters, numbers,
+
+      underscore, and dash.
+
+      '
+    in: header
+    name: opc-request-id
+    type: string
+  ResourceIdentifierQueryParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by
+      the work request.
+    in: query
+    name: resourceId
+    type: string
+    x-default-description: 'null'
+  RetryTokenHeader:
+    description: 'A token that uniquely identifies a request so it can be retried in case of a timeout
+      or
+
+      server error without risk of running that same action again. Retry tokens expire after 24
+
+      hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+      has been deleted and removed from the system, then a retry of the original creation request
+
+      might be rejected.
+
+      '
+    in: header
+    maxLength: 64
+    minLength: 1
+    name: opc-retry-token
+    required: false
+    type: string
+  SortByQueryParam:
+    description: The field to sort by. Only one sort order may be provided.
+    enum:
+    - timeCreated
+    - displayName
+    - productId
+    in: query
+    name: sortBy
+    required: false
+    type: string
+    x-default-description: 'The field to sort by. Only one sort order may be provided.
+
+      '
+  SortOrderQueryParam:
+    description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+    enum: *id017
+    in: query
+    name: sortOrder
+    type: string
+    x-default-description: 'The default value depends upon `sortBy`, and
+
+      in general is `DESC` when sorting by time and `ASC` otherwise.
+
+      '
+    x-obmcs-top-level-enum: '#/definitions/SortOrder'
+  SubscriptionIdPathParam:
+    description: The unique identifier for the subscription.
+    in: path
+    name: subscriptionId
+    required: true
+    type: string
+  SubscriptionIdQueryParam:
+    description: The unique identifier of the subscription provided to partner.
+    in: query
+    name: subscriptionId
+    required: false
+    type: string
+  SubscriptionIdentifierQueryParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Subscription.
+    in: query
+    name: id
+    type: string
+    x-default-description: 'null'
+  WorkRequestIdPathParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+    in: path
+    name: workRequestId
+    required: true
+    type: string
+  WorkRequestIdQueryParam:
+    description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+    in: query
+    name: workRequestId
+    type: string
+    x-default-description: 'null'
+  WorkRequestLogAndErrorSortByQueryParam:
+    default: timestamp
+    description: 'The field to sort by. Only one sort order may be provided. Default order for `timestamp`
+      is descending.
+
+      '
+    enum:
+    - timestamp
+    in: query
+    name: sortBy
+    type: string
+  WorkRequestSortByQueryParam:
+    default: timeAccepted
+    description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted`
+      is descending.
+
+      '
+    enum:
+    - timeAccepted
+    in: query
+    name: sortBy
+    type: string
+  WorkRequestStatusQueryParam:
+    description: A filter to return only the resources that match the given lifecycle state.
+    enum: *id014
+    in: query
+    name: status
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+responses:
+  400:
+    description: Bad Request
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  401:
+    description: Unauthorized
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  404:
+    description: Not Found
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  405:
+    description: Method Not Allowed
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  409:
+    description: Conflict
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  412:
+    description: Precondition Failed
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  429:
+    description: Too Many Requests
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: Internal Server Error
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+  default:
+    description: Unknown Error
+    headers:
+      opc-request-id: *id001
+    schema:
+      $ref: '#/definitions/Error'
+x-anchors:
+  x-headers:
+    etag: *id003
+    opc-next-page: *id002
+    opc-prev-page:
+      description: For moving to previous page.
+      type: string
+    opc-request-id: *id001
+    opc-total-items:
+      description: Total items on the page.
+      type: integer
+    opc-work-request-id: *id004
+    retry-after: *id018
+  x-properties:
+    definedTags: *id005
+    freeformTags: *id006
+    systemTags: *id011
+x-obmcs-client-retries-enabled: true
+x-oracle-package: com.oracle.oci.self

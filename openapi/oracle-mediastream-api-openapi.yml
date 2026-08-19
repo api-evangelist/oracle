@@ -1,0 +1,370 @@
+openapi: 3.2.0
+info:
+  description: 'Media Services (includes Media Flow and Media Streams) is a fully managed service for processing media (video) source content. Use Media Flow and Media Streams to transcode and package digital video using configurable workflows and stream video outputs.
+
+
+    Use the Media Services API to configure media workflows and run Media Flow jobs, create distribution channels, ingest assets, create Preview URLs and play assets. For more information, see [Media Flow](/iaas/Content/media-services/mediaflow/mediaflow.htm) and [Media Streams](/iaas/Content/media-services/mediastreams/mediastreams.htm).
+
+    '
+  title: Media Services Media Stream API
+  version: '20211101'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/fb3f87892acfebb2d30cddd4ec628119125fc820d1c3fad363bf9d5ed5497dc9.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Media Services API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/fb3f87892acfebb2d30cddd4ec628119125fc820d1c3fad363bf9d5ed5497dc9.yaml
+    what: the harvested document for Media Services API
+servers:
+- url: http://127.0.0.1/20211101
+- url: https://127.0.0.1/20211101
+tags:
+- name: mediaStream
+paths:
+  /actions/generatePlaylist:
+    get:
+      description: Gets the playlist content for the specified Packaging Configuration and Media Asset combination. This API call is made using the MediaStreamsClient, which requires the endpoint to be set with the value of the distribution channel domain name (for example, https://example_channel.dc.mediaservices.example_region.oci.oraclecloud.com) to generate a session token or playlist for a media asset registered in this distribution channel.
+      operationId: GeneratePlaylist
+      parameters:
+      - $ref: '#/components/parameters/StreamPackagingConfigIdentifierRequiredQueryParam'
+      - $ref: '#/components/parameters/MediaAssetIdentifierRequiredQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/StreamPlaylistToken'
+      responses:
+        200:
+          description: OK
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/x-mpegurl:
+              schema:
+                format: binary
+                type: string
+            application/dash+xml:
+              schema:
+                format: binary
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Gets content of a media playlist.
+      tags:
+      - mediaStream
+      x-obmcs-large-response-payload: true
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /actions/generateSessionToken:
+    post:
+      description: Generate a new streaming session token. This API call is made using the MediaStreamsClient, which requires the endpoint to be set with the value of the distribution channel domain name (for example, https://example_channel.dc.mediaservices.example_region.oci.oraclecloud.com) to generate a session token or playlist for a media asset registered in this distribution channel.
+      operationId: GenerateSessionToken
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: OK
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionToken'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Generates a streaming session token.
+      tags:
+      - mediaStream
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateSessionTokenDetails'
+        description: Details to generate a new stream session token.
+        required: true
+components:
+  schemas:
+    GenerateSessionTokenDetails:
+      description: Information about the new session token.
+      properties:
+        assetIds:
+          description: Array of asset resource IDs used to limit the scope of the token.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+        packagingConfigId:
+          description: The packaging config resource identifier used to limit the scope of the token.
+          maxLength: 255
+          minLength: 1
+          type: string
+        scopes:
+          description: Array of scopes the token can act upon.
+          items:
+            enum:
+            - PLAYLIST
+            - EDGE
+            type: string
+          maxItems: 2
+          minItems: 1
+          type: array
+        timeExpires:
+          description: Token expiry time. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - scopes
+      - packagingConfigId
+      type: object
+    SessionToken:
+      description: The generated sessionToken details.
+      properties:
+        token:
+          description: The generated session token.
+          type: string
+      required:
+      - token
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+  parameters:
+    StreamPlaylistToken:
+      description: Streaming session authentication token.
+      in: query
+      name: token
+      required: false
+      x-default-description: If playlist token not provided as a query parameter, value will be taken from authentication header.  If no value can be determined, request will fail with 404.
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    MediaAssetIdentifierRequiredQueryParam:
+      description: Unique MediaAsset identifier.
+      in: query
+      name: mediaAssetId
+      required: true
+      x-default-description: 'null'
+      schema:
+        type: string
+    StreamPackagingConfigIdentifierRequiredQueryParam:
+      description: Unique Stream Packaging Configuration identifier.
+      in: query
+      name: streamPackagingConfigId
+      required: true
+      x-default-description: 'null'
+      schema:
+        type: string
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-anchors:
+  x-headers:
+    etag:
+      description: 'For optimistic concurrency control. See `if-match`.
+
+        '
+      type: string
+    opc-next-page:
+      description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+        then a partial list might have been returned. Include this value as the `page` parameter for the
+
+        subsequent GET request to get the next batch of items.
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+    opc-work-request-id:
+      description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+        '
+      type: string
+    retry-after:
+      description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+      type: integer
+  x-properties:
+    definedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+        Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+        '
+      type: object
+    freeformTags:
+      additionalProperties:
+        type: string
+      description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+        Example: `{"bar-key": "value"}`
+
+        '
+      type: object
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+  x-tag-groups:
+    flowCellDeployment:
+    - mediaServices
+    logging:
+    - mediaServices
+    mediaAsset:
+    - mediaServices
+    mediaAssetDistributionChannelAttachment:
+    - mediaServices
+    mediaWorkflow:
+    - mediaServices
+    mediaWorkflowConfiguration:
+    - mediaServices
+    mediaWorkflowJob:
+    - mediaServices
+    mediaWorkflowTaskDeclaration:
+    - mediaServices
+    streamCdnConfig:
+    - mediaServices
+    streamCellAssignmentGroup:
+    - mediaServices
+    streamCellDeployment:
+    - mediaServices
+    streamDistributionChannel:
+    - mediaServices
+    streamPackagingConfig:
+    - mediaServices
+    streamPlaylist:
+    - mediaStream
+    streamSessionToken:
+    - mediaStream
+  x-tenancy-groups:
+    streamAdminListTenancies:
+    - boat
+    - ocid1.tenancy.oc1..aaaaaaaaqbwgdkzsx5cd2kiu3p32nnz3kkra5dchg5d3olbnxcbi3y5mkgoq
+    - ocid1.tenancy.oc1..aaaaaaaahyw7vxxqtskl2qhhj5be3yvnollsfowsxoekcdbfhcfmhof62jga
+    - ocid1.tenancy.oc1..aaaaaaaakprqz2dsqoloq2norxisvjaumwep5sl6cx2ktwioyxzjebmmekca
+    - ocid1.tenancy.oc1..aaaaaaaagmko4nzct4hpfhqviwxo4cim4zsezpjrxembuapkhchg2rvwhqha
+    - ocid1.tenancy.oc1..aaaaaaaatf4g2zretdqp4n3vfmrp7lwa5j7kx2s3xexequp5q3zpa5tmhpra
+    - ocid1.tenancy.oc5..aaaaaaaarik3gd4tvsvx2tn3izg5l5gggcnglhrt7o3kijq5tnvpgcad3zra
+    - ocid1.tenancy.region1..aaaaaaaa72w5f5zeb5yx745amjc2rv4tvbabywnklsahd4oh4bcee34kvu2a
+    - ocid1.tenancy.oc1..aaaaaaaav4xzhmyw4ewi7mciau2y47eqzxv32wayrl5kmrfjvc2vommkcsfq
+    - ocid1.tenancy.oc1..aaaaaaaafkxx2wtortpikuo63ywglstgfhdrn62s5shcicvuccfqzhqnqr6q
+    - ocid1.tenancy.oc1..aaaaaaaabss5hrvab4ophshqmw7tyxipbhyirsxeijmitfmzlnayxjuaqy6a
+    streamAdminTenancies:
+    - boat
+    - ocid1.tenancy.oc1..aaaaaaaaqbwgdkzsx5cd2kiu3p32nnz3kkra5dchg5d3olbnxcbi3y5mkgoq
+    - ocid1.tenancy.oc1..aaaaaaaahyw7vxxqtskl2qhhj5be3yvnollsfowsxoekcdbfhcfmhof62jga
+    - ocid1.tenancy.oc1..aaaaaaaakprqz2dsqoloq2norxisvjaumwep5sl6cx2ktwioyxzjebmmekca
+    - ocid1.tenancy.oc1..aaaaaaaagmko4nzct4hpfhqviwxo4cim4zsezpjrxembuapkhchg2rvwhqha
+    - ocid1.tenancy.oc1..aaaaaaaatf4g2zretdqp4n3vfmrp7lwa5j7kx2s3xexequp5q3zpa5tmhpra
+    - ocid1.tenancy.oc5..aaaaaaaarik3gd4tvsvx2tn3izg5l5gggcnglhrt7o3kijq5tnvpgcad3zra
+x-obmcs-client-retries-enabled: true
+x-oracle-package: com.oracle.oci.dmp

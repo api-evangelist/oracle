@@ -1,0 +1,1503 @@
+openapi: 3.2.0
+info:
+  description: The API for the MySQL Database Service
+  license:
+    name: Oracle Corporation
+  title: MySQL Database Service Channels API
+  version: '20190415'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/c21bc5da8ceddf436da4e56b2328b97fa65fa6675d07108e7a0447de3e832a0a.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the MySQL Database Service API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/c21bc5da8ceddf436da4e56b2328b97fa65fa6675d07108e7a0447de3e832a0a.yaml
+    what: the harvested document for MySQL Database Service API
+servers:
+- url: http://mysql.{region}.ocp.oraclecloud.com/20190415
+tags:
+- name: channels
+paths:
+  /channels:
+    get:
+      description: Lists all the Channels that match the specified filters.
+      operationId: ListChannels
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/FilterByCompartmentIdQueryParam'
+      - $ref: '#/components/parameters/FilterByDbSystemIdQueryParam'
+      - $ref: '#/components/parameters/FilterByChannelIdQueryParam'
+      - $ref: '#/components/parameters/FilterByDisplayNameQueryParam'
+      - $ref: '#/components/parameters/FilterByChannelLifecycleStateQueryParam'
+      - $ref: '#/components/parameters/FilterByChannelIsEnabledQueryParam'
+      - $ref: '#/components/parameters/SortByDbSystemFieldQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      responses:
+        200:
+          description: 'The list of Channels that match the specified filters. A summary
+
+            of the properties of the Channel is shown for each Channel listed.
+
+            '
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ChannelSummary'
+                type: array
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists Channels.
+      tags:
+      - channels
+      x-example: 'GET /20190415/channels?compartmentId=<var>&lt;CompartmentId&gt;</var>
+
+        Host: mysql.us-ashburn-1.ocp.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-obmcs-client-retries-enabled: true
+    post:
+      description: 'Creates a Channel to establish replication from a source to a target.
+
+        '
+      operationId: CreateChannel
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/OpcRetryTokenHeader'
+      responses:
+        201:
+          description: The Channel create operation has been accepted for processing.
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channel'
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        409:
+          $ref: '#/components/responses/409-Conflict'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Creates a Channel.
+      tags:
+      - channels
+      x-example: "Example I - Create a disabled Channel with required params only:\n  POST /20190415/channels\n  Host: mysql.us-ashburn-1.ocp.oraclecloud.com\n  <var>&lt;authorization and other headers&gt;</var>\n  {\n    \"isEnabled\": \"false\",\n    \"source\":\n    {\n      \"sourceType\": \"MYSQL\",\n      \"hostname\": \"hostname.my.company.com\",\n      \"username\": \"username\",\n      \"password\": \"<var>&lt;password&gt;</var>\",\n      \"sslMode\": \"REQUIRED\"\n    },\n    \"target\":\n    {\n      \"targetType\": \"DBSYSTEM\",\n      \"dbSystemId\": \"ocid1.dbsystem.oc1.<var>&lt;TargetDbSystemOCID&gt;</var>\"\n    }\n  }\n\nExample II - Create an enabled Channel with a user-specified target channelName and source port:\n  POST /20190415/channels\n  Host: mysql.us-ashburn-1.ocp.oraclecloud.com\n  <var>&lt;authorization and other headers&gt;</var>\n  {\n    \"isEnabled\": \"true\",\n    \"source\":\n    {\n      \"sourceType\": \"MYSQL\",\n      \"hostname\": \"hostname.my.company.com\",\n      \"username\": \"username\",\n      \"port\": \"3300\",\n      \"password\": \"<var>&lt;password&gt;</var>\",\n      \"sslMode\": \"REQUIRED\"\n    },\n    \"target\":\n    {\n      \"targetType\": \"DBSYSTEM\",\n      \"dbSystemId\": \"ocid1.dbsystem.oc1.<var>&lt;TargetDbSystemOCID&gt;</var>\",\n      \"channelName\": \"onprem_to_oci_channel\"\n    }\n  }\n"
+      x-obmcs-client-retries-enabled: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChannelDetails'
+        description: The parameters of the request to create the Channel.
+        required: true
+  /channels/{channelId}:
+    delete:
+      description: Deletes the specified Channel.
+      operationId: DeleteChannel
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/ChannelIdPathParam'
+      responses:
+        202:
+          description: The Channel delete action has been accepted for processing.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        409:
+          $ref: '#/components/responses/409-Conflict'
+        412:
+          $ref: '#/components/responses/412-PreconditionFailed'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Deletes a Channel.
+      tags:
+      - channels
+      x-example: 'DELETE /20190415/channels/ocid1.mysqlchannel.oc1.<var>&lt;UniqueChannelOCID&gt;</var>
+
+        Host: mysql.us-ashburn-1.ocp.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/Channel'
+    get:
+      description: 'Gets the full details of the specified Channel, including the user-specified
+
+        configuration parameters (passwords are omitted), as well as information about
+
+        the state of the Channel, its sources and targets.
+
+        '
+      operationId: GetChannel
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/IfNoneMatchHeader'
+      - $ref: '#/components/parameters/ChannelIdPathParam'
+      responses:
+        200:
+          description: A detailed view of the Channel showing all its properties except any passwords.
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channel'
+        304:
+          $ref: '#/components/responses/304-NotModified'
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets a Channel.
+      tags:
+      - channels
+      x-example: 'GET /20190415/channels/ocid1.mysqlchannel.oc1.<var>&lt;UniqueChannelOCID&gt;</var>
+
+        Host: mysql.us-ashburn-1.ocp.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-obmcs-client-retries-enabled: true
+    put:
+      description: 'Updates the properties of the specified Channel.
+
+        If the Channel is Active the Update operation will asynchronously apply the new configuration
+
+        parameters to the Channel and the Channel may become temporarily unavailable. Otherwise, the
+
+        new configuration will be applied the next time the Channel becomes Active.
+
+        '
+      operationId: UpdateChannel
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/OpcRetryTokenHeader'
+      - $ref: '#/components/parameters/ChannelIdPathParam'
+      responses:
+        202:
+          description: The Channel update operation has been accepted for processing.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        409:
+          $ref: '#/components/responses/409-Conflict'
+        412:
+          $ref: '#/components/responses/412-PreconditionFailed'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Updates a Channel.
+      tags:
+      - channels
+      x-example: "Example I - Enable the Channel and update the applierUsername:\nPUT /20190415/channels/ocid1.mysqlchannel.oc1.<var>&lt;ChannelOCID&gt;</var>\nHost: mysql.us-ashburn-1.ocp.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"isEnabled\": \"true\",\n  \"target\":\n  {\n    \"targetType\": \"DBSYSTEM\",\n    \"applierUsername\": \"admin\"\n  }\n}\n\nExample II - Update the sslMode of the source and the corresponding CA certificate:\nPUT /20190415/channels/ocid1.mysqlchannel.oc1.<var>&lt;ChannelOCID&gt;</var>\nHost: mysql.us-ashburn-1.ocp.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"source\":\n  {\n    \"sslMode\": \"VERIFY_IDENTITY\",\n    \"sslCaCertificate\": {\n      \"certificateType\": \"PEM\",\n      \"contents\": \"<var>&lt;CA certificate in PEM format&gt;</var>\"\n    }\n  }\n}\n"
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/Channel'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChannelDetails'
+        description: The parameters of the request to update the Channel.
+        required: true
+  /channels/{channelId}/actions/generateChannelStatus:
+    post:
+      description: 'Initiates an asynchronous request to collect the current status of the specified Channel.
+
+        '
+      operationId: GenerateChannelStatus
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/OpcRetryTokenHeader'
+      - $ref: '#/components/parameters/ChannelIdPathParam'
+      responses:
+        201:
+          description: "The status generation request was accepted and is being processed asynchronously. \nWhen processing completes, the Channel status can be retrieved using the \nGET /channels/{channelId}/channelStatus endpoint.\n"
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelStatus'
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        409:
+          $ref: '#/components/responses/409-Conflict'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Generate Channel status.
+      tags:
+      - channels
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/ChannelStatus'
+  /channels/{channelId}/actions/reset:
+    post:
+      description: 'Resets the specified Channel by purging its cached information, leaving the Channel
+
+        as if it had just been created. This operation is only accepted in Inactive Channels.
+
+        '
+      operationId: ResetChannel
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/OpcRetryTokenHeader'
+      - $ref: '#/components/parameters/ChannelIdPathParam'
+      responses:
+        202:
+          description: The Channel reset action has been accepted for processing.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        409:
+          $ref: '#/components/responses/409-Conflict'
+        412:
+          $ref: '#/components/responses/412-PreconditionFailed'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Resets a Channel.
+      tags:
+      - channels
+      x-example: 'POST /20190415/channels/<var>&lt;ChannelOCID&gt;</var>/actions/reset
+
+        Host: database.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/Channel'
+  /channels/{channelId}/actions/resume:
+    post:
+      description: 'Resumes an enabled Channel that has become Inactive due to an error. The resume operation
+
+        requires that the error that cause the Channel to become Inactive has already been fixed,
+
+        otherwise the operation may fail.
+
+        '
+      operationId: ResumeChannel
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/OpcRetryTokenHeader'
+      - $ref: '#/components/parameters/ChannelIdPathParam'
+      responses:
+        202:
+          description: The Channel resume action has been accepted for processing.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        409:
+          $ref: '#/components/responses/409-Conflict'
+        412:
+          $ref: '#/components/responses/412-PreconditionFailed'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Resumes a Channel.
+      tags:
+      - channels
+      x-example: 'POST /20190415/channels/<var>&lt;ChannelOCID&gt;</var>/actions/resume
+
+        Host: database.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/Channel'
+  /channels/{channelId}/channelStatus:
+    get:
+      description: 'Returns the most up-to-date status of the specified Channel.
+
+        '
+      operationId: GetChannelStatus
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeader'
+      - $ref: '#/components/parameters/ChannelIdPathParam'
+      responses:
+        200:
+          description: 'The most recent status of the Channel.
+
+            '
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelStatus'
+        400:
+          $ref: '#/components/responses/400-BadRequest'
+        401:
+          $ref: '#/components/responses/401-Unauthorized'
+        404:
+          $ref: '#/components/responses/404-NotFound'
+        409:
+          $ref: '#/components/responses/409-Conflict'
+        429:
+          $ref: '#/components/responses/429-TooManyRequests'
+        500:
+          $ref: '#/components/responses/500-ServerError'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Get Channel status.
+      tags:
+      - channels
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/ChannelStatus'
+components:
+  schemas:
+    UpdateChannelSourceDetails:
+      description: Parameters detailing how to provision the source for the given Channel.
+      discriminator:
+        propertyName: sourceType
+      properties:
+        sourceType:
+          description: 'The specific source identifier.
+
+            '
+          type: string
+          x-obmcs-enumref: '#/definitions/ChannelSource/sourceType'
+      required:
+      - sourceType
+    ChannelTarget:
+      description: Details about the Channel target.
+      discriminator:
+        propertyName: targetType
+      properties:
+        targetType:
+          description: The specific target identifier.
+          enum:
+          - DBSYSTEM
+          type: string
+      required:
+      - targetType
+    Error:
+      description: Sorry.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ChannelSource:
+      description: Parameters detailing how to provision the source for the given Channel.
+      discriminator:
+        propertyName: sourceType
+      properties:
+        sourceType:
+          description: The specific source identifier.
+          enum:
+          - MYSQL
+          type: string
+      required:
+      - sourceType
+    ChannelStatusResult:
+      description: 'Status information for the channel attached to the DB System.
+
+        '
+      properties:
+        channelId:
+          description: 'The OCID of the Channel for which the status is gathered.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        errors:
+          description: Channel errors identified, if there are any.
+          items:
+            type: string
+          maxItems: 2
+          minItems: 0
+          type: array
+          uniqueItems: true
+        isHealthy:
+          description: "Specifies if the channel is healthy or not. If healthy, replication target DB System is connected to the \nsource and no replication errors are seen.\n"
+          type: boolean
+        isReceivedGtidSetApplied:
+          description: 'Specifies if all transactions received by this channel are executed and their GTIDs are part of gtid_executed
+
+            set.
+
+            '
+          type: boolean
+        lagDuration:
+          description: "The channel lag, with respect to the immediate source of the channel. \nIf the channel is configured with replication delay, the channel lag includes the replication delay.\n"
+          format: x-obmcs-duration
+          type: string
+      required:
+      - channelId
+    UpdateChannelDetails:
+      description: Details required to update a Channel
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: User provided description of the Channel.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: The user-friendly name for the Channel. It does not have to be unique.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isEnabled:
+          default: true
+          description: 'Whether the Channel should be enabled or disabled. Enabling a previously
+
+            disabled Channel will cause the Channel to be started. Conversely, disabling
+
+            a previously enabled Channel will stop the Channel. Both operations are
+
+            executed asynchronously.
+
+            '
+          type: boolean
+        source:
+          $ref: '#/components/schemas/UpdateChannelSourceDetails'
+        target:
+          $ref: '#/components/schemas/UpdateChannelTargetDetails'
+    CreateChannelTargetDetails:
+      description: Parameters detailing how to provision the target for the given Channel.
+      discriminator:
+        propertyName: targetType
+      properties:
+        targetType:
+          description: The specific target identifier.
+          type: string
+          x-obmcs-enumref: '#/definitions/ChannelTarget/targetType'
+      required:
+      - targetType
+    CreateChannelDetails:
+      description: Details required to create a Channel.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: 'If not specified by the user it will assume the value of the compartment of
+
+            the target DB System.
+
+            '
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: User provided information about the Channel.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: The user-friendly name for the Channel. It does not have to be unique.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isEnabled:
+          default: true
+          description: 'Whether the Channel should be enabled upon creation. If set to true, the Channel
+
+            will be asynchronously started as a result of the create Channel operation.
+
+            '
+          type: boolean
+        source:
+          $ref: '#/components/schemas/CreateChannelSourceDetails'
+        target:
+          $ref: '#/components/schemas/CreateChannelTargetDetails'
+      required:
+      - source
+      - target
+    ChannelStatus:
+      description: 'Runtime status summary of a Channel, aggregating information about health and operational indicators.
+
+        '
+      properties:
+        channelStatusResult:
+          $ref: '#/components/schemas/ChannelStatusResult'
+        timeCreated:
+          description: "The date and time that the Work Request to generate the Channel status was issued, \nas described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).\n"
+          format: date-time
+          type: string
+        timeUpdated:
+          description: "The date and time that the Channel status was generated, \nas described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).\n"
+          format: date-time
+          type: string
+      required:
+      - channelStatusResult
+      - timeCreated
+      - timeUpdated
+    Channel:
+      description: A Channel connecting a DB System to an external entity.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: 'If not specified by the user it will assume the value of the compartment of
+
+            the target DB System.
+
+            '
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: User provided description of the Channel.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: The user-friendly name for the Channel. It does not have to be unique.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the Channel.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isEnabled:
+          default: true
+          description: Whether the Channel has been enabled by the user.
+          type: boolean
+        lifecycleDetails:
+          description: A message describing the state of the Channel.
+          type: string
+        lifecycleState:
+          description: The state of the Channel.
+          enum:
+          - CREATING
+          - ACTIVE
+          - NEEDS_ATTENTION
+          - INACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+        source:
+          $ref: '#/components/schemas/ChannelSource'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        target:
+          $ref: '#/components/schemas/ChannelTarget'
+        timeCreated:
+          description: 'The date and time the Channel was created, as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time the Channel was last updated, as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - isEnabled
+      - source
+      - target
+      - displayName
+      - lifecycleState
+      - timeCreated
+      - timeUpdated
+    ChannelSummary:
+      description: Summary of a Channel.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: 'If not specified by the user it will assume the value of the compartment of
+
+            the target DB System.
+
+            '
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The user-friendly name for the Channel. It does not have to be unique.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the Channel.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isEnabled:
+          default: true
+          description: Whether the Channel has been enabled by the user.
+          type: boolean
+        lifecycleDetails:
+          description: A message describing the state of the Channel.
+          type: string
+        lifecycleState:
+          description: The state of the Channel.
+          type: string
+          x-obmcs-enumref: '#/definitions/Channel/lifecycleState'
+        source:
+          $ref: '#/components/schemas/ChannelSource'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        target:
+          $ref: '#/components/schemas/ChannelTarget'
+        timeCreated:
+          description: 'The date and time the Channel was created, as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time the Channel was last updated, as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - isEnabled
+      - source
+      - target
+      - lifecycleState
+      - displayName
+      - timeCreated
+      - timeUpdated
+    UpdateChannelTargetDetails:
+      description: Parameters detailing how to provision the target for the given Channel.
+      discriminator:
+        propertyName: targetType
+      properties:
+        targetType:
+          description: The specific targetType identifier.
+          type: string
+          x-obmcs-enumref: '#/definitions/ChannelTarget/targetType'
+      required:
+      - targetType
+    CreateChannelSourceDetails:
+      description: Parameters detailing how to provision the source for the given Channel.
+      discriminator:
+        propertyName: sourceType
+      properties:
+        sourceType:
+          description: The specific source identifier.
+          type: string
+          x-obmcs-enumref: '#/definitions/ChannelSource/sourceType'
+      required:
+      - sourceType
+  parameters:
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` or `opc-prev-page` response header from
+
+        the previous list call. For information about pagination, see [List
+
+        Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    IfNoneMatchHeader:
+      description: 'For conditional requests. In the GET call for a resource, set the
+
+        `If-None-Match` header to the value of the ETag from a previous GET (or
+
+        POST or PUT) response for that resource. The server will return with
+
+        either a 304 Not Modified response if the resource has not changed, or a
+
+        200 OK response with the updated representation.
+
+        '
+      in: header
+      name: if-none-match
+      x-default-description: No conditional request is made.
+      schema:
+        type: string
+    OpcRetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case
+
+        of a timeout or server error without risk of executing that same action
+
+        again. Retry tokens expire after 24 hours, but can be invalidated before
+
+        then due to conflicting operations (for example, if a resource has been
+
+        deleted and purged from the system, then a retry of the original
+
+        creation request may be rejected).
+
+        '
+      in: header
+      name: opc-retry-token
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a
+
+        resource, set the `If-Match` header to the value of the etag from a
+
+        previous GET or POST response for that resource. The resource will be
+
+        updated or deleted only if the etag you provide matches the resource''s
+
+        current etag value.
+
+        '
+      in: header
+      name: if-match
+      schema:
+        type: string
+    FilterByCompartmentIdQueryParam:
+      description: The compartment [OCID](/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    FilterByDisplayNameQueryParam:
+      description: A filter to return only the resource matching the given display name exactly.
+      in: query
+      name: displayName
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+    ChannelIdPathParam:
+      description: The Channel [OCID](/Content/General/Concepts/identifiers.htm).
+      in: path
+      name: channelId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return in a paginated list call. For information about pagination, see
+
+        [List Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    SortOrderQueryParam:
+      description: The sort order to use (ASC or DESC).
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    SortByDbSystemFieldQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Time fields are default ordered as descending. Display name is default ordered as ascending.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - displayName
+        - timeCreated
+        default: timeCreated
+    FilterByChannelIsEnabledQueryParam:
+      description: 'If true, returns only Channels that are enabled. If false, returns only
+
+        Channels that are disabled.
+
+        '
+      in: query
+      name: isEnabled
+      required: false
+      schema:
+        type: boolean
+    OpcRequestIdHeader:
+      description: 'Customer-defined unique identifier for the request. If you need to
+
+        contact Oracle about a specific request, please provide the request
+
+        ID that you supplied in this header with the request.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    FilterByDbSystemIdQueryParam:
+      description: The DB System [OCID](/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: dbSystemId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    FilterByChannelLifecycleStateQueryParam:
+      description: The LifecycleState of the Channel.
+      in: query
+      name: lifecycleState
+      required: false
+      x-obmcs-enumref: '#/definitions/Channel/lifecycleState'
+      schema:
+        type: string
+    FilterByChannelIdQueryParam:
+      description: The OCID of the Channel.
+      in: query
+      name: channelId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+  responses:
+    409-Conflict:
+      description: Conflict
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404-NotFound:
+      description: Not Found
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    400-BadRequest:
+      description: Bad Request
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    500-ServerError:
+      description: Internal Server Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    DefaultError:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    412-PreconditionFailed:
+      description: Precondition Failed
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401-Unauthorized:
+      description: Unauthorized
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    304-NotModified:
+      description: The resource with the given ETag has not changed.
+      headers:
+        etag:
+          description: 'For optimistic concurrency control. See `if-match`.
+
+            '
+          schema:
+            type: string
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+    429-TooManyRequests:
+      description: Too Many Requests
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+        retry-after:
+          description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-anchors:
+  x-headers:
+    etag:
+      description: 'For optimistic concurrency control. See `if-match`.
+
+        '
+      type: string
+    opc-next-page:
+      description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+        then a partial list might have been returned. Include this value as the `page` parameter for the
+
+        subsequent GET request to get the next batch of items.
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+    opc-work-request-id:
+      description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+        '
+      type: string
+    retry-after:
+      description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+      type: integer
+  x-properties:
+    backupPolicyDefinedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+
+
+        Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy.
+
+
+        Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+        '
+      type: object
+    backupPolicyFreeformTags:
+      additionalProperties:
+        type: string
+      description: 'Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+
+        Tags defined here will be copied verbatim as tags on the Backup resource created by this BackupPolicy.
+
+
+        Example: `{"bar-key": "value"}`
+
+        '
+      type: object
+    definedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+        Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+        '
+      type: object
+    freeformTags:
+      additionalProperties:
+        type: string
+      description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+        Example: `{"bar-key": "value"}`
+
+        '
+      type: object
+    securityAttributes:
+      additionalProperties:
+        additionalProperties:
+          description: 'Security Attribute value and mode. Only the String type is supported for value. (Mode is reserved and “enforce” in this release)
+
+            '
+          type: object
+        description: 'Key-value pair representing a ZPR tag key and value, scoped to a namespace.
+
+          Example: `{"MaxEgressCount": {"value": "42", "mode": "audit"}}`
+
+          '
+        type: object
+      description: 'Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+
+        For more information, see [ZPR Artifacts](https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm).
+
+        Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+
+        '
+      type: object
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+x-oracle-package: com.oracle.oci.mysql

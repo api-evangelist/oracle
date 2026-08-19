@@ -1,0 +1,5271 @@
+swagger: '2.0'
+info:
+  description: 'Media Services (includes Media Flow and Media Streams) is a fully managed service for
+    processing media (video) source content. Use Media Flow and Media Streams to transcode and package
+    digital video using configurable workflows and stream video outputs.
+
+
+    Use the Media Services API to configure media workflows and run Media Flow jobs, create distribution
+    channels, ingest assets, create Preview URLs and play assets. For more information, see [Media Flow](/iaas/Content/media-services/mediaflow/mediaflow.htm)
+    and [Media Streams](/iaas/Content/media-services/mediastreams/mediastreams.htm).
+
+    '
+  title: Media Services API
+  version: '20211101'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/fb3f87892acfebb2d30cddd4ec628119125fc820d1c3fad363bf9d5ed5497dc9.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Media Services API OCI service and stored verbatim;
+      API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/fb3f87892acfebb2d30cddd4ec628119125fc820d1c3fad363bf9d5ed5497dc9.yaml
+    what: the harvested document for Media Services API
+host: 127.0.0.1
+basePath: /20211101
+schemes:
+- http
+- https
+produces:
+- application/json
+paths:
+  /actions/generatePlaylist:
+    get:
+      description: Gets the playlist content for the specified Packaging Configuration and Media Asset
+        combination. This API call is made using the MediaStreamsClient, which requires the endpoint to
+        be set with the value of the distribution channel domain name (for example, https://example_channel.dc.mediaservices.example_region.oci.oraclecloud.com)
+        to generate a session token or playlist for a media asset registered in this distribution channel.
+      operationId: GeneratePlaylist
+      parameters:
+      - $ref: '#/parameters/StreamPackagingConfigIdentifierRequiredQueryParam'
+      - $ref: '#/parameters/MediaAssetIdentifierRequiredQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/StreamPlaylistToken'
+      produces:
+      - application/x-mpegurl
+      - application/dash+xml
+      responses:
+        200:
+          description: OK
+          headers:
+            etag: &id001
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              type: string
+            opc-request-id: &id002
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            format: binary
+            type: string
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets content of a media playlist.
+      tags: &id026
+      - mediaStream
+      x-obmcs-large-response-payload: true
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /actions/generateSessionToken:
+    post:
+      description: Generate a new streaming session token. This API call is made using the MediaStreamsClient,
+        which requires the endpoint to be set with the value of the distribution channel domain name (for
+        example, https://example_channel.dc.mediaservices.example_region.oci.oraclecloud.com) to generate
+        a session token or playlist for a media asset registered in this distribution channel.
+      operationId: GenerateSessionToken
+      parameters:
+      - description: Details to generate a new stream session token.
+        in: body
+        name: GenerateSessionTokenDetails
+        required: true
+        schema:
+          $ref: '#/definitions/GenerateSessionTokenDetails'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: OK
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/SessionToken'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Generates a streaming session token.
+      tags: &id027
+      - mediaStream
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /mediaAssets:
+    get:
+      description: 'Returns a list of MediaAssetSummary.
+
+        '
+      operationId: ListMediaAssets
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/MediaAssetsLifecycleStateQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/MediaAssetsSortByQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/DistributionChannelIdentifierQueryParam'
+      - $ref: '#/parameters/ParentMediaAssetIdQueryParam'
+      - $ref: '#/parameters/MasterMediaAssetIdQueryParam'
+      - $ref: '#/parameters/MediaAssetTypeQueryParam'
+      - $ref: '#/parameters/BucketNameQueryParam'
+      - $ref: '#/parameters/ObjectNameQueryParam'
+      - $ref: '#/parameters/MediaWorkflowJobIdQueryParam'
+      - $ref: '#/parameters/SourceMediaWorkflowIdQueryParam'
+      - $ref: '#/parameters/SourceMediaWorkflowVersionQueryParam'
+      responses:
+        200:
+          description: A page of MediaAssetSummary objects.
+          headers:
+            opc-next-page: &id004
+              description: 'For pagination of a list of items. When paging through a list, if this header
+                appears in the response,
+
+                then a partial list might have been returned. Include this value as the `page` parameter
+                for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              type: string
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaAssetCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets a list of all MediaAssetSummary in a compartment.
+      tags: &id003
+      - mediaServices
+      x-related-resource: '#/definitions/MediaAsset'
+    post:
+      description: 'Creates a new MediaAsset.
+
+        '
+      operationId: CreateMediaAsset
+      parameters:
+      - description: Details for the new MediaAsset.
+        in: body
+        name: CreateMediaAssetDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateMediaAssetDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The MediaAsset was successfully created.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaAsset'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates a new MediaAsset
+      tags: *id003
+      x-related-resource: '#/definitions/MediaAsset'
+  /mediaAssets/{mediaAssetId}:
+    delete:
+      description: Deletes a MediaAsset resource by identifier. If DeleteChildren is passed in as the
+        mode, all the assets with the parentMediaAssetId matching the ID will be deleted. If DeleteDerivatives
+        is set as the mode, all the assets with the masterMediaAssetId matching the ID will be deleted.
+      operationId: DeleteMediaAsset
+      parameters:
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/DeleteModeQueryParam'
+      responses:
+        204:
+          description: The MediaAsset was successfully deleted.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Delete a provisioned MediaAsset
+      tags: *id003
+      x-related-resource: '#/definitions/MediaAsset'
+    get:
+      description: Gets a MediaAsset by identifier.
+      operationId: GetMediaAsset
+      parameters:
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Retrieves the MediaAsset with the given ID.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaAsset'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Get MediaAsset
+      tags: *id003
+    put:
+      description: Updates the MediaAsset.
+      operationId: UpdateMediaAsset
+      parameters:
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - description: The information to be updated.
+        in: body
+        name: UpdateMediaAssetDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateMediaAssetDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The MediaAsset was successfully updated.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaAsset'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Update the MediaAsset identified by the ID.
+      tags: *id003
+      x-related-resource: '#/definitions/MediaAsset'
+  /mediaAssets/{mediaAssetId}/actions/addLock:
+    post:
+      description: 'Add a lock to an MediaAsset.
+
+        '
+      operationId: AddMediaAssetLock
+      parameters:
+      - description: The details to be updated for the AddLock.
+        in: body
+        name: AddLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/AddLockDetails'
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        200:
+          description: Lock is added.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaAsset'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Add a lock to an MediaAsset.
+      tags: *id003
+      x-related-resource: '#/definitions/MediaAsset'
+  /mediaAssets/{mediaAssetId}/actions/changeCompartment:
+    post:
+      description: Moves a MediaAsset resource from one compartment identifier to another.
+      operationId: ChangeMediaAssetCompartment
+      parameters:
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - description: The information to be updated.
+        in: body
+        name: ChangeMediaAssetCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeMediaAssetCompartmentDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        204:
+          description: The MediaAsset resource has been moved into a different compartment.
+          headers:
+            opc-request-id: *id002
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+      summary: Moves an asset into a different compartment.
+      tags: *id003
+      x-related-resource: '#/definitions/MediaAsset'
+  /mediaAssets/{mediaAssetId}/actions/removeLock:
+    post:
+      description: 'Remove a lock to an MediaAsset.
+
+        '
+      operationId: RemoveMediaAssetLock
+      parameters:
+      - description: The details to be updated for the RemoveLock.
+        in: body
+        name: RemoveLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/RemoveLockDetails'
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        200:
+          description: Lock is removed.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaAsset'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Remove a lock from an MediaAsset.
+      tags: *id003
+      x-related-resource: '#/definitions/MediaAsset'
+  /mediaAssets/{mediaAssetId}/distributionChannelAttachments:
+    get:
+      description: Lists the MediaAssetDistributionChannelAttachments for a MediaAsset by identifier.
+      operationId: ListMediaAssetDistributionChannelAttachments
+      parameters:
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/DistributionChannelSortByQueryParam'
+      - $ref: '#/parameters/DistributionChannelIdentifierQueryParam'
+      responses:
+        200:
+          description: A page of MediaAssetDistributionChannelAttachmentSummary objects.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaAssetDistributionChannelAttachmentCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: List MediaAssetDistributionChannelAttachments for MediaAsset.
+      tags: &id005
+      - mediaServices
+      x-related-resource: '#/definitions/MediaAssetDistributionChannelAttachmentCollection'
+  /mediaAssets/{mediaAssetId}/distributionChannelAttachments/{distributionChannelId}:
+    delete:
+      description: Deletes a MediaAsset from the DistributionChannel by identifiers.
+      operationId: DeleteMediaAssetDistributionChannelAttachment
+      parameters:
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - $ref: '#/parameters/DistributionChannelIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/MediaAssetDistributionChannelAttachmentVersionQueryParam'
+      responses:
+        204:
+          description: The MediaAssetDistributionChannelAttachment was successfully deleted.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Deletes a MediaAsset from DistributionChannel.
+      tags: *id005
+      x-related-resource: '#/definitions/MediaAssetDistributionChannelAttachment'
+    get:
+      description: Gets a MediaAssetDistributionChannelAttachment for a MediaAsset by identifiers.
+      operationId: GetMediaAssetDistributionChannelAttachment
+      parameters:
+      - $ref: '#/parameters/MediaAssetIdentifierPathParam'
+      - $ref: '#/parameters/DistributionChannelIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/MediaAssetDistributionChannelAttachmentVersionQueryParam'
+      responses:
+        200:
+          description: Retrieves the MediaAssetDistributionChannelAttachment for a MediaAsset with the
+            given IDs.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaAssetDistributionChannelAttachment'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Get a MediaAssetDistributionChannelAttachment for a MediaAsset.
+      tags: *id005
+  /mediaWorkflowConfigurations:
+    get:
+      description: 'Returns a list of MediaWorkflowConfigurations.
+
+        '
+      operationId: ListMediaWorkflowConfigurations
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/LifecycleStateQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/MediaWorkflowConfigurationIdentifierQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: A page of MediaWorkflowConfigurationSummary objects.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowConfigurationCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets a list of all MediaWorkflowConfigurations in a compartment.
+      tags: &id006
+      - mediaServices
+      x-related-resource: '#/definitions/MediaWorkflowConfigurationCollection'
+    post:
+      description: 'Creates a new MediaWorkflowConfiguration.
+
+        '
+      operationId: CreateMediaWorkflowConfiguration
+      parameters:
+      - description: Details for the new MediaWorkflowConfiguration.
+        in: body
+        name: CreateMediaWorkflowConfigurationDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateMediaWorkflowConfigurationDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The MediaWorkflowConfiguration was created.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowConfiguration'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates a new MediaWorkflowConfiguration.
+      tags: *id006
+      x-related-resource: '#/definitions/MediaWorkflowConfiguration'
+  /mediaWorkflowConfigurations/{mediaWorkflowConfigurationId}:
+    delete:
+      description: Deletes a MediaWorkflowConfiguration resource by identifier.
+      operationId: DeleteMediaWorkflowConfiguration
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowConfigurationIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        204:
+          description: The MediaWorkflowConfiguration will be deleted.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Deletes a provisioned MediaWorkflowConfiguration.
+      tags: *id006
+      x-related-resource: '#/definitions/MediaWorkflowConfiguration'
+    get:
+      description: Gets a MediaWorkflowConfiguration by identifier
+      operationId: GetMediaWorkflowConfiguration
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowConfigurationIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Retrieves the MediaWorkflowConfiguration with the given ID.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowConfiguration'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Get MediaWorkflowConfiguration
+      tags: *id006
+    put:
+      description: Updates the MediaWorkflowConfiguration.
+      operationId: UpdateMediaWorkflowConfiguration
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowConfigurationIdentifierPathParam'
+      - description: The information to be updated.
+        in: body
+        name: UpdateMediaWorkflowConfigurationDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateMediaWorkflowConfigurationDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The MediaWorkflowConfiguration is updated.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowConfiguration'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        405:
+          $ref: '#/responses/405'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Update the MediaWorkflowConfiguration identified by the ID.
+      tags: *id006
+      x-related-resource: '#/definitions/MediaWorkflowConfiguration'
+  /mediaWorkflowConfigurations/{mediaWorkflowConfigurationId}/actions/addLock:
+    post:
+      description: 'Add a lock to a MediaWorkflowConfiguration.
+
+        '
+      operationId: AddMediaWorkflowConfigurationLock
+      parameters:
+      - $ref: '#/parameters/AddResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/MediaWorkflowConfigurationIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Lock is added.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowConfiguration'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        405:
+          $ref: '#/responses/405'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Add a lock to a MediaWorkflowConfiguration.
+      tags: *id006
+      x-related-resource: '#/definitions/MediaWorkflowConfiguration'
+  /mediaWorkflowConfigurations/{mediaWorkflowConfigurationId}/actions/changeCompartment:
+    post:
+      description: Moves a MediaWorkflowConfiguration resource from one compartment identifier to another.
+        When provided, If-Match is checked against ETag values of the resource.
+      operationId: ChangeMediaWorkflowConfigurationCompartment
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowConfigurationIdentifierPathParam'
+      - description: The information to be updated.
+        in: body
+        name: ChangeMediaWorkflowConfigurationCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeMediaWorkflowConfigurationCompartmentDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        204:
+          description: Accepted the request. The MediaWorkflowConfiguration resource will be moved into
+            a different compartment.
+          headers:
+            opc-request-id: *id002
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+      summary: Moves a resource into a different compartment.
+      tags: *id006
+      x-related-resource: '#/definitions/MediaWorkflowConfiguration'
+  /mediaWorkflowConfigurations/{mediaWorkflowConfigurationId}/actions/removeLock:
+    post:
+      description: 'Remove a lock from a MediaWorkflowConfiguration.
+
+        '
+      operationId: RemoveMediaWorkflowConfigurationLock
+      parameters:
+      - $ref: '#/parameters/RemoveResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/MediaWorkflowConfigurationIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Lock is removed.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowConfiguration'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        405:
+          $ref: '#/responses/405'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Remove a lock from a MediaWorkflowConfiguration.
+      tags: *id006
+      x-related-resource: '#/definitions/MediaWorkflowConfiguration'
+  /mediaWorkflowJobs:
+    get:
+      description: Lists the MediaWorkflowJobs.
+      operationId: ListMediaWorkflowJobs
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/MediaWorkflowJobIdentifierQueryParam'
+      - $ref: '#/parameters/MediaWorkflowIdQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/MediaWorkflowJobLifecycleStateQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/MediaWorkflowJobSortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Lists all the MediaWorkflowJobs in a compartment.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowJobCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: List MediaWorkflowJobs in a compartment
+      tags: &id007
+      - mediaServices
+      x-related-resource: '#/definitions/MediaWorkflowJob'
+    post:
+      description: Run the MediaWorkflow according to the given mediaWorkflow definition and configuration.
+      operationId: CreateMediaWorkflowJob
+      parameters:
+      - description: The information to run the mediaWorkflow.
+        in: body
+        name: CreateMediaWorkflowJobDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateMediaWorkflowJobDetails'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Creates and starts running a new job for the MediaWorkflow with the given ID.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowJob'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates and runs a MediaWorkflowJob for the the MediaWorkflow identified by mediaWorkflowId
+      tags: *id007
+      x-related-resource: '#/definitions/MediaWorkflowJob'
+  /mediaWorkflowJobs/{mediaWorkflowJobId}:
+    delete:
+      description: This is an asynchronous operation. The MediaWorkflowJob lifecycleState will change
+        to CANCELING temporarily until the job is completely CANCELED.
+      operationId: DeleteMediaWorkflowJob
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowJobIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        202:
+          description: Accepted the request. The MediaWorkflowJob will be canceled.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Cancel a MediaWorkflowJob identified by the mediaWorkflowJobId
+      tags: *id007
+      x-related-resource: '#/definitions/MediaWorkflowJob'
+    get:
+      description: Gets the MediaWorkflowJob.
+      operationId: GetMediaWorkflowJob
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowJobIdPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Retrieves the MediaWorkflowJob with the given ID.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowJob'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Get MediaWorkflowJob identified by the mediaWorkflowId and jobId
+      tags: *id007
+      x-related-resource: '#/definitions/MediaWorkflowJob'
+    put:
+      description: Updates the MediaWorkflowJob.
+      operationId: UpdateMediaWorkflowJob
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowJobIdPathParam'
+      - description: The information to be updated.
+        in: body
+        name: UpdateMediaWorkflowJobDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateMediaWorkflowJobDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The MediaWorkflowJob was updated.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowJob'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        405:
+          $ref: '#/responses/405'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Update the MediaWorkflowJob identified by the id
+      tags: *id007
+      x-related-resource: '#/definitions/MediaWorkflowJob'
+  /mediaWorkflowJobs/{mediaWorkflowJobId}/actions/addLock:
+    post:
+      description: 'Add a lock to a MediaWorkflowJob.
+
+        '
+      operationId: AddMediaWorkflowJobLock
+      parameters:
+      - description: The details to be updated for the AddLock.
+        in: body
+        name: AddLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/AddLockDetails'
+      - $ref: '#/parameters/MediaWorkflowJobIdPathParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        200:
+          description: Lock is added.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowJob'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Add a lock to a MediaWorkflowJob.
+      tags: *id007
+      x-related-resource: '#/definitions/MediaWorkflowJob'
+  /mediaWorkflowJobs/{mediaWorkflowJobId}/actions/changeCompartment:
+    post:
+      description: Moves a MediaWorkflowJob resource from one compartment identifier to another.
+      operationId: ChangeMediaWorkflowJobCompartment
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowJobIdPathParam'
+      - description: The change compartment payload.
+        in: body
+        name: ChangeMediaWorkflowJobCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeMediaWorkflowJobCompartmentDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        204:
+          description: The MediaWorkflowJob resource will be moved into a different compartment.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Moves a resource into a different compartment.
+      tags: *id007
+      x-related-resource: '#/definitions/MediaWorkflowJob'
+  /mediaWorkflowJobs/{mediaWorkflowJobId}/actions/removeLock:
+    post:
+      description: 'Remove a lock from a MediaWorkflowJob.
+
+        '
+      operationId: RemoveMediaWorkflowJobLock
+      parameters:
+      - description: The details to be updated for the RemoveLock.
+        in: body
+        name: RemoveLockDetails
+        required: true
+        schema:
+          $ref: '#/definitions/RemoveLockDetails'
+      - $ref: '#/parameters/MediaWorkflowJobIdPathParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        200:
+          description: Lock is removed.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowJob'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Remove a lock from a MediaWorkflowJob.
+      tags: *id007
+      x-related-resource: '#/definitions/MediaWorkflowJob'
+  /mediaWorkflowTaskDeclarations:
+    get:
+      description: 'Returns a list of MediaWorkflowTaskDeclarations.
+
+        '
+      operationId: ListMediaWorkflowTaskDeclarations
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/NameQueryParam'
+      - $ref: '#/parameters/MediaWorkflowTaskDeclarationVerionQueryParam'
+      - $ref: '#/parameters/MediaWorkflowTaskDeclarationCurrentQueryParam'
+      - $ref: '#/parameters/MediaWorkflowTaskDeclarationSortByQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: A page of MediaWorkflowTaskDeclaration items.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowTaskDeclarationCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets a list of all MediaWorkflowTaskDeclarations.
+      tags: &id025
+      - mediaServices
+      x-related-resource: '#/definitions/MediaWorkflowTaskDeclarationCollection'
+  /mediaWorkflows:
+    get:
+      description: Lists the MediaWorkflows.
+      operationId: ListMediaWorkflows
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/MediaWorkflowIdentifierQueryParam'
+      - $ref: '#/parameters/LifecycleStateQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: List of all the MediaWorkflows.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflowCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Lists the MediaWorkflows.
+      tags: &id008
+      - mediaServices
+      x-related-resource: '#/definitions/MediaWorkflow'
+    post:
+      description: 'Creates a new MediaWorkflow.
+
+        '
+      operationId: CreateMediaWorkflow
+      parameters:
+      - description: Details for the new MediaWorkflow.
+        in: body
+        name: CreateMediaWorkflowDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateMediaWorkflowDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The MediaWorkflow was successfully created.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflow'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates a new MediaWorkflow.
+      tags: *id008
+      x-related-resource: '#/definitions/MediaWorkflow'
+  /mediaWorkflows/{mediaWorkflowId}:
+    delete:
+      description: The MediaWorkflow lifecycleState will change to DELETED.
+      operationId: DeleteMediaWorkflow
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        204:
+          description: The MediaWorkflow is deleted.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Deletes a MediaWorkflow identified by the mediaWorkflowId.
+      tags: *id008
+      x-related-resource: '#/definitions/MediaWorkflow'
+    get:
+      description: Gets a MediaWorkflow by identifier.
+      operationId: GetMediaWorkflow
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Retrieves the MediaWorkflow with the given ID.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflow'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets MediaWorkflow.
+      tags: *id008
+    put:
+      description: Updates the MediaWorkflow.
+      operationId: UpdateMediaWorkflow
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowIdentifierPathParam'
+      - description: The information to be updated.
+        in: body
+        name: UpdateMediaWorkflowDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateMediaWorkflowDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The MediaWorkflow was updated.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflow'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        405:
+          $ref: '#/responses/405'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Updates the MediaWorkflow identified by the ID.
+      tags: *id008
+      x-related-resource: '#/definitions/MediaWorkflow'
+  /mediaWorkflows/{mediaWorkflowId}/actions/addLock:
+    post:
+      description: 'Add a lock to a MediaWorkflow.
+
+        '
+      operationId: AddMediaWorkflowLock
+      parameters:
+      - $ref: '#/parameters/AddResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/MediaWorkflowIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        200:
+          description: Lock is added.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflow'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Add a lock to a MediaWorkflow.
+      tags: *id008
+      x-related-resource: '#/definitions/MediaWorkflow'
+  /mediaWorkflows/{mediaWorkflowId}/actions/changeCompartment:
+    post:
+      description: Moves a MediaWorkflow resource from one compartment identifier to another.
+      operationId: ChangeMediaWorkflowCompartment
+      parameters:
+      - $ref: '#/parameters/MediaWorkflowIdentifierPathParam'
+      - description: The change compartment payload.
+        in: body
+        name: ChangeMediaWorkflowCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeMediaWorkflowCompartmentDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        204:
+          description: The MediaWorkflow resource will be moved into a different compartment.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Moves a resource into a different compartment.
+      tags: *id008
+      x-related-resource: '#/definitions/MediaWorkflow'
+  /mediaWorkflows/{mediaWorkflowId}/actions/removeLock:
+    post:
+      description: 'Remove a lock from a MediaWorkflow.
+
+        '
+      operationId: RemoveMediaWorkflowLock
+      parameters:
+      - $ref: '#/parameters/RemoveResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/MediaWorkflowIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        200:
+          description: Lock is removed.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/MediaWorkflow'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Remove a lock from a MediaWorkflow.
+      tags: *id008
+      x-related-resource: '#/definitions/MediaWorkflow'
+  /streamCdnConfigs:
+    get:
+      description: Lists the StreamCdnConfig.
+      operationId: ListStreamCdnConfigs
+      parameters:
+      - $ref: '#/parameters/RequiredStreamCdnConfigDistributionChannelIdentifierQueryParam'
+      - $ref: '#/parameters/StreamCdnConfigIdentifierQueryParam'
+      - $ref: '#/parameters/StreamCdnConfigLifecycleStateQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: List all the CDN Configurations.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamCdnConfigCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Lists the StreamCdnConfig.
+      tags: &id009
+      - mediaServices
+      x-related-resource: '#/definitions/StreamCdnConfig'
+    post:
+      description: 'Creates a new CDN Configuration.
+
+        '
+      operationId: CreateStreamCdnConfig
+      parameters:
+      - description: Details for the new StreamCdnConfig.
+        in: body
+        name: CreateStreamCdnConfigDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateStreamCdnConfigDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The StreamCdnConfig was successfully created.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamCdnConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates a new CDN Configuration.
+      tags: *id009
+      x-related-resource: '#/definitions/StreamCdnConfig'
+  /streamCdnConfigs/{streamCdnConfigId}:
+    delete:
+      description: The StreamCdnConfig lifecycleState will change to DELETED.
+      operationId: DeleteStreamCdnConfig
+      parameters:
+      - $ref: '#/parameters/StreamCdnConfigIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        204:
+          description: The StreamCdnConfig is deleted.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Deletes a StreamCdnConfig identified by the streamCdnConfigId.
+      tags: *id009
+      x-related-resource: '#/definitions/StreamCdnConfig'
+    get:
+      description: Gets a StreamCdnConfig by identifier.
+      operationId: GetStreamCdnConfig
+      parameters:
+      - $ref: '#/parameters/StreamCdnConfigIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Retrieves the StreamCdnConfig with the given ID.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamCdnConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets StreamCdnConfig.
+      tags: *id009
+    put:
+      description: Updates the StreamCdnConfig.
+      operationId: UpdateStreamCdnConfig
+      parameters:
+      - $ref: '#/parameters/StreamCdnConfigIdentifierPathParam'
+      - description: The information to be updated.
+        in: body
+        name: UpdateStreamCdnConfigDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateStreamCdnConfigDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The StreamCdnConfig is updated.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamCdnConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Updates the StreamCdnConfig identified by the ID.
+      tags: *id009
+      x-related-resource: '#/definitions/StreamCdnConfig'
+  /streamCdnConfigs/{streamCdnConfigId}/actions/addLock:
+    post:
+      description: 'Add a lock to a StreamCdnConfig.
+
+        '
+      operationId: AddStreamCdnConfigLock
+      parameters:
+      - $ref: '#/parameters/AddResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/StreamCdnConfigIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Lock is added.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamCdnConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Add a lock to a StreamCdnConfig.
+      tags: *id009
+      x-related-resource: '#/definitions/StreamCdnConfig'
+  /streamCdnConfigs/{streamCdnConfigId}/actions/removeLock:
+    post:
+      description: 'Remove a lock from a StreamCdnConfig.
+
+        '
+      operationId: RemoveStreamCdnConfigLock
+      parameters:
+      - $ref: '#/parameters/RemoveResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/StreamCdnConfigIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Lock is removed.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamCdnConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Remove a lock from a StreamCdnConfig.
+      tags: *id009
+      x-related-resource: '#/definitions/StreamCdnConfig'
+  /streamDistributionChannels:
+    get:
+      description: Lists the Stream Distribution Channels.
+      operationId: ListStreamDistributionChannels
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/StreamDistributionChannelIdentifierQueryParam'
+      - $ref: '#/parameters/StreamDistributionChannelLifecycleStateQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Lists all the Stream Distribution Channels.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamDistributionChannelCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Lists Stream Distribution Channels.
+      tags: &id010
+      - mediaServices
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+    post:
+      description: 'Creates a new Stream Distribution Channel.
+
+        '
+      operationId: CreateStreamDistributionChannel
+      parameters:
+      - description: Details for the new Stream Distribution Channel.
+        in: body
+        name: CreateStreamDistributionChannelDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateStreamDistributionChannelDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The Stream Distribution Channel was successfully created.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamDistributionChannel'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates a new Stream Distribution Channel
+      tags: *id010
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /streamDistributionChannels/{streamDistributionChannelId}:
+    delete:
+      description: The Stream Distribution Channel lifecycleState will change to DELETED.
+      operationId: DeleteStreamDistributionChannel
+      parameters:
+      - $ref: '#/parameters/StreamDistributionChannelIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        204:
+          description: The Stream Distribution Channel is deleted.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Deletes a Stream Distribution Channel identified by the streamDistributionChannelId.
+      tags: *id010
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+    get:
+      description: Gets a Stream Distribution Channel by identifier.
+      operationId: GetStreamDistributionChannel
+      parameters:
+      - $ref: '#/parameters/StreamDistributionChannelIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Retrieves the Stream Distribution Channel with the given ID.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamDistributionChannel'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Gets a Stream Distribution Channel.
+      tags: *id010
+    put:
+      description: Updates the Stream Distribution Channel.
+      operationId: UpdateStreamDistributionChannel
+      parameters:
+      - $ref: '#/parameters/StreamDistributionChannelIdentifierPathParam'
+      - description: The information to be updated.
+        in: body
+        name: UpdateStreamDistributionChannelDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateStreamDistributionChannelDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The Stream Distribution Channel has been updated.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamDistributionChannel'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Update the Stream Distribution Channel identified by the id
+      tags: *id010
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /streamDistributionChannels/{streamDistributionChannelId}/actions/addLock:
+    post:
+      description: 'Add a lock to a StreamDistributionChannel.
+
+        '
+      operationId: AddStreamDistributionChannelLock
+      parameters:
+      - $ref: '#/parameters/AddResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/StreamDistributionChannelIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Lock is added.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamDistributionChannel'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Add a lock to a StreamDistributionChannel.
+      tags: *id010
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /streamDistributionChannels/{streamDistributionChannelId}/actions/changeCompartment:
+    post:
+      description: Moves a Stream Distribution Channel resource from one compartment identifier to another.
+      operationId: ChangeStreamDistributionChannelCompartment
+      parameters:
+      - $ref: '#/parameters/StreamDistributionChannelIdentifierPathParam'
+      - description: The change compartment payload.
+        in: body
+        name: ChangeStreamDistributionChannelCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeStreamDistributionChannelCompartmentDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        204:
+          description: The Stream Distribution Channel resource will be moved into a different compartment.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Moves a resource into a different compartment.
+      tags: *id010
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /streamDistributionChannels/{streamDistributionChannelId}/actions/ingest:
+    post:
+      description: Ingests an Asset into a Distribution Channel.
+      operationId: IngestStreamDistributionChannel
+      parameters:
+      - $ref: '#/parameters/StreamDistributionChannelIdentifierPathParam'
+      - description: Playlist entry information.
+        in: body
+        name: IngestStreamDistributionChannelDetails
+        required: true
+        schema:
+          $ref: '#/definitions/IngestStreamDistributionChannelDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The workflow job is successfully created to ingest the asset into the distribution
+            channel.
+          headers:
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/IngestStreamDistributionChannelResult'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Ingests an Asset into a Distribution Channel.
+      tags: *id010
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /streamDistributionChannels/{streamDistributionChannelId}/actions/removeLock:
+    post:
+      description: 'Remove a lock to a StreamDistributionChannel.
+
+        '
+      operationId: RemoveStreamDistributionChannelLock
+      parameters:
+      - $ref: '#/parameters/RemoveResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/StreamDistributionChannelIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Lock is removed.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamDistributionChannel'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Remove a lock to a StreamDistributionChannel.
+      tags: *id010
+      x-related-resource: '#/definitions/StreamDistributionChannel'
+  /streamPackagingConfigs:
+    get:
+      description: Lists the Stream Packaging Configurations.
+      operationId: ListStreamPackagingConfigs
+      parameters:
+      - $ref: '#/parameters/StreamPackagingConfigDistributionChannelIdQueryParam'
+      - $ref: '#/parameters/StreamPackagingConfigIdentifierQueryParam'
+      - $ref: '#/parameters/StreamPackagingConfigLifecycleStateQueryParam'
+      - $ref: '#/parameters/DisplayNameQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Lists all the Stream Packaging Configurations.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamPackagingConfigCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: List Stream Packaging Configurations
+      tags: &id011
+      - mediaServices
+      x-related-resource: '#/definitions/StreamPackagingConfig'
+    post:
+      description: 'Creates a new Packaging Configuration.
+
+        '
+      operationId: CreateStreamPackagingConfig
+      parameters:
+      - description: Details for the new Stream Packaging Configuration.
+        in: body
+        name: CreateStreamPackagingConfigDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateStreamPackagingConfigDetails'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The Stream Packaging Configuration was successfully created.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamPackagingConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Creates a new Stream Packaging Configuration.
+      tags: *id011
+      x-related-resource: '#/definitions/StreamPackagingConfig'
+  /streamPackagingConfigs/{streamPackagingConfigId}:
+    delete:
+      description: The Stream Packaging Configuration lifecycleState will change to DELETED.
+      operationId: DeleteStreamPackagingConfig
+      parameters:
+      - $ref: '#/parameters/StreamPackagingConfigIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        204:
+          description: The Stream Packaging Configuration is deleted.
+          headers:
+            opc-request-id: *id002
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Deletes a Stream Packaging Configuration identified by the streamPackagingConfigId.
+      tags: *id011
+      x-related-resource: '#/definitions/StreamPackagingConfig'
+    get:
+      description: Gets a Stream Packaging Configuration by identifier.
+      operationId: GetStreamPackagingConfig
+      parameters:
+      - $ref: '#/parameters/StreamPackagingConfigIdentifierPathParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: Retrieves the Stream Packaging Configuration with the given ID.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamPackagingConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Get a Stream Packaging Configuration.
+      tags: *id011
+    put:
+      description: Updates the Stream Packaging Configuration.
+      operationId: UpdateStreamPackagingConfig
+      parameters:
+      - $ref: '#/parameters/StreamPackagingConfigIdentifierPathParam'
+      - description: The information to be updated.
+        in: body
+        name: UpdateStreamPackagingConfigDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateStreamPackagingConfigDetails'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The Stream Packaging Configuration will be updated.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamPackagingConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Updates the Stream Packaging Configuration identified by the ID.
+      tags: *id011
+      x-related-resource: '#/definitions/StreamPackagingConfig'
+  /streamPackagingConfigs/{streamPackagingConfigId}/actions/addLock:
+    post:
+      description: 'Add a lock to a StreamPackagingConfig.
+
+        '
+      operationId: AddStreamPackagingConfigLock
+      parameters:
+      - $ref: '#/parameters/AddResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/StreamPackagingConfigIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Lock is added.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamPackagingConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Add a lock to a StreamPackagingConfig.
+      tags: *id011
+      x-related-resource: '#/definitions/StreamPackagingConfig'
+  /streamPackagingConfigs/{streamPackagingConfigId}/actions/removeLock:
+    post:
+      description: 'Remove a lock from a StreamPackagingConfig.
+
+        '
+      operationId: RemoveStreamPackagingConfigLock
+      parameters:
+      - $ref: '#/parameters/RemoveResourceLockDetailsBodyParam'
+      - $ref: '#/parameters/StreamPackagingConfigIdentifierPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RequestIdHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      responses:
+        200:
+          description: Lock is removed.
+          headers:
+            etag: *id001
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/StreamPackagingConfig'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Remove a lock from a StreamPackagingConfig.
+      tags: *id011
+      x-related-resource: '#/definitions/StreamPackagingConfig'
+  /systemMediaWorkflows:
+    get:
+      description: 'Lists the SystemMediaWorkflows that can be used to run a job by name or as a template
+        to create a MediaWorkflow.
+
+        '
+      operationId: ListSystemMediaWorkflows
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/NameQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: The SystemMediaWorkflow templates.
+          headers:
+            opc-next-page: *id004
+            opc-request-id: *id002
+          schema:
+            $ref: '#/definitions/SystemMediaWorkflowCollection'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        429:
+          $ref: '#/responses/429'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/default'
+      summary: Lists SystemMediaWorkflows.
+      tags: *id008
+      x-related-resource: '#/definitions/MediaWorkflow'
+definitions:
+  AddLockDetails:
+    description: "Request payload to add lock to the resource. The FULL lock type allows no modifications\
+      \ (delete, create, update). \nThe DELETE lock type allows all modifications, but delete is not allowed.\n\
+      type: object\n"
+    properties:
+      compartmentId:
+        description: The compartment ID of the lock.
+        type: string
+      message:
+        description: 'A message added by the creator of the lock. This is typically used to give an
+
+          indication of why the resource is locked.
+
+          '
+        type: string
+      relatedResourceId:
+        description: 'The ID of the Target that is locking this Target. Indicates that deleting this Target
+          will remove the lock.
+
+          '
+        type: string
+      timeCreated:
+        description: When the lock was created.
+        format: date-time
+        type: string
+      type:
+        description: Type of the lock.
+        enum:
+        - FULL
+        - DELETE
+        type: string
+    required:
+    - type
+    - compartmentId
+  AkamaiManualStreamCdnConfig:
+    allOf:
+    - $ref: '#/definitions/StreamCdnConfigSection'
+    - discriminator: AKAMAI_MANUAL
+      properties:
+        edgeHostname:
+          description: The hostname of the CDN edge server to use when building CDN URLs.
+          type: string
+        edgePathPrefix:
+          description: The path to prepend when building CDN URLs.
+          type: string
+        edgeTokenKey:
+          description: The encryption key to use for edge token authentication.
+          type: string
+        edgeTokenSalt:
+          description: Salt to use when encrypting authentication token.
+          type: string
+        isEdgeTokenAuth:
+          description: Whether token authentication should be used at the CDN edge.
+          type: boolean
+        originAuthSecretKeyA:
+          description: The shared secret key A, two for errorless key rotation.
+          type: string
+        originAuthSecretKeyB:
+          description: The shared secret key B, two for errorless key rotation.
+          type: string
+        originAuthSecretKeyNonceA:
+          default: nonceKeyA
+          description: Nonce identifier for originAuthSecretKeyA (used to determine key used to sign).
+          type: string
+        originAuthSecretKeyNonceB:
+          default: nonceKeyB
+          description: Nonce identifier for originAuthSecretKeyB (used to determine key used to sign).
+          type: string
+        originAuthSignEncryption:
+          default: SHA256-HMAC
+          description: The type of encryption used to compute the signature.
+          enum:
+          - SHA256-HMAC
+          type: string
+        originAuthSignType:
+          default: ForwardURL
+          description: The type of data used to compute the signature.
+          enum:
+          - ForwardURL
+          type: string
+    description: Configuration fields for manual Akamai configuration.
+  AssetMetadataEntryDetails:
+    allOf:
+    - $ref: '#/definitions/IngestStreamDistributionChannelDetails'
+    - discriminator: ASSET_METADATA_MEDIA_ASSET
+      properties:
+        compartmentId:
+          description: The compartment ID where the Ingest Workflow Job will be run.
+          maxLength: 255
+          minLength: 1
+          type: string
+        mediaAssetId:
+          description: The Media Asset ID to ingest into the Distribution Channel.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - mediaAssetId
+    description: Asset Metadata entry information.
+  AssetType:
+    description: The type of the media asset.
+    enum: &id012
+    - AUDIO
+    - VIDEO
+    - PLAYLIST
+    - IMAGE
+    - CAPTION_FILE
+    - UNKNOWN
+    type: string
+  ChangeMediaAssetCompartmentDetails:
+    description: The information to be updated.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+  ChangeMediaWorkflowCompartmentDetails:
+    description: The information to be updated.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+          into which the resource should be moved.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+  ChangeMediaWorkflowConfigurationCompartmentDetails:
+    description: The details of the compartment to which the MediaWorkflowConfiguration will be moved.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+          into which the resource should be moved.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+  ChangeMediaWorkflowJobCompartmentDetails:
+    description: The information to be updated.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+          into which the resource should be moved.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+  ChangeStreamDistributionChannelCompartmentDetails:
+    description: The information to be updated.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+          into which the resource should be moved.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+    type: object
+  CreateMediaAssetDetails:
+    description: The information about new MediaAsset.
+    properties:
+      bucketName:
+        description: The name of the object storage bucket where this asset is located.
+        maxLength: 256
+        minLength: 1
+        type: string
+      compartmentId:
+        description: Compartment Identifier.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: &id013
+        additionalProperties:
+          additionalProperties:
+            description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+              '
+            type: object
+          description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+          Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+          '
+        type: object
+      displayName:
+        description: Display name for the Media Asset. Does not have to be unique. Avoid entering confidential
+          information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: &id014
+        additionalProperties:
+          type: string
+        description: 'Simple key-value pair that is applied without any predefined name, type or scope.
+          Exists for cross-compatibility only.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+      masterMediaAssetId:
+        description: The ID of the senior most asset from which this asset is derived.
+        maxLength: 255
+        minLength: 1
+        type: string
+      mediaAssetTags:
+        description: list of tags for the MediaAsset.
+        items:
+          $ref: '#/definitions/MediaAssetTag'
+        type: array
+      mediaWorkflowJobId:
+        description: The ID of the MediaWorkflowJob used to produce this asset.
+        maxLength: 255
+        minLength: 1
+        type: string
+      metadata:
+        description: List of Metadata.
+        items:
+          $ref: '#/definitions/Metadata'
+        type: array
+      namespaceName:
+        description: The object storage namespace where this asset is located.
+        maxLength: 255
+        minLength: 1
+        type: string
+      objectEtag:
+        description: eTag of the underlying object storage object.
+        maxLength: 128
+        minLength: 1
+        type: string
+      objectName:
+        description: The object storage object name that identifies this asset.
+        maxLength: 1024
+        minLength: 1
+        type: string
+      parentMediaAssetId:
+        description: The ID of the parent asset from which this asset is derived.
+        maxLength: 255
+        minLength: 1
+        type: string
+      segmentRangeEndIndex:
+        description: The end index for video segment files.
+        format: int64
+        minimum: 0
+        type: integer
+      segmentRangeStartIndex:
+        description: The start index for video segment files.
+        format: int64
+        minimum: 0
+        type: integer
+      sourceMediaWorkflowId:
+        description: The ID of the MediaWorkflow used to produce this asset.
+        maxLength: 255
+        minLength: 1
+        type: string
+      sourceMediaWorkflowVersion:
+        description: The version of the MediaWorkflow used to produce this asset.
+        format: int64
+        minimum: 1
+        type: integer
+      type:
+        description: The type of the media asset.
+        enum: *id012
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/AssetType'
+    required:
+    - type
+    - compartmentId
+    type: object
+  CreateMediaWorkflowConfigurationDetails:
+    description: The information needed to create a new MediaWorkflowConfiguration.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id013
+      displayName:
+        description: MediaWorkflowConfiguration identifier. Avoid entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'Reuseable parameter values encoded as a JSON; the top and second level JSON elements
+          are
+
+          objects. Each key of the top level object refers to a task key that is unqiue to the
+
+          workflow, each of the second level objects'' keys refer to the name of a parameter that is
+
+          unique to the task. taskKey -> parameterName -> parameterValue
+
+          '
+        type: object
+    required:
+    - displayName
+    - parameters
+    - compartmentId
+    type: object
+  CreateMediaWorkflowDetails:
+    description: The information about new MediaWorkflow.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Name for the MediaWorkflow. Does not have to be unique, and it's changeable. Avoid
+          entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+      mediaWorkflowConfigurationIds:
+        description: 'Configurations to be applied to all the jobs for this workflow. Parameters in these
+          configurations are
+
+          overridden by parameters in the MediaWorkflowConfigurations of the MediaWorkflowJob and the
+
+          parameters of the MediaWorkflowJob.
+
+          '
+        items:
+          type: string
+        type: array
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'JSON object representing named parameters and their default values that can be referenced
+          throughout this workflow.
+
+          The values declared here can be overridden by the MediaWorkflowConfigurations or parameters
+          supplied when creating
+
+          MediaWorkflowJobs from this MediaWorkflow.
+
+          '
+        type: object
+      tasks:
+        description: 'The processing to be done in this workflow. Each key of the MediaWorkflowTasks in
+          this array must be unique
+
+          within the array. The order of tasks given here will be preserved.
+
+          '
+        items:
+          $ref: '#/definitions/MediaWorkflowTask'
+        maxItems: 20
+        minItems: 1
+        type: array
+    required:
+    - displayName
+    - compartmentId
+    type: object
+  CreateMediaWorkflowJobByIdDetails:
+    allOf:
+    - $ref: '#/definitions/CreateMediaWorkflowJobDetails'
+    - discriminator: ID
+      properties:
+        mediaWorkflowId:
+          description: OCID of the MediaWorkflow that should be run.
+          type: string
+    description: Information to run a MediaWorkflow identified by its OCID.
+  CreateMediaWorkflowJobByNameDetails:
+    allOf:
+    - $ref: '#/definitions/CreateMediaWorkflowJobDetails'
+    - discriminator: NAME
+      properties:
+        mediaWorkflowName:
+          description: Name of the system MediaWorkflow that should be run.
+          type: string
+    description: Information to run a system MediaWorkflow identified by its name.
+  CreateMediaWorkflowJobDetails:
+    description: Information to run the MediaWorkflow.
+    discriminator: workflowIdentifierType
+    properties:
+      compartmentId:
+        description: ID of the compartment in which the job should be created.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Name of the Media Workflow Job. Does not have to be unique. Avoid entering confidential
+          information.
+        type: string
+      freeformTags: *id014
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+      mediaWorkflowConfigurationIds:
+        description: Configurations to be applied to this run of the workflow.
+        items:
+          type: string
+        type: array
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'Parameters that override parameters specified in MediaWorkflowTaskDeclarations,
+          the MediaWorkflow,
+
+          the MediaWorkflow''s MediaWorkflowConfigurations and the MediaWorkflowConfigurations of this
+
+          MediaWorkflowJob. The parameters are given as JSON. The top level and 2nd level elements must
+          be
+
+          JSON objects (vs arrays, scalars, etc). The top level keys refer to a task''s key and the 2nd
+          level
+
+          keys refer to a parameter''s name.
+
+          '
+        type: object
+      workflowIdentifierType:
+        description: Discriminate identification of a workflow by name versus a workflow by ID.
+        enum:
+        - ID
+        - NAME
+        type: string
+    required:
+    - workflowIdentifierType
+    - compartmentId
+    type: object
+  CreateStreamCdnConfigDetails:
+    description: The information about the new CDN Configuration.
+    properties:
+      config:
+        $ref: '#/definitions/StreamCdnConfigSection'
+      definedTags: *id013
+      displayName:
+        description: CDN Config display name, which can be renamed and is not necessarily unique. Avoid
+          entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      distributionChannelId:
+        description: Distribution Channel Identifier.
+        type: string
+      freeformTags: *id014
+      isEnabled:
+        default: true
+        description: Whether publishing to CDN is enabled.
+        type: boolean
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+    required:
+    - displayName
+    - distributionChannelId
+    - config
+    type: object
+  CreateStreamDistributionChannelDetails:
+    description: The information about the new Stream Distribution Channel.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        maxLength: 255
+        minLength: 1
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Stream Distribution Channel display name. Avoid entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+    required:
+    - displayName
+    - compartmentId
+    type: object
+  CreateStreamPackagingConfigDetails:
+    description: The information about the new Packaging Configuration.
+    properties:
+      definedTags: *id013
+      displayName:
+        description: The name of the stream Packaging Configuration. Avoid entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      distributionChannelId:
+        description: Unique identifier of the Distribution Channel that this stream packaging configuration
+          belongs to.
+        type: string
+      encryption:
+        $ref: '#/definitions/StreamPackagingConfigEncryption'
+      freeformTags: *id014
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+      segmentTimeInSeconds:
+        default: 6
+        description: The duration in seconds for each fragment.
+        maximum: 30
+        minimum: 1
+        type: integer
+      streamPackagingFormat:
+        description: The output format for the package.
+        enum:
+        - HLS
+        - DASH
+        type: string
+    required:
+    - distributionChannelId
+    - displayName
+    - streamPackagingFormat
+    - segmentTimeInSeconds
+    type: object
+  DashStreamPackagingConfig:
+    allOf:
+    - $ref: '#/definitions/StreamPackagingConfig'
+    - discriminator: DASH
+    description: Configuration fields for a DASH Packaging Configuration.
+  DeleteMode:
+    description: Media asset delete mode. DELETE_CHILDREN deletes all the MediaAssets with a given mediaAssetParentId.
+      DELETE_DERIVATIONS deletes all the Media Assets with a given masterMediaAssetId.
+    enum: &id018
+    - DELETE_CHILDREN
+    - DELETE_DERIVATIONS
+    type: string
+  EdgeStreamCdnConfig:
+    allOf:
+    - $ref: '#/definitions/StreamCdnConfigSection'
+    - discriminator: EDGE
+    description: Configuration fields for Edge configuration.
+  Error:
+    description: Error Information.
+    properties:
+      code:
+        description: A short error code that defines the error, meant for programmatic parsing.
+        type: string
+      message:
+        description: A human-readable error string.
+        type: string
+    required:
+    - code
+    - message
+  GenerateSessionTokenDetails:
+    description: Information about the new session token.
+    properties:
+      assetIds:
+        description: Array of asset resource IDs used to limit the scope of the token.
+        items:
+          maxLength: 255
+          minLength: 1
+          type: string
+        maxItems: 10
+        minItems: 1
+        type: array
+      packagingConfigId:
+        description: The packaging config resource identifier used to limit the scope of the token.
+        maxLength: 255
+        minLength: 1
+        type: string
+      scopes:
+        description: Array of scopes the token can act upon.
+        items:
+          enum:
+          - PLAYLIST
+          - EDGE
+          type: string
+        maxItems: 2
+        minItems: 1
+        type: array
+      timeExpires:
+        description: Token expiry time. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+    required:
+    - scopes
+    - packagingConfigId
+    type: object
+  HlsStreamPackagingConfig:
+    allOf:
+    - $ref: '#/definitions/StreamPackagingConfig'
+    - discriminator: HLS
+    description: Configuration fields for a HLS Packaging Configuration.
+  IngestStreamDistributionChannelDetails:
+    description: Ingest Payload Information.
+    discriminator: ingestPayloadType
+    properties:
+      ingestPayloadType:
+        description: Ingest Payload Type
+        enum:
+        - ASSET_METADATA_MEDIA_ASSET
+        type: string
+    required:
+    - ingestPayloadType
+    type: object
+  IngestStreamDistributionChannelResult:
+    description: The Ingest Workflow Job information.
+    properties:
+      mediaWorkflowJobId:
+        description: Identifier of the Ingest Workflow Job created.
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - mediaWorkflowJobId
+    type: object
+  JobOutput:
+    description: The output result of an executed MediaWorkflowJob.
+    properties:
+      assetType:
+        description: Type of job output.
+        enum:
+        - AUDIO
+        - VIDEO
+        - PLAYLIST
+        - IMAGE
+        - CAPTION_FILE
+        - TRANSCRIPTION_JOB
+        - VISION_JOB
+        - TEXT_ANALYSIS
+        - INPUT_FILE
+        - OTHER
+        type: string
+      bucketName:
+        description: The bucket name of the job output.
+        type: string
+      id:
+        description: The ID associated with the job output.
+        type: string
+      namespaceName:
+        description: The namespace name of the job output.
+        type: string
+      objectName:
+        description: The object name of the job output.
+        type: string
+    type: object
+  LifecycleState:
+    description: Possible lifecycle states.
+    enum: &id015
+    - CREATING
+    - UPDATING
+    - ACTIVE
+    - DELETING
+    - DELETED
+    - FAILED
+    type: string
+  MediaAsset:
+    description: Represents the metadata associated with an asset that has been either produced by or
+      registered with Media Services.
+    properties:
+      bucketName:
+        description: The name of the object storage bucket where this represented asset is located.
+        type: string
+      compartmentId:
+        description: The ID of the compartment containing the MediaAsset.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering
+          confidential information.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaAsset.
+        enum: *id015
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      masterMediaAssetId:
+        description: The ID of the senior most asset from which this asset is derived.
+        type: string
+      mediaAssetTags:
+        description: List of tags for the MediaAsset.
+        items:
+          $ref: '#/definitions/MediaAssetTag'
+        type: array
+      mediaWorkflowJobId:
+        description: The ID of the MediaWorkflowJob used to produce this asset.
+        type: string
+      metadata:
+        description: List of Metadata.
+        items:
+          $ref: '#/definitions/Metadata'
+        type: array
+      namespaceName:
+        description: The object storage namespace where this asset is located.
+        type: string
+      objectEtag:
+        description: eTag of the underlying object storage object.
+        type: string
+      objectName:
+        description: The object storage object name that identifies this asset.
+        type: string
+      parentMediaAssetId:
+        description: The ID of the parent asset from which this asset is derived.
+        type: string
+      segmentRangeEndIndex:
+        description: The end index of video segment files.
+        format: int64
+        type: integer
+      segmentRangeStartIndex:
+        description: The start index for video segment files.
+        format: int64
+        type: integer
+      sourceMediaWorkflowId:
+        description: The ID of the MediaWorkflow used to produce this asset.
+        type: string
+      sourceMediaWorkflowVersion:
+        description: The version of the MediaWorkflow used to produce this asset.
+        format: int64
+        type: integer
+      systemTags: &id017
+        additionalProperties:
+          additionalProperties:
+            description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+              '
+            type: object
+          description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+          Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+          '
+        type: object
+      timeCreated:
+        description: The time when the MediaAsset was created. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the MediaAsset was updated. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      type:
+        description: The type of the media asset.
+        enum: *id012
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/AssetType'
+    required:
+    - id
+    - compartmentId
+    - lifecycleState
+    - type
+    type: object
+  MediaAssetCollection:
+    description: Results of a mediaAsset search. Contains both MediaAssetSummary items and other data.
+    properties:
+      items:
+        description: List of mediaAssets.
+        items:
+          $ref: '#/definitions/MediaAssetSummary'
+        type: array
+    required:
+    - items
+    type: object
+  MediaAssetDistributionChannelAttachment:
+    description: Attachment between MediaAsset and streaming DistributionChannel.
+    properties:
+      displayName:
+        description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering
+          confidential information.
+        type: string
+      distributionChannelId:
+        description: OCID of associated Distribution Channel.
+        type: string
+      lifecycleState:
+        description: Lifecycle state of the attachment.
+        enum: &id016
+        - CREATING
+        - ACTIVE
+        - NEEDS_ATTENTION
+        - UPDATING
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+      mediaWorkflowJobId:
+        description: The ingest MediaWorkflowJob ID that created this attachment.
+        type: string
+      metadataRef:
+        description: The identifier for the metadata.
+        type: string
+      version:
+        description: Version of the attachment.
+        format: int64
+        type: integer
+    required:
+    - distributionChannelId
+    - version
+    - lifecycleState
+    - metadataRef
+    type: object
+  MediaAssetDistributionChannelAttachmentCollection:
+    description: Results of a MediaAssetDistributionChannelAttachment search. Contains the MediaAssetDistributionChannelAttachmentSummary
+      items.
+    properties:
+      items:
+        description: List of Distribution Channel attachments.
+        items:
+          $ref: '#/definitions/MediaAssetDistributionChannelAttachmentSummary'
+        type: array
+    required:
+    - items
+    type: object
+  MediaAssetDistributionChannelAttachmentSortBy:
+    description: The field to sort by.
+    enum: &id019
+    - mediaAssetId
+    - distributionChannelId
+    - displayName
+    - version
+    type: string
+  MediaAssetDistributionChannelAttachmentSummary:
+    description: Summary of the MediaAssetDistributionChannelAttachment.
+    properties:
+      displayName:
+        description: Display name for the MediaAssetDistributionChannelAttachment. Does not have to be
+          unique, and it's changeable. Avoid entering confidential information.
+        type: string
+      distributionChannelId:
+        description: OCID of associated Distribution Channel.
+        type: string
+      lifecycleState:
+        description: Lifecycle state of the attachment.
+        enum: *id016
+        type: string
+        x-obmcs-enumref: '#/definitions/MediaAssetDistributionChannelAttachment/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      mediaAssetId:
+        description: OCID of associated media asset.
+        type: string
+      mediaWorkflowJobId:
+        description: The ingest MediaWorkflowJob ID that created this attachment.
+        type: string
+      metadataRef:
+        description: The identifier for the metadata.
+        type: string
+      version:
+        description: Version number of the attachment.
+        format: int64
+        type: integer
+    required:
+    - mediaAssetId
+    - distributionChannelId
+    - version
+    - lifecycleState
+    - metadataRef
+    type: object
+  MediaAssetSortBy:
+    description: The field to sort by.
+    enum: &id020
+    - compartmentId
+    - type
+    - lifecycleState
+    - parentMediaAssetId
+    - masterMediaAssetId
+    - displayName
+    - timeCreated
+    - timeUpdated
+    type: string
+  MediaAssetSummary:
+    description: Summary of the MediaAsset.
+    properties:
+      compartmentId:
+        description: The ID of the compartment containing the MediaAsset.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: MediaAsset name. Does not have to be unique, and it's changeable. Avoid entering
+          confidential information.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaAsset.
+        enum: *id015
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      masterMediaAssetId:
+        description: The ID of the senior most asset from which this asset is derived.
+        type: string
+      parentMediaAssetId:
+        description: The ID of the parent asset from which this asset is derived.
+        type: string
+      systemTags: *id017
+      timeCreated:
+        description: The time the the MediaAsset was created. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time the MediaAsset was updated. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      type:
+        description: The type of the media asset.
+        enum: *id012
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/AssetType'
+    required:
+    - id
+    - compartmentId
+    - type
+    - lifecycleState
+    type: object
+  MediaAssetTag:
+    description: Tags of the MediaAsset.
+    properties:
+      type:
+        description: Type of the tag.
+        enum:
+        - USER
+        - SYSTEM
+        type: string
+      value:
+        description: Tag of the MediaAsset.
+        type: string
+    required:
+    - value
+    type: object
+  MediaWorkflow:
+    description: Configurable workflows that define the series of tasks that will be used to process video
+      files.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Name of the Media Workflow. Does not have to be unique, and it's changeable. Avoid
+          entering confidential information.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaWorkflow.
+        enum:
+        - ACTIVE
+        - NEEDS_ATTENTION
+        - DELETED
+        type: string
+      lifecyleDetails:
+        description: A message describing the current state in more detail. For example, can be used to
+          provide actionable information for a resource in Failed state.
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      mediaWorkflowConfigurationIds:
+        description: 'Configurations to be applied to all the runs of this workflow. Parameters in these
+          configurations are
+
+          overridden by parameters in the MediaWorkflowConfigurations of the MediaWorkflowJob and the
+
+          parameters of the MediaWorkflowJob. If the same parameter appears in multiple configurations,
+          the values that
+
+          appear in the configuration at the highest index will be used.
+
+          '
+        items:
+          type: string
+        type: array
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'JSON object representing named parameters and their default values that can be referenced
+          throughout this workflow.
+
+          The values declared here can be overridden by the MediaWorkflowConfigurations or parameters
+          supplied when creating
+
+          MediaWorkflowJobs from this MediaWorkflow.
+
+          '
+        type: object
+      systemTags: *id017
+      tasks:
+        description: 'The processing to be done in this workflow. Each key of the MediaWorkflowTasks in
+          this array is unique
+
+          within the array.  The order of the items is preserved from the order of the tasks array in
+
+          CreateMediaWorkflowDetails or UpdateMediaWorkflowDetails.
+
+          '
+        items:
+          $ref: '#/definitions/MediaWorkflowTask'
+        type: array
+      timeCreated:
+        description: The time when the MediaWorkflow was created. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the MediaWorkflow was updated. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      version:
+        description: The version of the MediaWorkflow.
+        format: int64
+        type: integer
+    required:
+    - id
+    - compartmentId
+    - displayName
+    - tasks
+    type: object
+  MediaWorkflowCollection:
+    description: 'Results of a MediaWorkflow search. Contains both MediaWorkflowSummary items and other
+      information, such as
+
+      metadata.
+
+      '
+    properties:
+      items:
+        description: List of all MediaWorkflows.
+        items:
+          $ref: '#/definitions/MediaWorkflowSummary'
+        type: array
+    required:
+    - items
+    type: object
+  MediaWorkflowConfiguration:
+    description: Resusable set of values that can be referenced either in a MediaWorkflow or when running
+      a MediaWorkflowJob.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Display name for the MediaWorkflowConfiguration. Avoid entering confidential information.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaWorkflowConfiguration.
+        enum:
+        - ACTIVE
+        - DELETED
+        type: string
+      lifecyleDetails:
+        description: A message describing the current state in more detail. For example, can be used to
+          provide actionable information for a resource in Failed state.
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'Reuseable parameter values encoded as a JSON; the top and second level JSON elements
+          are
+
+          objects. Each key of the top level object refer to a task key that is unqiue to the
+
+          workflow, each of the second level objects'' keys refer to the name of a parameter that is
+
+          unique to the task. taskKey -> parameterName -> parameterValue
+
+          '
+        type: object
+      systemTags: *id017
+      timeCreated:
+        description: The time when the the MediaWorkflowConfiguration was created. An RFC3339 formatted
+          datetime string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the MediaWorkflowConfiguration was updated. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - displayName
+    - parameters
+    type: object
+  MediaWorkflowConfigurationCollection:
+    description: Results of a mediaWorkflowConfiguration search. Contains boh MediaWorkflowConfigurationSummary
+      items and other information, such as metadata.
+    properties:
+      items:
+        description: List of the mediaWorkflowConfigurationSummary objects.
+        items:
+          $ref: '#/definitions/MediaWorkflowConfigurationSummary'
+        type: array
+    required:
+    - items
+    type: object
+  MediaWorkflowConfigurationSummary:
+    description: Summary of the MediaWorkflowConfiguration.
+    properties:
+      compartmentId:
+        description: Compartment identifier
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Name of the MediaWorkflowConfiguration. Avoid entering confidential information.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Immutable unique identifier for the MediaWorkflowConfiguration.
+        type: string
+      lifecycleDetails:
+        description: A message describing the current state in more detail. For example, can be used to
+          provide actionable information for a resource in Failed state.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaWorkflowConfiguration.
+        type: string
+        x-obmcs-enumref: '#/definitions/MediaWorkflowConfiguration/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      systemTags: *id017
+      timeCreated:
+        description: The time when the MediaWorkflowConfiguration was created. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the MediaWorkflowConfiguration was updated. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - displayName
+    type: object
+  MediaWorkflowJob:
+    description: 'A MediaWorkflowJob represents a run of a MediaWorkflow for a specific set of parameters
+      and configurations.
+
+      '
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Name of the Media Workflow Job. Does not have to be unique. Avoid entering confidential
+          information.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier for this run of the workflow.
+        type: string
+      lifecycleDetails:
+        description: The lifecyle details.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaWorkflowJob.
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - WAITING
+        - REJECTED
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      mediaWorkflowConfigurationIds:
+        description: Configurations to be applied to this run of the workflow.
+        items:
+          type: string
+        type: array
+      mediaWorkflowId:
+        description: The workflow to execute.
+        type: string
+      outputs:
+        description: A list of JobOutput for the workflowJob.
+        items:
+          $ref: '#/definitions/JobOutput'
+        type: array
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'Parameters that override parameters specified in MediaWorkflowTaskDeclarations,
+          the MediaWorkflow,
+
+          the MediaWorkflow''s MediaWorkflowConfigurations and the MediaWorkflowConfigurations of this
+
+          MediaWorkflowJob. The parameters are given as JSON.  The top level and 2nd level elements must
+          be
+
+          JSON objects (vs arrays, scalars, etc). The top level keys refer to a task''s key and the 2nd
+          level
+
+          keys refer to a parameter''s name.
+
+          '
+        type: object
+      runnable:
+        additionalProperties:
+          type: object
+        description: 'A JSON representation of the job as it will be run by the system. All the task declarations,
+          configurations
+
+          and parameters are merged. Parameter values are all fully resolved.
+
+          '
+        type: object
+      systemTags: *id017
+      taskLifecycleState:
+        description: Status of each task.
+        items:
+          $ref: '#/definitions/MediaWorkflowTaskState'
+        type: array
+      timeCreated:
+        description: Creation time of the job. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeEnded:
+        description: Time when the job finished. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeStarted:
+        description: Time when the job started to execute. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: Updated time of the job. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - mediaWorkflowId
+    - compartmentId
+    type: object
+  MediaWorkflowJobCollection:
+    description: 'Results of a mediaWorkflowJob search, a list of MediaWorkflowJobSummary items and metadata
+      of the
+
+      search.
+
+      '
+    properties:
+      items:
+        description: List of mediaWorkflowJob items.
+        items:
+          $ref: '#/definitions/MediaWorkflowJobSummary'
+        type: array
+    required:
+    - items
+    type: object
+  MediaWorkflowJobSortBy:
+    description: Sort by field for the Media Workflow Job.
+    enum: &id021
+    - timeCreated
+    - workflowId
+    - lifecycleState
+    type: string
+  MediaWorkflowJobSummary:
+    description: Summary of a MediaWorkflowJob.
+    properties:
+      definedTags: *id013
+      displayName:
+        description: Name of the Media Workflow Job. Does not have to be unique. Avoid entering confidential
+          information.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier for this job.
+        type: string
+      lifecycleDetails:
+        description: The lifecyle details.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaWorkflowJob.
+        type: string
+        x-obmcs-enumref: '#/definitions/MediaWorkflowJob/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      mediaWorkflowId:
+        description: The workflow to execute.
+        type: string
+      systemTags: *id017
+      timeCreated:
+        description: Creation time of the job. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: Updated time of the job. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+    type: object
+  MediaWorkflowSummary:
+    description: Summary of the MediaWorkflow.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Name for the MediaWorkflow. Does not have to be unique, and it's changeable. Avoid
+          entering confidential information.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleDetails:
+        description: A message describing the current state in more detail. For example, can be used to
+          provide actionable information for a resource in Failed state.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaWorkflow.
+        type: string
+        x-obmcs-enumref: '#/definitions/MediaWorkflow/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      systemTags: *id017
+      timeCreated:
+        description: The time when the MediaWorkflow was created. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the MediaWorkflow was updated. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      version:
+        description: The version of MediaWorkflow.
+        format: int64
+        type: integer
+    required:
+    - id
+    - compartmentId
+    type: object
+  MediaWorkflowTask:
+    description: 'Defines the type of processing to be run at a given point in the workflow, parameters
+      to configure the
+
+      processing, and any processing that must be completed before this processing begins.
+
+      '
+    properties:
+      enableParameterReference:
+        description: 'Allows this task to be conditionally enabled.  If no value or a blank value is given,
+          the task is
+
+          unconditionally enbled.  Otherwise the given string specifies a parameter of the job created
+          for this task''s
+
+          workflow using the JSON pointer syntax. The JSON pointer is validated when a job is created
+          from the workflow of this task.
+
+          '
+        type: string
+      enableWhenReferencedParameterEquals:
+        additionalProperties:
+          type: object
+        description: 'Used in conjunction with enableParameterReference to conditionally enable a task.  When
+          a job is created
+
+          from the workflow of this task, the task will only be enabled if the value of the parameter
+          specified by
+
+          enableParameterReference is equal to the value of this property. This property must be prenset
+          if and only if
+
+          a enableParameterReference is given. The value is a JSON node.
+
+          '
+        type: object
+      key:
+        description: 'A unique identifier for this task within its workflow. Keys are used to reference
+          a task within workflows
+
+          and MediaWorkflowJobs. Tasks are referenced as prerequisites and to track output and state.
+
+          '
+        type: string
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'Data specifiying how this task is to be run. The data is a JSON object that must
+          conform to the JSON Schema
+
+          specified by the parameters of the MediaWorkflowTaskDeclaration this task references. The parameters
+          may
+
+          contain values or references to other parameters.
+
+          '
+        type: object
+      prerequisites:
+        description: 'Keys to the other tasks in this workflow that must be completed before execution
+          of this task can begin.
+
+          '
+        items:
+          type: string
+        type: array
+        uniqueItems: true
+      type:
+        description: 'The type of process to run at this task. Refers to the name of a MediaWorkflowTaskDeclaration.
+
+          '
+        type: string
+      version:
+        description: The version of the MediaWorkflowTaskDeclaration.
+        format: int64
+        type: integer
+    required:
+    - key
+    - version
+    - type
+    - parameters
+    type: object
+  MediaWorkflowTaskDeclaration:
+    description: The declaration of a type of task that can be used in a MediaWorkflow.
+    properties:
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      name:
+        description: 'MediaWorkflowTaskDeclaration identifier. The name and version should be unique among
+
+          MediaWorkflowTaskDeclarations.
+
+          '
+        type: string
+      parametersSchema:
+        additionalProperties:
+          type: object
+        description: 'JSON schema specifying the parameters supported by this type of task. This is used
+          to validate tasks''
+
+          parameters when jobs are created.
+
+          '
+        type: object
+      parametersSchemaAllowingReferences:
+        additionalProperties:
+          type: object
+        description: 'JSON schema similar to the parameterSchema, but permits parameter values to refer
+          to other parameters using the
+
+          ${/path/to/another/parmeter} syntax.  This is used to validate task parameters when workflows
+          are created.
+
+          '
+        type: object
+      version:
+        description: 'The version of MediaWorkflowTaskDeclaration, incremented whenever the team implementing
+          the task processor
+
+          modifies the JSON schema of this declaration''s definitions, parameters or list of required
+          parameters.
+
+          '
+        type: integer
+    required:
+    - name
+    - version
+    - parametersSchema
+    - parametersSchemaAllowingReferences
+    type: object
+  MediaWorkflowTaskDeclarationCollection:
+    description: 'Results of the ListMediaWorkflowTaskDeclaration operation, a list of MediaWorkflowTaskDeclarations.
+
+      '
+    properties:
+      items:
+        description: List of MediaWorkflowTaskDeclaration objects.
+        items:
+          $ref: '#/definitions/MediaWorkflowTaskDeclaration'
+        type: array
+    required:
+    - items
+    type: object
+  MediaWorkflowTaskDeclarationSortBy:
+    description: Sort by field for Media Workflow task declaration.
+    enum: &id022
+    - name
+    - version
+    type: string
+  MediaWorkflowTaskState:
+    description: Status of a task in a workflow job being run.
+    properties:
+      key:
+        description: Unique key within a MediaWorkflowJob for the task.
+        type: string
+      lifecycleDetails:
+        description: The lifecycle details of MediaWorkflowJob task.
+        type: string
+      lifecycleState:
+        description: The current state of the MediaWorkflowJob task.
+        type: string
+        x-obmcs-enumref: '#/definitions/MediaWorkflowJob/lifecycleState'
+    type: object
+  Metadata:
+    description: Technical metadata for this asset.
+    properties:
+      metadata:
+        description: JSON string containing the technial metadata for the media asset.
+        type: string
+    required:
+    - metadata
+    type: object
+  RemoveLockDetails:
+    description: 'Request payload to remove lock to the resource.
+
+      '
+    properties:
+      compartmentId:
+        description: The compartment ID of the lock.
+        type: string
+      message:
+        description: 'A message added by the creator of the lock. This is typically used to give an
+
+          indication of why the resource is locked.
+
+          '
+        type: string
+      relatedResourceId:
+        description: 'The ID of the resource that is locking this resource. Indicates that deleting this
+          resource will remove the lock.
+
+          '
+        type: string
+      timeCreated:
+        description: When the lock was created.
+        format: date-time
+        type: string
+      type:
+        description: Type of the lock.
+        enum:
+        - FULL
+        - DELETE
+        type: string
+    required:
+    - type
+    - compartmentId
+    type: object
+  ResourceLock:
+    description: 'Resource locks are used to prevent certain APIs from being called for the resource.
+
+      A full lock prevents both updating the resource and deleting the resource. A delete
+
+      lock prevents deleting the resource.
+
+      '
+    properties:
+      compartmentId:
+        description: The compartment ID of the lock.
+        type: string
+      message:
+        description: 'A message added by the creator of the lock. This is typically used to give an
+
+          indication of why the resource is locked.
+
+          '
+        type: string
+      relatedResourceId:
+        description: 'The ID of the resource that is locking this resource. Indicates that deleting this
+          resource will remove the lock.
+
+          '
+        type: string
+      timeCreated:
+        description: When the lock was created.
+        format: date-time
+        type: string
+      type:
+        description: Type of the lock.
+        enum:
+        - FULL
+        - DELETE
+        type: string
+    required:
+    - type
+    - compartmentId
+    type: object
+  SessionToken:
+    description: The generated sessionToken details.
+    properties:
+      token:
+        description: The generated session token.
+        type: string
+    required:
+    - token
+    type: object
+  SortBy:
+    description: Sort By.
+    enum: &id023
+    - timeCreated
+    - displayName
+    type: string
+  SortOrder:
+    description: Sort orders.
+    enum: &id024
+    - ASC
+    - DESC
+    type: string
+  StreamCdnConfig:
+    description: Configuration used for integrating with a CDN.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      config:
+        $ref: '#/definitions/StreamCdnConfigSection'
+      definedTags: *id013
+      displayName:
+        description: The CDN Configuration identifier or display name, which can be renamed and is not
+          necessarily unique. Avoid entering confidential information.
+        type: string
+      distributionChannelId:
+        description: Distribution Channel Identifier.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      isEnabled:
+        description: Whether publishing to CDN is enabled.
+        type: boolean
+      lifecycleState:
+        description: The current state of the CDN Configuration.
+        enum:
+        - ACTIVE
+        - NEEDS_ATTENTION
+        - DELETED
+        type: string
+      lifecyleDetails:
+        description: A message describing the current state in more detail. For example, can be used to
+          provide actionable information for a resource in Failed state.
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      systemTags: *id017
+      timeCreated:
+        description: The time when the CDN Config was created. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the CDN Config was updated. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - displayName
+    - compartmentId
+    - distributionChannelId
+    - isEnabled
+    - config
+    type: object
+  StreamCdnConfigCollection:
+    description: 'Results of a streamCdnConfig search. Contains both StreamCdnConfigSummary items and
+      other information, such as
+
+      metadata.
+
+      '
+    properties:
+      items:
+        description: List of streamCdnConfigs.
+        items:
+          $ref: '#/definitions/StreamCdnConfigSummary'
+        type: array
+    required:
+    - items
+    type: object
+  StreamCdnConfigSection:
+    description: Base fields of the StreamCdnConfig configuration object.
+    discriminator: type
+    properties:
+      type:
+        description: The name of the CDN configuration type.
+        enum:
+        - EDGE
+        - AKAMAI_MANUAL
+        type: string
+    required:
+    - type
+    type: object
+  StreamCdnConfigSummary:
+    description: Summary of the StreamCdnConfig.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: The CDN Configuration identifier or display name, which can be renamed and is not
+          necessarily unique. Avoid entering confidential information.
+        type: string
+      distributionChannelId:
+        description: Distribution Channel Identifier.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      isEnabled:
+        description: Whether publishing to CDN is enabled.
+        type: boolean
+      lifecycleDetails:
+        description: A message describing the current state in more detail. For example, can be used to
+          provide actionable information for a resource in Failed state.
+        type: string
+      lifecycleState:
+        description: The current state of the CDN Configuration.
+        type: string
+        x-obmcs-enumref: '#/definitions/StreamCdnConfig/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      systemTags: *id017
+      timeCreated:
+        description: The time when the the CDN Configuration was created. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time the CDN Configuration was updated. An RFC3339 formatted datetime string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - displayName
+    - compartmentId
+    - distributionChannelId
+    - isEnabled
+    type: object
+  StreamDistributionChannel:
+    description: Channel used for delivering video streams to the end-users.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Stream Distribution Channel display name. Avoid entering confidential information.
+        type: string
+      domainName:
+        description: Unique domain name of the Distribution Channel.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleState:
+        description: The current state of the Stream Distribution Channel.
+        enum:
+        - ACTIVE
+        - NEEDS_ATTENTION
+        - DELETED
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      systemTags: *id017
+      timeCreated:
+        description: The time when the Stream Distribution Channel was created. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the Stream Distribution Channel was updated. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - displayName
+    - compartmentId
+    type: object
+  StreamDistributionChannelCollection:
+    description: 'Results of a Stream Distribution Channel search. Contains both StreamDistributionChannelSummary
+      items and other information, such as
+
+      metadata.
+
+      '
+    properties:
+      items:
+        description: List of Stream Distribution Channels.
+        items:
+          $ref: '#/definitions/StreamDistributionChannelSummary'
+        type: array
+    required:
+    - items
+    type: object
+  StreamDistributionChannelSummary:
+    description: Summary of the Stream Distribution Channel.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Stream Distribution Channel display name. Avoid entering confidential information.
+        type: string
+      domainName:
+        description: The unique domain name of the Distribution Channel.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleState:
+        description: The current state of the Stream Distribution Channel.
+        type: string
+        x-obmcs-enumref: '#/definitions/StreamDistributionChannel/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      systemTags: *id017
+      timeCreated:
+        description: The time when the Stream Distribution Channel was created. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the Stream Distribution Channel was updated. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - displayName
+    - compartmentId
+    type: object
+  StreamPackagingConfig:
+    description: A stream packaging configuration for a Distribution Channel.
+    discriminator: streamPackagingFormat
+    properties:
+      compartmentId:
+        description: Compartment Identifier
+        type: string
+      definedTags: *id013
+      displayName:
+        description: The name of the stream packaging configuration. Avoid entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      distributionChannelId:
+        description: Unique identifier of the Distribution Channel that this stream packaging configuration
+          belongs to.
+        type: string
+      encryption:
+        $ref: '#/definitions/StreamPackagingConfigEncryption'
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleState:
+        description: The current state of the Packaging Configuration.
+        enum:
+        - ACTIVE
+        - NEEDS_ATTENTION
+        - DELETED
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      segmentTimeInSeconds:
+        default: 6
+        description: The duration in seconds for each fragment.
+        maximum: 30
+        minimum: 1
+        type: integer
+      streamPackagingFormat:
+        description: The output format for the package.
+        enum:
+        - HLS
+        - DASH
+        type: string
+      systemTags: *id017
+      timeCreated:
+        description: The time when the Packaging Configuration was created. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the Packaging Configuration was updated. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - distributionChannelId
+    - displayName
+    - streamPackagingFormat
+    - segmentTimeInSeconds
+    type: object
+  StreamPackagingConfigCollection:
+    description: 'Results of a Packaging Configuration search. Contains both StreamPackagingConfigSummary
+      items and other information, such as
+
+      metadata.
+
+      '
+    properties:
+      items:
+        description: List of Packaging Configurations.
+        items:
+          $ref: '#/definitions/StreamPackagingConfigSummary'
+        type: array
+    required:
+    - items
+    type: object
+  StreamPackagingConfigEncryption:
+    description: The encryption used by the stream packaging configuration.
+    discriminator: algorithm
+    properties:
+      algorithm:
+        description: The encryption algorithm for the stream packaging configuration.
+        enum:
+        - NONE
+        - AES128
+        type: string
+    required:
+    - algorithm
+    type: object
+  StreamPackagingConfigEncryptionAes128:
+    allOf:
+    - $ref: '#/definitions/StreamPackagingConfigEncryption'
+    - discriminator: AES128
+      properties:
+        kmsKeyId:
+          description: The identifier of the customer managed Vault KMS symmetric encryption key (null
+            if Oracle managed).
+          type: string
+    description: AES128 encryption type (enabled by default).
+  StreamPackagingConfigEncryptionNone:
+    allOf:
+    - $ref: '#/definitions/StreamPackagingConfigEncryption'
+    - discriminator: NONE
+    description: Disables encryption.
+  StreamPackagingConfigSummary:
+    description: Summary of the Packaging Configuration.
+    properties:
+      compartmentId:
+        description: Compartment Identifier.
+        type: string
+      definedTags: *id013
+      displayName:
+        description: Stream Packaging Configuration display name. Avoid entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      distributionChannelId:
+        description: Unique identifier of the distribution channel that this stream packaging configuration
+          belongs to.
+        type: string
+      freeformTags: *id014
+      id:
+        description: Unique identifier that is immutable on creation.
+        type: string
+      lifecycleState:
+        description: The current state of the Distribution Channel.
+        type: string
+        x-obmcs-enumref: '#/definitions/StreamPackagingConfig/lifecycleState'
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 2
+        type: array
+      systemTags: *id017
+      timeCreated:
+        description: The time when the Distribution Channel was created. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+      timeUpdated:
+        description: The time when the Distribution Channel was updated. An RFC3339 formatted datetime
+          string.
+        format: date-time
+        type: string
+    required:
+    - id
+    - compartmentId
+    - distributionChannelId
+    - displayName
+    type: object
+  SystemMediaWorkflow:
+    description: A named list of tasks to be used to run a job or as a template to create a MediaWorkflow.
+    properties:
+      description:
+        description: 'Description of this workflow''s processing and how that processing can be customized
+          by
+
+          specifying parameter values.
+
+          '
+        type: string
+      locks:
+        description: Locks associated with this resource.
+        items:
+          $ref: '#/definitions/ResourceLock'
+        maxItems: 1
+        type: array
+      name:
+        description: System provided unique identifier for this static media workflow.
+        type: string
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'JSON object representing named parameters and their default values that can be referenced
+          throughout this workflow.
+
+          The values declared here can be overridden by the MediaWorkflowConfigurations or parameters
+          supplied when creating
+
+          MediaWorkflowJobs from this MediaWorkflow.
+
+          '
+        type: object
+      tasks:
+        description: 'The processing to be done in this workflow. Each key of the MediaWorkflowTasks in
+          this array is unique
+
+          within the array. The order of the items is preserved from the order of the tasks array in
+
+          CreateMediaWorkflowDetails or UpdateMediaWorkflowDetails.
+
+          '
+        items:
+          $ref: '#/definitions/MediaWorkflowTask'
+        type: array
+    required:
+    - name
+    - tasks
+    type: object
+  SystemMediaWorkflowCollection:
+    description: 'Result for the ListSystemMediaWorkflows operation.
+
+      '
+    properties:
+      items:
+        description: List of SytemMediaWorkflow items.
+        items:
+          $ref: '#/definitions/SystemMediaWorkflow'
+        type: array
+    required:
+    - items
+    type: object
+  UpdateMediaAssetDetails:
+    description: The information to be updated.
+    properties:
+      definedTags: *id013
+      displayName:
+        description: Display name for the Media Asset. Does not have to be unique. Avoid entering confidential
+          information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+      masterMediaAssetId:
+        description: The ID of the senior most asset from which this asset is derived.
+        maxLength: 255
+        minLength: 1
+        type: string
+      mediaAssetTags:
+        description: List of tags for the MediaAsset.
+        items:
+          $ref: '#/definitions/MediaAssetTag'
+        type: array
+      metadata:
+        description: List of Metadata.
+        items:
+          $ref: '#/definitions/Metadata'
+        type: array
+      parentMediaAssetId:
+        description: The ID of the parent asset from which this asset is derived.
+        maxLength: 255
+        minLength: 1
+        type: string
+      type:
+        description: The type of the media asset.
+        enum: *id012
+        type: string
+        x-obmcs-top-level-enum: '#/definitions/AssetType'
+    type: object
+  UpdateMediaWorkflowConfigurationDetails:
+    description: The information to be updated.
+    properties:
+      definedTags: *id013
+      displayName:
+        description: Name for the MediaWorkflowConfiguration. Does not have to be unique, and it's changeable.
+          Avoid entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'Reuseable parameter values encoded as a JSON; the top and second level JSON elements
+          are
+
+          objects. Each key of the top level object refer to a task key that is unqiue to the
+
+          workflow, each of the second level objects'' keys refer to the name of a parameter that is
+
+          unique to the task. taskKey -> parameterName -> parameterValue
+
+          '
+        type: object
+    type: object
+  UpdateMediaWorkflowDetails:
+    description: The information to be updated.
+    properties:
+      definedTags: *id013
+      displayName:
+        description: Name for the MediaWorkflow. Does not have to be unique, and it's changeable. Avoid
+          entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+      mediaWorkflowConfigurationIds:
+        description: 'Configurations to be applied to all jobs for this workflow. Parameters in these
+          configurations are
+
+          overridden by parameters in the MediaWorkflowConfigurations of the MediaWorkflogJob and the
+
+          parameters of the MediaWorkflowJob.
+
+          '
+        items:
+          type: string
+        type: array
+      parameters:
+        additionalProperties:
+          type: object
+        description: 'JSON object representing named parameters and their default values that can be referenced
+          throughout this workflow.
+
+          The values declared here can be overridden by the MediaWorkflowConfigurations or parameters
+          supplied when creating
+
+          MediaWorkflowJobs from this MediaWorkflow.
+
+          '
+        type: object
+      tasks:
+        description: 'The processing to be done in this workflow. Each key of the MediaWorkflowTasks in
+          this array must be unique
+
+          within the array.
+
+          '
+        items:
+          $ref: '#/definitions/MediaWorkflowTask'
+        type: array
+    type: object
+  UpdateMediaWorkflowJobDetails:
+    description: The information to be updated.
+    properties:
+      definedTags: *id013
+      displayName:
+        description: Name for the MediaWorkflowJob. Does not have to be unique. Avoid entering confidential
+          information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+    type: object
+  UpdateStreamCdnConfigDetails:
+    description: The information to be updated.
+    properties:
+      config:
+        $ref: '#/definitions/StreamCdnConfigSection'
+      definedTags: *id013
+      displayName:
+        description: CDN Config display name.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+      isEnabled:
+        description: Whether CDN is enabled for publishing.
+        type: boolean
+    type: object
+  UpdateStreamDistributionChannelDetails:
+    description: The information to be updated.
+    properties:
+      definedTags: *id013
+      displayName:
+        description: Stream Distribution channel display name. Avoid entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+    type: object
+  UpdateStreamPackagingConfigDetails:
+    description: The information to be updated.
+    properties:
+      definedTags: *id013
+      displayName:
+        description: The name of the stream Packaging Configuration. Avoid entering confidential information.
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id014
+    type: object
+parameters:
+  AddResourceLockDetailsBodyParam:
+    description: AddResourceLockDetails body parameter
+    in: body
+    name: AddResourceLockDetails
+    required: true
+    schema:
+      $ref: '#/definitions/AddLockDetails'
+  BucketNameQueryParam:
+    description: Filter MediaAsset by the bucket where the object is stored.
+    in: query
+    name: bucketName
+    type: string
+    x-default-description: 'null'
+  CompartmentIdQueryParam:
+    description: The ID of the compartment in which to list resources.
+    in: query
+    name: compartmentId
+    type: string
+    x-default-description: The OCID of the compartment in which to list resources. Required -  unless
+      resource id is specified in the query parameter.
+  DeleteModeQueryParam:
+    description: DeleteMode decides whether to delete all the immediate children or all assets with the
+      asset's ID as their masterMediaAssetId.
+    enum: *id018
+    in: query
+    name: deleteMode
+    type: string
+    x-default-description: 'null'
+    x-obmcs-top-level-enum: '#/definitions/DeleteMode'
+  DisplayNameQueryParam:
+    description: A filter to return only the resources that match the entire display name given.
+    in: query
+    maxLength: 255
+    minLength: 1
+    name: displayName
+    type: string
+    x-default-description: 'null'
+  DistributionChannelIdentifierPathParam:
+    description: Unique DistributionChannel identifier.
+    in: path
+    name: distributionChannelId
+    required: true
+    type: string
+  DistributionChannelIdentifierQueryParam:
+    description: Unique DistributionChannel identifier.
+    in: query
+    name: distributionChannelId
+    type: string
+    x-default-description: 'null'
+  DistributionChannelSortByQueryParam:
+    description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated
+      is descending. Default order for displayName is ascending.
+
+      '
+    enum: *id019
+    in: query
+    name: sortBy
+    type: string
+    x-default-description: The default value is the media asset ID.
+    x-obmcs-top-level-enum: '#/definitions/MediaAssetDistributionChannelAttachmentSortBy'
+  IfMatchHeader:
+    description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+      for a resource, set the `if-match` parameter to the value of the
+
+      etag from a previous GET or POST response for that resource.
+
+      The resource will be updated or deleted only if the etag you
+
+      provide matches the resource''s current etag value.
+
+      '
+    in: header
+    name: if-match
+    required: false
+    type: string
+  LifecycleStateQueryParam:
+    description: A filter to return only the resources with lifecycleState matching the given lifecycleState.
+    in: query
+    name: lifecycleState
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-enumref: '#/definitions/MediaWorkflow/lifecycleState'
+  MasterMediaAssetIdQueryParam:
+    description: Unique MediaAsset identifier of the first asset upload.
+    in: query
+    name: masterMediaAssetId
+    type: string
+    x-default-description: 'null'
+  MediaAssetDistributionChannelAttachmentVersionQueryParam:
+    description: Version of the attachment.
+    format: int64
+    in: query
+    name: version
+    type: integer
+    x-default-description: 'null'
+  MediaAssetIdentifierPathParam:
+    description: Unique MediaAsset identifier
+    in: path
+    name: mediaAssetId
+    required: true
+    type: string
+  MediaAssetIdentifierQueryParam:
+    description: Unique MediaAsset identifier.
+    in: query
+    name: id
+    type: string
+    x-default-description: 'null'
+  MediaAssetIdentifierRequiredQueryParam:
+    description: Unique MediaAsset identifier.
+    in: query
+    name: mediaAssetId
+    required: true
+    type: string
+    x-default-description: 'null'
+  MediaAssetTypeQueryParam:
+    description: Filter MediaAsset by the asset type.
+    enum: *id012
+    in: query
+    name: type
+    type: string
+    x-default-description: 'null'
+    x-obmcs-top-level-enum: '#/definitions/AssetType'
+  MediaAssetsLifecycleStateQueryParam:
+    description: A filter to return only the resources with lifecycleState matching the given lifecycleState.
+    enum: *id015
+    in: query
+    name: lifecycleState
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+  MediaAssetsSortByQueryParam:
+    description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated
+      is descending. Default order for displayName is ascending.
+
+      '
+    enum: *id020
+    in: query
+    name: sortBy
+    type: string
+    x-default-description: The default value is timeCreated.
+    x-obmcs-top-level-enum: '#/definitions/MediaAssetSortBy'
+  MediaWorkflowConfigurationIdentifierPathParam:
+    description: Unique MediaWorkflowConfiguration identifier.
+    in: path
+    name: mediaWorkflowConfigurationId
+    required: true
+    type: string
+  MediaWorkflowConfigurationIdentifierQueryParam:
+    description: Unique MediaWorkflowConfiguration identifier.
+    in: query
+    name: id
+    type: string
+    x-default-description: 'null'
+  MediaWorkflowIdQueryParam:
+    description: Unique MediaWorkflow identifier.
+    in: query
+    name: mediaWorkflowId
+    type: string
+    x-default-description: 'null'
+  MediaWorkflowIdentifierPathParam:
+    description: Unique MediaWorkflow identifier.
+    in: path
+    name: mediaWorkflowId
+    required: true
+    type: string
+  MediaWorkflowIdentifierQueryParam:
+    description: Unique MediaWorkflow identifier.
+    in: query
+    name: id
+    type: string
+    x-default-description: 'null'
+  MediaWorkflowJobIdPathParam:
+    description: Unique MediaWorkflowJob identifier.
+    in: path
+    name: mediaWorkflowJobId
+    required: true
+    type: string
+  MediaWorkflowJobIdQueryParam:
+    description: The ID of the MediaWorkflowJob used to produce this asset, if this parameter is supplied
+      then the workflow ID must also be supplied.
+    in: query
+    name: mediaWorkflowJobId
+    required: false
+    type: string
+    x-default-description: 'null'
+  MediaWorkflowJobIdentifierQueryParam:
+    description: unique MediaWorkflowJob identifier
+    in: query
+    name: id
+    type: string
+    x-default-description: 'null'
+  MediaWorkflowJobLifecycleStateQueryParam:
+    description: A filter to return only the resources with lifecycleState matching the given lifecycleState.
+    in: query
+    name: lifecycleState
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-enumref: '#/definitions/MediaWorkflowJob/lifecycleState'
+  MediaWorkflowJobSortByQueryParam:
+    default: timeCreated
+    description: The parameter sort by.
+    enum: *id021
+    in: query
+    name: sortBy
+    type: string
+    x-obmcs-top-level-enum: '#/definitions/MediaWorkflowJobSortBy'
+  MediaWorkflowTaskDeclarationCurrentQueryParam:
+    default: false
+    description: A filter to only select the newest version for each MediaWorkflowTaskDeclaration name.
+    in: query
+    name: isCurrent
+    type: boolean
+  MediaWorkflowTaskDeclarationSortByQueryParam:
+    default: name
+    description: 'The field to sort by. Only one sort order may be provided.
+
+      '
+    enum: *id022
+    in: query
+    name: sortBy
+    type: string
+    x-obmcs-top-level-enum: '#/definitions/MediaWorkflowTaskDeclarationSortBy'
+  MediaWorkflowTaskDeclarationVerionQueryParam:
+    description: A filter to select MediaWorkflowTaskDeclaration by version.
+    in: query
+    minimum: 0
+    name: version
+    type: integer
+    x-default-description: 'null'
+  NameQueryParam:
+    description: A filter to return only the resources with their system defined, unique name matching
+      the given name.
+    in: query
+    name: name
+    type: string
+    x-default-description: 'null'
+  ObjectNameQueryParam:
+    description: Filter MediaAsset by the name of the object in object storage.
+    in: query
+    name: objectName
+    type: string
+    x-default-description: 'null'
+  OverrideLocksQueryParameter:
+    default: false
+    description: Whether to override locks (if any exist).
+    in: query
+    name: isLockOverride
+    type: boolean
+  PaginationLimitQueryParam:
+    default: 10
+    description: The maximum number of items to return.
+    in: query
+    maximum: 50
+    minimum: 1
+    name: limit
+    type: integer
+  PaginationTokenQueryParam:
+    default: ''
+    description: 'A token representing the position at which to start retrieving results. This must come
+      from the
+
+      `opc-next-page` header field of a previous response.
+
+      '
+    in: query
+    minLength: 1
+    name: page
+    type: string
+    x-default-description: 'null'
+  ParentMediaAssetIdQueryParam:
+    description: Unique MediaAsset identifier of the asset from which this asset is derived.
+    in: query
+    name: parentMediaAssetId
+    type: string
+    x-default-description: 'null'
+  RemoveResourceLockDetailsBodyParam:
+    description: RemoveResourceLockDetails body parameter
+    in: body
+    name: RemoveResourceLockDetails
+    required: true
+    schema:
+      $ref: '#/definitions/RemoveLockDetails'
+  RequestIdHeader:
+    description: The client request ID for tracing.
+    in: header
+    name: opc-request-id
+    type: string
+  RequiredStreamCdnConfigDistributionChannelIdentifierQueryParam:
+    description: 'The Stream Distribution Channel identifier this CdnConfig belongs to.
+
+      '
+    in: query
+    name: distributionChannelId
+    required: true
+    type: string
+    x-default-description: 'null'
+  RetryTokenHeader:
+    description: 'A token that uniquely identifies a request so it can be retried in case of a timeout
+      or
+
+      server error without the risk of executing that same action again. Retry tokens expire after 24
+
+      hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+      has been deleted and purged from the system, then a retry of the original creation request
+
+      might be rejected.
+
+      '
+    in: header
+    maxLength: 64
+    minLength: 1
+    name: opc-retry-token
+    required: false
+    type: string
+  SortByQueryParam:
+    default: timeCreated
+    description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated
+      is descending. Default
+
+      order for displayName is ascending.
+
+      '
+    enum: *id023
+    in: query
+    name: sortBy
+    type: string
+    x-obmcs-top-level-enum: '#/definitions/SortBy'
+  SortOrderQueryParam:
+    description: The sort order to use, either 'ASC' or 'DESC'.
+    enum: *id024
+    in: query
+    name: sortOrder
+    type: string
+    x-default-description: 'The default value depends upon `sortBy`, and
+
+      in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+      '
+    x-obmcs-top-level-enum: '#/definitions/SortOrder'
+  SourceMediaWorkflowIdQueryParam:
+    description: The ID of the MediaWorkflow used to produce this asset.
+    in: query
+    name: sourceMediaWorkflowId
+    required: false
+    type: string
+    x-default-description: 'null'
+  SourceMediaWorkflowVersionQueryParam:
+    description: The version of the MediaWorkflow used to produce this asset.
+    format: int64
+    in: query
+    name: sourceMediaWorkflowVersion
+    required: false
+    type: integer
+    x-default-description: 'null'
+  StreamCdnConfigDistributionChannelIdentifierQueryParam:
+    description: 'The Stream Distribution Channel identifier this CdnConfig belongs to.
+
+      '
+    in: query
+    name: distributionChannelId
+    required: true
+    type: string
+    x-default-description: 'null'
+  StreamCdnConfigIdentifierPathParam:
+    description: Unique StreamCdnConfig identifier.
+    in: path
+    name: streamCdnConfigId
+    required: true
+    type: string
+  StreamCdnConfigIdentifierQueryParam:
+    description: Unique StreamCdnConfig identifier.
+    in: query
+    name: id
+    type: string
+    x-default-description: 'null'
+  StreamCdnConfigLifecycleStateQueryParam:
+    description: A filter to return only the resources with lifecycleState matching the given lifecycleState.
+    in: query
+    name: lifecycleState
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-enumref: '#/definitions/StreamCdnConfig/lifecycleState'
+  StreamDistributionChannelIdentifierPathParam:
+    description: Unique Stream Distribution Channel path identifier.
+    in: path
+    name: streamDistributionChannelId
+    required: true
+    type: string
+  StreamDistributionChannelIdentifierQueryParam:
+    description: Unique Stream Distribution Channel identifier.
+    in: query
+    name: id
+    type: string
+    x-default-description: 'null'
+  StreamDistributionChannelLifecycleStateQueryParam:
+    description: A filter to return only the resources with lifecycleState matching the given lifecycleState.
+    in: query
+    name: lifecycleState
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-enumref: '#/definitions/StreamDistributionChannel/lifecycleState'
+  StreamPackagingConfigDistributionChannelIdQueryParam:
+    description: Unique Stream Distribution Channel identifier.
+    in: query
+    name: distributionChannelId
+    required: true
+    type: string
+    x-default-description: 'null'
+  StreamPackagingConfigIdentifierPathParam:
+    description: Unique Stream Packaging Configuration path identifier.
+    in: path
+    name: streamPackagingConfigId
+    required: true
+    type: string
+  StreamPackagingConfigIdentifierQueryParam:
+    description: Unique Stream Packaging Configuration identifier.
+    in: query
+    name: streamPackagingConfigId
+    type: string
+    x-default-description: 'null'
+  StreamPackagingConfigIdentifierRequiredQueryParam:
+    description: Unique Stream Packaging Configuration identifier.
+    in: query
+    name: streamPackagingConfigId
+    required: true
+    type: string
+    x-default-description: 'null'
+  StreamPackagingConfigLifecycleStateQueryParam:
+    description: A filter to return only the resources with lifecycleState matching the given lifecycleState.
+    in: query
+    name: lifecycleState
+    required: false
+    type: string
+    x-default-description: 'null'
+    x-obmcs-enumref: '#/definitions/StreamPackagingConfig/lifecycleState'
+  StreamPlaylistToken:
+    description: Streaming session authentication token.
+    in: query
+    name: token
+    required: false
+    type: string
+    x-default-description: If playlist token not provided as a query parameter, value will be taken from
+      authentication header.  If no value can be determined, request will fail with 404.
+  WorkRequestIdQueryParam:
+    description: The ID of the asynchronous work request.
+    in: query
+    name: workRequestId
+    type: string
+    x-default-description: 'null'
+responses:
+  400:
+    description: Bad Request
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+  401:
+    description: Unauthorized
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+  404:
+    description: Not Found
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+  405:
+    description: Method Not Allowed
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+  409:
+    description: Conflict
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+  412:
+    description: Precondition failed
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+  429:
+    description: Too Many Requests
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: Internal Server Error
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+  default:
+    description: Unknown Error
+    headers:
+      opc-request-id: *id002
+    schema:
+      $ref: '#/definitions/Error'
+x-anchors:
+  x-headers:
+    etag: *id001
+    opc-next-page: *id004
+    opc-request-id: *id002
+    opc-work-request-id:
+      description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to
+        query status of the asynchronous operation.
+
+        '
+      type: string
+    retry-after:
+      description: A decimal number representing the number of seconds the client should wait before polling
+        this endpoint again.
+      type: integer
+  x-properties:
+    definedTags: *id013
+    freeformTags: *id014
+    systemTags: *id017
+  x-tag-groups:
+    flowCellDeployment:
+    - mediaServices
+    logging:
+    - mediaServices
+    mediaAsset: *id003
+    mediaAssetDistributionChannelAttachment: *id005
+    mediaWorkflow: *id008
+    mediaWorkflowConfiguration: *id006
+    mediaWorkflowJob: *id007
+    mediaWorkflowTaskDeclaration: *id025
+    streamCdnConfig: *id009
+    streamCellAssignmentGroup:
+    - mediaServices
+    streamCellDeployment:
+    - mediaServices
+    streamDistributionChannel: *id010
+    streamPackagingConfig: *id011
+    streamPlaylist: *id026
+    streamSessionToken: *id027
+  x-tenancy-groups:
+    streamAdminListTenancies:
+    - boat
+    - ocid1.tenancy.oc1..aaaaaaaaqbwgdkzsx5cd2kiu3p32nnz3kkra5dchg5d3olbnxcbi3y5mkgoq
+    - ocid1.tenancy.oc1..aaaaaaaahyw7vxxqtskl2qhhj5be3yvnollsfowsxoekcdbfhcfmhof62jga
+    - ocid1.tenancy.oc1..aaaaaaaakprqz2dsqoloq2norxisvjaumwep5sl6cx2ktwioyxzjebmmekca
+    - ocid1.tenancy.oc1..aaaaaaaagmko4nzct4hpfhqviwxo4cim4zsezpjrxembuapkhchg2rvwhqha
+    - ocid1.tenancy.oc1..aaaaaaaatf4g2zretdqp4n3vfmrp7lwa5j7kx2s3xexequp5q3zpa5tmhpra
+    - ocid1.tenancy.oc5..aaaaaaaarik3gd4tvsvx2tn3izg5l5gggcnglhrt7o3kijq5tnvpgcad3zra
+    - ocid1.tenancy.region1..aaaaaaaa72w5f5zeb5yx745amjc2rv4tvbabywnklsahd4oh4bcee34kvu2a
+    - ocid1.tenancy.oc1..aaaaaaaav4xzhmyw4ewi7mciau2y47eqzxv32wayrl5kmrfjvc2vommkcsfq
+    - ocid1.tenancy.oc1..aaaaaaaafkxx2wtortpikuo63ywglstgfhdrn62s5shcicvuccfqzhqnqr6q
+    - ocid1.tenancy.oc1..aaaaaaaabss5hrvab4ophshqmw7tyxipbhyirsxeijmitfmzlnayxjuaqy6a
+    streamAdminTenancies:
+    - boat
+    - ocid1.tenancy.oc1..aaaaaaaaqbwgdkzsx5cd2kiu3p32nnz3kkra5dchg5d3olbnxcbi3y5mkgoq
+    - ocid1.tenancy.oc1..aaaaaaaahyw7vxxqtskl2qhhj5be3yvnollsfowsxoekcdbfhcfmhof62jga
+    - ocid1.tenancy.oc1..aaaaaaaakprqz2dsqoloq2norxisvjaumwep5sl6cx2ktwioyxzjebmmekca
+    - ocid1.tenancy.oc1..aaaaaaaagmko4nzct4hpfhqviwxo4cim4zsezpjrxembuapkhchg2rvwhqha
+    - ocid1.tenancy.oc1..aaaaaaaatf4g2zretdqp4n3vfmrp7lwa5j7kx2s3xexequp5q3zpa5tmhpra
+    - ocid1.tenancy.oc5..aaaaaaaarik3gd4tvsvx2tn3izg5l5gggcnglhrt7o3kijq5tnvpgcad3zra
+x-obmcs-client-retries-enabled: true
+x-oracle-package: com.oracle.oci.dmp

@@ -1,0 +1,2705 @@
+swagger: '2.0'
+info:
+  description: 'Amazon S3 Compatibility API supported by the Oracle Cloud Infrastructure Object Storage
+    Service.
+
+
+    See [Understanding Object Storage Namespaces](/Content/Object/Tasks/understandingnamespaces.htm) for
+    information about Object Storage namespaces and how to get your namespace string.
+
+    '
+  license:
+    name: Oracle Corporation
+  title: Amazon S3 Compatibility API
+  version: '20160918'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/9e2da9aadeefd1443d7c5b128aaa328b373918e6b46cc11aa15a86db6ec8107b.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Amazon S3 Compatibility API OCI service and stored
+      verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/9e2da9aadeefd1443d7c5b128aaa328b373918e6b46cc11aa15a86db6ec8107b.yaml
+    what: the harvested document for Amazon S3 Compatibility API
+host: localhost:9060
+basePath: /
+schemes:
+- https
+consumes:
+- application/xml
+produces:
+- application/xml
+paths:
+  /:
+    get:
+      description: 'Lists all buckets owned by the authenticated sender of the request.
+
+        '
+      operationId: GetService
+      parameters:
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: A list of all of the buckets owned by the authenticated sender of the request.
+          examples:
+            application-xml: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListAllMyBucketsResult xmlns=\"\
+              http://s3.amazonaws.com/doc/2006-03-01\">\n  <Owner>\n    <ID>bcaf1ffd86f461ca5fb16fd081034f</ID>\n\
+              \    <DisplayName>webfile</DisplayName>\n  </Owner>\n  <Buckets>\n    <Bucket>\n      <Name>quotes</Name>\n\
+              \      <CreationDate>2006-02-03T16:45:09.000Z</CreationDate>\n    </Bucket>\n    <Bucket>\n\
+              \      <Name>samples</Name>\n      <CreationDate>2006-02-03T16:41:58.000Z</CreationDate>\n\
+              \    </Bucket>\n  </Buckets>\n</ListAllMyBucketsResult>\n"
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/ListAllMyBuckets'
+        400:
+          $ref: '#/responses/BadRequest'
+        401:
+          $ref: '#/responses/NotAuthenticated'
+        403:
+          $ref: '#/responses/Forbidden'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: GET Service (List Buckets)
+      tags:
+      - s3ObjectStorage
+      x-example: 'GET / HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:42:15 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+  /{bucketName}:
+    delete:
+      description: 'Deletes a bucket. All objects in the bucket must be deleted before the bucket itself
+        can be deleted.
+
+        '
+      operationId: DeleteBucket
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      responses:
+        204:
+          description: The response body is always empty.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        409:
+          $ref: '#/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: DELETE Bucket
+      tags:
+      - s3ObjectStorage
+      x-example: 'DELETE /example_bucket HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+    get:
+      description: 'Lists up to 1000 objects in the specified bucket.
+
+        '
+      operationId: ListObjects
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/DelimiterQueryParam'
+      - $ref: '#/parameters/EncodingTypeQueryParam'
+      - $ref: '#/parameters/MaxKeysQueryParam'
+      - $ref: '#/parameters/PrefixQueryParam'
+      - $ref: '#/parameters/ContinuationTokenQueryParam'
+      - $ref: '#/parameters/StartAfterQueryParam'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: A list of objects in the bucket.
+          examples:
+            application-xml: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListBucketResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"\
+              >\n    <Name>bucket</Name>\n    <Prefix/>\n    <KeyCount>205</KeyCount>\n    <MaxKeys>1000</MaxKeys>\n\
+              \    <IsTruncated>false</IsTruncated>\n    <Contents>\n        <Key>my-image.jpg</Key>\n\
+              \        <LastModified>2009-10-12T17:50:30.000Z</LastModified>\n        <ETag>fba9dede5f27731c9771645a39863328</ETag>\n\
+              \        <Size>434234</Size>\n        <StorageClass>STANDARD</StorageClass>\n    </Contents>\n\
+              \    <Contents>\n       ...\n    </Contents>\n    ...\n</ListBucketResult>\n"
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/ListBucket'
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: GET Bucket (List Objects)
+      tags:
+      - s3ObjectStorage
+      x-example: 'GET /example_bucket HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+    head:
+      description: 'Checks to see if a bucket exists and that the requester has permission to access it.
+
+        '
+      operationId: HeadBucket
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: The bucket exists and access is authorized.
+          headers:
+            ETag:
+              description: The current entity tag for the bucket.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: HEAD Bucket
+      tags:
+      - s3ObjectStorage
+      x-example: 'HEAD /example_bucket HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        Connection: Keep-Alive
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+    put:
+      description: 'Creates a new bucket.
+
+        '
+      operationId: PutBucket
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: The bucket was successfully created.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        409:
+          $ref: '#/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: PUT Bucket (Create Bucket)
+      tags:
+      - s3ObjectStorage
+      x-example: 'PUT /example_bucket HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Content-Length: 0
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+  /{bucketName}/{objectName}:
+    delete:
+      description: 'Deletes an object.
+
+        '
+      operationId: DeleteObject
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      responses:
+        204:
+          description: The object was successfully deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        409:
+          $ref: '#/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: DELETE Object
+      tags:
+      - objectStorage
+      x-example: 'DELETE /example_bucket/dummy_object HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 19 Aug 2016 23:43:49 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Object'
+    get:
+      description: 'Retrieves an object.
+
+        '
+      operationId: GetObject
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/IfNoneMatchHeader'
+      - $ref: '#/parameters/IfModifiedSinceHeader'
+      - $ref: '#/parameters/IfUnmodifiedSinceHeader'
+      - $ref: '#/parameters/RangeRequestHeader'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      - $ref: '#/parameters/AmzSSECustomerAlgorithmHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyMD5'
+      - $ref: '#/parameters/ResponseContentDispositionQueryParam'
+      - $ref: '#/parameters/ResponseCacheControlQueryParam'
+      - $ref: '#/parameters/ResponseContentTypeQueryParam'
+      - $ref: '#/parameters/ResponseContentLanguageQueryParam'
+      - $ref: '#/parameters/ResponseContentEncodingQueryParam'
+      - $ref: '#/parameters/ResponseExpiresQueryParam'
+      responses:
+        200:
+          description: The object metadata and bytes.
+          headers:
+            ETag:
+              description: The entity tag for the object.
+              type: string
+            cache-control:
+              description: Cache-Control header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.9.
+              type: string
+            content-disposition:
+              description: Content-Disposition header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 19.5.1
+              type: string
+            content-encoding:
+              description: Content-Encoding header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.11.
+              type: string
+            content-language:
+              description: Content-Language header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.12.
+              type: string
+            content-length:
+              description: The object size in bytes.
+              format: int64
+              type: integer
+            content-md5:
+              description: 'Content-MD5 header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.15.
+
+                Unavailable for objects uploaded using multipart upload.
+
+                '
+              type: string
+            content-range:
+              description: Content-Range header for range requests, per [RFC 7233](https://tools.ietf.org/rfc/rfc7233),
+                section 4.2.
+              type: string
+            content-type:
+              description: Content-Type header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.17.
+              type: string
+            expires:
+              description: 'The date and time after which the object is no longer cached by a browser,
+                proxy, or other caching entity.
+
+                See [RFC 2616](https://tools.ietf.org/rfc/rfc2616), section 14.21.
+
+                '
+              format: date-time
+              type: string
+            last-modified:
+              description: The object modification time, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.29.
+              format: date-time
+              type: string
+            opc-meta-*:
+              description: The user-defined metadata for the object.
+              type: string
+              x-obmcs-header-collection: true
+              x-obmcs-prefix: opc-meta-
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+            x-amz-checksum-sha256:
+              description: 'The base64-encoded SHA256 hash of the object as computed during upload.
+
+                Unavailable for objects uploaded using multipart upload.
+
+                '
+              type: string
+            x-amz-storage-class:
+              description: Provides the storage class information of the object. Returned for all objects
+                except Standard storage class objects.
+              type: string
+          schema:
+            format: binary
+            type: string
+        206:
+          description: The object metadata and range bytes.
+          headers:
+            ETag:
+              description: The entity tag for the object.
+              type: string
+            cache-control:
+              description: Cache-Control header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.9.
+              type: string
+            content-disposition:
+              description: Content-Disposition header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 19.5.1
+              type: string
+            content-encoding:
+              description: Content-Encoding header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.11.
+              type: string
+            content-language:
+              description: Content-Language header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.12.
+              type: string
+            content-length:
+              description: The object size in bytes.
+              format: int64
+              type: integer
+            content-md5:
+              description: 'Content-MD5 header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.15.
+
+                Unavailable for objects uploaded using multipart upload.
+
+                '
+              type: string
+            content-range:
+              description: Content-Range header for range requests, per [RFC 7233](https://tools.ietf.org/rfc/rfc7233),
+                section 4.2.
+              type: string
+            content-type:
+              description: Content-Type header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.17.
+              type: string
+            expires:
+              description: 'The date and time after which the object is no longer cached by a browser,
+                proxy, or other caching entity. See
+
+                [RFC 2616](https://tools.ietf.org/rfc/rfc2616), section 14.21.
+
+                '
+              format: date-time
+              type: string
+            last-modified:
+              description: The object modification time, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.29.
+              format: date-time
+              type: string
+            opc-meta-*:
+              description: The user-defined metadata for the object.
+              type: string
+              x-obmcs-header-collection: true
+              x-obmcs-prefix: opc-meta-
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+            x-amz-storage-class:
+              description: Provides the storage class information of the object. Returned for all objects
+                except Standard storage class objects.
+              type: string
+          schema:
+            format: binary
+            type: string
+        304:
+          description: Not Modified
+          headers:
+            ETag:
+              description: The entity tag for the object.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        412:
+          $ref: '#/responses/PreconditionFailed'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: GET Object
+      tags:
+      - objectStorage
+      x-example: 'GET /example_bucket/dummy_object HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 19 Aug 2016 23:43:49 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Object'
+    head:
+      description: 'Gets the user-defined metadata and entity tag for an object.
+
+        '
+      operationId: HeadObject
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/IfNoneMatchHeader'
+      - $ref: '#/parameters/IfModifiedSinceHeader'
+      - $ref: '#/parameters/IfUnmodifiedSinceHeader'
+      - $ref: '#/parameters/RangeRequestHeader'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      - $ref: '#/parameters/AmzSSECustomerAlgorithmHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyMD5'
+      responses:
+        200:
+          description: The object metadata.
+          headers:
+            ETag:
+              description: The entity tag for the object.
+              type: string
+            cache-control:
+              description: Cache-Control header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.9.
+              type: string
+            content-disposition:
+              description: Content-Disposition header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 19.5.1
+              type: string
+            content-encoding:
+              description: Content-Encoding header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.11.
+              type: string
+            content-language:
+              description: Content-Language header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.12.
+              type: string
+            content-length:
+              description: The object size in bytes.
+              format: int64
+              type: integer
+            content-md5:
+              description: 'Content-MD5 header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.15.
+
+                Unavailable for objects uploaded using multipart upload.
+
+                '
+              type: string
+            content-type:
+              description: Content-Type header, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.17.
+              type: string
+            last-modified:
+              description: The object modification time, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616),
+                section 14.29.
+              format: date-time
+              type: string
+            opc-meta-*:
+              description: The user-defined metadata for the object.
+              type: string
+              x-obmcs-header-collection: true
+              x-obmcs-prefix: opc-meta-
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+            x-amz-checksum-sha256:
+              description: 'The base64-encoded SHA256 hash of the object as computed during upload.
+
+                Unavailable for objects uploaded using multipart upload.
+
+                '
+              type: string
+            x-amz-restore:
+              description: If the object is an archived object (an object whose storage class is Archive),
+                the response includes this header if either the archive restoration is in progress or
+                an archive copy is already restored. If an archive copy is already restored, the header
+                value indicates when the object will be re-archived.
+              type: string
+            x-amz-storage-class:
+              description: Provides the storage class information of the object. Returned for all objects
+                except Standard storage class objects.
+              type: string
+        304:
+          description: Not Modified
+          headers:
+            ETag:
+              description: The entity tag for the object.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        412:
+          $ref: '#/responses/PreconditionFailed'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: HEAD Object
+      tags:
+      - objectStorage
+      x-example: 'HEAD /example_bucket/dummy_object HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 19 Aug 2016 23:43:49 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Object'
+    put:
+      description: 'Creates a new object or overwrites an existing one.
+
+
+        To use this and other API operations, you must be authorized in an IAM policy. If you''re not
+        authorized,
+
+        talk to an administrator. If you''re an administrator who needs to write policies to give users
+        access, see
+
+        [Getting Started with Policies](/Content/Identity/Concepts/policygetstarted.htm).
+
+        '
+      operationId: PutObject
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/Expect100ContinueHeader'
+      - $ref: '#/parameters/RequiredContentLengthHeader'
+      - $ref: '#/parameters/OptionalContentMD5Header'
+      - $ref: '#/parameters/OptionalContentTypeHeader'
+      - $ref: '#/parameters/OptionalContentEncodingHeader'
+      - $ref: '#/parameters/OptionalContentDispositionHeader'
+      - $ref: '#/parameters/OptionalContentSHA256Header'
+      - $ref: '#/parameters/OptionalChecksumSHA256Header'
+      - $ref: '#/parameters/OptionalCacheControlHeader'
+      - $ref: '#/parameters/AmzMetaHeader'
+      - $ref: '#/parameters/AmzMetaDirectiveHeader'
+      - $ref: '#/parameters/AmzCopySrcHeader'
+      - $ref: '#/parameters/AmzCopySrcIfMatchHeader'
+      - $ref: '#/parameters/AmzCopySrcIfNoneMatchHeader'
+      - $ref: '#/parameters/AmzCopySrcIfUnmodifiedHeader'
+      - $ref: '#/parameters/AmzCopySrcIfModifiedHeader'
+      - $ref: '#/parameters/AmzStorageClassHeader'
+      - $ref: '#/parameters/AmzSSECustomerAlgorithmHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyMD5'
+      - $ref: '#/parameters/AmzSSEKmsKeyIdHeader'
+      - $ref: '#/parameters/AmzCopySrcSSECustomerAlgorithmHeader'
+      - $ref: '#/parameters/AmzCopySrcSSECustomerKeyHeader'
+      - $ref: '#/parameters/AmzCopySrcSSECustomerKeyMD5'
+      - description: The object to upload to the object store.
+        in: body
+        name: PutObjectBody
+        required: true
+        schema:
+          format: binary
+          type: string
+      responses:
+        200:
+          description: The object was successfully created.
+          headers:
+            ETag:
+              description: The entity tag for the object.
+              type: string
+            opc-content-md5:
+              description: The base64-encoded MD5 hash of the request body as computed by the server.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+            x-amz-checksum-sha256:
+              description: The base64-encoded SHA256 hash of the request body as computed by the server.
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        409:
+          $ref: '#/responses/NotAuthorizedOrInternalConflict'
+        412:
+          $ref: '#/responses/PreconditionFailed'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: PUT Object
+      tags:
+      - objectStorage
+      x-example: 'PUT /example_bucket/example_object HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Wed, 12 Oct 2009 17:50:00 GMT
+
+        x-amz-copy-source: /accounts-bucket/inbound-inventory.xslx
+
+        x-amz-metadata-directive: REPLACE
+
+        x-amz-copy-source-if-match: etag
+
+        Authorization: <var>&lt;authorization string&gt;</var>
+
+        Content-Type: text/plain
+
+        Content-Length: 11434
+
+        opc-meta-author: Janet
+
+        Expect: 100-continue
+
+        '
+      x-related-resource: '#/definitions/Object'
+  /{bucketName}/{objectName}?restore:
+    post:
+      description: 'Restores the object as defined in the request body.
+
+        '
+      operationId: RestoreObjects
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/AmzMetaHeader'
+      - description: Specifies the object that you want to restore and the associated restore parameters.
+        in: body
+        name: RestoreRequest
+        required: true
+        schema:
+          $ref: '#/definitions/RestoreRequest'
+      responses:
+        200:
+          description: The object is already restored.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        202:
+          description: An operation to restore the object has been started.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        409:
+          $ref: '#/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: Restores an archived object.
+      tags:
+      - objectStorage
+      x-example: 'POST /example_bucket/object?restore HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        '
+      x-example-literal: "<RestoreRequest xmlns=\"http://s3.amazonaws.com/doc/2006-3-01\">\n  <Days>1</Days>\n\
+        \  <GlacierJobParameters>\n    <Tier>Standard</Tier>\n  </GlacierJobParameters>\n</RestoreRequest>\n"
+      x-related-resource: '#/definitions/Object'
+  /{bucketName}/{objectName}?select:
+    post:
+      description: 'Filter the contents of an object based on a simple structured query language (SQL)
+        statement
+
+        defined in the request body.
+
+        '
+      operationId: SelectObjectContent
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/AmzMetaHeader'
+      - description: Specifies the objects that you want to query and the associated query parameters.
+        in: body
+        name: SelectObjectContentRequest
+        required: true
+        schema:
+          $ref: '#/definitions/SelectObjectRequest'
+      responses:
+        200:
+          description: Query results
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, please provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        409:
+          $ref: '#/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: run SQL like queries on objects and returns results.
+      tags:
+      - objectStorage
+      x-example: 'POST /example_bucket/object?select HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        '
+      x-example-literal: "<SelectObjectContentRequest xmlns=\"http://s3.amazonaws.com/doc/2006-3-01\"\
+        >\n  <Expression>Select * from S3Object</Expression>\n  <ExpressionType>SQL</ExpressionType>\n\
+        \  <InputSerialization>\n    <CompressionType>NONE</CompressionType>\n    <CSV>\n    </CSV>\n\
+        \  </InputSerialization>\n  <OutputSerialization>\n    <CSV>\n    </CSV>\n  </OutputSerialization>\n\
+        </SelectObjectContentRequest>\n"
+      x-related-resource: '#/definitions/Object'
+  /{bucketName}/{objectName}?uploadId:
+    delete:
+      description: 'Aborts a multipart upload.
+
+        '
+      operationId: AbortMultipartUpload
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/UploadIdQueryParam'
+      responses:
+        204:
+          description: The object was successfully deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: Abort Multipart Upload
+      tags:
+      - objectStorage
+      x-example: 'DELETE /example_bucket/object?uploadId=fj38rtudiu HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        '
+      x-related-resource: '#/definitions/MultipartUpload'
+    get:
+      description: 'Lists the parts that have been uploaded for a specific multipart upload.
+
+        '
+      operationId: ListParts
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/UploadIdQueryParam'
+      - $ref: '#/parameters/MaxPartsQueryParam'
+      - $ref: '#/parameters/PartNumberMarkerQueryParam'
+      - $ref: '#/parameters/EncodingTypeQueryParam'
+      responses:
+        200:
+          description: The full details of the newly created multipart upload.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/ListPartsResult'
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: List Parts
+      tags:
+      - objectStorage
+      x-example: 'GET /example_bucket/object?uploadId=fj38rtudiu HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        '
+      x-related-resource: '#/definitions/MultipartUpload'
+    post:
+      description: 'Commits a multipart upload.
+
+        '
+      operationId: CompleteMultipartUpload
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/UploadIdQueryParam'
+      - description: The part numbers and ETags for the parts you want to commit.
+        in: body
+        name: CompleteMultipartUpload
+        required: true
+        schema:
+          $ref: '#/definitions/CompleteMultipartUpload'
+      responses:
+        200:
+          description: The multipart upload was successfully completed.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/CompleteMultipartUploadResult'
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: Complete Multipart Upload
+      tags:
+      - objectStorage
+      x-example: 'POST /example_bucket/object?uploadId=fj38rtudiu HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 10 Mar 2017 11:50:24 GMT
+
+        '
+      x-example-literal: "<CompleteMultipartUpload>\n  <Part>\n    <PartNumber>1</PartNumber>\n    <ETag>a54357aff0632cce46d942af68356b38</ETag>\n\
+        \  </Part>\n</CompleteMultipartUpload>\n"
+      x-related-resource: '#/definitions/MultipartUpload'
+    put:
+      description: 'Uploads a part in a multipart upload.
+
+        '
+      operationId: UploadPart
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/UploadIdQueryParam'
+      - $ref: '#/parameters/RequiredContentLengthHeader'
+      - $ref: '#/parameters/OptionalContentMD5Header'
+      - $ref: '#/parameters/OptionalChecksumSHA256Header'
+      - $ref: '#/parameters/Expect100ContinueHeader'
+      - $ref: '#/parameters/AmzCopySrcHeader'
+      - $ref: '#/parameters/AmzCopySrcIfMatchHeader'
+      - $ref: '#/parameters/AmzCopySrcIfNoneMatchHeader'
+      - $ref: '#/parameters/AmzCopySrcIfUnmodifiedHeader'
+      - $ref: '#/parameters/AmzCopySrcIfModifiedHeader'
+      - $ref: '#/parameters/AmzSSECustomerAlgorithmHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyMD5'
+      - $ref: '#/parameters/AmzCopySrcSSECustomerAlgorithmHeader'
+      - $ref: '#/parameters/AmzCopySrcSSECustomerKeyHeader'
+      - $ref: '#/parameters/AmzCopySrcSSECustomerKeyMD5'
+      - $ref: '#/parameters/AmzSSEKmsKeyIdHeader'
+      responses:
+        200:
+          description: The object was successfully created.
+          headers:
+            ETag:
+              description: The entity tag for the object.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+            x-amz-checksum-sha256:
+              description: The base64-encoded SHA256 hash of the request body as computed by the server.
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: Upload Part
+      tags:
+      - objectStorage
+      x-example: 'PUT /example_bucket/object?uploadId=fj38rtudiu HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        '
+      x-related-resource: '#/definitions/MultipartUpload'
+  /{bucketName}/{objectName}?uploads:
+    post:
+      description: 'Starts a new multipart upload to a specific object in the given bucket.
+
+        '
+      operationId: InitiateMultipartUpload
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/ObjectPathParam'
+      - $ref: '#/parameters/AmzMetaHeader'
+      - $ref: '#/parameters/OptionalContentTypeHeader'
+      - $ref: '#/parameters/OptionalContentEncodingHeader'
+      - $ref: '#/parameters/OptionalContentDispositionHeader'
+      - $ref: '#/parameters/OptionalCacheControlHeader'
+      - $ref: '#/parameters/AmzStorageClassHeader'
+      - $ref: '#/parameters/AmzSSECustomerAlgorithmHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyHeader'
+      - $ref: '#/parameters/AmzSSECustomerKeyMD5'
+      - $ref: '#/parameters/AmzSSEKmsKeyIdHeader'
+      responses:
+        200:
+          description: The full details of the newly created multipart upload.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/InitiateMultipartUploadResult'
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: Initiate Multipart Upload
+      tags:
+      - objectStorage
+      x-example: 'POST /example_bucket/object?uploads HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        '
+      x-related-resource: '#/definitions/MultipartUpload'
+  /{bucketName}?delete:
+    post:
+      description: 'Bulk delete up to 1000 objects in the given bucket.
+
+        The request body must include one checksum header for validation: Content-MD5, x-amz-checksum-sha256,
+        or x-amz-checksum-crc32c.
+
+        '
+      operationId: BulkDelete
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/RequiredContentLengthHeader'
+      - $ref: '#/parameters/OptionalContentMD5Header'
+      - $ref: '#/parameters/OptionalChecksumSHA256Header'
+      - $ref: '#/parameters/OptionalChecksumCRC32CHeader'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      - description: The Bulk delete objects request.
+        in: body
+        name: Delete
+        required: true
+        schema:
+          $ref: '#/definitions/Delete'
+      responses:
+        200:
+          description: Result of bulk delete operation. A list of deleted objects
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, please provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/DeleteResult'
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: Bulk Delete
+      tags:
+      - objectStorage
+      x-example: "POST /?delete HTTP/1.1\nHost: <object_storage_namespace>.compat.objectstorage.us-phoenix-1.oraclecloud.com\n\
+        Accept: */*\nx-amz-date: Wed, 30 Nov 2011 03:39:05 GMT\nContent-MD5: p5/WA/oEr30qrEEl21PAqw==\n\
+        Authorization: <authorization string>\nContent-Length: 125\nConnection: Keep-Alive\n\n<Delete>\n\
+        \  <Object>\n    <Key>sample1.txt</Key>\n  </Object>\n  <Object>\n    <Key>sample2.txt</Key>\n\
+        \  </Object>\n</Delete>\n"
+      x-related-resource: '#/definitions/Object'
+  /{bucketName}?location:
+    get:
+      description: 'Get the location of bucket''s region.
+
+        '
+      operationId: GetLocation
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: Returns the location of a bucket.
+          examples:
+            application-xml: '<?xml version="1.0" encoding="UTF-8"?>
+
+              <LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">us-ashburn-1</LocationConstraint>
+
+              '
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/LocationConstraint'
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: GetLocation
+      tags:
+      - objectStorage
+      x-example: 'GET /example_bucket?location HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 1 Oct 2017 22:52:33 GMT
+
+        '
+      x-related-resource: '#/definitions/Bucket'
+  /{bucketName}?tagging:
+    delete:
+      description: 'Delete the tags from a bucket.
+
+        '
+      operationId: DeleteBucketTagging
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      responses:
+        204:
+          description: The response body is always empty.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        409:
+          $ref: '#/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: DeleteBucketTagging
+      tags:
+      - s3ObjectStorage
+      x-example: 'DELETE /example_bucket?tagging HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Tagging'
+    get:
+      description: 'Gets the list of tags for a bucket.
+
+        '
+      operationId: GetBucketTagging
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      responses:
+        200:
+          description: List of tags for a given bucket.
+          examples:
+            application-xml: "HTTP/1.1 200 OK\nDate: Wed, 25 Nov 2009 12:00:00 GMT\nConnection: close\n\
+              Server: AmazonS3\n\n<Tagging>\n  <TagSet>\n     <Tag>\n       <Key>Project</Key>\n     \
+              \  <Value>ProjectX</Value>\n     </Tag>\n     <Tag>\n       <Key>User</Key>\n       <Value>bsmith</Value>\n\
+              \     </Tag>\n  </TagSet>\n</Tagging>\n"
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/Tagging'
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: GetBucketTagging
+      tags:
+      - s3ObjectStorage
+      x-example: 'GET /example_bucket?tagging HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Tagging'
+    put:
+      description: 'Add tags to a bucket.
+
+        '
+      operationId: PutBucketTagging
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/OptionalDateTimeHeader'
+      - description: Adds tags to the given bucket.
+        in: body
+        name: PutTaggingBody
+        required: true
+        schema:
+          $ref: '#/definitions/Tagging'
+      responses:
+        204:
+          description: The tags were successfully added to the bucket.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        409:
+          $ref: '#/responses/NotAuthorizedOrInternalConflict'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: PutBucketTagging
+      tags:
+      - s3ObjectStorage
+      x-example: 'PUT /example_bucket?tagging HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Content-Length: 1660
+
+        x-amz-date: Thu, 12 Apr 2012 20:04:21 GMT
+
+        Authorization: <var>&lt;authorization_string&gt;</var>
+
+        '
+      x-example-literal: "<Tagging>\n  <TagSet>\n    <Tag>\n      <Key>Project</Key>\n      <Value>ProjectX</Value>\n\
+        \    </Tag>\n    <Tag>\n      <Key>User</Key>\n      <Value>jdoe</Value>\n    </Tag>\n  </TagSet>\n\
+        </Tagging>\n"
+      x-related-resource: '#/definitions/Tagging'
+  /{bucketName}?uploads:
+    get:
+      description: 'Lists up to 1000 in-progress multipart uploads in the given bucket.
+
+        '
+      operationId: ListUploads
+      parameters:
+      - $ref: '#/parameters/BucketPathParam'
+      - $ref: '#/parameters/MaxUploadsQueryParam'
+      - $ref: '#/parameters/KeyMarkerQueryParam'
+      - $ref: '#/parameters/UploadIdMarkerQueryParam'
+      - $ref: '#/parameters/EncodingTypeQueryParam'
+      responses:
+        200:
+          description: A list of in-progress multipart uploads in the bucket.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about a particular
+
+                request, provide this request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/ListMultipartUploads'
+        400:
+          $ref: '#/responses/BadRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotAuthorizedOrNotFound'
+        408:
+          $ref: '#/responses/RequestTimeout'
+        500:
+          $ref: '#/responses/InternalServerError'
+        default:
+          $ref: '#/responses/Error'
+      summary: List Uploads
+      tags:
+      - objectStorage
+      x-example: 'GET /example_bucket?uploads HTTP/1.1
+
+        Host: <var>&lt;object_storage_namespace&gt;</var>.compat.objectstorage.us-phoenix-1.oraclecloud.com
+
+        Date: Fri, 12 Aug 2016 22:52:33 GMT
+
+        '
+      x-related-resource: '#/definitions/MultipartUpload'
+definitions:
+  Bucket:
+    description: Container for bucket information.
+    properties:
+      creationDate:
+        description: Date the bucket was created.
+        format: date-time
+        type: string
+        xml:
+          name: CreationDate
+      name:
+        description: The bucket name. Avoid entering confidential information.
+        type: string
+        xml:
+          name: Name
+    required:
+    - name
+    - creationDate
+  Buckets:
+    description: Container for one or more buckets.
+    items:
+      $ref: '#/definitions/Bucket'
+    type: array
+  CommonPrefixes:
+    description: Contains a key (if it exists) between Prefix and the next occurrence of the delimiter.
+    properties:
+      prefix:
+        description: A substring from the beginning to the first occurrence of the specified delimiter
+          after the prefix.
+        type: string
+        xml:
+          name: Prefix
+    required:
+    - prefix
+  CompleteMultipartUpload:
+    description: Container for complete multipart upload request.
+    properties:
+      part:
+        items:
+          $ref: '#/definitions/PartAndETag'
+        type: array
+    required:
+    - part
+  CompleteMultipartUploadResult:
+    description: 'Container for complete multipart upload response.
+
+      '
+    properties:
+      bucket:
+        description: Name of the bucket to which the multipart upload was initiated.
+        type: string
+        xml:
+          name: Bucket
+      eTag:
+        description: The ETag of the newly created object.
+        type: string
+        xml:
+          name: ETag
+      key:
+        description: Object key of the newly created object.
+        type: string
+        xml:
+          name: Key
+      location:
+        description: The URI that identifies the newly created object.
+        type: string
+        xml:
+          name: Location
+    required:
+    - location
+    - bucket
+    - key
+    - eTag
+  Contents:
+    description: Object metadata returned.
+    properties:
+      eTag:
+        description: The entity tag, an MD5 hash of the object.
+        type: string
+        xml:
+          name: ETag
+      key:
+        description: The object's key.
+        type: string
+        xml:
+          name: Key
+      lastModified:
+        description: Date and time the object was last modified.
+        format: date-time
+        type: string
+        xml:
+          name: LastModified
+      size:
+        description: Size, in bytes, of the object.
+        type: integer
+        xml:
+          name: Size
+      storageClass:
+        description: Storage class of the object.
+        enum:
+        - STANDARD
+        - STANDARD_IA
+        - GLACIER
+        type: string
+        xml:
+          name: StorageClass
+    required:
+    - key
+    - lastModified
+    - eTag
+    - size
+    - storageClass
+  CsvInput:
+    description: Describes the serialization of a CSV-encoded object.
+  CsvOutput:
+    description: Describes the serialization of a CSV-encoded object.
+  Delete:
+    description: Container for the Bulk delete request.
+    properties:
+      Object:
+        items:
+          $ref: '#/definitions/DeleteObject'
+        type: array
+      quiet:
+        default: false
+        description: Element to enable quiet mode for the request.
+        type: boolean
+        xml:
+          name: Quiet
+    required:
+    - Object
+  DeleteError:
+    description: Container for a failed delete operation that describes the object that we attempted to
+      delete.
+    properties:
+      code:
+        description: Status code for the result of the failed delete.
+        enum:
+        - AccessDenied
+        - InternalError
+        type: string
+        xml:
+          name: Code
+      key:
+        description: object name which we tried to delete.
+        type: string
+        xml:
+          name: Key
+      message:
+        description: Error description.
+        type: string
+        xml:
+          name: Message
+      versionId:
+        description: Version ID of the versioned object attempted to delete.Included only in versioned-delete
+          request.
+        type: string
+        xml:
+          name: VersionId
+    required:
+    - key
+    - code
+    - message
+  DeleteObject:
+    description: Container element that describes the delete request for an object.
+    properties:
+      key:
+        description: object name to delete.
+        type: string
+        xml:
+          name: Key
+      versionId:
+        description: VersionId for the specific version of the object to delete.
+        type: string
+        xml:
+          name: VersionId
+    required:
+    - key
+  DeleteResult:
+    description: Container for the Bulk delete response.
+    properties:
+      Deleted:
+        items:
+          $ref: '#/definitions/Deleted'
+        type: array
+      Error:
+        items:
+          $ref: '#/definitions/DeleteError'
+        type: array
+  Deleted:
+    description: Container element for a successful delete. It identifies the object that was successfully
+      deleted.
+    properties:
+      key:
+        description: object name which was deleted.
+        type: string
+        xml:
+          name: Key
+      versionId:
+        description: Version ID of the versioned object attempted to delete.Included only in versioned-delete
+          request.
+        type: string
+        xml:
+          name: VersionId
+    required:
+    - key
+  Error:
+    properties:
+      code:
+        description: A short error code that defines the error, meant for programmatic parsing.
+        type: string
+      message:
+        description: A human-readable error string.
+        type: string
+    required:
+    - code
+    - message
+  GlacierJobParameters:
+    description: Optional container for Glacier job parameters.
+    properties:
+      tier:
+        description: The retrieval option to use when restoring the archive. Standard is the only OCI-supported
+          option.
+        enum:
+        - Standard
+        - Expedited
+        - Bulk
+        type: string
+        xml:
+          name: Tier
+    required:
+    - tier
+  InitiateMultipartUploadResult:
+    description: Container for the response to initiate multipart upload.
+    properties:
+      bucket:
+        description: Name of the bucket to which the multipart upload was initiated.
+        type: string
+        xml:
+          name: Bucket
+      key:
+        description: Object key for which the multipart upload was initiated.
+        type: string
+        xml:
+          name: Key
+      uploadId:
+        description: ID for the initiated multipart upload.
+        type: string
+        xml:
+          name: UploadId
+    required:
+    - bucket
+    - key
+    - uploadId
+  InputSerialization:
+    description: Describes the serialization format of the object.
+    properties:
+      compressionType:
+        description: Specifies object's compression format.
+        enum:
+        - NONE
+        type: string
+        xml:
+          name: CompressionType
+      csv:
+        $ref: '#/definitions/CsvInput'
+      json:
+        $ref: '#/definitions/JsonInput'
+      parquet:
+        $ref: '#/definitions/ParquetInput'
+  JsonInput:
+    description: Describes the serialization of a JSON-encoded object.
+  JsonOutput:
+    description: Describes the serialization of a JSON-encoded object.
+  ListAllMyBuckets:
+    description: 'To use any of the API operations, you must be authorized in an IAM policy. If you''re
+      not authorized,
+
+      talk to an administrator. If you''re an administrator who needs to write policies to give users
+      access, see
+
+      [Getting Started with Policies](/Content/Identity/Concepts/policygetstarted.htm).
+
+      '
+    properties:
+      buckets:
+        $ref: '#/definitions/Buckets'
+      owner:
+        $ref: '#/definitions/Owner'
+    required:
+    - owner
+    - buckets
+  ListBucket:
+    description: 'To use any of the API operations, you must be authorized in an IAM policy. If you''re
+      not authorized,
+
+      talk to an administrator. If you''re an administrator who needs to write policies to give users
+      access, see
+
+      [Getting Started with Policies](/Content/Identity/Concepts/policygetstarted.htm).
+
+      '
+    properties:
+      commonPrefixes:
+        description: Contains all (existing) keys between Prefix and the next occurrence of the delimiter.
+        items:
+          $ref: '#/definitions/CommonPrefixes'
+        type: array
+      contents:
+        description: Metadata returned for each object.
+        items:
+          $ref: '#/definitions/Contents'
+        type: array
+      continuationToken:
+        description: Included in the response if it was sent with the request.
+        type: string
+        xml:
+          name: ContinuationToken
+      delimiter:
+        description: Included in the response if it was sent with the request.
+        type: string
+        xml:
+          name: Delimiter
+      isTruncated:
+        description: Specifies whether or not all of the results are returned.
+        type: boolean
+        xml:
+          name: IsTruncated
+      keyCount:
+        description: The number of keys included in the response.
+        type: integer
+        xml:
+          name: KeyCount
+      maxKeys:
+        description: The maximum number of keys included in the response body.
+        type: integer
+        xml:
+          name: MaxKeys
+      name:
+        description: Name of the bucket. Avoid entering confidential information.
+        type: string
+        xml:
+          name: Name
+      nextContinuationToken:
+        description: If the response is truncated, this can be used in the next request to retrieve the
+          next set of keys.
+        type: string
+        xml:
+          name: NextContinuationToken
+      prefix:
+        description: The specified prefix that returned keys should start with.
+        type: string
+        xml:
+          name: Prefix
+      startAfter:
+        description: Included in the response if it was sent with the request.
+        type: string
+        xml:
+          name: StartAfter
+    required:
+    - name
+    - keyCount
+    - maxKeys
+    - isTruncated
+    - contents
+  ListMultipartUploads:
+    description: 'Container for list multipart upload response.
+
+      '
+    properties:
+      bucket:
+        description: Name of the bucket to which the multipart upload was initiated.
+        type: string
+        xml:
+          name: Bucket
+      encodingType:
+        description: Included in the response if it was sent with the request.
+        type: string
+        xml:
+          name: Encoding-Type
+      isTruncated:
+        description: Specifies whether or not all of the multipart uploads are returned.
+        type: boolean
+        xml:
+          name: IsTruncated
+      keyMarker:
+        description: The key at or after which the listing began.
+        type: string
+        xml:
+          name: KeyMarker
+      maxUploads:
+        description: Maximum number of multipart uploads that could have been included in the response.
+        type: integer
+        xml:
+          name: MaxUploads
+      nextKeyMarker:
+        description: 'When a list is truncated, this element specifies the value that should be used for
+          the key-marker request
+
+          parameter in a subsequent request.
+
+          '
+        type: string
+        xml:
+          name: NextKeyMarker
+      nextUploadIdMarker:
+        description: 'When a list is truncated, this element specifies the value that should be used for
+          the upload-id-marker
+
+          request parameter in a subsequent request.
+
+          '
+        type: string
+        xml:
+          name: NextUploadIdMarker
+      uploadIdMarker:
+        description: Upload ID after which listing began.
+        type: string
+        xml:
+          name: UploadIdMarker
+      uploads:
+        description: Metadata about each multipart upload returned.
+        items:
+          $ref: '#/definitions/Upload'
+        type: array
+    required:
+    - bucket
+    - isTruncated
+    - uploads
+    - nextKeyMarker
+    - nextUploadIdMarker
+  ListPartsResult:
+    description: 'Container for list multipart upload parts response.
+
+      '
+    properties:
+      bucket:
+        description: Name of the bucket to which the multipart upload was initiated.
+        type: string
+        xml:
+          name: Bucket
+      encodingType:
+        description: Included in the response if it was sent with the request.
+        type: string
+        xml:
+          name: Encoding-Type
+      isTruncated:
+        description: Specifies whether or not all of the multipart uploads are returned.
+        type: boolean
+        xml:
+          name: IsTruncated
+      key:
+        description: Object key for which the multipart upload was initiated.
+        type: string
+        xml:
+          name: Key
+      maxParts:
+        description: Maximum number of parts that could have been included in the response.
+        type: integer
+        xml:
+          name: MaxParts
+      nextPartNumberMarker:
+        description: 'When a list is truncated, this element specifies the value that should be used for
+          the part-number-marker
+
+          request parameter in a subsequent request.
+
+          '
+        type: integer
+        xml:
+          name: NextPartNumberMarker
+      partNumberMarker:
+        description: The key at or after which the listing began.
+        type: integer
+        xml:
+          name: PartNumberMarker
+      parts:
+        description: Metadata about each part returned.
+        items:
+          $ref: '#/definitions/Part'
+        type: array
+      uploadId:
+        description: ID for the initiated multipart upload.
+        type: string
+        xml:
+          name: UploadId
+      uploadIdMarker:
+        description: Upload ID after which listing began.
+        type: string
+        xml:
+          name: UploadIdMarker
+    required:
+    - bucket
+    - key
+    - uploadId
+    - nextPartNumberMarker
+    - isTruncated
+  LocationConstraint:
+    description: Contains a location of Bucket.
+    type: string
+  OutputSerialization:
+    description: Describes the serialization format of the Output.
+    properties:
+      csv:
+        $ref: '#/definitions/CsvOutput'
+      json:
+        $ref: '#/definitions/JsonOutput'
+  Owner:
+    description: Container for information about the bucket owner.
+    properties:
+      displayName:
+        description: Bucket owner's display name.
+        type: string
+        xml:
+          name: DisplayName
+      id:
+        description: Bucket owner's user ID.
+        type: string
+        xml:
+          name: ID
+    required:
+    - id
+    - displayName
+  ParquetInput:
+    description: Describes the serialization of a PARQUET-encoded object.
+  Part:
+    description: Container for elements related to a particular part.
+    properties:
+      eTag:
+        description: The ETag of the part.
+        type: string
+        xml:
+          name: ETag
+      partNumber:
+        description: The part number.
+        type: integer
+        xml:
+          name: PartNumber
+      size:
+        description: The size of the part in bytes.
+        type: integer
+        xml:
+          name: Size
+    required:
+    - partNumber
+    - eTag
+    - size
+  PartAndETag:
+    description: Container for a part and its ETag.
+    properties:
+      eTag:
+        description: The ETag of the part.
+        type: string
+        xml:
+          name: ETag
+      partNumber:
+        description: The part number.
+        type: integer
+        xml:
+          name: PartNumber
+    required:
+    - partNumber
+    - eTag
+  RestoreRequest:
+    description: Container for object restoration information.
+    properties:
+      GlacierJobParameters:
+        $ref: '#/definitions/GlacierJobParameters'
+      days:
+        description: Number of days the object will remain restored before returning to archive. Specify
+          from 1 to 10 days.
+        maximum: 10
+        minimum: 1
+        type: integer
+        xml:
+          name: Days
+    required:
+    - days
+  SelectObjectRequest:
+    description: Container with information for querying object.
+    properties:
+      expression:
+        description: The expression that is used to query the object.
+        type: string
+        xml:
+          name: Expression
+      expressionType:
+        description: The type of the provided expression (for example, SQL).
+        type: string
+        xml:
+          name: ExpressionType
+      inputSerialization:
+        $ref: '#/definitions/InputSerialization'
+      outputSerialization:
+        $ref: '#/definitions/OutputSerialization'
+    required:
+    - expression
+    - expressionType
+    - inputSerialization
+    - outputSerialization
+  Tag:
+    description: Container of key-value pair of a tag.
+    properties:
+      key:
+        description: The key of a tag.
+        type: string
+        xml:
+          name: Key
+      value:
+        description: The value of a tag.
+        type: string
+        xml:
+          name: Value
+    required:
+    - key
+    - value
+  TagSet:
+    description: Container for a list of tags.
+    items:
+      $ref: '#/definitions/Tag'
+    type: array
+  Tagging:
+    description: Container for one TagSet.
+    items:
+      $ref: '#/definitions/TagSet'
+    type: array
+  Upload:
+    description: Container for elements related to a particular multipart upload.
+    properties:
+      initiated:
+        description: Date and time at which the multipart upload was initiated.
+        format: date-time
+        type: string
+        xml:
+          name: Initiated
+      key:
+        description: Key of the object for which the multipart upload was initiated.
+        type: integer
+        xml:
+          name: Key
+      storageClass:
+        description: Storage class of the object.
+        enum:
+        - STANDARD
+        - STANDARD_IA
+        - GLACIER
+        type: string
+        xml:
+          name: StorageClass
+      uploadId:
+        description: Upload ID that identifies the multipart upload.
+        type: integer
+        xml:
+          name: UploadId
+    required:
+    - key
+    - uploadId
+    - storageClass
+    - initiated
+parameters:
+  AmzCopySrcHeader:
+    description: Specifies the key name of the source object and the name of source bucket, separated
+      by a slash (/). x-amz-copy-source header is required for COPY.
+    in: header
+    name: x-amz-copy-source
+    type: string
+  AmzCopySrcIfMatchHeader:
+    description: 'If the entity tag (ETag) of the object matches the specified tag, copies the object.
+      Otherwise, the request returns an HTTP status code error (failed precondition) of 412.
+
+      Constraints: You can use this header with x-amz-copy-source-if-unmodified-since, but not with other
+      conditional copy headers.
+
+      '
+    in: header
+    name: x-amz-copy-source-if-match
+    type: string
+  AmzCopySrcIfModifiedHeader:
+    description: 'If the object has been modified since the specified time, copies the object. Otherwise,
+      the request returns an HTTP status code error (failed precondition) of 412.
+
+      Constraints: The specified date must be a valid HTTP date. You can use this header with x-amz-copy-source-if-none-match,
+      but not with other conditional copy headers.
+
+      '
+    in: header
+    name: x-amz-copy-source-if-modified-since
+    type: string
+  AmzCopySrcIfNoneMatchHeader:
+    description: 'If the entity tag (ETag) of the object does not match the specified tag, copies the
+      object. Otherwise, the request returns an HTTP status code error (failed precondition) of 412.
+
+      Constraints: You can use this header with x-amz-copy-source-if-modified-since, but not with other
+      conditional copy headers.
+
+      '
+    in: header
+    name: x-amz-copy-source-if-none-match
+    type: string
+  AmzCopySrcIfUnmodifiedHeader:
+    description: 'If the object has not been modified since the specified time, copies the object. Otherwise,
+      the request returns an HTTP status code error (failed precondition) of 412.
+
+      Constraints: The specified date must be a valid HTTP date. You can use this header with x-amz-copy-source-if-match,
+      but not with other conditional copy headers.
+
+      '
+    in: header
+    name: x-amz-copy-source-if-unmodified-since
+    type: string
+  AmzCopySrcSSECustomerAlgorithmHeader:
+    description: 'Specifies the encryption algorithm to use to decrypt the source object. The header value
+      must be "AES256".
+
+      '
+    in: header
+    name: x-amz-copy-source-server-side-encryption-customer-algorithm
+    type: string
+    x-default-description: 'null'
+  AmzCopySrcSSECustomerKeyHeader:
+    description: 'Specifies the 256-bit, base64-encoded encryption key for S3 to use to decrypt the
+
+      source object.
+
+      '
+    in: header
+    name: x-amz-copy-source-server-side-encryption-customer-key
+    type: string
+    x-default-description: 'null'
+  AmzCopySrcSSECustomerKeyMD5:
+    description: 'Specifies the base64-encoded 128-bit MD5 digest of the encryption key used to
+
+      decrypt the source object. This value is used to check the integrity of the encryption key.
+
+      '
+    in: header
+    name: x-amz-copy-source-server-side-encryption-customer-key-md5
+    type: string
+    x-default-description: 'null'
+  AmzMetaDirectiveHeader:
+    description: 'Specifies whether metadata in the source object is replaced with metadata provided in
+      the request or is copied from the source object.
+
+      Valid values: "COPY" and "REPLACE"
+
+      Default: "COPY"
+
+      '
+    in: header
+    name: x-amz-metadata-directive
+    type: string
+  AmzMetaHeader:
+    description: Optional user-defined metadata key and value.
+    in: header
+    name: x-amz-meta-*
+    type: string
+    x-obmcs-header-collection: true
+    x-obmcs-prefix: x-amz-meta-
+  AmzSSECustomerAlgorithmHeader:
+    description: 'Specifies the encryption algorithm. The header value must be "AES256".
+
+      '
+    in: header
+    name: x-amz-server-side-encryption-customer-algorithm
+    type: string
+    x-default-description: 'null'
+  AmzSSECustomerKeyHeader:
+    description: 'Specifies the 256-bit, base64-encoded encryption key for S3 to use to encrypt or
+
+      decrypt the data.
+
+      '
+    in: header
+    name: x-amz-server-side-encryption-customer-key
+    type: string
+    x-default-description: 'null'
+  AmzSSECustomerKeyMD5:
+    description: 'Specifies the base64-encoded 128-bit MD5 digest of the encryption key. This value is
+
+      used to check the integrity of the encryption key.
+
+      '
+    in: header
+    name: x-amz-server-side-encryption-customer-key-md5
+    type: string
+    x-default-description: 'null'
+  AmzSSEKmsKeyIdHeader:
+    description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of a master encryption key used
+      to call the Key
+
+      Management service to generate a data encryption key or to encrypt or decrypt a data encryption
+      key.
+
+      '
+    in: header
+    name: x-amz-server-side-encryption-aws-kms-key-id
+    type: string
+    x-default-description: 'null'
+  AmzStorageClassHeader:
+    description: 'The Amazon S3 compatible API uses STANDARD, the default for the storage class, if you
+      do not specify this header.
+
+      STANDARD, STANDARD_IA and GLACIER are the only valid values for AmzStorageClassHeader.
+
+      '
+    in: header
+    name: x-amz-storage-class
+    type: string
+  BucketPathParam:
+    description: 'The name of the bucket. Avoid entering confidential information.
+
+
+      Example: `my-new-bucket1`
+
+      '
+    in: path
+    minLength: 1
+    name: bucketName
+    pattern: '[A-Za-z0-9\\-_\\.]+'
+    required: true
+    type: string
+  ContinuationTokenQueryParam:
+    description: The token at which to start listing the next set of results when the previous response
+      is truncated.
+    in: query
+    maxLength: 1024
+    minLength: 1
+    name: continuation-token
+    type: string
+  DelimiterQueryParam:
+    description: 'When this parameter is set, only objects whose names do not contain the delimiter character
+
+      (after an optionally specified prefix) are returned. Scanned objects whose names contain the
+
+      delimiter have part of their name up to the last occurrence of the delimiter (after the optional
+
+      prefix) returned as a set of prefixes. Note that only ''/'' is a supported delimiter character at
+
+      this time.
+
+      '
+    in: query
+    name: delimiter
+    type: string
+  EncodingTypeQueryParam:
+    description: 'When this parameter is set, the response is encoded with the specified encoding method.
+      This
+
+      can be used for object keys containing characters that XML 1.0 parsers cannot parse.
+
+      '
+    in: query
+    name: encoding-type
+    type: string
+  Expect100ContinueHeader:
+    default: 100-continue
+    description: 100-continue
+    in: header
+    name: Expect
+    type: string
+  IfMatchHeader:
+    description: 'The entity tag to match. For creating and committing a multipart upload to an object,
+      this is the entity tag of the target object.
+
+      For uploading a part, this is the entity tag of the target part.
+
+      '
+    in: header
+    name: If-Match
+    type: string
+  IfModifiedSinceHeader:
+    description: Return the object only if it has been modified since the specified time, otherwise return
+      a 304 (not modified).
+    format: date-time
+    in: header
+    name: If-Modified-Since
+    type: string
+  IfNoneMatchHeader:
+    description: 'The entity tag to avoid matching. The only valid value is ''*'', which indicates that
+      the request should fail if the object already exists.
+
+      For creating and committing a multipart upload, this is the entity tag of the target object. For
+      uploading a part, this is the entity tag
+
+      of the target part.
+
+      '
+    in: header
+    maxLength: 1
+    minLength: 0
+    name: If-None-Match
+    pattern: ^[*]$
+    type: string
+  IfUnmodifiedSinceHeader:
+    description: Return the object only if it has not been modified since the specified time, otherwise
+      return a 412 (precondition failed).
+    format: date-time
+    in: header
+    name: If-Unmodified-Since
+    type: string
+  KeyMarkerQueryParam:
+    description: 'Together with upload-id-marker, this parameter specifies the multipart upload after
+      which listing should begin.
+
+      '
+    in: query
+    name: key-marker
+    type: string
+  MaxKeysQueryParam:
+    description: The maximum number of keys to return in the response body.
+    in: query
+    maximum: 1000
+    minimum: 1
+    name: max-keys
+    type: integer
+  MaxPartsQueryParam:
+    description: The maximum number of parts to return in the response body.
+    in: query
+    maximum: 1000
+    minimum: 1
+    name: max-parts
+    type: integer
+  MaxUploadsQueryParam:
+    description: The maximum number of multipart uploads to return in the response body.
+    in: query
+    maximum: 1000
+    minimum: 1
+    name: max-uploads
+    type: integer
+  ObjectPathParam:
+    description: 'The name of the object. Avoid entering confidential information.
+
+
+      Example: `test/object1.log`
+
+      '
+    in: path
+    maxLength: 1024
+    minLength: 1
+    name: objectName
+    pattern: '[^\\r\\n\\00#\\?]+'
+    required: true
+    type: string
+  OptionalCacheControlHeader:
+    description: The cache-control header value to be returned in GetObjectReponse.
+    in: header
+    name: Cache-Control
+    type: string
+  OptionalChecksumAlgorithmHeader:
+    description: The checksum algorithm to use to create the checksum for the object.
+    enum:
+    - SHA256
+    in: header
+    name: x-amz-checksum-algorithm
+    type: string
+    x-default-description: 'null'
+  OptionalChecksumCRC32CHeader:
+    description: A base64-encoded CRC32C checksum of the request payload.
+    in: header
+    name: x-amz-checksum-crc32c
+    type: string
+    x-default-description: 'null'
+  OptionalChecksumSHA256Header:
+    description: A base64-encoded SHA256 hash of the request payload.
+    in: header
+    name: x-amz-checksum-sha256
+    type: string
+    x-default-description: 'null'
+  OptionalContentDispositionHeader:
+    description: The Content-Disposition header value to be returned in GetObjectReponse.
+    in: header
+    name: Content-Disposition
+    type: string
+  OptionalContentEncodingHeader:
+    description: The content encoding of the object.
+    in: header
+    name: Content-Encoding
+    type: string
+  OptionalContentMD5Header:
+    description: The base64-encoded MD5 hash of the body.
+    in: header
+    name: Content-MD5
+    type: string
+  OptionalContentSHA256Header:
+    description: A hex-encoded SHA256 hash of the request payload.
+    in: header
+    name: x-amz-content-sha256
+    type: string
+  OptionalContentTypeHeader:
+    description: The content type of the object. Defaults to 'application/octet-stream' if not overridden
+      during the PutObject call.
+    in: header
+    name: Content-Type
+    type: string
+  OptionalDateTimeHeader:
+    description: The current date and time according to the requester. Takes precedence over the Date
+      header.
+    format: date-time
+    in: header
+    name: x-amz-date
+    type: string
+  PartNumberMarkerQueryParam:
+    description: Specifies the part number after which listing should begin.
+    in: query
+    name: part-number-marker
+    type: string
+  PrefixQueryParam:
+    description: The string to use for matching against the start of keys in a list query.
+    in: query
+    name: prefix
+    type: string
+  RangeRequestHeader:
+    description: 'Optional byte range to fetch, as described in [RFC 7233](https://tools.ietf.org/rfc/rfc7233),
+      section 2.1.
+
+      Note, only a single range of bytes is supported.
+
+      '
+    in: header
+    name: range
+    type: string
+  RequiredContentLengthHeader:
+    description: The content length of the body.
+    format: int64
+    in: header
+    name: Content-Length
+    required: true
+    type: integer
+  ResponseCacheControlQueryParam:
+    description: Specify this query parameter to override the value of the Cache-Control response header
+      in the GetObject response.
+    in: query
+    name: response-cache-control
+    required: false
+    type: string
+  ResponseContentDispositionQueryParam:
+    description: Specify this query parameter to override the value of the Content-Disposition response
+      header in the GetObject response.
+    in: query
+    name: response-content-disposition
+    required: false
+    type: string
+  ResponseContentEncodingQueryParam:
+    description: Specify this query parameter to override the value of the Content-Encoding response header
+      in the GetObject response.
+    in: query
+    name: response-content-encoding
+    required: false
+    type: string
+  ResponseContentLanguageQueryParam:
+    description: Specify this query parameter to override the value of the Content-Language response header
+      in the GetObject response.
+    in: query
+    name: response-content-language
+    required: false
+    type: string
+  ResponseContentTypeQueryParam:
+    description: Specify this query parameter to override the value of the Content-Type response header
+      in the GetObject response.
+    in: query
+    name: response-content-type
+    required: false
+    type: string
+  ResponseExpiresQueryParam:
+    description: Specify this query parameter to override the value of the Expires response header in
+      the GetObject response.
+    in: query
+    name: response-expires
+    required: false
+    type: string
+  StartAfterQueryParam:
+    description: Object keys returned by a list query must be after this parameter in lexicographical
+      order.
+    in: query
+    name: start-after
+    type: string
+  UploadIdMarkerQueryParam:
+    description: 'Together with key-marker, this parameter specifies the multipart upload after which
+      listing should begin.
+
+      '
+    in: query
+    name: upload-id-marker
+    type: string
+  UploadIdQueryParam:
+    description: 'The ID of a multipart upload.
+
+      '
+    in: query
+    name: uploadId
+    type: string
+responses:
+  BadRequest:
+    description: Bad Request
+    headers:
+      opc-request-id:
+        description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular request, please provide the request ID.
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  Error:
+    description: A description of an error that occurred.
+    headers:
+      opc-request-id:
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular
+
+          request, provide this request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  Forbidden:
+    description: Forbidden
+    headers:
+      opc-request-id:
+        description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular request, please provide the request ID.
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  InternalServerError:
+    description: Internal Server Error
+    headers:
+      opc-request-id:
+        description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular request, please provide the request ID.
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  NotAuthenticated:
+    description: Unauthorized
+    headers:
+      opc-request-id:
+        description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular request, please provide the request ID.
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  NotAuthorizedOrInternalConflict:
+    description: Conflict
+    headers:
+      opc-request-id:
+        description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular request, please provide the request ID.
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  NotAuthorizedOrNotFound:
+    description: Not Found
+    headers:
+      opc-request-id:
+        description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular request, please provide the request ID.
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  PreconditionFailed:
+    description: Precondition Failed
+    headers:
+      opc-request-id:
+        description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular request, please provide the request ID.
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  RequestTimeout:
+    description: Request Timeout
+    headers:
+      opc-request-id:
+        description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle
+          about a particular request, please provide the request ID.
+        type: string
+    schema:
+      $ref: '#/definitions/Error'

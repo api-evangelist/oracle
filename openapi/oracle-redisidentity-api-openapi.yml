@@ -1,0 +1,291 @@
+openapi: 3.2.0
+info:
+  description: Use the OCI Cache API to create and manage clusters. A cluster is a memory-based storage solution. For more information, see [OCI Cache](/iaas/Content/ocicache/home.htm).
+  title: OCI Cache Redis Identity API
+  version: '20220315'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/0c0709de34f2014ed9d1948ceeb3f59f7c24fee03209fa8269bdb6c37117b40d.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the OCI Cache API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/0c0709de34f2014ed9d1948ceeb3f59f7c24fee03209fa8269bdb6c37117b40d.yaml
+    what: the harvested document for OCI Cache API
+servers:
+- url: http://127.0.0.1/20220315
+- url: https://127.0.0.1/20220315
+tags:
+- name: redisIdentity
+paths:
+  /redisClusters/{redisClusterId}/actions/identityToken:
+    post:
+      description: Generates an identity token to sign in with the specified redis user for the redis cluster
+      operationId: CreateIdentityToken
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      - $ref: '#/components/parameters/RedisClusterIdentifierPathParam'
+      responses:
+        200:
+          description: The Identity token was successfully created for the specified redis user.
+          headers:
+            etag:
+              description: 'For optimistic concurrency control. See `if-match`.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityTokenDetailsResponse'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        409:
+          $ref: '#/components/responses/409'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Gets the Redis cluster identity token
+      tags:
+      - redisIdentity
+      x-related-resource: '#/definitions/CreateIdentityTokenDetails'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIdentityTokenDetails'
+        description: Details to create the token
+        required: true
+components:
+  parameters:
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RedisClusterIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
+      in: path
+      name: redisClusterId
+      required: true
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+  schemas:
+    CreateIdentityTokenDetails:
+      description: Generate an Identity token for Redis cluster
+      properties:
+        publicKey:
+          description: User public key pair
+          type: string
+        redisUser:
+          description: Redis User generating identity token.
+          type: string
+      required:
+      - publicKey
+      - redisUser
+      type: object
+    Error:
+      description: Specifies details for an error.
+      properties:
+        code:
+          description: A machine-usable code for the error that occured.
+          type: string
+        message:
+          description: A human-readable error string for the error that occured.
+          type: string
+      required:
+      - code
+      - message
+    IdentityTokenDetailsResponse:
+      description: Response an Identity token generated for Redis cluster
+      properties:
+        identityToken:
+          description: Generated Identity token
+          type: string
+        redisUser:
+          description: Redis user for the newly created identity token
+          type: string
+      required:
+      - identityToken
+      - redisUser
+      type: object
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-anchors:
+  x-headers:
+    etag:
+      description: 'For optimistic concurrency control. See `if-match`.
+
+        '
+      type: string
+    opc-next-page:
+      description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+        then a partial list might have been returned. Include this value as the `page` parameter for the
+
+        subsequent GET request to get the next batch of items.
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+    opc-work-request-id:
+      description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+        '
+      type: string
+    retry-after:
+      description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+      type: integer
+  x-properties:
+    definedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+        Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+        '
+      type: object
+    freeformTags:
+      additionalProperties:
+        type: string
+      description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+        Example: `{"bar-key": "value"}`
+
+        '
+      type: object
+    securityAttributes:
+      additionalProperties:
+        additionalProperties:
+          description: 'Attribute value and mode. Only the String type is supported for value. Mode is currently always "enforce".
+
+            '
+          type: object
+        description: 'Key-value pair representing a security attribute key and value, scoped to a namespace.
+
+
+          Example: `{"MaxEgressCount": {"value": "42", "mode": "enforce"}}`
+
+          '
+        type: object
+      description: 'Security attributes for redis cluster resource. Each key is predefined and scoped to a namespace.
+
+        For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+        Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+
+        '
+      type: object
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+x-obmcs-client-retries-enabled: true
+x-oracle-package: com.oracle.pic.redisservice

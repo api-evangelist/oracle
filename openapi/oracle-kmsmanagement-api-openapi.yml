@@ -1,0 +1,2737 @@
+openapi: 3.2.0
+info:
+  description: 'Use the Key Management API to manage vaults and keys. For more information, see [Managing Vaults](/Content/KeyManagement/Tasks/managingvaults.htm) and [Managing Keys](/Content/KeyManagement/Tasks/managingkeys.htm).
+
+    '
+  license:
+    name: Oracle Corporation
+  title: Vault Key Management Kms Management API
+  version: release
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/6650b193f50d51919ae1a5f31b525097c777bb9e61575a82b12bf5a5fa5c1dea.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Vault Key Management API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/6650b193f50d51919ae1a5f31b525097c777bb9e61575a82b12bf5a5fa5c1dea.yaml
+    what: the harvested document for Vault Key Management API
+servers:
+- url: /
+tags:
+- name: kmsManagement
+paths:
+  /20180608/keys:
+    get:
+      description: 'Lists the master encryption keys in the specified vault and compartment.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total number
+
+        of requests across all management read operations. Key Management might throttle this call to reject an
+
+        otherwise valid request when the total rate of management read operations exceeds 10 requests per second
+
+        for a given tenancy.
+
+        '
+      operationId: ListKeys
+      parameters:
+      - $ref: '#/components/parameters/CompartmentIdQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/SortByQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/ProtectionModeQueryParam'
+      - $ref: '#/components/parameters/KeyAlgorithmQueryParam'
+      - $ref: '#/components/parameters/KeyLengthQueryParam'
+      - $ref: '#/components/parameters/KeyCurveQueryParam'
+      responses:
+        '200':
+          description: A list of keys.
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then there are additional items still to get. Include this value as the `page` parameter for the
+
+                subsequent GET request. For information about pagination, see
+
+                [List Pagination](/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/KeySummary'
+                type: array
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists keys in the specified vault and compartment.
+      tags:
+      - kmsManagement
+      x-example: 'GET /20180608/keys?compartmentId=<var>&lt;compartmentId&gt;</var>
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: 'Creates a new master encryption key.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total
+
+        number of requests across all management write operations. Key Management might throttle this call
+
+        to reject an otherwise valid request when the total rate of management write operations exceeds 10
+
+        requests per second for a given tenancy.
+
+        '
+      operationId: CreateKey
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The key is being created.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Creates a new key.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5lsdneskcfy7lr4a6wfauxuwrwed5b3xea\",\n  \"displayName\": \"Key C\",\n  \"keyShape\": {\n    \"algorithm\": \"AES\",\n    \"length\": 16\n  }\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKeyDetails'
+        description: CreateKeyDetails
+        required: true
+  /20180608/keys/actions/restoreFromFile:
+    post:
+      description: 'Restores the specified key to the specified vault, based on information in the backup file provided.
+
+        If the vault doesn''t exist, the operation returns a response with a 404 HTTP status error code. You
+
+        need to first restore the vault associated with the key.
+
+        '
+      operationId: RestoreKeyFromFile
+      parameters:
+      - $ref: '#/components/parameters/ContentLengthHeader'
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/OptionalContentMD5Header'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RestoreKeyFromFileDetails'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '202':
+          description: The key restore operation started successfully.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-content-md5:
+              description: 'The base64-encoded MD5 hash value of the request body, as computed
+
+                by the server.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the work request, used to track the progress of the
+
+                restore operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Restores a key to a vault from a file.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys/actions/restoreFromFile\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"RestoreKeyFromFileDetails\" : \"key backup bytes..\"\n}\n"
+      x-related-resource: '#/definitions/Key'
+  /20180608/keys/actions/restoreFromObjectStore:
+    post:
+      description: 'Restores the specified key to the specified vault from an Oracle Cloud Infrastructure
+
+        Object Storage location. If the vault doesn''t exist, the operation returns a response with a
+
+        404 HTTP status error code. You need to first restore the vault associated with the key.
+
+        '
+      operationId: RestoreKeyFromObjectStore
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '202':
+          description: The key restore operation started successfully.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the work request, used to track the progress of the
+
+                restore operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Restores a key to a vault from an object storage location.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys/actions/restoreFromObjectStore\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n\"RestoreKeyFromObjectStoreDetails\" : {\n    \"backupLocation\" : {\n      \"BackupLocationURI\" : {\n        \"uri\" : \"http://n/namespace/b/bucket/o/object\"\n      }\n    }\n}\n"
+      x-related-resource: '#/definitions/Key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreKeyFromObjectStoreDetails'
+        description: Location to restore the backup from
+  /20180608/keys/import:
+    post:
+      description: "Imports AES and RSA keys to create a new key. The key material must be base64-encoded \nand wrapped by the vault's public RSA wrapping key before you can import it. \nKey Management supports both RSA and AES keys. The AES keys are symmetric keys \nof length 128 bits (16 bytes), 192 bits (24 bytes), or 256 bits (32 bytes), and the RSA keys are asymmetric keys of length 2048 bits (256 bytes), 3072 bits (384 bytes), and 4096 bits (512 bytes). \nFurthermore, the key length must match what you specify at the time of import. When importing an asymmetric key, \nonly private key must be wrapped in PKCS8 format while the corresponding public key is generated internally by KMS.\n"
+      operationId: ImportKey
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The key is being imported and is in the `CREATING` state. After the key is imported, it is set to the `ENABLED` state.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Imports the given wrapped AES key.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys/import\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5lsdneskcfy7lr4a6wfauxuwrwed5b3xea\",\n  \"displayName\": \"Key C\",\n  \"keyShape\": {\n    \"algorithm\": \"AES\",\n    \"length\": 16\n  },\n  \"wrappedImportKey\":{\n     \"wrappingAlgorithm\": \"RSA_OAEP_SHA256\",\n     \"keyMaterial\": \"089d08927390280802d0987c09e7798h09f879870909c098709a709870970987b09709870c987098d70e==\"\n   },\n  \"protectionMode\":\"HSM\"\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportKeyDetails'
+        description: ImportKeyDetails
+        required: true
+  /20180608/keys/{keyId}:
+    get:
+      description: 'Gets information about the specified master encryption key.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total number
+
+        of requests across all management read operations. Key Management might throttle this call to reject an
+
+        otherwise valid request when the total rate of management read operations exceeds 10 requests per second for
+
+        a given tenancy.
+
+        '
+      operationId: GetKey
+      parameters:
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        '200':
+          description: The specified key.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets details about a key.
+      tags:
+      - kmsManagement
+      x-example: 'GET /20180608/keys/<var>&lt;key_OCID&gt;</var>
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: 'Updates the properties of a master encryption key. Specifically, you can update the
+
+        `displayName`, `freeformTags`, and `definedTags` properties. Furthermore,
+
+        the key must be in an `ENABLED` or `CREATING` state to be updated.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total number
+
+        of requests across all management write operations. Key Management might throttle this call to reject an
+
+        otherwise valid request when the total rate of management write operations exceeds 10 requests per second
+
+        for a given tenancy.
+
+        '
+      operationId: UpdateKey
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        '200':
+          description: The key is being updated according to the request.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Updates a key's properties.
+      tags:
+      - kmsManagement
+      x-example: "PUT /20180608/keys/<var>&lt;key_OCID&gt;</var>\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"displayName\": \"Key CC\"\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKeyDetails'
+        description: UpdateKeyDetails
+        required: true
+  /20180608/keys/{keyId}/actions/backup:
+    post:
+      description: 'Backs up an encrypted file that contains all key versions and metadata of the specified key so that you can restore
+
+        the key later. The file also contains the metadata of the vault that the key belonged to.
+
+        '
+      operationId: BackupKey
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '202':
+          description: The key backup operation started successfully.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the work request, used to track the progress of the
+
+                backup operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Backs up the key and associated key metadata.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/actions/backup\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"BackupKeyDetails\": {\n      \"backupLocation\" : {\n          \"BackupLocationURI\" : {\n            \"uri\" : \"http://n/namespace/b/bucket/o/object\"\n          }\n      }\n  }\n}\n"
+      x-related-resource: '#/definitions/Key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackupKeyDetails'
+        description: BackupKeyDetails
+  /20180608/keys/{keyId}/actions/cancelDeletion:
+    post:
+      description: 'Cancels the scheduled deletion of the specified key. Canceling
+
+        a scheduled deletion restores the key''s lifecycle state to what
+
+        it was before its scheduled deletion.
+
+
+        As a provisioning operation, this call is subject to a Key Management limit that applies to
+
+        the total number of requests across all provisioning write operations. Key Management might
+
+        throttle this call to reject an otherwise valid request when the total rate of provisioning
+
+        write operations exceeds 10 requests per second for a given tenancy.
+
+        '
+      operationId: CancelKeyDeletion
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The key's scheduled deletion has been canceled.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Cancels the scheduled deletion of a key.
+      tags:
+      - kmsManagement
+      x-example: 'POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/actions/cancelDeletion
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Key'
+  /20180608/keys/{keyId}/actions/changeCompartment:
+    post:
+      description: 'Moves a key into a different compartment within the same tenancy. For information about
+
+        moving resources between compartments, see [Moving Resources to a Different Compartment](/iaas/Content/Identity/Tasks/managingcompartments.htm#moveRes).
+
+
+        When provided, if-match is checked against the ETag values of the key.
+
+
+        As a provisioning operation, this call is subject to a Key Management limit that applies to
+
+        the total number of requests across all provisioning write operations. Key Management might
+
+        throttle this call to reject an otherwise valid request when the total rate of provisioning
+
+        write operations exceeds 10 requests per second for a given tenancy.
+
+        '
+      operationId: ChangeKeyCompartment
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '204':
+          description: The compartment information for the key has been updated.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Moves a key into a different compartment.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/actions/changeCompartment\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5lsdneskcfy7lr4a6wfauxuwrwed5b3xea\",\n}\n"
+      x-related-resource: '#/definitions/Key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeKeyCompartmentDetails'
+        description: Details of change key compartment.
+        required: true
+  /20180608/keys/{keyId}/actions/disable:
+    post:
+      description: 'Disables a master encryption key so it can no longer be used for encryption, decryption, or
+
+        generating new data encryption keys.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total number
+
+        of requests across all management write operations. Key Management might throttle this call to reject an
+
+        otherwise valid request when the total rate of management write operations exceeds 10 requests per second
+
+        for a given tenancy.
+
+        '
+      operationId: DisableKey
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The key is being disabled.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Disables a key so it cannot be used for cryptographic operations.
+      tags:
+      - kmsManagement
+      x-example: 'POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/actions/disable
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Key'
+  /20180608/keys/{keyId}/actions/enable:
+    post:
+      description: 'Enables a master encryption key so it can be used for encryption, decryption, or
+
+        generating new data encryption keys.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total number
+
+        of requests across all management write operations. Key Management might throttle this call to reject an
+
+        otherwise valid request when the total rate of management write operations exceeds 10 requests per second
+
+        for a given tenancy.
+
+        '
+      operationId: EnableKey
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The key is being enabled.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Enables a key so it can be used for cryptographic operations.
+      tags:
+      - kmsManagement
+      x-example: 'POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/actions/enable
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Key'
+  /20180608/keys/{keyId}/actions/scheduleDeletion:
+    post:
+      description: 'Schedules the deletion of the specified key. This sets the lifecycle state of the key
+
+        to `PENDING_DELETION` and then deletes it after the specified retention period ends.
+
+
+        As a provisioning operation, this call is subject to a Key Management limit that applies to
+
+        the total number of requests across all provisioning write operations. Key Management might
+
+        throttle this call to reject an otherwise valid request when the total rate of provisioning
+
+        write operations exceeds 10 requests per second for a given tenancy.
+
+        '
+      operationId: ScheduleKeyDeletion
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The key is scheduled for deletion.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Key'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Schedules the deletion of a key.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/actions/scheduleDeletion\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"timeOfDeletion\": \"2018-04-03T21:10:29.600Z\"\n}\n"
+      x-related-resource: '#/definitions/Key'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleKeyDeletionDetails'
+        description: ScheduleKeyDeletionDetails
+        required: true
+  /20180608/keys/{keyId}/keyVersions:
+    get:
+      description: 'Lists all [KeyVersion](/api/#/en/key/latest/KeyVersion/) resources for the specified
+
+        master encryption key.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total number
+
+        of requests across all management read operations. Key Management might throttle this call to reject an
+
+        otherwise valid request when the total rate of management read operations exceeds 10 requests per second
+
+        for a given tenancy.
+
+        '
+      operationId: ListKeyVersions
+      parameters:
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/SortByQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      responses:
+        '200':
+          description: 'The [KeyVersionSummary](/api/#/en/key/latest/KeyVersionSummary/) resource for the specified
+
+            master encryption key.
+
+            '
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then there are additional items still to get. Include this value as the `page` parameter for the
+
+                subsequent GET request. For information about pagination, see
+
+                [List Pagination](/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/KeyVersionSummary'
+                type: array
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists all key versions for a key.
+      tags:
+      - kmsManagement
+      x-example: 'GET /20180608/keys/<var>&lt;key_OCID&gt;</var>/keyVersions?limit=20&sortBy=timeCreated&sortOrder=DESC
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: 'Generates a new [KeyVersion](/api/#/en/key/latest/KeyVersion/) resource that provides new cryptographic
+
+        material for a master encryption key. The key must be in an `ENABLED` state to be rotated.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total number
+
+        of requests across all  management write operations. Key Management might throttle this call to reject an
+
+        otherwise valid request when the total rate of management write operations exceeds 10 requests per second
+
+        for a given tenancy.
+
+        '
+      operationId: CreateKeyVersion
+      parameters:
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The new key version.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVersion'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Creates a new key version resource and rotates the key to use it for encryption.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180201/keys/<var>&lt;key_OCID&gt;</var>/keyVersions\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"keyId\" : \"ocid1.key.region1.sea.avqwccqbaacu2.abzwkljskoqxgp5gswxqhk6za5vjsd2rocdmu333iolcoto6jvmnnuzlclib\",\n  \"externalKeyVersionId\": \"1036f5083e1b4ef49b60c01f50d9e337baa8fa3c28504265bf36760d351c4534\"\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExternalKeyVersionReference'
+        description: CreateKeyMetadataDetails
+  /20180608/keys/{keyId}/keyVersions/import:
+    post:
+      description: "Imports AES key material to create a new key version and then rotate the key to begin using the new\nkey version. The key material must be base64-encoded and wrapped by the vault's public RSA wrapping key\nbefore you can import it. Key Management supports AES symmetric keys that are exactly 16, 24, or 32 bytes.\nFurthermore, the key length must match the length of the specified key and what you specify as the length\nat the time of import. When importing an asymmetric key, only the private key must be wrapped in PKCS8 format \nwhile the corresponding public key is generated internally by KMS.\n"
+      operationId: ImportKeyVersion
+      parameters:
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The new key version.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVersion'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Imports the given wrapped key material and then rotate the key to begin using the new key version for the specified key.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/keyVersions/import\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"wrappedImportKey\":\n  {\n    \"wrappingAlgorithm\": \"RSA_OAEP_SHA256\",\n    \"keyMaterial\": \"089d08927390280802d0987c09e7798h09f879870909c098709a709870970987b09709870c987098d70e==\"\n  }\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportKeyVersionDetails'
+        description: ImportKeyVersionDetails
+        required: true
+  /20180608/keys/{keyId}/keyVersions/{keyVersionId}:
+    get:
+      description: 'Gets information about the specified key version.
+
+
+        As a management operation, this call is subject to a Key Management limit that applies to the total number
+
+        of requests across all management read operations. Key Management might throttle this call to reject an
+
+        otherwise valid request when the total rate of management read operations exceeds 10 requests per second
+
+        for a given tenancy.
+
+        '
+      operationId: GetKeyVersion
+      parameters:
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/KeyVersionIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        '200':
+          description: The specified key version.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVersion'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets details about a key version.
+      tags:
+      - kmsManagement
+      x-example: 'GET /20180608/keyVersions/<var>&lt;key_version_OCID&gt;</var>
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+  /20180608/keys/{keyId}/keyVersions/{keyVersionId}/actions/cancelDeletion:
+    post:
+      description: 'Cancels the scheduled deletion of the specified key version. Canceling
+
+        a scheduled deletion restores the key version to its lifecycle state from
+
+        before its scheduled deletion.
+
+
+        As a provisioning operation, this call is subject to a Key Management limit that applies to
+
+        the total number of requests across all provisioning write operations. Key Management might
+
+        throttle this call to reject an otherwise valid request when the total rate of provisioning
+
+        write operations exceeds 10 requests per second for a given tenancy.
+
+        '
+      operationId: CancelKeyVersionDeletion
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/KeyVersionIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The key version's scheduled deletion has been canceled.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVersion'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Cancels the scheduled deletion of a key version.
+      tags:
+      - kmsManagement
+      x-example: 'POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/keyVersions/<var>&lt;key_version_OCID&gt;</var>actions/cancelDeletion
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/KeyVersion'
+  /20180608/keys/{keyId}/keyVersions/{keyVersionId}/actions/scheduleDeletion:
+    post:
+      description: 'Schedules the deletion of the specified key version. This sets the lifecycle state of the key version
+
+        to `PENDING_DELETION` and then deletes it after the specified retention period ends.
+
+
+        As a provisioning operation, this call is subject to a Key Management limit that applies to
+
+        the total number of requests across all provisioning write operations. Key Management might
+
+        throttle this call to reject an otherwise valid request when the total rate of provisioning
+
+        write operations exceeds 10 requests per second for a given tenancy.
+
+        '
+      operationId: ScheduleKeyVersionDeletion
+      parameters:
+      - $ref: '#/components/parameters/IfMatchHeader'
+      - $ref: '#/components/parameters/KeyIdPathParam'
+      - $ref: '#/components/parameters/KeyVersionIdPathParam'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      responses:
+        '200':
+          description: The key version is scheduled for deletion.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyVersion'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '412':
+          $ref: '#/components/responses/412'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Schedules the deletion of a key version.
+      tags:
+      - kmsManagement
+      x-example: "POST /20180608/keys/<var>&lt;key_OCID&gt;</var>/keyVersions/<var>&lt;key_version_OCID&gt;</var>/actions/scheduleDeletion\nHost: <var>&lt;managementEndpoint&gt;</var>\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"timeOfDeletion\": \"2018-04-03T21:10:29.600Z\"\n}\n"
+      x-related-resource: '#/definitions/KeyVersion'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleKeyVersionDeletionDetails'
+        description: ScheduleKeyVersionDeletionDetails
+        required: true
+  /20180608/replicaOperations/{replicationId}/status:
+    get:
+      description: 'When a vault has a replica, each operation on the vault or its resources, such as
+
+        keys, is replicated and has an associated replicationId. Replication status provides
+
+        details about whether the operation associated with the given replicationId has been
+
+        successfully applied across replicas.
+
+        '
+      operationId: GetReplicationStatus
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/ReplicationIdPathParam'
+      responses:
+        '200':
+          description: 'Replication status indicating whether replication corresponding to a replicationId is complete or still in progress
+
+            '
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReplicationStatusDetails'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets the replication status of a replica operation
+      tags:
+      - kmsManagement
+      x-example: 'GET /20180608/replicaOperations/<var>&lt;replicationId&gt;</var>/status
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+  /20180608/wrappingKeys:
+    get:
+      description: 'Gets details about the public RSA wrapping key associated with the vault in the endpoint. Each vault has an RSA key-pair that wraps and
+
+        unwraps AES key material for import into Key Management.
+
+        '
+      operationId: GetWrappingKey
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        '200':
+          description: The public RSA wrapping key associated with the vault.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WrappingKey'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets details about the RSA wrapping key associated with the vault.
+      tags:
+      - kmsManagement
+      x-example: 'GET /20180608/wrappingKeys
+
+        Host: <var>&lt;managementEndpoint&gt;</var>
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+components:
+  schemas:
+    BackupKeyDetails:
+      description: The details of the Key that you wish to backup.
+      properties:
+        backupLocation:
+          $ref: '#/components/schemas/BackupLocation'
+      type: object
+      x-example: "{\n  \"backupLocation\" : {\n    \"BackupLocationURI\" : {\n      \"uri\" : \"http://n/namespace/b/bucket/o/object\"\n    }\n  }\n}\n"
+    ReplicaDetails:
+      description: Details of replication status
+      properties:
+        region:
+          description: 'The replica region
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        status:
+          description: Replication status associated with a replicationId
+          enum:
+          - REPLICATING
+          - REPLICATED
+          type: string
+      type: object
+    Error:
+      description: The desciption of Error message.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    AutoKeyRotationDetails:
+      description: The details of auto rotation schedule for the Key being create updated or imported.
+      properties:
+        lastRotationMessage:
+          description: 'The last execution status message of auto key rotation.
+
+            '
+          type: string
+        lastRotationStatus:
+          description: The status of last execution of auto key rotation.
+          enum:
+          - SUCCESS
+          - FAILED
+          - IN_PROGRESS
+          type: string
+        rotationIntervalInDays:
+          description: 'The interval of auto key rotation. For auto key rotation the interval should between 60 day and 365 days (1 year). Note: User must specify this parameter when creating a new schedule.'
+          format: int32
+          maximum: 365
+          minimum: 60
+          type: integer
+        timeOfLastRotation:
+          description: 'A property indicating Last rotation Date. Example: `2023-04-04T00:00:00Z`.'
+          format: date-time
+          type: string
+        timeOfNextRotation:
+          description: 'A property indicating Next estimated scheduled Time, as per the interval, expressed as date YYYY-MM-DD String. Example: `2023-04-04T00:00:00Z`. The time has no significance when scheduling an auto key rotation as this can be done anytime approximately the scheduled day, KMS ignores the time and replaces it with 00:00, for example 2023-04-04T15:14:13Z will be used as 2023-04-04T00:00:00Z. '
+          format: date-time
+          type: string
+        timeOfScheduleStart:
+          description: 'A property indicating  scheduled start date expressed as date YYYY-MM-DD String. Example: `2023-04-04T00:00:00Z. The time has no significance when scheduling an auto key rotation as this can be done anytime approximately the scheduled day, KMS ignores the time and replaces it with 00:00, for example 2023-04-04T15:14:13Z will be used as 2023-04-04T00:00:00Z . Note : Today’s date will be used if not specified by customer.'
+          format: date-time
+          type: string
+      type: object
+      x-example: "{\n    \"rotationIntervalInDays\": \"60\",\n    \"timeOfScheduleStart\": \"2023-04-04T00:00:00Z\"\n    \"timeOfNextRotation\": \"2023-06-04T00:00:00Z\",\n    \"timeOfLastRotation\": \"2023-02-04T00:00:00Z\",\n    \"lastRotationStatus\": \"SUCCESS\",\n    \"lastRotationMessage\": \"Rotation Completed\"\n}\n"
+    CreateKeyDetails:
+      description: The details of the key that you want to create.
+      properties:
+        autoKeyRotationDetails:
+          $ref: '#/components/schemas/AutoKeyRotationDetails'
+        compartmentId:
+          description: The OCID of the compartment where you want to create the master encryption key.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'An object that represents the value of the tag. Only the string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name for the key. It does not have to be unique, and it is changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        externalKeyReference:
+          $ref: '#/components/schemas/ExternalKeyReference'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        isAutoRotationEnabled:
+          description: A parameter specifying whether the auto key rotation is enabled or not.
+          type: boolean
+        keyShape:
+          $ref: '#/components/schemas/KeyShape'
+        protectionMode:
+          description: 'The key''s protection mode indicates how the key persists and where cryptographic operations that use the key are performed.
+
+            A protection mode of `HSM` means that the key persists on a hardware security module (HSM) and all cryptographic operations are performed inside
+
+            the HSM. A protection mode of `SOFTWARE` means that the key persists on the server, protected by the vault''s RSA wrapping key which persists
+
+            on the HSM. All cryptographic operations that use a key with a protection mode of `SOFTWARE` are performed on the server. By default,
+
+            a key''s protection mode is set to `HSM`. You can''t change a key''s protection mode after the key is created or imported.
+
+            A protection mode of `EXTERNAL` mean that the key persists on the customer''s external key manager which is hosted externally outside of oracle.
+
+            Oracle only hold a reference to that key.
+
+            All cryptographic operations that use a key with a protection mode of `EXTERNAL` are performed by external key manager.
+
+            '
+          enum:
+          - HSM
+          - SOFTWARE
+          - EXTERNAL
+          type: string
+      required:
+      - compartmentId
+      - displayName
+      - keyShape
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpneskcfy7lr4yywfauxuwrwed5b3xea\",\n  \"displayName\": \"Key C\",\n  \"keyShape\": {\n    \"algorithm\": \"AES\",\n    \"length\": 16\n  },\n  \"freeformTags\": {\"Department\": \"Finance\"},\n  \"protectionMode\": \"HSM\",\n  \"isAutoRotationEnabled\" : true,\n  \"autoKeyRotationDetails\": {\n    \"rotationIntervalInDays\": \"60\",\n    \"timeOfScheduleStart\": \"2023-04-04T00:00:00Z\",\n  }\n  \"definedTags\":\n  {\n    \"MyFirstNamespace\":\n    {\n      \"CostCenter\": \"SmartAlec\",\n      \"Project\": \"42\",\n      \"CreatedBy\": \"SmartAlec\",\n      \"CreatedDate\": \"9/21/2017T14:00\"\n    },\n    \"Audit\":\n    {\n      \"DataSensitivity\": \"PII\",\n      \"CageSecurity\": \"High\",\n      \"Simplicity\": \"complex\"\n    }\n  }\n  \"externalKeyReference\":\n  {\n    \"externalKeyId\": \"ce01d0adc75b43be88ed404056fd43ba0489321993534d66bf0f925dd5b95147\"\n  }\n}\n"
+    KeyReplicaDetails:
+      description: 'Key replica details
+
+        '
+      properties:
+        replicationId:
+          description: 'ReplicationId associated with a key operation
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    KeyShape:
+      description: The cryptographic properties of a key.
+      properties:
+        algorithm:
+          description: The algorithm used by a key's key versions to encrypt or decrypt. Only AES algorithm is supported for `External` keys.
+          enum:
+          - AES
+          - RSA
+          - ECDSA
+          type: string
+        curveId:
+          description: Supported curve IDs for ECDSA keys.
+          enum:
+          - NIST_P256
+          - NIST_P384
+          - NIST_P521
+          type: string
+        length:
+          description: "The length of the key in bytes, expressed as an integer. Supported values include the following:\n  - AES: 16, 24, or 32\n  - RSA: 256, 384, or 512\n  - ECDSA: 32, 48, or 66\n"
+          type: integer
+      required:
+      - algorithm
+      - length
+      type: object
+      x-example: "{\n  \"algorithm\": \"AES\",\n  \"length\": 16\n}\n"
+    ExternalKeyReferenceDetails:
+      description: Key reference data to be returned to the customer as a response.
+      properties:
+        externalKeyId:
+          description: ExternalKeyId refers to the globally unique key Id associated with the key created in external vault in CTM.
+          maxLength: 255
+          minLength: 1
+          type: string
+        externalKeyVersionId:
+          description: Key version ID associated with the external key.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - externalKeyId
+      - externalKeyVersionId
+      type: object
+    KeyVersionSummary:
+      description: The details of the KeyVersion.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains this key version.
+          maxLength: 255
+          minLength: 1
+          type: string
+        externalKeyReferenceDetails:
+          $ref: '#/components/schemas/ExternalKeyReferenceDetails'
+        id:
+          description: The OCID of the key version.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isAutoRotated:
+          description: An optional property indicating whether this keyversion is generated from auto rotatation.
+          type: boolean
+        keyId:
+          description: The OCID of the master encryption key associated with this key version.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: 'The key version''s current lifecycle state.
+
+
+            Example: `ENABLED`
+
+            '
+          enum:
+          - CREATING
+          - ENABLING
+          - ENABLED
+          - DISABLING
+          - DISABLED
+          - DELETING
+          - DELETED
+          - PENDING_DELETION
+          - SCHEDULING_DELETION
+          - CANCELLING_DELETION
+          type: string
+        origin:
+          description: The source of the key material. When this value is INTERNAL, Key Management created the key material. When this value is EXTERNAL, the key material was imported from an external source.
+          enum:
+          - INTERNAL
+          - EXTERNAL
+          type: string
+        timeCreated:
+          description: 'The date and time this key version was created, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.
+
+
+            Example: `2018-04-03T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeOfDeletion:
+          description: 'An optional property to indicate when to delete the key version, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.
+
+            Example: `2019-04-03T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        vaultId:
+          description: The OCID of the vault that contains this key version.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - compartmentId
+      - timeCreated
+      - vaultId
+      - keyId
+      - origin
+      type: object
+      x-example: "[\n  {\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpneskcfy7lsda6wfauxuwrwed5b3xea\",\n    \"id\": \"ocid1.keyversion.oc1.iad.exampledaaeug.examplevriiaa.examples4h2bocax3dfgdnsxw4ceocvbged2gftlho4ufxwa4faux2eiqwija\",\n    \"keyId\": \"ocid1.key.oc1.iad.exampledaaeug.examplestkvmbjdnbickxcvbotxd5q23kueityj4q2c6qfauxm32i577yu5a\",\n    \"timeCreated\": \"2018-04-04T18:52:47.405Z\",\n    \"origin\": \"INTERNAL\",\n    \"vaultId\": \"ocid1.vault.oc1.iad.examplevaaeuk.examplettv5i3qbkp22g3cvbjqy7c7welywv25eajvnvcfauxpdgga6gct4a\"\n    \"lifecycleState\": \"CREATING\",\n    \"timeOfDeletion\": \"2018-04-03T20:35:12.023Z\"\n    \"externalKeyReferenceDetails\":{\n      \"externalKeyId\": \"ce01d0adc75b43be88ed404056fd43ba0489321993534d66bf0f925dd5b95147\",\n      \"externalKeyVersionId\": \"d1e1d0adc75b43te88ed4f4056f443ba0489321963534d66bfhf925dd5a95148\"\n    }\n    \"isAutoRotated\" : true\n  },\n  {\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpnesktyy7lr4a6wfauxuwrwed5b3xea\",\n    \"id\": \"ocid1.keyversion.oc1.iad.exampledaaeug.examplevriiaa.examples4h2bocax3damnsxw4ceocvbged2gftlho4ufxwa4faux2eiqwija\",\n    \"keyId\": \"ocid1.key.oc1.iad.exampledaaeug.examplestkvmyudnbickxcvbotxd5q23kueidhj4q2c6qfauxm32i577yu5a\",\n    \"timeCreated\": \"2018-04-03T17:16:01.509Z\",\n    \"origin\": \"INTERNAL\",\n    \"vaultId\": \"ocid1.vault.oc1.iad.examplevaaeuk.examplettv5i3qjkp22g3cvbjqy7c7sqlywv25eajvnvcfauxpdgga6gct4a\"\n    \"lifecycleState\": \"CREATING\",\n    \"timeOfDeletion\": null,\n    \"externalKeyReferenceDetails\": {\n      \"externalKeyId\": \"ce01d0adc75b43be88ed404056fd43ba0489321993534d66bf0f925dd5b95147\",\n      \"externalKeyVersionId\": \"d1e1d0adc75b43te88ed4f4056f443ba0489321963534d66bfhf925dd5a95148\"\n    }\n    \"isAutoRotated\" : true\n  }\n]\n"
+    ChangeKeyCompartmentDetails:
+      description: The deatils of the compartment that you wish to move the Key.
+      properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment that you want to move the key to.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5lsdneskcfy7lr4a6wfauxuwrwed5b3xea\",\n}\n"
+    Key:
+      description: The logical entities that represent one or more key versions, each of which contains cryptographic material.
+      properties:
+        autoKeyRotationDetails:
+          $ref: '#/components/schemas/AutoKeyRotationDetails'
+        compartmentId:
+          description: The OCID of the compartment that contains this master encryption key.
+          maxLength: 255
+          minLength: 1
+          type: string
+        currentKeyVersion:
+          description: 'The OCID of the key version used in cryptographic operations. During key rotation, the service might be
+
+            in a transitional state where this or a newer key version are used intermittently. The `currentKeyVersion`
+
+            property is updated when the service is guaranteed to use the new key version for all subsequent encryption operations.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'An object that represents the value of the tag. Only the string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name for the key. It does not have to be unique, and it is changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        externalKeyReferenceDetails:
+          $ref: '#/components/schemas/ExternalKeyReferenceDetails'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the key.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isAutoRotationEnabled:
+          description: A parameter specifying whether the auto key rotation is enabled or not.
+          type: boolean
+        isPrimary:
+          description: A Boolean value that indicates whether the Key belongs to primary Vault or replica vault.
+          type: boolean
+        keyShape:
+          $ref: '#/components/schemas/KeyShape'
+        lifecycleState:
+          description: 'The key''s current lifecycle state.
+
+
+            Example: `ENABLED`
+
+            '
+          enum:
+          - CREATING
+          - ENABLING
+          - ENABLED
+          - DISABLING
+          - DISABLED
+          - DELETING
+          - DELETED
+          - PENDING_DELETION
+          - SCHEDULING_DELETION
+          - CANCELLING_DELETION
+          - UPDATING
+          - BACKUP_IN_PROGRESS
+          - RESTORING
+          type: string
+        protectionMode:
+          description: 'The key''s protection mode indicates how the key persists and where cryptographic operations that use the key are performed.
+
+            A protection mode of `HSM` means that the key persists on a hardware security module (HSM) and all cryptographic operations are performed inside
+
+            the HSM. A protection mode of `SOFTWARE` means that the key persists on the server, protected by the vault''s RSA wrapping key which persists
+
+            on the HSM. All cryptographic operations that use a key with a protection mode of `SOFTWARE` are performed on the server. By default,
+
+            a key''s protection mode is set to `HSM`. You can''t change a key''s protection mode after the key is created or imported.
+
+            A protection mode of `EXTERNAL` mean that the key persists on the customer''s external key manager which is hosted externally outside of oracle.
+
+            Oracle only hold a reference to that key.
+
+            All cryptographic operations that use a key with a protection mode of `EXTERNAL` are performed by external key manager.
+
+            '
+          enum:
+          - HSM
+          - SOFTWARE
+          - EXTERNAL
+          type: string
+        replicaDetails:
+          $ref: '#/components/schemas/KeyReplicaDetails'
+        restoredFromKeyId:
+          description: The OCID of the key from which this key was restored.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: 'The date and time the key was created, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.
+
+
+            Example: `2018-04-03T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeOfDeletion:
+          description: 'An optional property indicating when to delete the key, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.
+
+            Example: `2019-04-03T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        vaultId:
+          description: The OCID of the vault that contains this key.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - compartmentId
+      - displayName
+      - timeCreated
+      - lifecycleState
+      - vaultId
+      - keyShape
+      - currentKeyVersion
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpneskcfy7lr4a6wfauxuwrwed5b3xea\",\n  \"currentKeyVersion\": \"ocid1.keyversion.oc1.iad.exampledaaeug.examplevriiaa.examples4h2bocax3damnsxw4cvbbndged2gftlho4ufxwa4faux2eiqwija\",\n  \"definedTags\": { },\n  \"displayName\": \"Key C\",\n  \"freeformTags\": { },\n  \"id\": \"ocid1.key.oc1.iad.examplefaafqw.exampletn3m2p4cvb6nv7oer2p3nliijfw4qyuguvmrfauxr622ife7urnqa\",\n  \"keyShape\": {\n    \"algorithm\": \"AES\",\n    \"length\": 16\n  },\n  \"lifecycleState\": \"CREATING\",\n  \"protectionMode\": \"HSM\",\n  \"timeCreated\": \"2018-04-04T00:33:59.874Z\",\n  \"timeOfDeletion\": \"2018-04-03T20:35:12.023Z\",\n  \"vaultId\": \"ocid1.vault.oc1.iad.examplevaaeuk.examplettv5i3qbkp22g3cvbjqy7c7sqlywv25eajvnvcfauxpdgga6gct4a\",\n  \"restoredFromKeyId\": \"ocid1.key.oc1.iad.examplefaafqw.exampletn3m2p4cvb6nv7oer2p3nliijfw4qyuguvmrfauxr622ife7urnta\"\n  \"replicaDetails\": {\"replicationId\" : \"12345abc\"}\n  \"isPrimary\": true\n  \"isAutoRotationEnabled\" : true,\n  \"autoKeyRotationDetails\": {\n    \"rotationIntervalInDays\": \"60\",\n    \"timeOfScheduleStart\": \"2023-04-04T00:00:00Z\"\n    \"timeOfNextRotation\": \"2023-06-04T00:00:00Z\",\n    \"timeOfLastRotation\": \"2023-02-04T00:00:00Z\",\n    \"lastRotationStatus\": \"SUCCESS\",\n    \"lastRotationMessage\": \"Rotation Completed\"\n  }\n  \"externalKeyReferenceDetails\": {\n    \"externalKeyId\": \"ce01d0adc75b43be88ed404056fd43ba0489321993534d66bf0f925dd5b95147\",\n    \"externalKeyVersionId\": \"d1e1d0adc75b43te88ed4f4056f443ba0489321963534d66bfhf925dd5a95148\"\n  }\n}\n"
+    KeySummary:
+      description: The details of the Key.
+      properties:
+        algorithm:
+          description: The algorithm used by a key's key versions to encrypt or decrypt data.
+          enum:
+          - AES
+          - RSA
+          - ECDSA
+          type: string
+        compartmentId:
+          description: The OCID of the compartment that contains the key.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'An object that represents the value of the tag. Only the string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name for the key. It does not have to be unique, and it is changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        externalKeyReferenceDetails:
+          $ref: '#/components/schemas/ExternalKeyReferenceDetails'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the key.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isAutoRotationEnabled:
+          description: A parameter specifying whether the auto key rotation is enabled or not.
+          type: boolean
+        lifecycleState:
+          description: 'The key''s current lifecycle state.
+
+
+            Example: `ENABLED`
+
+            '
+          enum:
+          - CREATING
+          - ENABLING
+          - ENABLED
+          - DISABLING
+          - DISABLED
+          - DELETING
+          - DELETED
+          - PENDING_DELETION
+          - SCHEDULING_DELETION
+          - CANCELLING_DELETION
+          - UPDATING
+          - BACKUP_IN_PROGRESS
+          - RESTORING
+          type: string
+        protectionMode:
+          description: 'The key''s protection mode indicates how the key persists and where cryptographic operations that use the key are performed.
+
+            A protection mode of `HSM` means that the key persists on a hardware security module (HSM) and all cryptographic operations are performed inside
+
+            the HSM. A protection mode of `SOFTWARE` means that the key persists on the server, protected by the vault''s RSA wrapping key which persists
+
+            on the HSM. All cryptographic operations that use a key with a protection mode of `SOFTWARE` are performed on the server. By default,
+
+            a key''s protection mode is set to `HSM`. You can''t change a key''s protection mode after the key is created or imported.
+
+            A protection mode of `EXTERNAL` mean that the key persists on the customer''s external key manager which is hosted externally outside of oracle.
+
+            Oracle only hold a reference to that key.
+
+            All cryptographic operations that use a key with a protection mode of `EXTERNAL` are performed by external key manager.
+
+            '
+          enum:
+          - HSM
+          - SOFTWARE
+          - EXTERNAL
+          type: string
+        timeCreated:
+          description: 'The date and time the key was created, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.
+
+
+            Example: `2018-04-03T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        vaultId:
+          description: The OCID of the vault that contains the key.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - compartmentId
+      - displayName
+      - timeCreated
+      - lifecycleState
+      - vaultId
+      type: object
+      x-example: "[\n  {\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpneskcfy7lr4a6wfauxuwrhhd5b3xea\",\n    \"definedTags\": { },\n    \"displayName\": \"Key A\",\n    \"freeformTags\": { },\n    \"id\": \"ocid1.key.oc1.iad.exampledaaeug.examplestkvmbjdnbickxcvbotxd5q23kueidhj4q2c6qfauxm32ikk7yu5a\",\n    \"lifecycleState\": \"ENABLED\",\n    \"timeCreated\": \"2018-04-03T17:16:01.509Z\",\n    \"protectionMode\": \"HSM\",\n    \"vaultId\": \"ocid1.vault.oc1.iad.examplevaaeuk.examplettv5i3qbkp22g3cvbjqy7c7sqlywv25eajvnvcfauxpdgga6gct4a\"\n    \"externalKeyReferenceDetails\": {\n      \"externalKeyId\": \"ce01d0adc75b43be88ed404056fd43ba0489321993534d66bf0f925dd5b95147\",\n      \"externalKeyVersionId\": \"d1e1d0adc75b43te88ed4f4056f443ba0489321963534d66bfhf925dd5a95148\"\n    }\n    \"isAutoRotationEnabled\" : true\n },\n  {\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpneskcffflr4a6wfauxuwrwed5b3xea\",\n    \"definedTags\": { },\n    \"displayName\": \"Key B\",\n    \"freeformTags\": { },\n    \"id\": \"ocid1.key.oc1.iad.examplefaafqw.examplesstlnmdng4b4elwodcvbbbms57hmyazfeay25faux32oxw4c7zlsa\",\n    \"lifecycleState\": \"ENABLED\",\n    \"timeCreated\": \"2018-04-03T20:36:49.818Z\",\n    \"protectionMode\": \"HSM\",\n    \"vaultId\": \"ocid1.vault.oc1.iad.examplevaaeuk.examplettv5i3qbkp22g3cvbjqy7c7sqlywv25eajvnvcfauxpdgga6gct4a\"\n    \"externalKeyReferenceDetails\": {\n      \"externalKeyId\": \"ce01d0adc75b43be88ed404056fd43ba0489321993534d66bf0f925dd5b95147\",\n      \"externalKeyVersionId\": \"d1e1d0adc75b43te88ed4f4056f443ba0489321963534d66bfhf925dd5a95148\"\n    }\n    \"isAutoRotationEnabled\" : true\n  }\n]\n"
+    WrappedImportKey:
+      description: The details of the wrapped import Key.
+      properties:
+        keyMaterial:
+          description: The key material to import, wrapped by the vault's RSA public wrapping key and base64-encoded.
+          type: string
+        wrappingAlgorithm:
+          description: 'The wrapping mechanism to use during key import.
+
+            `RSA_OAEP_AES_SHA256` invokes the RSA AES key wrap mechanism, which generates a temporary AES key. The temporary AES key is wrapped
+
+            by the vault''s RSA public wrapping key, creating a wrapped temporary AES key. The temporary AES key is also used to wrap the private key material.
+
+            The wrapped temporary AES key and the wrapped exportable key material are concatenated, producing concatenated blob output that jointly represents them.
+
+            `RSA_OAEP_SHA256` means that the exportable key material is wrapped by the vault''s RSA public wrapping key.
+
+            '
+          enum:
+          - RSA_OAEP_SHA256
+          - RSA_OAEP_AES_SHA256
+          type: string
+      required:
+      - keyMaterial
+      - wrappingAlgorithm
+      type: object
+    WrappingKey:
+      description: The public RSA wrapping key associated with the vault
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains this key.
+          maxLength: 255
+          minLength: 1
+          type: string
+        id:
+          description: The OCID of the key.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: 'The key''s current lifecycle state.
+
+
+            Example: `ENABLED`
+
+            '
+          enum:
+          - CREATING
+          - ENABLING
+          - ENABLED
+          - DISABLING
+          - DISABLED
+          - DELETING
+          - DELETED
+          - PENDING_DELETION
+          - SCHEDULING_DELETION
+          - CANCELLING_DELETION
+          - UPDATING
+          - BACKUP_IN_PROGRESS
+          - RESTORING
+          type: string
+        publicKey:
+          description: 'The public key, in PEM format, to use to wrap the key material before importing it.
+
+            '
+          type: string
+        timeCreated:
+          description: 'The date and time the key was created, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.
+
+
+            Example: `2018-04-03T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        vaultId:
+          description: The OCID of the vault that contains this key.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - compartmentId
+      - timeCreated
+      - lifecycleState
+      - vaultId
+      - publicKey
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpneskcfy7lr4a6wfauxuwrwed5b3xea\",\n  \"id\": \"ocid1.key.oc1.iad.examplefaafqw.exampletn3m2p4cvb6nv7oer2p3nliijfw4qyuguvmrfauxr622ife7urnqa\",\n  \"lifecycleState\": \"ENABLED\",\n  \"timeCreated\": \"2018-04-04T00:33:59.874Z\",\n  \"vaultId\": \"ocid1.vault.oc1.iad.examplevaaeuk.examplettv5i3qbkp22g3cvbjqy7c7sqlywv25eajvnvcfauxpdgga6gct4a\"\n  \"publicKey\":\"-----BEGIN PUBLIC KEY----- ..... -----END PUBLIC KEY-----\"\n}\n"
+    BackupLocation:
+      description: Backup upload location
+      discriminator:
+        propertyName: destination
+      properties:
+        destination:
+          description: '''Backup location destination:
+
+            BUCKET - Uploading or downloading backup via object store bucket
+
+            PRE_AUTHENTICATED_REQUEST_URI - Uploading or downloading backup via a PreAuthenticated object store URI''
+
+            '
+          enum:
+          - BUCKET
+          - PRE_AUTHENTICATED_REQUEST_URI
+          type: string
+      required:
+      - destination
+    ImportKeyVersionDetails:
+      description: The details of the KeyVersion that you wish to import.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'An object that represents the value of the tag. Only string, integer, and Boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        wrappedImportKey:
+          $ref: '#/components/schemas/WrappedImportKey'
+      required:
+      - wrappedImportKey
+      type: object
+      x-example: "{\n   \"wrappedImportKey\": {\n      \"wrappingAlgorithm\": \"RSA_OAEP_SHA256\",\n      \"keyMaterial\": \"089d08927390280802d0987c09e7798h09f879870909c098709a709870970987b09709870c987098d70e==\"\n    }\n}\n"
+    ImportKeyDetails:
+      description: The details of the Key that you wish to import.
+      properties:
+        autoKeyRotationDetails:
+          $ref: '#/components/schemas/AutoKeyRotationDetails'
+        compartmentId:
+          description: The OCID of the compartment that contains this key.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'An object that represents the value of the tag. Only string, integer, and Boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"foo-namespace": {"bar-key": "foo-value"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name for the key. It does not have to be unique, and it is changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope.
+
+            Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isAutoRotationEnabled:
+          description: A parameter specifying whether the auto key rotation is enabled or not.
+          type: boolean
+        keyShape:
+          $ref: '#/components/schemas/KeyShape'
+        protectionMode:
+          default: HSM
+          description: 'The key''s protection mode indicates how the key persists and where cryptographic operations that use the key are performed.
+
+            A protection mode of `HSM` means that the key persists on a hardware security module (HSM) and all cryptographic operations are performed inside
+
+            the HSM. A protection mode of `SOFTWARE` means that the key persists on the server, protected by the vault''s RSA wrapping key which persists
+
+            on the HSM. All cryptographic operations that use a key with a protection mode of `SOFTWARE` are performed on the server. By default,
+
+            a key''s protection mode is set to `HSM`. You can''t change a key''s protection mode after the key is created or imported.
+
+            '
+          enum:
+          - HSM
+          - SOFTWARE
+          type: string
+        wrappedImportKey:
+          $ref: '#/components/schemas/WrappedImportKey'
+      required:
+      - compartmentId
+      - displayName
+      - wrappedImportKey
+      - keyShape
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpneskcfy7lr4yywfauxuwrwed5b3xea\",\n  \"displayName\": \"Key C\",\n  \"keyShape\": {\n    \"algorithm\": \"AES\",\n    \"length\": 16\n  },\n  \"wrappedImportKey\": {\n    \"wrappingAlgorithm\": \"RSA_OAEP_SHA256\",\n    \"keyMaterial\": \"089d08927390280802d0987c09e7798h09f879870909c098709a709870970987b09709870c987098d70e==\"\n  },\n  \"protectionMode\": \"HSM\",\n  \"isAutoRotationEnabled\" : true,\n  \"autoKeyRotationDetails\": {\n      \"rotationIntervalInDays\": \"60\",\n      \"timeOfScheduleStart\": \"2023-04-04T00:00:00Z\",\n}\n  \"freeformTags\": {\"Department\": \"Finance\"},\n  \"definedTags\":\n  {\n    \"MyFirstNamespace\":\n    {\n      \"CostCenter\": \"SmartAlec\",\n      \"Project\": \"42\"\n    },\n    \"Audit\":\n    {\n      \"DataSensitivity\": \"PII\",\n      \"CageSecurity\": \"High\",\n      \"Simplicity\": \"complex\"\n    }\n  }\n}\n"
+    ScheduleKeyVersionDeletionDetails:
+      description: Details for scheduling key version deletion.
+      properties:
+        timeOfDeletion:
+          description: 'An optional property to indicate when to delete the key version, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            timestamp format. The specified time must be between 7 and 30 days from the time
+
+            when the request is received. If this property is missing, it will be set to 30 days from the time of the request by default.
+
+            '
+          format: date-time
+          type: string
+      type: object
+      x-example: "{\n  \"timeOfDeletion\": \"2019-04-03T21:10:29.600Z\"\n}\n"
+    ExternalKeyVersionReference:
+      description: A reference to key version on external key manager.
+      properties:
+        externalKeyVersionId:
+          description: Key version ID associated with the external key.
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    UpdateKeyDetails:
+      description: The details of the Key that you wish to update.
+      properties:
+        autoKeyRotationDetails:
+          $ref: '#/components/schemas/AutoKeyRotationDetails'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'An object that represents the value of the tag. Only the string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name for the key. It does not have to be unique, and it is changeable.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        isAutoRotationEnabled:
+          description: A parameter specifying whether the auto key rotation is enabled or not.
+          type: boolean
+      type: object
+      x-example: "{\n  \"displayName\": \"Key CC\",\n  \"freeformTags\": {\"Department\": \"Finance\"},\n  \"definedTags\":\n  {\n    \"MyFirstNamespace\":\n    {\n      \"CostCenter\": \"SmartAlec\",\n      \"Project\": \"42\",\n      \"CreatedBy\": \"SmartAlec\",\n      \"CreatedDate\": \"9/21/2017T14:00\"\n    },\n    \"Audit\":\n    {\n      \"DataSensitivity\": \"PII\",\n      \"CageSecurity\": \"High\",\n      \"Simplicity\": \"complex\"\n    }\n  }\n  \"isAutoRotationEnabled\" : true,\n  \"autoKeyRotationDetails\": {\n    \"rotationIntervalInDays\": \"60\",\n    \"timeOfScheduleStart\": \"2023-04-04T00:00:00Z\",\n  }\n}\n"
+    ExternalKeyReference:
+      description: A reference to the key on external key manager.
+      properties:
+        externalKeyId:
+          description: ExternalKeyId refers to the globally unique key Id associated with the key created in external vault in CTM
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - externalKeyId
+      type: object
+    ReplicationStatusDetails:
+      description: Details of replication status across all replica regions
+      properties:
+        replicaDetails:
+          description: Replica Details.
+          items:
+            $ref: '#/components/schemas/ReplicaDetails'
+          type: array
+      type: object
+    ScheduleKeyDeletionDetails:
+      description: Details for scheduling key deletion.
+      properties:
+        timeOfDeletion:
+          description: 'An optional property to indicate when to delete the vault, expressed in
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format. The specified
+
+            time must be between 7 and 30 days from when the request is received.
+
+            If this property is missing, it will be set to 30 days from the time of the request
+
+            by default.
+
+            '
+          format: date-time
+          type: string
+      type: object
+      x-example: "{\n  \"timeOfDeletion\": \"2019-04-03T21:10:29.600Z\"\n}\n"
+    KeyVersion:
+      description: The details of the KeyVersion associated with the Key.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains this key version.
+          maxLength: 255
+          minLength: 1
+          type: string
+        externalKeyReferenceDetails:
+          $ref: '#/components/schemas/ExternalKeyReferenceDetails'
+        id:
+          description: The OCID of the key version.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isAutoRotated:
+          description: A Boolean Value indicating whether this keyversion is generated from auto rotation of key
+          type: boolean
+        isPrimary:
+          description: A Boolean value that indicates whether the KeyVersion belongs to primary Vault or replica Vault.
+          type: boolean
+        keyId:
+          description: The OCID of the key associated with this key version.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: 'The key version''s current lifecycle state.
+
+
+            Example: `ENABLED`
+
+            '
+          enum:
+          - CREATING
+          - ENABLING
+          - ENABLED
+          - DISABLING
+          - DISABLED
+          - DELETING
+          - DELETED
+          - PENDING_DELETION
+          - SCHEDULING_DELETION
+          - CANCELLING_DELETION
+          type: string
+        origin:
+          description: 'The source of the key material. When this value is `INTERNAL`, Key Management
+
+            created the key material. When this value is `EXTERNAL`, the key material
+
+            was imported from an external source.
+
+            '
+          enum:
+          - INTERNAL
+          - EXTERNAL
+          type: string
+        publicKey:
+          description: 'The public key in PEM format. (This value pertains only to RSA and ECDSA keys.)
+
+            '
+          type: string
+        replicaDetails:
+          $ref: '#/components/schemas/KeyVersionReplicaDetails'
+        restoredFromKeyVersionId:
+          description: The OCID of the key version from which this key version was restored.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: 'The date and time this key version was created, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.
+
+
+            Example: "2018-04-03T21:10:29.600Z"
+
+            '
+          format: date-time
+          type: string
+        timeOfDeletion:
+          description: 'An optional property indicating when to delete the key version, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.
+
+            Example: `2019-04-03T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        vaultId:
+          description: The OCID of the vault that contains this key version.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - compartmentId
+      - timeCreated
+      - vaultId
+      - keyId
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleati4wjo6cvbxq4iusld5ltpneskcffflr4a6wfauxuwrwed5b3xea\",\n  \"id\": \"ocid1.keyversion.oc1.iad.exampledaaeug.examplevriiaa.examples4h2bocax3dfgdnsxw4ceocvbged2gftlho4ufxwa4faux2eiqwija\",\n  \"keyId\": \"ocid1.key.oc1.iad.exampledaaeug.examplestkvmbjdnbickxcvbotxd5q23kueityj4q2c6qfauxm32i577yu5a\",\n  \"timeCreated\": \"2018-04-04T18:52:47.405Z\",\n  \"vaultId\": \"ocid1.vault.oc1.iad.examplevaaeuk.examplettv5i3qbkp22g3cvbjqy7c7welywv25eajvnvcfauxpdgga6gct4a\"\n  \"lifecycleState\": \"CREATING\",\n  \"timeOfDeletion\": \"2018-04-03T20:35:12.023Z\",\n  \"restoredFromKeyVersionId\": \"ocid1.keyversion.oc1.iad.examplefaafqw.exampletn3m2p4cvb6nv7oer2p3nliijfw4qyuguvmrfauxr622ife7urnta\"\n    \"origin\": \"INTERNAL\"\n  \"replicaDetails\": {\"replicationId\" : \"12345abc\"}\n  \"isPrimary\": true\n  \"externalKeyReferenceDetails\":{\n    \"externalKeyId\": \"ce01d0adc75b43be88ed404056fd43ba0489321993534d66bf0f925dd5b95147\",\n    \"externalKeyVersionId\": \"d1e1d0adc75b43te88ed4f4056f443ba0489321963534d66bfhf925dd5a95148\"\n  }\n  \"isAutoRotated\" : true\n}\n"
+    RestoreKeyFromObjectStoreDetails:
+      description: The details of the backup location from which you want to restore the Key.
+      properties:
+        backupLocation:
+          $ref: '#/components/schemas/BackupLocation'
+      type: object
+      x-example: "{\n  \"backupLocation\" : {\n    \"BackupLocationURI\" : {\n      \"uri\" : \"http://n/namespace/b/bucket/o/object\"\n    }\n  },\n}\n"
+    KeyVersionReplicaDetails:
+      description: 'KeyVersion replica details
+
+        '
+      properties:
+        replicationId:
+          description: 'ReplicationId associated with a key version operation
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+  parameters:
+    ReplicationIdPathParam:
+      description: 'replicationId associated with an operation on a resource
+
+        '
+      in: path
+      name: replicationId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ProtectionModeQueryParam:
+      description: 'A key''s protection mode indicates how the key persists and where cryptographic operations that use the key are performed. A
+
+        protection mode of `HSM` means that the key persists on a hardware security module (HSM) and all cryptographic operations are
+
+        performed inside the HSM. A protection mode of `SOFTWARE` means that the key persists on the server, protected by the vault''s
+
+        RSA wrapping key which persists on the HSM. All cryptographic operations that use a key with a protection mode of
+
+        `SOFTWARE` are performed on the server.
+
+        A protection mode of `EXTERNAL` mean that the key persists on the customer''s external key manager which is hosted externally outside of oracle.
+
+        Oracle only hold a reference to that key. All cryptographic operations that use a key with a protection mode of `EXTERNAL` are performed by external key manager.
+
+        '
+      in: query
+      name: protectionMode
+      required: false
+      schema:
+        type: string
+        enum:
+        - HSM
+        - SOFTWARE
+        - EXTERNAL
+        default: HSM
+    KeyAlgorithmQueryParam:
+      description: 'The algorithm used by a key''s key versions to encrypt or decrypt data. Currently, support includes AES, RSA, and ECDSA algorithms.
+
+        '
+      in: query
+      name: algorithm
+      required: false
+      schema:
+        type: string
+        enum:
+        - AES
+        - RSA
+        - ECDSA
+    SortByQueryParam:
+      description: 'The field to sort by. You can specify only one sort order. The default
+
+        order for `TIMECREATED` is descending. The default order for `DISPLAYNAME`
+
+        is ascending.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - TIMECREATED
+        - DISPLAYNAME
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` response header
+
+        from the previous "List" call.
+
+        '
+      in: query
+      name: page
+      required: false
+      schema:
+        type: string
+        maxLength: 512
+        minLength: 1
+    ContentLengthHeader:
+      description: The content length of the body.
+      in: header
+      name: content-length
+      required: true
+      schema:
+        type: integer
+        format: int64
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a
+
+        resource, set the `if-match` parameter to the value of the etag from a
+
+        previous GET or POST response for that resource. The resource will be
+
+        updated or deleted only if the etag you provide matches the resource''s
+
+        current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    OptionalContentMD5Header:
+      description: 'The base64-encoded MD5 hash value of the body, as described in [RFC 2616](https://tools.ietf.org/rfc/rfc2616), section 14.15.
+
+        If the Content-MD5 header is present, Key Management performs an integrity check on the body of the HTTP request by computing the MD5
+
+        hash for the body and comparing it to the MD5 hash supplied in the header. If the two hashes don''t match, the object is rejected and
+
+        a response with 400 Unmatched Content MD5 error is returned, along with the message: "The computed MD5 of the request body (ACTUAL_MD5)
+
+        does not match the Content-MD5 header (HEADER_MD5)."
+
+        '
+      in: header
+      name: content-md5
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return in a paginated "List" call.
+
+        '
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        maximum: 1000
+        minimum: 1
+    KeyIdPathParam:
+      description: The OCID of the key.
+      in: path
+      name: keyId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+
+        '
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    KeyVersionIdPathParam:
+      description: The OCID of the key version.
+      in: path
+      name: keyVersionId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case
+
+        of a timeout or server error without risk of executing that same action
+
+        again. Retry tokens expire after 24 hours, but can be invalidated
+
+        before then due to conflicting operations (e.g., if a resource has been
+
+        deleted and purged from the system, then a retry of the original
+
+        creation request may be rejected).
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    KeyCurveQueryParam:
+      description: 'The curve ID of the keys. (This pertains only to ECDSA keys.)
+
+        '
+      in: query
+      name: curveId
+      required: false
+      schema:
+        type: string
+        enum:
+        - NIST_P256
+        - NIST_P384
+        - NIST_P521
+    RestoreKeyFromFileDetails:
+      description: The encrypted backup file to upload to restore the key.
+      in: body
+      name: RestoreKeyFromFileDetails
+      required: true
+      schema:
+        format: binary
+        type: string
+    RequestIdHeader:
+      description: 'Unique identifier for the request. If provided, the returned request ID
+
+        will include this value. Otherwise, a random request ID will be
+
+        generated by the service.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    KeyLengthQueryParam:
+      description: 'The length of the key in bytes, expressed as an integer. Supported values include 16, 24, or 32.
+
+        '
+      in: query
+      name: length
+      required: false
+      schema:
+        type: integer
+  responses:
+    DefaultError:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+            a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

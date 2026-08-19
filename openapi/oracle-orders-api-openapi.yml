@@ -1,0 +1,335 @@
+openapi: 3.2.0
+info:
+  title: Oracle Orders API
+  version: '1.0'
+  description: 'Operations tagged orders across 2 of this provider''s published API definitions: oci-organizations-1-openapi.yaml, oci-organizations-openapi.yaml. Each path carries the servers of the definition it was published in.'
+servers:
+- url: http://127.0.0.1/20220518
+- url: https://127.0.0.1/20220518
+tags:
+- name: orders
+paths:
+  /orders/{activationToken}:
+    get:
+      description: 'Returns the order details given by the order ID in the JWT.
+
+        '
+      operationId: GetOrder
+      parameters:
+      - $ref: '#/components/parameters/OrderActivationToken'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        200:
+          description: OrderActivationToken is valid and the requested subscription information has been found and was returned.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Returns order details with subscription information.
+      tags:
+      - orders
+      x-obmcs-authz-declarations:
+        authorizationRequired: false
+      x-related-resource: '#/definitions/Order'
+  /orders/{activationToken}/actions/activate:
+    post:
+      description: Triggers an order activation workflow on behalf of the tenant, given by compartment ID in the body.
+      operationId: ActivateOrder
+      parameters:
+      - $ref: '#/components/parameters/OrderActivationToken'
+      - $ref: '#/components/parameters/RetryTokenHeader'
+      - $ref: '#/components/parameters/RequestIdHeader'
+      responses:
+        202:
+          description: Order activation accepted and activation has begun.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query the status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      summary: Order activation workflow creation.
+      tags:
+      - orders
+      x-related-resource: '#/definitions/Order'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateOrderDetails'
+        description: The information needed to activate an order in a tenancy.
+        required: true
+components:
+  parameters:
+    OrderActivationToken:
+      description: 'Activation token containing an order ID. A JWT RFC 7519-formatted string.
+
+        '
+      in: path
+      name: activationToken
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
+
+        server error, without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        will be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+  schemas:
+    Sku:
+      description: A single subscription SKU.
+      properties:
+        name:
+          description: SKU name.
+          type: string
+        number:
+          description: SKU number.
+          type: string
+        quantity:
+          description: SKU quantity.
+          type: integer
+    SubscriptionInfo:
+      description: A single subscription's details.
+      properties:
+        endDate:
+          description: Subscription end date. An RFC 3339-formatted date and time string.
+          format: date-time
+          type: string
+        service:
+          description: Subscription service name.
+          example: CLOUDCM
+          type: string
+        skus:
+          description: List of SKUs the subscription contains.
+          items:
+            $ref: '#/components/schemas/Sku'
+          type: array
+        spmSubscriptionId:
+          description: Subscription ID.
+          type: string
+        startDate:
+          description: Subscription start date. An RFC 3339-formatted date and time string.
+          format: date-time
+          type: string
+      required:
+      - spmSubscriptionId
+      - service
+      - startDate
+      - endDate
+      - skus
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ActivateOrderDetails:
+      description: The parameters for activating an order subscription in a tenancy.
+      properties:
+        compartmentId:
+          description: Tenant ID to activate the order.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+    Order:
+      description: Order details.
+      properties:
+        adminEmail:
+          description: Email address of the administrator who owns the subscription.
+          maxLength: 255
+          minLength: 6
+          type: string
+        dataCenterRegion:
+          description: Order's data center region.
+          example: global
+          type: string
+        orderNumber:
+          description: Immutable and unique order number holding customer subscription information.
+          type: string
+        orderState:
+          description: State of the order.
+          type: string
+        subscriptions:
+          description: Array of subscriptions associated with the order.
+          items:
+            $ref: '#/components/schemas/SubscriptionInfo'
+          type: array
+      required:
+      - orderNumber
+      - adminEmail
+      - orderState
+      - subscriptions
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-refined-from:
+- oci-organizations-1-openapi.yaml
+- oci-organizations-openapi.yaml
+x-anchors:
+  x-headers:
+    etag:
+      description: 'For optimistic concurrency control. See `if-match`.
+
+        '
+      type: string
+    opc-next-page:
+      description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+        then a partial list might have been returned. Include this value as the `page` parameter for the
+
+        subsequent GET request to get the next batch of items.
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+    opc-work-request-id:
+      description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query status of the asynchronous operation.
+
+        '
+      type: string
+    retry-after:
+      description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
+      type: integer
+  x-properties:
+    definedTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+        Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+        '
+      type: object
+    freeformTags:
+      additionalProperties:
+        type: string
+      description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+        Example: `{"bar-key": "value"}`
+
+        '
+      type: object
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+x-obmcs-client-retries-enabled: true
+x-oracle-package: com.oracle.idm.agcs.cp

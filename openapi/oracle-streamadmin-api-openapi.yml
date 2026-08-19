@@ -1,0 +1,2952 @@
+openapi: 3.2.0
+info:
+  description: Use the Streaming API to produce and consume messages, create streams and stream pools, and manage related items. For more information, see [Streaming](/Content/Streaming/Concepts/streamingoverview.htm).
+  title: Streaming Stream Admin API
+  version: '20180418'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/45f06290ec3f949690d1ae9b8f7d2adeeea531cfb0142678cd2e791be8c625d9.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Streaming API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/45f06290ec3f949690d1ae9b8f7d2adeeea531cfb0142678cd2e791be8c625d9.yaml
+    what: the harvested document for Streaming API
+servers:
+- url: https://streaming.{region}.oci.oraclecloud.com/20180418
+tags:
+- name: streamAdmin
+paths:
+  /connectharnesses:
+    get:
+      description: Lists the connectharness.
+      operationId: ListConnectHarnesses
+      parameters:
+      - $ref: '#/components/parameters/CompartmentIdQueryParam'
+      - $ref: '#/components/parameters/FilterByIdQueryParam'
+      - $ref: '#/components/parameters/FilterByNameQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/SortByQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - description: 'A filter to only return resources that match the given lifecycle state. The state value is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        x-obmcs-enumref: '#/definitions/ConnectHarnessSummary/lifecycleState'
+        schema:
+          type: string
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: The list of connect harnesses.
+          headers:
+            opc-next-page:
+              description: For list pagination. When this header appears in the response, additional pages of results remain. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-prev-page:
+              description: For list pagination. When this header appears in the response, previous pages of results exist. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ConnectHarnessSummary'
+                type: array
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists the connectharnesses.
+      tags:
+      - streamAdmin
+      x-example: 'GET /20180418/connectharnesses?compartmentId=<var>&lt;compartmentId&gt;</var>&limit=10&page=1
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: 'Starts the provisioning of a new connect harness.
+
+        To track the progress of the provisioning, you can periodically call [GetConnectHarness].
+
+        In the response, the `lifecycleState` parameter of the [ConnectHarness](#/en/streaming/20180418/ConnectHarness/) object tells you its current state.
+
+        '
+      operationId: CreateConnectHarness
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/OpcRetryTokenHeaderParam'
+      responses:
+        200:
+          description: Created
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectHarness'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        409:
+          $ref: '#/components/responses/409'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Create a connect harness
+      tags:
+      - streamAdmin
+      x-example: "POST /20180418/connectharnesses\nHost: streaming.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n  \"name\": \"mynewconnectharness\"\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConnectHarnessDetails'
+        description: The connect harness to create.
+        required: true
+  /connectharnesses/{connectHarnessId}:
+    delete:
+      description: 'Deletes a connect harness and its content. Connect harness contents are deleted immediately. The service retains records of the connect harness itself for 90 days after deletion.
+
+        The `lifecycleState` parameter of the `ConnectHarness` object changes to `DELETING` and the connect harness becomes inaccessible for read or write operations.
+
+        To verify that a connect harness has been deleted, make a [GetConnectHarness](#/en/streaming/20180418/ConnectHarness/GetConnectHarness) request. If the call returns the connect harness''s
+
+        lifecycle state as `DELETED`, then the connect harness has been deleted. If the call returns a "404 Not Found" error, that means all records of the
+
+        connect harness have been deleted.
+
+        '
+      operationId: DeleteConnectHarness
+      parameters:
+      - $ref: '#/components/parameters/ConnectHarnessIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      responses:
+        204:
+          description: The connect harness is being deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Deletes a connect harness.
+      tags:
+      - streamAdmin
+      x-example: 'DELETE /20180418/connectharnesses/<var>&lt;connectHarnessId&gt;</var>
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/ConnectHarness'
+    get:
+      description: Gets detailed information about a connect harness.
+      operationId: GetConnectHarness
+      parameters:
+      - $ref: '#/components/parameters/ConnectHarnessIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Success
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectHarness'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets a connectharness
+      tags:
+      - streamAdmin
+      x-example: 'GET /20180418/connectharnesses/<var>&lt;connectHarnessId&gt;</var>
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: 'Updates the tags applied to the connect harness.
+
+        '
+      operationId: UpdateConnectHarness
+      parameters:
+      - $ref: '#/components/parameters/ConnectHarnessIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      responses:
+        200:
+          description: Updated
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectHarness'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Updates a connect harness.
+      tags:
+      - streamAdmin
+      x-example: "PUT /20180418/connectharnesses/<var>&lt;connectHarnessId&gt;</var>\nHost: streaming.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"definedTags\": {\n    \"Operations\": {\n      \"CostCenter\": \"42\"\n    }\n  },\n  \"freeformTags\": {\n    \"Department\": \"Finance\"\n  }\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateConnectHarnessDetails'
+        description: The connect harness is updated with the tags provided.
+        required: true
+  /connectharnesses/{connectHarnessId}/actions/changeCompartment:
+    post:
+      description: Moves a resource into a different compartment. When provided, If-Match is checked against ETag values of the resource.
+      operationId: ChangeConnectHarnessCompartment
+      parameters:
+      - $ref: '#/components/parameters/ConnectHarnessIdPathParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        204:
+          description: ConnectHarness's compartment has been changed.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        412:
+          $ref: '#/components/responses/412'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Moves a resource into a different compartment.
+      tags:
+      - streamAdmin
+      x-related-resource: '#/definitions/ConnectHarness'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeConnectHarnessCompartmentDetails'
+        description: The connect harness will be moved into the compartment specified within this entity.
+        required: true
+  /streampools:
+    get:
+      description: List the stream pools for a given compartment ID.
+      operationId: ListStreamPools
+      parameters:
+      - $ref: '#/components/parameters/CompartmentIdQueryParam'
+      - $ref: '#/components/parameters/FilterByIdQueryParam'
+      - $ref: '#/components/parameters/FilterByNameQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/SortByQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - description: 'A filter to only return resources that match the given lifecycle state. The state value is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        x-obmcs-enumref: '#/definitions/StreamPoolSummary/lifecycleState'
+        schema:
+          type: string
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: A list containing the stream pools for the compartment.
+          headers:
+            opc-next-page:
+              description: For list pagination. When this header appears in the response, additional pages of results remain. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-prev-page:
+              description: For list pagination. When this header appears in the response, previous pages of results exist. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/StreamPoolSummary'
+                type: array
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: List the stream pools for a given compartment ID.
+      tags:
+      - streamAdmin
+      x-example: 'GET /20180418/streampools?compartmentId=<var>&lt;compartmentId&gt;</var>
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: 'Starts the provisioning of a new stream pool.
+
+        To track the progress of the provisioning, you can periodically call GetStreamPool.
+
+        In the response, the `lifecycleState` parameter of the object tells you its current state.
+
+        '
+      operationId: CreateStreamPool
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/OpcRetryTokenHeaderParam'
+      responses:
+        200:
+          description: Created
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreamPool'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        409:
+          $ref: '#/components/responses/409'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Creates a stream pool.
+      tags:
+      - streamAdmin
+      x-example: "POST /20180418/streampools\nHost: streaming.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n  \"name\": \"MyStreamPool\"\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStreamPoolDetails'
+        description: The stream pool to create.
+        required: true
+  /streampools/{streamPoolId}:
+    delete:
+      description: 'Deletes a stream pool. All containing streams will also be deleted.
+
+        The default stream pool of a compartment cannot be deleted.
+
+        '
+      operationId: DeleteStreamPool
+      parameters:
+      - $ref: '#/components/parameters/StreamPoolIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      responses:
+        204:
+          description: The stream pool is being deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Deletes a stream pool.
+      tags:
+      - streamAdmin
+      x-example: 'DELETE /20180418/streampools/<var>&lt;streamPoolId&gt;</var>
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/StreamPool'
+    get:
+      description: Gets detailed information about the stream pool, such as Kafka settings.
+      operationId: GetStreamPool
+      parameters:
+      - $ref: '#/components/parameters/StreamPoolIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Success
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreamPool'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets the stream pool
+      tags:
+      - streamAdmin
+      x-example: 'GET /20180418/streampools/<var>&lt;streamPoolId&gt;</var>
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: 'Updates the specified stream pool.
+
+        '
+      operationId: UpdateStreamPool
+      parameters:
+      - $ref: '#/components/parameters/StreamPoolIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      responses:
+        200:
+          description: Updated
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreamPool'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Updates the stream pool.
+      tags:
+      - streamAdmin
+      x-example: "PUT /20180418/streampools/<var>&lt;streamPoolId&gt;</var>\nHost: streaming.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"kafkaSettings\": {\n    \"autoCreateTopicsEnable\": true,\n    \"logRetentionHours\": 24,\n    \"numPartitions\": 1\n  }\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStreamPoolDetails'
+        description: The pool is updated with the provided fields.
+        required: true
+  /streampools/{streamPoolId}/actions/changeCompartment:
+    post:
+      description: Moves a resource into a different compartment. When provided, If-Match is checked against ETag values of the resource.
+      operationId: ChangeStreamPoolCompartment
+      parameters:
+      - $ref: '#/components/parameters/StreamPoolIdPathParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        204:
+          description: The compartment has been changed.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        409:
+          $ref: '#/components/responses/409'
+        412:
+          $ref: '#/components/responses/412'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Moves a resource into a different compartment.
+      tags:
+      - streamAdmin
+      x-related-resource: '#/definitions/StreamPool'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeStreamPoolCompartmentDetails'
+        description: The stream pool will be moved into the compartment specified within this entity.
+        required: true
+  /streams:
+    get:
+      description: 'Lists the streams in the given compartment id.
+
+        If the compartment id is specified, it will list streams in the compartment, regardless of their stream pool.
+
+        If the stream pool id is specified, the action will be scoped to that stream pool.
+
+        The compartment id and stream pool id cannot be specified at the same time.
+
+        '
+      operationId: ListStreams
+      parameters:
+      - $ref: '#/components/parameters/CompartmentIdQueryOptionalParam'
+      - $ref: '#/components/parameters/StreamPoolIdQueryParam'
+      - $ref: '#/components/parameters/FilterByIdQueryParam'
+      - $ref: '#/components/parameters/FilterByNameQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/SortByQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - description: 'A filter to only return resources that match the given lifecycle state. The state value is case-insensitive.
+
+          '
+        in: query
+        name: lifecycleState
+        required: false
+        x-obmcs-enumref: '#/definitions/Stream/lifecycleState'
+        schema:
+          type: string
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: The list of streams.
+          headers:
+            opc-next-page:
+              description: For list pagination. When this header appears in the response, additional pages of results remain. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-prev-page:
+              description: For list pagination. When this header appears in the response, previous pages of results exist. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/StreamSummary'
+                type: array
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists the streams in the given compartment id.
+      tags:
+      - streamAdmin
+      x-example: 'GET /20180418/streams?compartmentId=<var>&lt;compartmentId&gt;</var>&limit=10&page=1
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: 'Starts the provisioning of a new stream.
+
+        The stream will be created in the given compartment id or stream pool id, depending on which parameter is specified.
+
+        Compartment id and stream pool id cannot be specified at the same time.
+
+        To track the progress of the provisioning, you can periodically call [GetStream](#/en/streaming/20180418/Stream/GetStream).
+
+        In the response, the `lifecycleState` parameter of the [Stream](#/en/streaming/20180418/Stream/) object tells you its current state.
+
+        '
+      operationId: CreateStream
+      parameters:
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Created
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stream'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        409:
+          description: A stream with an identical name already exists.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Creates a stream.
+      tags:
+      - streamAdmin
+      x-example: "POST /20180418/streams\nHost: streaming.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n  \"name\": \"mynewstream\",\n  \"partitions\": \"4\"\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStreamDetails'
+        description: The stream to create.
+        required: true
+  /streams/{streamId}:
+    delete:
+      description: 'Deletes a stream and its content. Stream contents are deleted immediately. The service retains records of the stream itself for 90 days after deletion.
+
+        The `lifecycleState` parameter of the `Stream` object changes to `DELETING` and the stream becomes inaccessible for read or write operations.
+
+        To verify that a stream has been deleted, make a [GetStream](#/en/streaming/20180418/Stream/GetStream) request. If the call returns the stream''s
+
+        lifecycle state as `DELETED`, then the stream has been deleted. If the call returns a "404 Not Found" error, that means all records of the
+
+        stream have been deleted.
+
+        '
+      operationId: DeleteStream
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      responses:
+        204:
+          description: The stream is being deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Deletes a stream.
+      tags:
+      - streamAdmin
+      x-example: 'DELETE /20180418/streams/<var>&lt;streamId&gt;</var>
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/Stream'
+    get:
+      description: Gets detailed information about a stream, including the number of partitions.
+      operationId: GetStream
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: Success
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stream'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Gets a stream
+      tags:
+      - streamAdmin
+      x-example: 'GET /20180418/streams/<var>&lt;streamId&gt;</var>
+
+        Host: streaming.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: 'Updates the stream. Only specified values will be updated.
+
+        '
+      operationId: UpdateStream
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      responses:
+        200:
+          description: Updated
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stream'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Updates a stream.
+      tags:
+      - streamAdmin
+      x-example: "PUT /20180418/streams/<var>&lt;streamId&gt;</var>\nHost: streaming.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"definedTags\": {\n    \"Operations\": {\n      \"CostCenter\": \"42\"\n    }\n  },\n  \"freeformTags\": {\n    \"Department\": \"Finance\"\n  },\n  \"streamPoolId\": \"ocid1.streampool.realm.region.zxcvbn432765\"\n}\n"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStreamDetails'
+        description: The stream is updated with the values provided.
+        required: true
+  /streams/{streamId}/actions/changeCompartment:
+    post:
+      description: 'Moves a resource into a different compartment.
+
+        When provided, If-Match is checked against ETag values of the resource.
+
+        The stream will also be moved into the default stream pool in the destination compartment.
+
+        '
+      operationId: ChangeStreamCompartment
+      parameters:
+      - $ref: '#/components/parameters/StreamIdPathParam'
+      - $ref: '#/components/parameters/OpcIfMatchHeaderParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        204:
+          description: Stream's compartment has been changed.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-work-request-id:
+              description: 'Unique Oracle-assigned identifier for the asynchronous request. You can use this to query
+
+                status of the asynchronous operation.
+
+                '
+              schema:
+                type: string
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        409:
+          $ref: '#/components/responses/409'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Moves a resource into a different compartment.
+      tags:
+      - streamAdmin
+      x-related-resource: '#/definitions/Stream'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeStreamCompartmentDetails'
+        description: The stream will be moved into the compartment specified within this entity.
+        required: true
+  /workRequests:
+    get:
+      description: 'Lists the work requests in a compartment.
+
+        '
+      operationId: ListWorkRequests
+      parameters:
+      - $ref: '#/components/parameters/WorkRequestIdQueryOptionalParam'
+      - $ref: '#/components/parameters/CompartmentIdQueryOptionalParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/WorkRequestSortByQueryParam'
+      - $ref: '#/components/parameters/ResourceIdentifierQueryParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: The list of work requests was retrieved.
+          headers:
+            opc-next-page:
+              description: For list pagination. When this header appears in the response, additional pages of results remain. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-prev-page:
+              description: For list pagination. When this header appears in the response, previous pages of results exist. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequestSummaryCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: List Work Requests
+      tags:
+      - streamAdmin
+      x-obmcs-client-retries-enabled: true
+  /workRequests/{workRequestId}:
+    get:
+      description: Gets the details of a work request.
+      operationId: GetWorkRequest
+      parameters:
+      - $ref: '#/components/parameters/WorkRequestIdPathParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: The work request was retrieved.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequest'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: GET Work Request Status
+      tags:
+      - streamAdmin
+      x-obmcs-client-retries-enabled: true
+  /workRequests/{workRequestId}/errors:
+    get:
+      description: 'Lists the errors for a work request.
+
+        '
+      operationId: ListWorkRequestErrors
+      parameters:
+      - $ref: '#/components/parameters/WorkRequestIdPathParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/WorkRequestSortByQueryParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: The list of work request errors was retrieved.
+          headers:
+            opc-next-page:
+              description: For list pagination. When this header appears in the response, additional pages of results remain. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-prev-page:
+              description: For list pagination. When this header appears in the response, previous pages of results exist. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequestErrorCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists work request errors
+      tags:
+      - streamAdmin
+      x-obmcs-client-retries-enabled: true
+  /workRequests/{workRequestId}/logs:
+    get:
+      description: 'Lists the logs for a work request.
+
+        '
+      operationId: ListWorkRequestLogs
+      parameters:
+      - $ref: '#/components/parameters/WorkRequestIdPathParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/SortOrderQueryParam'
+      - $ref: '#/components/parameters/WorkRequestSortByQueryParam'
+      - $ref: '#/components/parameters/OpcRequestIdHeaderParam'
+      responses:
+        200:
+          description: The list of work request logs.
+          headers:
+            opc-next-page:
+              description: For list pagination. When this header appears in the response, additional pages of results remain. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-prev-page:
+              description: For list pagination. When this header appears in the response, previous pages of results exist. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkRequestLogEntryCollection'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Lists work request logs
+      tags:
+      - streamAdmin
+      x-obmcs-client-retries-enabled: true
+      x-related-resource: '#/definitions/WorkRequestLogEntry'
+components:
+  schemas:
+    UpdateConnectHarnessDetails:
+      description: Object used to update a connect harness.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      type: object
+    ChangeConnectHarnessCompartmentDetails:
+      description: Detailed representation of a change connect harness compartment operation.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    CreateStreamPoolDetails:
+      description: Object used to create a stream pool.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains the stream.
+          example: ocid1.compinstance.realm.region.zxcvbn432765
+          maxLength: 1024
+          minLength: 1
+          type: string
+        customEncryptionKeyDetails:
+          $ref: '#/components/schemas/CustomEncryptionKeyDetails'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        kafkaSettings:
+          $ref: '#/components/schemas/KafkaSettings'
+        name:
+          description: 'The name of the stream pool. Avoid entering confidential information.
+
+
+            Example: `MyStreamPool`
+
+            '
+          example: MyStreamPool
+          maxLength: 1024
+          minLength: 1
+          type: string
+        privateEndpointDetails:
+          $ref: '#/components/schemas/PrivateEndpointDetails'
+        securityAttributes:
+          additionalProperties:
+            additionalProperties:
+              description: 'Attribute value and mode. Only the String type is supported for value. Mode is currently always "enforce".
+
+                '
+              type: object
+            description: 'Key-value pair representing a security attribute key and value, scoped to a namespace.
+
+
+              Example: `{"MaxEgressCount": {"value": "42", "mode": "enforce"}}`
+
+              '
+            type: object
+          description: 'Security attributes for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+
+            '
+          type: object
+      required:
+      - name
+      - compartmentId
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n  \"name\": \"MyStreamPool\",\n  \"kafkaSettings\": {\n    \"autoCreateTopicsEnable\": false\n  }\n"
+    Error:
+      description: The representation of an error.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    StreamPool:
+      description: The details of a stream pool.
+      properties:
+        compartmentId:
+          description: Compartment OCID that the pool belongs to.
+          example: ocid1.compartment.oc1..aaaaaaaa2byuam5ewxzrcs2iqzh7okx84jae6j4uhkih5wdbrkkwuxv3qgpa
+          type: string
+        customEncryptionKey:
+          $ref: '#/components/schemas/CustomEncryptionKey'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}''
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}''
+
+            '
+          type: object
+        endpointFqdn:
+          description: 'The FQDN used to access the streams inside the stream pool (same FQDN as the messagesEndpoint attribute of a [Stream](#/en/streaming/20180418/Stream) object).
+
+            If the stream pool is private, the FQDN is customized and can only be accessed from inside the associated subnetId, otherwise the FQDN is publicly resolvable.
+
+            Depending on which protocol you attempt to use, you need to either prepend https or append the Kafka port.
+
+            '
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the stream pool.
+          example: ocid1.streampool.realm.region.mnopqr789
+          type: string
+        isPrivate:
+          description: 'True if the stream pool is private, false otherwise.
+
+            If the stream pool is private, the streams inside the stream pool can only be accessed from inside the associated subnetId.
+
+            '
+          type: boolean
+        kafkaSettings:
+          $ref: '#/components/schemas/KafkaSettings'
+        lifecycleState:
+          description: The current state of the stream pool.
+          enum:
+          - CREATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          - UPDATING
+          type: string
+        lifecycleStateDetails:
+          description: Any additional details about the current state of the stream.
+          type: string
+        name:
+          description: The name of the stream pool.
+          example: MyStreamPool
+          type: string
+        privateEndpointSettings:
+          $ref: '#/components/schemas/PrivateEndpointSettings'
+        securityAttributes:
+          additionalProperties:
+            additionalProperties:
+              description: 'Attribute value and mode. Only the String type is supported for value. Mode is currently always "enforce".
+
+                '
+              type: object
+            description: 'Key-value pair representing a security attribute key and value, scoped to a namespace.
+
+
+              Example: `{"MaxEgressCount": {"value": "42", "mode": "enforce"}}`
+
+              '
+            type: object
+          description: 'Security attributes for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the stream pool was created, expressed in in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - name
+      - kafkaSettings
+      - customEncryptionKey
+      - lifecycleState
+      - timeCreated
+      type: object
+      x-example: "{\n  \"id\": \"ocid1.streampool.realm.region.mnopqr789\",\n  \"compartmentId\": \"ocid1.compartment.oc1..aaaaaaaa2byuam5ewxzrcs2iqzh7okx84jae6j4uhkih5wdbrkkwuxv3qgpa\",\n  \"name\": \"MyStreamPool\",\n  \"kafkaSettings\": {\n    \"autoCreateTopicsEnable\": true,\n    \"logRetentionHours\": 24,\n    \"numPartitions\": 1,\n  },\n  \"freeformTags\": {},\n  \"definedTags\": {}\n}\n"
+    CustomEncryptionKeyDetails:
+      description: The OCID of the custom encryption key to be used or deleted if currently being used.
+      properties:
+        kmsKeyId:
+          description: Custom Encryption Key (Master Key) ocid.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+      - kmsKeyId
+      type: object
+    UpdateStreamDetails:
+      description: Object used to update a stream.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        streamPoolId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the stream pool where the stream should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    ConnectHarness:
+      description: Detailed representation of a connect harness.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains the connect harness.
+          example: ocid1.compartment.realm.region.zxcvbn432765
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}''
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}''
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the connect harness.
+          example: ocid1.connectharness.realm.region.mnopqr789
+          type: string
+        lifecycleState:
+          description: The current state of the connect harness.
+          enum:
+          - CREATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          - UPDATING
+          type: string
+        lifecycleStateDetails:
+          description: Any additional details about the current state of the connect harness.
+          type: string
+        name:
+          description: 'The name of the connect harness. Avoid entering confidential information.
+
+
+            Example: `JDBCConnector`
+
+            '
+          example: TelemetryEvents
+          type: string
+        timeCreated:
+          description: 'The date and time the connect harness was created, expressed in in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - name
+      - id
+      - compartmentId
+      - lifecycleState
+      - timeCreated
+      type: object
+      x-example: "{\n  \"name\": \"mynewstream\",\n  \"id\": \"ocid1.stream.oc1..exampleakzxrjqcvbj2rpflj6xqnej3gus4xse3fxmnfauxbdtovpuhywnua\",\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n  \"lifecycleState\": \"CREATING\",\n  \"timeCreated\": \"2018-04-25T23:28:30.629Z\",\n  \"messagesEndpoint\": \"https://streaming-api-1.us-phoenix-1.oraclecloud.com\",\n  \"freeformTags\": { },\n  \"definedTags\": { }\n}\n"
+    StreamSummary:
+      description: Summary representation of a stream.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains the stream.
+          example: ocid1.compinstance.realm.region.zxcvbn432765
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the stream.
+          example: ocid1.stream.realm.region.mnopqr789
+          type: string
+        lifecycleState:
+          description: The current state of the stream.
+          enum:
+          - CREATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          - UPDATING
+          type: string
+        messagesEndpoint:
+          description: 'The endpoint to use when creating the StreamClient to consume or publish messages in the stream.
+
+            If the associated stream pool is private, the endpoint is also private and can only be accessed from inside the stream pool''s associated subnet.
+
+            '
+          type: string
+        name:
+          description: 'The name of the stream.
+
+
+            Example: `TelemetryEvents`
+
+            '
+          example: TelemetryEvents
+          type: string
+        partitions:
+          description: The number of partitions in the stream.
+          example: 10
+          type: integer
+        streamPoolId:
+          description: The OCID of the stream pool that contains the stream.
+          example: ocid1.streampool.realm.region.zxcvbn432765
+          type: string
+        timeCreated:
+          description: 'The date and time the stream was created, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - name
+      - id
+      - partitions
+      - compartmentId
+      - lifecycleState
+      - timeCreated
+      - messagesEndpoint
+      - streamPoolId
+      type: object
+      x-example: "[\n  {\n    \"name\": \"mynewstream\",\n    \"id\": \"ocid1.stream.oc1..exampleakzxrjqcvbj2rpflj6xqnej3gus4xse3fxmnfauxbdtovpuhywnua\",\n    \"partitions\": 4,\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n    \"lifecycleState\": \"ACTIVE\",\n    \"timeCreated\": \"2018-04-25T23:28:30.629Z\",\n    \"messagesEndpoint\": \"https://streaming-api-1.us-phoenix-1.oraclecloud.com\",\n    \"freeformTags\": {\n      \"Department\": \"Finance\"\n      },\n    \"definedTags\":\n    {\n      \"MyNamespace\":\n      {\n        \"CostCenter\": \"42\"\n      }\n    }\n  },\n  {\n    \"name\": \"Stream1\",\n    \"id\": \"ocid1.stream.oc1..exampleak737ys3cvb5xs42lbuy3qr3wiqmfaux5ugnn7wmpvb4d2sgk7dmq\",\n    \"partitions\": 1,\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n    \"lifecycleState\": \"ACTIVE\",\n    \"timeCreated\": \"2018-04-25T15:35:07.306Z\",\n    \"messagesEndpoint\": \"https://streaming-api-1.us-phoenix-1.oraclecloud.com\",\n    \"freeformTags\": { },\n    \"definedTags\": { }\n  }\n]\n"
+    StreamPoolSummary:
+      description: The summary representation of a stream pool.
+      properties:
+        compartmentId:
+          description: Compartment OCID that the pool belongs to.
+          example: ocid1.compartment.oc1..aaaaaaaa2byuam5ewxzrcs2iqzh7okx84jae6j4uhkih5wdbrkkwuxv3qgpa
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the stream pool.
+          example: ocid1.streampool.realm.region.mnopqr789
+          type: string
+        isPrivate:
+          description: 'True if the stream pool is private, false otherwise.
+
+            The associated endpoint and subnetId of a private stream pool can be retrieved through the [GetStreamPool](#/en/streaming/20180418/StreamPool/GetStreamPool) API.
+
+            '
+          type: boolean
+        lifecycleState:
+          description: The current state of the stream pool.
+          enum:
+          - CREATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          - UPDATING
+          type: string
+        name:
+          description: The name of the stream pool.
+          example: MyStreamPool
+          type: string
+        securityAttributes:
+          additionalProperties:
+            additionalProperties:
+              description: 'Attribute value and mode. Only the String type is supported for value. Mode is currently always "enforce".
+
+                '
+              type: object
+            description: 'Key-value pair representing a security attribute key and value, scoped to a namespace.
+
+
+              Example: `{"MaxEgressCount": {"value": "42", "mode": "enforce"}}`
+
+              '
+            type: object
+          description: 'Security attributes for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the stream pool was created, expressed in in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - name
+      - lifecycleState
+      - timeCreated
+      type: object
+      x-example: "{\n  \"id\": \"ocid1.streampool.realm.region.mnopqr789\",\n  \"compartmentId\": \"ocid1.compartment.oc1..aaaaaaaa2byuam5ewxzrcs2iqzh7okx84jae6j4uhkih5wdbrkkwuxv3qgpa\",\n  \"name\": \"MyStreamPool\"\n}\n"
+    ChangeStreamPoolCompartmentDetails:
+      description: Detailed representation of a change stream pool compartment operation.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    ChangeStreamCompartmentDetails:
+      description: Detailed representation of a change stream compartment operation.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    UpdateStreamPoolDetails:
+      description: Object used to update the stream pool's details.
+      properties:
+        customEncryptionKeyDetails:
+          $ref: '#/components/schemas/CustomEncryptionKeyDetails'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        kafkaSettings:
+          $ref: '#/components/schemas/KafkaSettings'
+        name:
+          description: 'The name of the stream pool. Avoid entering confidential information.
+
+
+            Example: `MyStreamPool`
+
+            '
+          maxLength: 1024
+          minLength: 1
+          type: string
+        securityAttributes:
+          additionalProperties:
+            additionalProperties:
+              description: 'Attribute value and mode. Only the String type is supported for value. Mode is currently always "enforce".
+
+                '
+              type: object
+            description: 'Key-value pair representing a security attribute key and value, scoped to a namespace.
+
+
+              Example: `{"MaxEgressCount": {"value": "42", "mode": "enforce"}}`
+
+              '
+            type: object
+          description: 'Security attributes for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
+
+            '
+          type: object
+      type: object
+    PrivateEndpointDetails:
+      description: Optional parameters if a private stream pool is requested.
+      properties:
+        nsgIds:
+          description: 'The optional list of network security groups to be used with the private endpoint of the stream pool.
+
+            That value cannot be changed.
+
+            '
+          items:
+            type: string
+          maxLength: 1024
+          minLength: 1
+          type: array
+          uniqueItems: true
+        privateEndpointIp:
+          description: 'The optional private IP you want to be associated with your private stream pool.
+
+            That parameter can only be specified when the subnetId parameter is set. It cannot be changed.
+
+            The private IP needs to be part of the CIDR range of the specified subnetId or the creation will fail.
+
+            If not specified a random IP inside the subnet will be chosen.
+
+            After the stream pool is created, a custom FQDN, pointing to this private IP, is created.
+
+            The FQDN is then used to access the service instead of the private IP.
+
+            '
+          example: 10.0.0.5
+          type: string
+        subnetId:
+          description: 'If specified, the stream pool will be private and only accessible from inside that subnet.
+
+            Producing-to and consuming-from a stream inside a private stream pool can also only be done from inside the subnet.
+
+            That value cannot be changed.
+
+            '
+          example: ocid1.subnet.realm.region.zxcvbn432765
+          maxLength: 1024
+          minLength: 1
+          type: string
+      type: object
+    CustomEncryptionKey:
+      description: Custom Encryption Key which will be used for encryption by all the streams in the pool.
+      properties:
+        keyState:
+          description: Life cycle State of the custom key
+          enum:
+          - ACTIVE
+          - CREATING
+          - DELETING
+          - NONE
+          - FAILED
+          - UPDATING
+          type: string
+        kmsKeyId:
+          description: Custom Encryption Key (Master Key) ocid.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      type: object
+    WorkRequestSummaryCollection:
+      description: A list of work requests. Can contain both work requests and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work requests.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the operation tracked in the work request.
+
+            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
+
+            work is complete for that resource, at which point it transitions to CREATED, UPDATED,
+
+            or DELETED, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - RELATED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type that the work request affects.
+          type: string
+        entityUri:
+          description: The URI path that you can use for a GET request to access the resource metadata
+          type: string
+        identifier:
+          description: An [OCID](/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource.
+          type: string
+      required:
+      - actionType
+      - entityType
+      - identifier
+      type: object
+    ConnectHarnessSummary:
+      description: Summary representation of a ConnectHarness.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains the connect harness.
+          example: ocid1.compartment.realm.region.zxcvbn432765
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the connect harness.
+          example: ocid1.connectharness.realm.region.mnopqr789
+          type: string
+        lifecycleState:
+          description: The current state of the connect harness.
+          enum:
+          - CREATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          - UPDATING
+          type: string
+        name:
+          description: 'The name of the connect harness.
+
+
+            Example: `TelemetryEvents`
+
+            '
+          example: TelemetryEvents
+          type: string
+        timeCreated:
+          description: 'The date and time the connect harness was created, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - name
+      - id
+      - compartmentId
+      - lifecycleState
+      - timeCreated
+      type: object
+      x-example: "[\n  {\n    \"name\": \"config-topic\",\n    \"id\": \"ocid1.connectharness.oc1..exampleakzxrjqcvbj2rpflj6xqnej3gus4xse3fxmnfauxbdtovpuhywnua\",\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n    \"lifecycleState\": \"ACTIVE\",\n    \"timeCreated\": \"2018-04-25T23:28:30.629Z\",\n    \"messagesEndpoint\": \"https://streaming-api-1.us-phoenix-1.oraclecloud.com\",\n    \"freeformTags\": {\n      \"Department\": \"Finance\"\n      },\n    \"definedTags\":\n    {\n      \"MyNamespace\":\n      {\n        \"CostCenter\": \"42\"\n      }\n    }\n  },\n  {\n    \"name\": \"status-topic\",\n    \"id\": \"ocid1.connectharness.oc1..exampleak737ys3cvb5xs42lbuy3qr3wiqmfaux5ugnn7wmpvb4d2sgk7dmq\",\n    \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n    \"lifecycleState\": \"ACTIVE\",\n    \"timeCreated\": \"2018-04-25T15:35:07.306Z\",\n    \"messagesEndpoint\": \"https://streaming-api-1.us-phoenix-1.oraclecloud.com\",\n    \"freeformTags\": { },\n    \"definedTags\": { }\n  }\n]\n"
+    CreateConnectHarnessDetails:
+      description: Object used to create a connect harness.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains the connect harness.
+          example: ocid1.compartment.realm.region.zxcvbn432765
+          maxLength: 1024
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        name:
+          description: 'The name of the connect harness. Avoid entering confidential information.
+
+
+            Example: `JDBCConnector`
+
+            '
+          example: JDBCConnector
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+      - name
+      - compartmentId
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n  \"name\": \"jdbcconnector\"\n}\n"
+    WorkRequestErrorCollection:
+      description: A list of work request errors. Can contain both errors and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work request errors.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    KafkaSettings:
+      description: Settings for the Kafka compatibility layer.
+      properties:
+        autoCreateTopicsEnable:
+          description: Enable auto creation of topic on the server.
+          type: boolean
+        bootstrapServers:
+          description: Bootstrap servers.
+          type: string
+        logRetentionHours:
+          description: The number of hours to keep a log file before deleting it (in hours).
+          maximum: 672
+          minimum: 1
+          type: integer
+        numPartitions:
+          description: The default number of log partitions per topic.
+          minimum: 1
+          type: integer
+      type: object
+    WorkRequestSummary:
+      description: 'An asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
+
+        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
+
+        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
+
+            '
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+          type: string
+        operationType:
+          description: The asynchronous operation tracked by this work request.
+          enum:
+          - CREATE_STREAM
+          - UPDATE_STREAM
+          - DELETE_STREAM
+          - CREATE_STREAM_POOL
+          - UPDATE_STREAM_POOL
+          - DELETE_STREAM_POOL
+          - CREATE_CONNECT_HARNESS
+          - UPDATE_CONNECT_HARNESS
+          - DELETE_CONNECT_HARNESS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
+
+            that must be performed.
+
+            '
+          format: float
+          type: number
+        resources:
+          description: The resources that are affected by the work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+      type: object
+    WorkRequestError:
+      description: An error encountered while performing an operation that is tracked by a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
+
+            [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+        timestamp:
+          description: The date and time the error occurred, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+      type: object
+    CreateStreamDetails:
+      description: Object used to create a stream.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains the stream.
+          example: ocid1.compinstance.realm.region.zxcvbn432765
+          maxLength: 1024
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair that is applied with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        name:
+          description: 'The name of the stream. Avoid entering confidential information.
+
+
+            Example: `TelemetryEvents`
+
+            '
+          example: TelemetryEvents
+          maxLength: 1024
+          minLength: 1
+          type: string
+        partitions:
+          description: The number of partitions in the stream.
+          example: 1
+          minimum: 1
+          type: integer
+        retentionInHours:
+          description: 'The retention period of the stream, in hours. Accepted values are between 24 and 168 (7 days).
+
+            If not specified, the stream will have a retention period of 24 hours.
+
+            '
+          example: 24
+          type: integer
+        streamPoolId:
+          description: The OCID of the stream pool that contains the stream.
+          example: ocid1.streampool.realm.region.zxcvbn432765
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+      - name
+      - partitions
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n  \"name\": \"mynewstream\",\n  \"partitions\": \"4\"\n}\n"
+    Stream:
+      description: Detailed representation of a stream, including all its partitions.
+      properties:
+        compartmentId:
+          description: The OCID of the stream.
+          example: ocid1.compinstance.realm.region.zxcvbn432765
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}''
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}''
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. Exists for cross-compatibility only.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the stream.
+          example: ocid1.stream.realm.region.mnopqr789
+          type: string
+        lifecycleState:
+          description: The current state of the stream.
+          enum:
+          - CREATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          - UPDATING
+          type: string
+        lifecycleStateDetails:
+          description: Any additional details about the current state of the stream.
+          type: string
+        messagesEndpoint:
+          description: 'The endpoint to use when creating the StreamClient to consume or publish messages in the stream.
+
+            If the associated stream pool is private, the endpoint is also private and can only be accessed from inside the stream pool''s associated subnet.
+
+            '
+          type: string
+        name:
+          description: 'The name of the stream. Avoid entering confidential information.
+
+
+            Example: `TelemetryEvents`
+
+            '
+          example: TelemetryEvents
+          type: string
+        partitions:
+          description: The number of partitions in the stream.
+          example: 10
+          type: integer
+        retentionInHours:
+          description: The retention period of the stream, in hours. This property is read-only.
+          example: 24
+          type: integer
+        streamPoolId:
+          description: The OCID of the stream pool that contains the stream.
+          example: ocid1.streampool.realm.region.zxcvbn432765
+          type: string
+        timeCreated:
+          description: 'The date and time the stream was created, expressed in in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - name
+      - id
+      - partitions
+      - compartmentId
+      - streamPoolId
+      - lifecycleState
+      - timeCreated
+      - retentionInHours
+      - messagesEndpoint
+      type: object
+      x-example: "{\n  \"name\": \"mynewstream\",\n  \"id\": \"ocid1.stream.oc1..exampleakzxrjqcvbj2rpflj6xqnej3gus4xse3fxmnfauxbdtovpuhywnua\",\n  \"partitions\": 4,\n  \"retentionInHours\": 24,\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleasgadvsw7l6cvb4fhssurjqs4irbkzma3wc2fauxv4novazj5guta\",\n  \"lifecycleState\": \"CREATING\",\n  \"timeCreated\": \"2018-04-25T23:28:30.629Z\",\n  \"messagesEndpoint\": \"https://streaming-api-1.us-phoenix-1.oraclecloud.com\",\n  \"freeformTags\": { },\n  \"definedTags\": { }\n}\n"
+    PrivateEndpointSettings:
+      description: Optional settings if the stream pool is private.
+      properties:
+        nsgIds:
+          description: The optional list of network security groups that are associated with the private endpoint of the stream pool.
+          items:
+            type: string
+          maxLength: 1024
+          minLength: 1
+          type: array
+          uniqueItems: true
+        privateEndpointIp:
+          description: 'The private IP associated with the stream pool in the associated subnetId.
+
+            The stream pool''s FQDN resolves to that IP and should be used - instead of the private IP - in order to not trigger any TLS issues.
+
+            '
+          example: 10.0.0.5
+          type: string
+        subnetId:
+          description: 'The subnet id from which the private stream pool can be accessed.
+
+            Trying to access the streams from another network location will result in an error.
+
+            '
+          example: ocid1.subnet.realm.region.zxcvbn432765
+          type: string
+      type: object
+    WorkRequestLogEntry:
+      description: A log message from performing an operation that is tracked by a work request.
+      properties:
+        message:
+          description: A human-readable log message.
+          type: string
+        timestamp:
+          description: The date and time the log message was written, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+      type: object
+    WorkRequestLogEntryCollection:
+      description: A list of work request logs. Can contain both logs and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work request log entries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequest:
+      description: 'An asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
+
+        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
+
+        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
+
+            '
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+          type: string
+        operationType:
+          description: The asynchronous operation tracked by this work request.
+          enum:
+          - CREATE_STREAM
+          - UPDATE_STREAM
+          - DELETE_STREAM
+          - CREATE_STREAM_POOL
+          - UPDATE_STREAM_POOL
+          - DELETE_STREAM_POOL
+          - CREATE_CONNECT_HARNESS
+          - UPDATE_CONNECT_HARNESS
+          - DELETE_CONNECT_HARNESS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
+
+            that must be performed.
+
+            '
+          format: float
+          type: number
+        resources:
+          description: The resources that are affected by the work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+      type: object
+  parameters:
+    OpcIfMatchHeaderParam:
+      description: For optimistic concurrency control. In the PUT or DELETE call for a resource, set the if-match parameter to the value of the etag from a previous GET or POST response for that resource. The resource will be updated or deleted only if the etag you provide matches the resource's current etag value.
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+    PaginationTokenQueryParam:
+      description: The page at which to start retrieving results.
+      in: query
+      name: page
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide no more than one sort order. By default, `TIMECREATED` sorts results in descending order and `NAME` sorts results in ascending order.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      x-default-description: By default, TIMECREATED is used to sort by.
+      schema:
+        type: string
+        enum:
+        - NAME
+        - TIMECREATED
+    ResourceIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    FilterByIdQueryParam:
+      description: 'A filter to return only resources that match the given ID exactly.
+
+        '
+      in: query
+      name: id
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    OpcRetryTokenHeaderParam:
+      description: A token that uniquely identifies a request so it can be retried in case of a timeout or server error without risk of executing that same action again. Retry tokens expire after 24 hours, but can be invalidated before then due to conflicting operations (for example, if a resource has been deleted and purged from the system, then a retry of the original creation request may be rejected).
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return. The value must be between 1 and 50. The default is 10.
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        default: 10
+        maximum: 50
+        minimum: 1
+    StreamPoolIdQueryParam:
+      description: The OCID of the stream pool. Is exclusive with the `compartmentId` parameter. One of them is required.
+      in: query
+      name: streamPoolId
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    WorkRequestIdQueryOptionalParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: query
+      name: workRequestId
+      required: false
+      schema:
+        type: string
+    FilterByNameQueryParam:
+      description: 'A filter to return only resources that match the given name exactly.
+
+        '
+      in: query
+      name: name
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    StreamIdPathParam:
+      description: 'The OCID of the stream.
+
+        '
+      in: path
+      name: streamId
+      required: true
+      schema:
+        type: string
+        maxLength: 256
+        minLength: 1
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ''asc'' or ''desc''.
+
+        '
+      in: query
+      name: sortOrder
+      required: false
+      x-default-description: For time-based fields, the default sort order is `DESC` (descending). For all others, it is `ASC` (ascending).
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    OpcRequestIdHeaderParam:
+      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    StreamPoolIdPathParam:
+      description: 'The OCID of the stream pool.
+
+        '
+      in: path
+      name: streamPoolId
+      required: true
+      schema:
+        type: string
+        maxLength: 256
+        minLength: 1
+    ConnectHarnessIdPathParam:
+      description: 'The OCID of the connect harness.
+
+        '
+      in: path
+      name: connectHarnessId
+      required: true
+      schema:
+        type: string
+        maxLength: 256
+        minLength: 1
+    CompartmentIdQueryOptionalParam:
+      description: The OCID of the compartment. Is exclusive with the `streamPoolId` parameter. One of them is required.
+      in: query
+      name: compartmentId
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIMEACCEPTED
+        default: TIMEACCEPTED
+  responses:
+    DefaultError:
+      description: An error has occurred
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+            a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-oracle-package: com.oracle.pic.oss.api

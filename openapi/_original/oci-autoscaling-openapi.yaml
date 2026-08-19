@@ -1,0 +1,1709 @@
+swagger: '2.0'
+info:
+  description: 'Use the Autoscaling API to dynamically scale compute resources to meet application requirements.
+    For more information about
+
+    autoscaling, see [Autoscaling](/Content/Compute/Tasks/autoscalinginstancepools.htm). For information
+    about the
+
+    Compute service, see [Compute](/Content/Compute/home.htm).
+
+    '
+  title: Autoscaling API
+  version: '20181001'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/413902c2f198bba0a2c9aad62a4454040fa6d057036747336477142eadcf1214.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Autoscaling API OCI service and stored verbatim;
+      API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/413902c2f198bba0a2c9aad62a4454040fa6d057036747336477142eadcf1214.yaml
+    what: the harvested document for Autoscaling API
+basePath: /20181001
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+tags:
+- description: Autoscaling Service
+  name: autoScaling
+paths:
+  /autoScalingConfigurations:
+    get:
+      description: 'Lists autoscaling configurations in the specifed compartment.
+
+        '
+      operationId: ListAutoScalingConfigurations
+      parameters:
+      - $ref: '#/parameters/CompartmentIdQueryParam'
+      - $ref: '#/parameters/FilterByDisplayNameQueryParam'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      responses:
+        200:
+          description: The list is being retrieved.
+          headers:
+            opc-next-page:
+              description: 'For list pagination. When this header appears in the response, additional
+                pages of results remain.
+
+                For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            items:
+              $ref: '#/definitions/AutoScalingConfigurationSummary'
+            type: array
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: ListAutoScalingConfigurations
+      tags:
+      - autoScaling
+      x-example: 'GET /20181001/autoScalingConfigurations?compartmentId=<var>&lt;compartment_OCID&gt;</var>
+
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    post:
+      description: Creates an autoscaling configuration.
+      operationId: CreateAutoScalingConfiguration
+      parameters:
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - description: Creation details for an autoscaling configuration.
+        in: body
+        name: CreateAutoScalingConfigurationDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateAutoScalingConfigurationDetails'
+      responses:
+        200:
+          description: The created object is returned.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/AutoScalingConfiguration'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: CreateAutoScalingConfiguration
+      tags:
+      - autoScaling
+      x-example: "Example: Create a threshold-based autoscaling configuration\nPOST /20181001/autoScalingConfigurations\n\
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n\
+        {\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"displayName\"\
+        : \"example_threshold_autoscaling_configuration\",\n  \"coolDownInSeconds\": 300,\n  \"isEnabled\"\
+        : true,\n  \"policies\": [\n    {\n      \"capacity\": {\n        \"max\": 50,\n        \"min\"\
+        : 10,\n        \"initial\": 15\n      },\n      \"displayName\": \"example_autoscaling_policy\"\
+        ,\n      \"policyType\": \"threshold\",\n      \"rules\": [\n        {\n          \"action\":\
+        \ {\n            \"type\": \"CHANGE_COUNT_BY\",\n            \"value\": 5\n          },\n    \
+        \      \"displayName\": \"example_scale_out_condition\",\n          \"metric\": {\n          \
+        \  \"metricType\": \"CPU_UTILIZATION\",\n            \"threshold\": {\n              \"operator\"\
+        : \"GTE\",\n              \"value\": 90\n            }\n          }\n        },\n        {\n \
+        \         \"action\": {\n            \"type\": \"CHANGE_COUNT_BY\",\n            \"value\": -5\n\
+        \          },\n          \"displayName\": \"example_scale_in_condition\",\n          \"metric\"\
+        : {\n            \"metricType\": \"CPU_UTILIZATION\",\n            \"threshold\": {\n        \
+        \      \"operator\": \"LTE\",\n              \"value\": 25\n            }\n          }\n     \
+        \   }\n      ]\n    }\n  ],\n  \"resource\": {\n    \"type\": \"instancePool\",\n    \"id\": \"\
+        ocid1.instancepool.oc1..<var>&lt;unique_ID&gt;</var>\"\n  }\n}\n\nExample: Create a schedule-based\
+        \ autoscaling configuration\nPOST /20181001/autoScalingConfigurations\nHost: autoscaling.us-phoenix-1.oci.oraclecloud.com\n\
+        <var>&lt;authorization and other headers&gt;</var>\n{\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\"\
+        ,\n  \"displayName\": \"example_scheduled_autoscaling_configuration\",\n  \"isEnabled\": true,\n\
+        \  \"policies\": [\n    {\n      \"policyType\": \"scheduled\",\n      \"capacity\": {\n     \
+        \   \"initial\": \"100\"\n      },\n      \"displayName\": \"example_scale_out_schedule\",\n \
+        \     \"isEnabled\": true,\n      \"executionSchedule\": {\n        \"type\": \"cron\",\n    \
+        \    \"expression\": \"0 0 8 ? * MON-FRI *\",\n        \"timezone\": \"UTC\"\n      }\n    },\n\
+        \    {\n      \"policyType\": \"scheduled\",\n      \"capacity\": {\n        \"initial\": \"20\"\
+        \n      },\n      \"displayName\": \"example_scale_in_schedule\",\n      \"isEnabled\": true,\n\
+        \      \"executionSchedule\": {\n        \"type\": \"cron\",\n        \"expression\": \"0 0 18\
+        \ ? * MON-FRI *\",\n        \"timezone\": \"UTC\"\n      }\n    }\n  ],\n  \"resource\": {\n \
+        \   \"type\": \"instancePool\",\n    \"id\": \"ocid1.instancepool.oc1.iad.<var>&lt;unique_ID&gt;</var>\"\
+        \n  }\n}\n"
+  /autoScalingConfigurations/{autoScalingConfigurationId}:
+    delete:
+      description: Deletes an autoscaling configuration.
+      operationId: DeleteAutoScalingConfiguration
+      parameters:
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      responses:
+        204:
+          description: The autoscaling configuration is being deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: DeleteAutoScalingConfiguration
+      tags:
+      - autoScaling
+      x-example: 'DELETE /20181001/autoScalingConfigurations/<var>&lt;autoscaling_configuration_ID&gt;</var>
+
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/AutoScalingConfiguration'
+    get:
+      description: Gets information about the specified autoscaling configuration.
+      operationId: GetAutoScalingConfiguration
+      parameters:
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      responses:
+        200:
+          description: The autoscaling configuration was retrieved.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/AutoScalingConfiguration'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: GetAutoScalingConfiguration
+      tags:
+      - autoScaling
+      x-example: 'GET /20181001/autoScalingConfigurations/<var>&lt;autoscaling_configuration_ID&gt;</var>
+
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: 'Updates certain fields on the specified autoscaling configuration, such as the name,
+        the cooldown period,
+
+        and whether the autoscaling configuration is enabled.
+
+        '
+      operationId: UpdateAutoScalingConfiguration
+      parameters:
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - description: Update details for an autoscaling configuration.
+        in: body
+        name: UpdateAutoScalingConfigurationDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateAutoScalingConfigurationDetails'
+      responses:
+        200:
+          description: The updated autoscaling configuration.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/AutoScalingConfiguration'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: UpdateAutoScalingConfiguration
+      tags:
+      - autoScaling
+      x-example: "PUT /20181001/autoScalingConfigurations/<var>&lt;autoscaling_configuration_ID&gt;</var>\n\
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n\
+        {\n  \"displayName\": \"example_autoscaling_configuration\",\n  \"isEnabled\": false,\n  \"coolDownInSeconds\"\
+        : 600\n}\n"
+  /autoScalingConfigurations/{autoScalingConfigurationId}/actions/changeCompartment:
+    post:
+      description: 'Moves an autoscaling configuration into a different compartment within the same tenancy.
+        For information
+
+        about moving resources between compartments, see
+
+        [Moving Resources to a Different Compartment](/iaas/Content/Identity/Tasks/managingcompartments.htm#moveRes).
+
+
+        When you move an autoscaling configuration to a different compartment, associated resources such
+        as instance
+
+        pools are not moved.
+
+        '
+      operationId: ChangeAutoScalingConfigurationCompartment
+      parameters:
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - description: Request to change the compartment of given autoscaling configuration.
+        in: body
+        name: ChangeCompartmentDetails
+        required: true
+        schema:
+          $ref: '#/definitions/ChangeAutoScalingCompartmentDetails'
+      responses:
+        204:
+          description: The resource was moved.
+          headers:
+            etag:
+              description: 'The resulting etag of the autoscaling configuration affected by this operation.
+
+                For optimistic concurrency control. See `if-match`.
+
+                '
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: ChangeAutoScalingConfigurationCompartment
+      tags:
+      - autoScaling
+      x-example: "POST /20181001/autoScalingConfigurations/<var>&lt;autoscaling_configuration_OCID&gt;</var>/actions/changeCompartment\n\
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n\
+        {\n    \"compartmentId\": \"ocid1.compartment.oc1..&lt;unique_ID&gt;\"\n}\n"
+      x-related-resource: '#/definitions/AutoScalingConfiguration'
+  /autoScalingConfigurations/{autoScalingConfigurationId}/policies:
+    get:
+      description: 'Lists the autoscaling policies in the specified autoscaling configuration.
+
+        '
+      operationId: ListAutoScalingPolicies
+      parameters:
+      - $ref: '#/parameters/FilterByDisplayNameQueryParam'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/SortByQueryParam'
+      - $ref: '#/parameters/SortOrderQueryParam'
+      responses:
+        200:
+          description: The list is being retrieved.
+          headers:
+            opc-next-page:
+              description: 'For list pagination. When this header appears in the response, additional
+                pages of results remain.
+
+                For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            items:
+              $ref: '#/definitions/AutoScalingPolicySummary'
+            type: array
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: ListAutoScalingPolicies
+      tags:
+      - autoScaling
+      x-example: 'GET /20181001/autoScalingConfigurations/<var>&lt;autoscaling_configuration_ID&gt;</var>/policies
+
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/AutoScalingPolicySummary'
+    post:
+      description: 'Creates an autoscaling policy for the specified autoscaling configuration.
+
+
+        You can create the following types of autoscaling policies:
+
+
+        - **Schedule-based:** Autoscaling events take place at the specific times that you schedule.
+
+        - **Threshold-based:** An autoscaling action is triggered when a performance metric meets or exceeds
+        a threshold.
+
+
+        An autoscaling configuration can either have multiple schedule-based autoscaling policies, or
+        one
+
+        threshold-based autoscaling policy.
+
+        '
+      operationId: CreateAutoScalingPolicy
+      parameters:
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - description: Creation details for an autoscaling policy.
+        in: body
+        name: CreateAutoScalingPolicyDetails
+        required: true
+        schema:
+          $ref: '#/definitions/CreateAutoScalingPolicyDetails'
+      responses:
+        200:
+          description: Returns the created policy.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/AutoScalingPolicy'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: CreateAutoScalingPolicy
+      tags:
+      - autoScaling
+      x-example: "Example: Create a threshold-based autoscaling policy\nPOST /20181001/autoScalingConfigurations/<var>&lt;autoscalingConfigurationId&gt;</var>/policies\n\
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n\
+        {\n  \"capacity\": {\n    \"max\": 50,\n    \"min\": 10,\n    \"initial\": 15\n  },\n  \"displayName\"\
+        : \"example_threshold_autoscaling_policy\",\n  \"policyType\": \"threshold\",\n  \"isEnabled\"\
+        : true,\n  \"rules\": [\n    {\n      \"action\": {\n        \"type\": \"CHANGE_COUNT_BY\",\n\
+        \        \"value\": 5\n      },\n      \"displayName\": \"example_scale_out_condition\",\n   \
+        \   \"metric\": {\n        \"metricType\": \"CPU_UTILIZATION\",\n        \"threshold\": {\n  \
+        \        \"operator\": \"GTE\",\n          \"value\": 90\n        }\n      }\n    },\n    {\n\
+        \      \"action\": {\n        \"type\": \"CHANGE_COUNT_BY\",\n        \"value\": -5\n      },\n\
+        \      \"displayName\": \"example_scale_in_condition\",\n      \"metric\": {\n        \"metricType\"\
+        : \"CPU_UTILIZATION\",\n        \"threshold\": {\n          \"operator\": \"LTE\",\n         \
+        \ \"value\": 25\n        }\n      }\n    }\n  ]\n}\n\nExample: Create a schedule-based autoscaling\
+        \ policy\nPOST /20181001/autoScalingConfigurations/<var>&lt;autoscalingConfigurationId&gt;</var>/policies\n\
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n\
+        {\n  \"capacity\": {\n    \"initial\": 25\n  },\n  \"displayName\": \"example_scheduled_autoscaling_policy\"\
+        ,\n  \"policyType\": \"scheduled\",\n  \"isEnabled\": true,\n  \"executionSchedule\": {\n    \"\
+        type\": \"cron\",\n    \"timezone\": \"UTC\",\n    \"expression\": \"0 15 10 ? * *\"\n  }\n}\n"
+  /autoScalingConfigurations/{autoScalingConfigurationId}/policies/{autoScalingPolicyId}:
+    delete:
+      description: Deletes an autoscaling policy for the specified autoscaling configuration.
+      operationId: DeleteAutoScalingPolicy
+      parameters:
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      - $ref: '#/parameters/AutoScalingPolicyIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      responses:
+        204:
+          description: The autoscaling policy is being deleted.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        412:
+          $ref: '#/responses/412'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: DeleteAutoScalingPolicy
+      tags:
+      - autoScaling
+      x-example: 'DELETE /20181001/autoScalingConfigurations/<var>&lt;autoscaling_configuration_ID&gt;</var>/policies/<var>&lt;autoscaling_policy_ID&gt;</var>
+
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+      x-related-resource: '#/definitions/AutoScalingPolicy'
+    get:
+      description: Gets information about the specified autoscaling policy in the specified autoscaling
+        configuration.
+      operationId: GetAutoScalingPolicy
+      parameters:
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      - $ref: '#/parameters/AutoScalingPolicyIdPathParam'
+      responses:
+        200:
+          description: The autoscaling policy was retrieved.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/AutoScalingPolicy'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: GetAutoScalingPolicy
+      tags:
+      - autoScaling
+      x-example: 'GET /20181001/autoScalingConfigurations/<var>&lt;autoscaling_configuration_ID&gt;</var>/policies/<var>&lt;autoscaling_policy_ID&gt;</var>
+
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+    put:
+      description: Updates an autoscaling policy in the specified autoscaling configuration.
+      operationId: UpdateAutoScalingPolicy
+      parameters:
+      - $ref: '#/parameters/AutoScalingConfigurationIdPathParam'
+      - $ref: '#/parameters/AutoScalingPolicyIdPathParam'
+      - $ref: '#/parameters/IfMatchHeader'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - $ref: '#/parameters/RetryTokenHeader'
+      - description: Update details for an autoscaling policy.
+        in: body
+        name: UpdateAutoScalingPolicyDetails
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateAutoScalingPolicyDetails'
+      responses:
+        200:
+          description: The updated autoscaling policy.
+          headers:
+            etag:
+              description: For optimistic concurrency control. See `if-match`.
+              type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+                Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/AutoScalingPolicy'
+        400:
+          $ref: '#/responses/400'
+        401:
+          $ref: '#/responses/401'
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        412:
+          $ref: '#/responses/412'
+        500:
+          $ref: '#/responses/500'
+        default:
+          $ref: '#/responses/DefaultError'
+      summary: UpdateAutoScalingPolicy
+      tags:
+      - autoScaling
+      x-example: "PUT /20181001/autoScalingConfigurations/<var>&lt;autoscaling_configuration_ID&gt;</var>/policies/<var>&lt;autoscaling_policy_ID&gt;</var>\n\
+        Host: autoscaling.us-phoenix-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n\
+        {\n  \"displayName\": \"example_threshold_autoscaling_policy\",\n  \"capacity\": {\n    \"max\"\
+        : 50,\n    \"min\": 10,\n    \"initial\": 15\n  },\n  \"policyType\": \"threshold\",\n  \"rules\"\
+        : [\n    {\n      \"action\": {\n        \"type\": \"CHANGE_COUNT_BY\",\n        \"value\": 5\n\
+        \      },\n      \"displayName\": \"example_scale_out_condition\",\n      \"metric\": {\n    \
+        \    \"metricType\": \"CPU_UTILIZATION\",\n        \"threshold\": {\n          \"operator\": \"\
+        GTE\",\n          \"value\": 90\n        }\n      }\n    },\n    {\n      \"action\": {\n    \
+        \    \"type\": \"CHANGE_COUNT_BY\",\n        \"value\": -5\n      },\n      \"displayName\": \"\
+        example_scale_in_condition\",\n      \"metric\": {\n        \"metricType\": \"CPU_UTILIZATION\"\
+        ,\n        \"threshold\": {\n          \"operator\": \"LTE\",\n          \"value\": 25\n     \
+        \   }\n      }\n    }\n  ]\n}\n"
+definitions:
+  Action:
+    description: 'The action to take when autoscaling is triggered.
+
+      '
+    properties:
+      type:
+        description: The type of action to take.
+        enum:
+        - CHANGE_COUNT_BY
+        type: string
+      value:
+        description: 'To scale out (increase the number of instances), provide a positive value. To scale
+          in (decrease the number of
+
+          instances), provide a negative value.
+
+          '
+        type: integer
+    required:
+    - type
+    - value
+  AutoScalingConfiguration:
+    description: 'An autoscaling configuration lets you dynamically scale the resources in a Compute instance
+      pool.
+
+      For more information, see [Autoscaling](/iaas/Content/Compute/Tasks/autoscalinginstancepools.htm).
+
+      '
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing
+          the autoscaling configuration.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      coolDownInSeconds:
+        description: 'For threshold-based autoscaling policies, this value is the minimum period of time
+          to wait between scaling actions.
+
+          The cooldown period gives the system time to stabilize before rescaling. The minimum value is
+          300 seconds, which
+
+          is also the default. The cooldown period starts when the instance pool reaches the running state.
+
+
+          For schedule-based autoscaling policies, this value is not used.
+
+          '
+        minimum: 0
+        type: integer
+      definedTags: &id001
+        additionalProperties:
+          additionalProperties:
+            description: 'The value of the tag. Only the String type is supported.
+
+              '
+            type: object
+          description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+            Example: `{"CostCenter": "42"}`
+
+            '
+          type: object
+        description: 'Defined tags for this resource. Each key is predefined and scoped to a
+
+          namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+          Example: `{"Operations": {"CostCenter": "42"}}`
+
+          '
+        type: object
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: &id002
+        additionalProperties:
+          type: string
+        description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no
+
+          predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+          Example: `{"Department": "Finance"}`
+
+          '
+        type: object
+      id:
+        description: The [OCID](/Content/General/Concepts/identifiers.htm) of the autoscaling configuration.
+        maxLength: 255
+        minLength: 1
+        type: string
+      isEnabled:
+        description: Whether the autoscaling configuration is enabled.
+        type: boolean
+      maxResourceCount:
+        description: The maximum number of resources to scale out to.
+        minimum: 0
+        type: integer
+      minResourceCount:
+        description: The minimum number of resources to scale in to.
+        minimum: 0
+        type: integer
+      policies:
+        description: 'Autoscaling policy definitions for the autoscaling configuration. An autoscaling
+          policy defines the criteria that
+
+          trigger autoscaling actions and the actions to take.
+
+          '
+        items:
+          $ref: '#/definitions/AutoScalingPolicy'
+        type: array
+      resource:
+        $ref: '#/definitions/Resource'
+      timeCreated:
+        description: 'The date and time the autoscaling configuration was created, in the format defined
+          by RFC3339.
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - compartmentId
+    - id
+    - policies
+    - resource
+    - timeCreated
+    type: object
+    x-example: "{\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"\
+      displayName\": \"example_autoscaling_configuration\",\n  \"id\": \"ocid1.autoscalingconfiguration.oc1..<var>&lt;unique_ID&gt;</var>\"\
+      ,\n  \"coolDownInSeconds\": 300,\n  \"isEnabled\": true,\n  \"resource\": {\n    \"type\": \"instancePool\"\
+      ,\n    \"id\": \"ocid1.instancepool.oc1..<var>&lt;unique_ID&gt;</var>\"\n  },\n  \"policies\": [\n\
+      \    {\n      \"capacity\": {\n        \"max\": 50,\n        \"min\": 10,\n        \"initial\":\
+      \ 15\n      },\n      \"id\": \"<var>&lt;unique_ID&gt;</var>\",\n      \"displayName\": \"example_autoscaling_policy\"\
+      ,\n      \"policyType\": \"threshold\",\n      \"timeCreated\": \"2019-01-18T18:30:09.438Z\",\n\
+      \      \"rules\": [\n        {\n          \"action\": {\n            \"type\": \"CHANGE_COUNT_BY\"\
+      ,\n            \"value\": 5\n          }\n          \"displayName\": \"example_scale_out_condition\"\
+      ,\n          \"id\": \"<var>&lt;unique_ID&gt;</var>\",\n          \"metric\": {\n            \"\
+      metricType\": \"CPU_UTILIZATION\",\n            \"threshold\": {\n              \"operator\": \"\
+      GTE\",\n              \"value\": 90\n            }\n          }\n        },\n        {\n       \
+      \   \"action\": {\n            \"type\": \"CHANGE_COUNT_BY\",\n            \"value\": -5\n     \
+      \     }\n          \"displayName\": \"example_scale_in_condition\",\n          \"id\": \"<var>&lt;unique_ID&gt;</var>\"\
+      ,\n          \"metric\": {\n            \"metricType\": \"CPU_UTILIZATION\",\n            \"threshold\"\
+      : {\n              \"operator\": \"LTE\",\n              \"value\": 25\n            }\n        \
+      \  }\n        }\n      ]\n    }\n  ],\n  \"timeCreated\": \"2019-01-18T18:30:09.438Z\"\n}\n"
+  AutoScalingConfigurationSummary:
+    description: 'Summary information for an autoscaling configuration.
+
+      '
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing
+          the autoscaling configuration.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      coolDownInSeconds:
+        description: 'For threshold-based autoscaling policies, this value is the minimum period of time
+          to wait between scaling actions.
+
+          The cooldown period gives the system time to stabilize before rescaling. The minimum value is
+          300 seconds, which
+
+          is also the default. The cooldown period starts when the instance pool reaches the running state.
+
+
+          For schedule-based autoscaling policies, this value is not used.
+
+          '
+        minimum: 0
+        type: integer
+      definedTags: *id001
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id002
+      id:
+        description: The [OCID](/Content/General/Concepts/identifiers.htm) of the autoscaling configuration.
+        maxLength: 255
+        minLength: 1
+        type: string
+      isEnabled:
+        description: Whether the autoscaling configuration is enabled.
+        type: boolean
+      resource:
+        $ref: '#/definitions/Resource'
+      timeCreated:
+        description: 'The date and time the autoscaling configuration was created, in the format defined
+          by RFC3339.
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - compartmentId
+    - id
+    - resource
+    - timeCreated
+    type: object
+    x-example: "{\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"\
+      displayName\": \"example_autoscaling_configuration\",\n  \"id\": \"ocid1.autoscalingconfiguration.oc1..<var>&lt;unique_ID&gt;</var>\"\
+      ,\n  \"coolDownInSeconds\": 300,\n  \"isEnabled\": true,\n  \"resource\": {\n    \"type\": \"instancePool\"\
+      ,\n    \"id\": \"ocid1.instancepool.oc1..<var>&lt;unique_ID&gt;</var>\"\n  },\n  \"timeCreated\"\
+      : \"2019-01-18T18:44:45.285Z\"\n}\n"
+  AutoScalingPolicy:
+    description: "Autoscaling policies define the criteria that trigger autoscaling actions and the actions\
+      \ to take.\n\nAn autoscaling policy is part of an autoscaling configuration. For more information,\
+      \ see\n[Autoscaling](/iaas/Content/Compute/Tasks/autoscalinginstancepools.htm).\n\nYou can create\
+      \ the following types of autoscaling policies:\n  \n  - **Schedule-based:** Autoscaling events take\
+      \ place at the specific times that you schedule.\n  - **Threshold-based:** An autoscaling action\
+      \ is triggered when a performance metric meets or exceeds a threshold.\n"
+    discriminator: policyType
+    properties:
+      capacity:
+        $ref: '#/definitions/Capacity'
+        description: The capacity requirements of the autoscaling policy.
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      id:
+        description: The ID of the autoscaling policy that is assigned after creation.
+        maxLength: 255
+        minLength: 1
+        type: string
+      isEnabled:
+        description: Whether the autoscaling policy is enabled.
+        type: boolean
+      policyType:
+        description: The type of autoscaling policy.
+        maxLength: 100
+        minLength: 1
+        type: string
+      timeCreated:
+        description: 'The date and time the autoscaling configuration was created, in the format defined
+          by RFC3339.
+
+
+          Example: `2016-08-25T21:10:29.600Z`
+
+          '
+        format: date-time
+        type: string
+    required:
+    - policyType
+    - timeCreated
+    x-example: "{\n  \"capacity\": {\n    \"max\": 50,\n    \"min\": 10,\n    \"initial\": 15\n  },\n\
+      \  \"id\": \"<var>&lt;unique_ID&gt;</var>\",\n  \"displayName\": \"example_autoscaling_policy\"\
+      ,\n  \"policyType\": \"threshold\",\n  \"timeCreated\": \"2019-01-18T18:51:25.337Z\",\n  \"rules\"\
+      : [\n    {\n      \"action\": {\n        \"type\": \"CHANGE_COUNT_BY\",\n        \"value\": 5\n\
+      \      }\n      \"displayName\": \"example_scale_out_condition\",\n      \"id\": \"<var>&lt;unique_ID&gt;</var>\"\
+      ,\n      \"metric\": {\n        \"metricType\": \"CPU_UTILIZATION\",\n        \"threshold\": {\n\
+      \          \"operator\": \"GTE\",\n          \"value\": 90\n        }\n      }\n    },\n    {\n\
+      \      \"action\": {\n        \"type\": \"CHANGE_COUNT_BY\",\n        \"value\": -5\n      }\n \
+      \     \"displayName\": \"example_scale_in_condition\",\n      \"id\": \"<var>&lt;unique_ID&gt;</var>\"\
+      ,\n      \"metric\": {\n        \"metricType\": \"CPU_UTILIZATION\",\n        \"threshold\": {\n\
+      \          \"operator\": \"LTE\",\n          \"value\": 25\n        }\n      }\n    }\n  ]\n}\n"
+  AutoScalingPolicySummary:
+    description: 'Summary information for an autoscaling policy.
+
+      '
+    properties:
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      id:
+        description: The ID of the autoscaling policy that is assigned after creation.
+        maxLength: 255
+        minLength: 1
+        type: string
+      isEnabled:
+        description: Whether the autoscaling policy is enabled.
+        type: boolean
+      policyType:
+        description: The type of autoscaling policy.
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - id
+    - policyType
+    x-example: "{\n  \"id\": \"<var>&lt;unique_ID&gt;</var>\",\n  \"displayName\": \"example_autoscaling_policy\"\
+      ,\n  \"policyType\": \"threshold\",\n  \"isEnabled\": true\n}\n"
+  Capacity:
+    description: 'Capacity limits for the instance pool.
+
+      '
+    properties:
+      initial:
+        description: 'For a threshold-based autoscaling policy, this value is the initial number of instances
+          to launch in the instance pool
+
+          immediately after autoscaling is enabled. After autoscaling retrieves performance metrics, the
+          number of
+
+          instances is automatically adjusted from this initial number to a number that is based on the
+          limits that
+
+          you set.
+
+
+          For a schedule-based autoscaling policy, this value is the target pool size to scale to when
+          executing the schedule
+
+          that''s defined in the autoscaling policy.
+
+          '
+        minimum: 0
+        type: integer
+      max:
+        description: 'For a threshold-based autoscaling policy, this value is the maximum number of instances
+          the instance pool is allowed
+
+          to increase to (scale out).
+
+
+          For a schedule-based autoscaling policy, this value is not used.
+
+          '
+        minimum: 0
+        type: integer
+      min:
+        description: 'For a threshold-based autoscaling policy, this value is the minimum number of instances
+          the instance pool is allowed
+
+          to decrease to (scale in).
+
+
+          For a schedule-based autoscaling policy, this value is not used.
+
+          '
+        minimum: 0
+        type: integer
+    type: object
+  ChangeAutoScalingCompartmentDetails:
+    description: The configuration details for the move operation.
+    properties:
+      compartmentId:
+        description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to
+          move the autoscaling configuration to.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - compartmentId
+  Condition:
+    description: 'A rule that defines a specific autoscaling action to take (scale in or scale out) and
+      the metric that triggers that action.
+
+      '
+    properties:
+      action:
+        $ref: '#/definitions/Action'
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      id:
+        description: ID of the condition that is assigned after creation.
+        type: string
+      metric:
+        $ref: '#/definitions/Metric'
+    required:
+    - metric
+    - action
+  CreateAutoScalingConfigurationDetails:
+    description: 'Creation details for an autoscaling configuration.
+
+      '
+    properties:
+      compartmentId:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing
+          the autoscaling configuration.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      coolDownInSeconds:
+        description: 'For threshold-based autoscaling policies, this value is the minimum period of time
+          to wait between scaling actions.
+
+          The cooldown period gives the system time to stabilize before rescaling. The minimum value is
+          300 seconds, which
+
+          is also the default. The cooldown period starts when the instance pool reaches the running state.
+
+
+          For schedule-based autoscaling policies, this value is not used.
+
+          '
+        minimum: 0
+        type: integer
+      definedTags: *id001
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id002
+      isEnabled:
+        description: Whether the autoscaling configuration is enabled.
+        type: boolean
+      policies:
+        items:
+          $ref: '#/definitions/CreateAutoScalingPolicyDetails'
+        type: array
+      resource:
+        $ref: '#/definitions/Resource'
+    required:
+    - compartmentId
+    - policies
+    - resource
+    type: object
+  CreateAutoScalingPolicyDetails:
+    description: 'Creation details for an autoscaling policy. You can create the following types of autoscaling
+      policies:
+
+
+      - **Schedule-based:** Autoscaling events take place at the specific times that you schedule.
+
+      - **Threshold-based:** An autoscaling action is triggered when a performance metric meets
+
+      or exceeds a threshold.
+
+
+      An autoscaling configuration can either have multiple schedule-based autoscaling policies, or one
+
+      threshold-based autoscaling policy.
+
+      '
+    discriminator: policyType
+    properties:
+      capacity:
+        $ref: '#/definitions/Capacity'
+        description: The capacity requirements of the autoscaling policy.
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      isEnabled:
+        default: true
+        description: Whether the autoscaling policy is enabled.
+        type: boolean
+      policyType:
+        description: The type of autoscaling policy.
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - policyType
+    type: object
+  CreateConditionDetails:
+    description: 'Creation details for a condition in a threshold-based autoscaling policy.
+
+      '
+    properties:
+      action:
+        $ref: '#/definitions/Action'
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      metric:
+        $ref: '#/definitions/Metric'
+    required:
+    - metric
+    - action
+    type: object
+  CreateScheduledPolicyDetails:
+    allOf:
+    - $ref: '#/definitions/CreateAutoScalingPolicyDetails'
+    - discriminator: scheduled
+      properties:
+        executionSchedule:
+          $ref: '#/definitions/ExecutionSchedule'
+        resourceAction:
+          $ref: '#/definitions/ResourceAction'
+      required:
+      - executionSchedule
+    description: 'Creation details for a schedule-based autoscaling policy.
+
+
+      In a schedule-based autoscaling policy, an autoscaling action is triggered at the scheduled execution
+      time.
+
+      '
+    type: object
+  CreateThresholdPolicyDetails:
+    allOf:
+    - $ref: '#/definitions/CreateAutoScalingPolicyDetails'
+    - discriminator: threshold
+      properties:
+        rules:
+          items:
+            $ref: '#/definitions/CreateConditionDetails'
+          type: array
+      required:
+      - rules
+    description: 'Creation details for a threshold-based autoscaling policy.
+
+
+      In a threshold-based autoscaling policy, an autoscaling action is triggered when a performance metric
+      meets
+
+      or exceeds a threshold.
+
+      '
+    type: object
+  CronExecutionSchedule:
+    allOf:
+    - $ref: '#/definitions/ExecutionSchedule'
+    - discriminator: cron
+      properties:
+        expression:
+          description: 'A cron expression that represents the time at which to execute the autoscaling
+            policy.
+
+
+            Cron expressions have this format: `<second> <minute> <hour> <day of month> <month> <day of
+            week> <year>`
+
+
+            You can use special characters that are supported with the Quartz cron implementation.
+
+
+            You must specify `0` as the value for seconds.
+
+
+            Example: `0 15 10 ? * *`
+
+            '
+          type: string
+      required:
+      - expression
+    description: 'An autoscaling execution schedule that uses a cron expression.
+
+      '
+  Error:
+    properties:
+      code:
+        description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+          [API Errors](/Content/API/References/apierrors.htm).
+
+          '
+        type: string
+      message:
+        description: A human-readable error string.
+        type: string
+    required:
+    - code
+    - message
+  ExecutionSchedule:
+    description: 'An execution schedule for an autoscaling policy.
+
+      '
+    discriminator: type
+    properties:
+      timezone:
+        default: UTC
+        description: The time zone for the execution schedule.
+        enum:
+        - UTC
+        type: string
+      type:
+        description: The type of execution schedule.
+        type: string
+    required:
+    - type
+    - timezone
+  InstancePoolResource:
+    allOf:
+    - $ref: '#/definitions/Resource'
+    - discriminator: instancePool
+    description: A Compute instance pool.
+  Metric:
+    description: 'Metric and threshold details for triggering an autoscaling action based on CPU or memory
+      utilization.
+
+      '
+    properties:
+      metricType:
+        enum:
+        - CPU_UTILIZATION
+        - MEMORY_UTILIZATION
+        type: string
+      threshold:
+        $ref: '#/definitions/Threshold'
+    required:
+    - metricType
+    - threshold
+  Resource:
+    description: 'A resource that is managed by an autoscaling configuration. The only supported type
+      is `instancePool`.
+
+
+      Each instance pool can have one autoscaling configuration.
+
+      '
+    discriminator: type
+    properties:
+      id:
+        description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource that is managed
+          by the autoscaling configuration.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      type:
+        description: The type of resource.
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - type
+    - id
+  ResourceAction:
+    description: An action to run on a resource, such as stopping or starting an instance pool.
+    discriminator: actionType
+    properties:
+      actionType:
+        description: The category of action to run on the resource.
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - actionType
+  ResourcePowerAction:
+    allOf:
+    - $ref: '#/definitions/ResourceAction'
+    - discriminator: power
+      properties:
+        action:
+          enum:
+          - SOFTSTOP
+          - STOP
+          - START
+          - SOFTRESET
+          - RESET
+          type: string
+      required:
+      - action
+    description: An action that starts, stops, or resets a resource.
+  ScheduledPolicy:
+    allOf:
+    - $ref: '#/definitions/AutoScalingPolicy'
+    - discriminator: scheduled
+      properties:
+        executionSchedule:
+          $ref: '#/definitions/ExecutionSchedule'
+          description: The schedule for executing the autoscaling policy.
+        resourceAction:
+          $ref: '#/definitions/ResourceAction'
+      required:
+      - executionSchedule
+    description: An autoscaling policy that defines execution schedules for an autoscaling configuration.
+  Threshold:
+    properties:
+      operator:
+        description: 'The comparison operator to use. Options are greater than (`GT`), greater than or
+          equal to
+
+          (`GTE`), less than (`LT`), and less than or equal to (`LTE`).
+
+          '
+        enum:
+        - GT
+        - GTE
+        - LT
+        - LTE
+        type: string
+      value:
+        minimum: 0
+        type: integer
+    required:
+    - operator
+    - value
+  ThresholdPolicy:
+    allOf:
+    - $ref: '#/definitions/AutoScalingPolicy'
+    - discriminator: threshold
+      properties:
+        rules:
+          items:
+            $ref: '#/definitions/Condition'
+          type: array
+      required:
+      - rules
+    description: An autoscaling policy that defines threshold-based rules for an autoscaling configuration.
+  UpdateAutoScalingConfigurationDetails:
+    properties:
+      alarmStreamId:
+        type: string
+      coolDownInSeconds:
+        minimum: 0
+        type: integer
+      definedTags: *id001
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      freeformTags: *id002
+      isEnabled:
+        description: Whether the autoscaling configuration is enabled.
+        type: boolean
+  UpdateAutoScalingPolicyDetails:
+    discriminator: policyType
+    properties:
+      capacity:
+        $ref: '#/definitions/Capacity'
+        description: The capacity requirements of the autoscaling policy.
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      isEnabled:
+        default: true
+        description: Whether the autoscaling policy is enabled.
+        type: boolean
+      policyType:
+        description: Indicates the type of autoscaling policy.
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - policyType
+  UpdateConditionDetails:
+    description: 'Update details for a condition in a threshold-based autoscaling policy.
+
+      '
+    properties:
+      action:
+        $ref: '#/definitions/Action'
+      displayName:
+        description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering
+          confidential information.
+
+          '
+        maxLength: 255
+        minLength: 1
+        type: string
+      metric:
+        $ref: '#/definitions/Metric'
+    required:
+    - metric
+    - action
+    type: object
+  UpdateScheduledPolicyDetails:
+    allOf:
+    - $ref: '#/definitions/UpdateAutoScalingPolicyDetails'
+    - discriminator: scheduled
+      properties:
+        executionSchedule:
+          $ref: '#/definitions/ExecutionSchedule'
+          description: The schedule for executing the autoscaling policy.
+        resourceAction:
+          $ref: '#/definitions/ResourceAction'
+  UpdateThresholdPolicyDetails:
+    allOf:
+    - $ref: '#/definitions/UpdateAutoScalingPolicyDetails'
+    - discriminator: threshold
+      properties:
+        rules:
+          items:
+            $ref: '#/definitions/UpdateConditionDetails'
+          type: array
+parameters:
+  AutoScalingConfigurationIdPathParam:
+    description: The [OCID](/Content/General/Concepts/identifiers.htm) of the autoscaling configuration.
+    in: path
+    name: autoScalingConfigurationId
+    required: true
+    type: string
+  AutoScalingPolicyIdPathParam:
+    description: The ID of the autoscaling policy.
+    in: path
+    name: autoScalingPolicyId
+    required: true
+    type: string
+  CompartmentIdQueryParam:
+    description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing
+      the
+
+      resource. Use tenancyId to search in
+
+      the root compartment.
+
+      '
+    in: query
+    maxLength: 255
+    minLength: 1
+    name: compartmentId
+    required: true
+    type: string
+    x-example: ocid1.compartment.oc1..exampleaozhsmynlmeeqbo6iiq4dwjghobpkodzxab5pwezb3vny4bntc5yq
+  FilterByDisplayNameQueryParam:
+    default: 'null'
+    description: 'A filter to return only resources that match the given display name exactly.
+
+      '
+    in: query
+    maxLength: 255
+    minLength: 1
+    name: displayName
+    required: false
+    type: string
+  IfMatchHeader:
+    description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+      `if-match`
+
+      parameter to the value of the etag from a previous GET or POST response for that resource.  The
+      resource
+
+      will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+
+      '
+    in: header
+    name: if-match
+    type: string
+  OpcRequestIdHeaderParam:
+    in: header
+    name: opc-request-id
+    pattern: ^[A-Za-z0-9\-_\.]+$
+    required: false
+    type: string
+  PaginationLimitQueryParam:
+    default: 15
+    description: 'For list pagination. The maximum number of items to return in a paginated "List" call.
+      For important details
+
+      about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+      '
+    in: query
+    maximum: 1000
+    minimum: 1
+    name: limit
+    type: integer
+  PaginationTokenQueryParam:
+    default: 'null'
+    description: 'For list pagination. The value of the `opc-next-page` response header from the previous
+      "List" call. For important
+
+      details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+      '
+    in: query
+    maxLength: 512
+    minLength: 1
+    name: page
+    type: string
+  RetryTokenHeader:
+    description: 'A token that uniquely identifies a request so it can be retried in case of a timeout
+      or
+
+      server error without risk of executing that same action again. Retry tokens expire after 24
+
+      hours, but can be invalidated before then due to conflicting operations (for example, if a resource
+
+      has been deleted and purged from the system, then a retry of the original creation request
+
+      may be rejected).
+
+      '
+    in: header
+    maxLength: 64
+    minLength: 1
+    name: opc-retry-token
+    type: string
+  SortByQueryParam:
+    description: 'The field to sort by. You can provide one sort order (`sortOrder`). Default order for
+
+      TIMECREATED is descending. Default order for DISPLAYNAME is ascending. The DISPLAYNAME
+
+      sort order is case sensitive.
+
+
+      **Note:** In general, some "List" operations (for example, `ListInstances`) let you
+
+      optionally filter by availability domain if the scope of the resource type is within a
+
+      single availability domain. If you call one of these "List" operations without specifying
+
+      an availability domain, the resources are grouped by availability domain, then sorted.
+
+      '
+    enum:
+    - TIMECREATED
+    - DISPLAYNAME
+    in: query
+    name: sortBy
+    required: false
+    type: string
+    x-default-description: The default field to sort by varies by API.
+  SortOrderQueryParam:
+    description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The DISPLAYNAME
+      sort order
+
+      is case sensitive.
+
+      '
+    enum:
+    - ASC
+    - DESC
+    in: query
+    name: sortOrder
+    required: false
+    type: string
+    x-default-description: The default sort order varies by API.
+responses:
+  400:
+    description: Bad Request
+    headers:
+      opc-request-id: &id003
+        description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+          Oracle about a particular request, please provide the request ID.
+
+          '
+        type: string
+    schema:
+      $ref: '#/definitions/Error'
+  401:
+    description: Not Authenticated
+    headers:
+      opc-request-id: *id003
+    schema:
+      $ref: '#/definitions/Error'
+  404:
+    description: Not Found
+    headers:
+      opc-request-id: *id003
+    schema:
+      $ref: '#/definitions/Error'
+  409:
+    description: Incorrect State
+    headers:
+      opc-request-id: *id003
+    schema:
+      $ref: '#/definitions/Error'
+  412:
+    description: Precondition Failed
+    headers:
+      opc-request-id: *id003
+    schema:
+      $ref: '#/definitions/Error'
+  500:
+    description: Internal Server Error
+    headers:
+      opc-request-id: *id003
+    schema:
+      $ref: '#/definitions/Error'
+  DefaultError:
+    description: An error has occurred.
+    headers:
+      opc-request-id: *id003
+    schema:
+      $ref: '#/definitions/Error'
+  Error:
+    description: An error has occurred.
+    headers:
+      opc-request-id: *id003
+    schema:
+      $ref: '#/definitions/Error'
+x-anchors:
+  x-properties:
+    definedTags: *id001
+    freeformTags: *id002
+    opc-request-id: *id003
+    systemTags:
+      additionalProperties:
+        additionalProperties:
+          description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+            '
+          type: object
+        description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+          Example: `{"bar-key": "value"}`
+
+          '
+        type: object
+      description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+        Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+        '
+      type: object
+x-obmcs-client-retries-enabled: true
+x-oracle-package: com.oracle.pic.autoscaling

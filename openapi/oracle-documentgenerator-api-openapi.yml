@@ -1,0 +1,140 @@
+openapi: 3.2.0
+info:
+  description: "The Document Generator allows to merge JSON Data and Office Templates to produce documents. \nFor the endpoints, see invokeEndpoint in the [Function Reference](/iaas/api/#/en/functions/20181201/Function/).\n"
+  title: Pre-Built Function Document Generator Documentgenerator API
+  version: '1.0'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/2759931116bb04dc62de76027c85704524479cd94fcd8b9dffc6f9713fba1481.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Pre-Built Function Document Generator API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/2759931116bb04dc62de76027c85704524479cd94fcd8b9dffc6f9713fba1481.yaml
+    what: the harvested document for Pre-Built Function Document Generator API
+servers:
+- url: http://127.0.0.1/20181201
+- url: https://127.0.0.1/20181201
+tags:
+- name: documentgenerator
+paths:
+  /functions/{functionId}/actions/invoke:
+    post:
+      description: "Invoke Document Generator. \nSee [InvokeFunction](/iaas/api/#/en/functions/20181201/Function/InvokeFunction).\n"
+      operationId: InvokeFunction
+      parameters:
+      - description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of this function.
+
+          '
+        in: path
+        name: functionId
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Successfully invoked function. See the `code` in the Response payload.
+          headers:
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+                a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        default:
+          description: For full details of the response codes, see [invokeFunction](/iaas/api/#/en/functions/20181201/Function/InvokeFunction).
+      summary: Call Document Generator Function
+      tags:
+      - documentgenerator
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request'
+        description: Request to generate document
+        required: true
+components:
+  schemas:
+    ResponseMetadata:
+      description: Metadata related to the processing of the request.
+      properties:
+        configurationParameters:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pairs that are selected from the Configuration Parameters on the Document Generator.
+
+            Example: `{"FN_FN_ID": "ocid1.fnfunc.oc1.phx.examplej63m5hsm6ha", "FN_MEMORY": "512"}`
+
+            '
+          type: object
+        version:
+          description: 'Document Generator Version.
+
+            Example: 1.0
+
+            '
+          type: string
+      required:
+      - version
+      type: object
+    Request:
+      description: The Request sent to the Document Generator.
+      discriminator:
+        propertyName: requestType
+      properties:
+        requestType:
+          description: The type of Request to execute.
+          enum:
+          - SINGLE
+          - BATCH
+          type: string
+      required:
+      - requestType
+      type: object
+    Response:
+      description: The Response obtained from the Document Generator.
+      discriminator:
+        propertyName: responseType
+      properties:
+        code:
+          description: 'Response code for this processing.
+
+            200: Success.
+
+            207: Multiple statuses. See the `code` for each document.
+
+            400: Processing error.
+
+            500: Internal Server Error.
+
+            '
+          type: integer
+        metadata:
+          $ref: '#/components/schemas/ResponseMetadata'
+        responseType:
+          description: Type of Response.
+          enum:
+          - SINGLE
+          - BATCH
+          - ERROR
+          type: string
+        status:
+          description: Status text for this processing.
+          type: string
+      required:
+      - responseType
+      - code
+      - status
+      - metadata
+      type: object
+x-obmcs-client-retries-enabled: false
+x-oracle-package: com.oracle.dbtoolbox.docgen

@@ -1,0 +1,698 @@
+openapi: 3.2.0
+info:
+  description: 'Use the Application Performance Monitoring Trace Explorer API to query traces and associated spans in Trace Explorer. For more information, see [Application Performance Monitoring](https://docs.oracle.com/iaas/application-performance-monitoring/index.html).
+
+    '
+  license:
+    name: Oracle Corporation
+  title: Application Performance Monitoring Trace Explorer Query API
+  version: '20200630'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/d1cc8021a03784e751fe54c779074681c153f47a8bd2975f098d6c8988748126.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Application Performance Monitoring Trace Explorer API OCI service and stored verbatim; API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/d1cc8021a03784e751fe54c779074681c153f47a8bd2975f098d6c8988748126.yaml
+    what: the harvested document for Application Performance Monitoring Trace Explorer API
+servers:
+- url: http://apm-trace.{region}.oci.{secondLevelDomain}/20200630
+- url: https://apm-trace.{region}.oci.{secondLevelDomain}/20200630
+tags:
+- name: query
+paths:
+  /queries/actions/runQuery:
+    post:
+      description: 'Retrieves the results (selected attributes and aggregations) of a query constructed according to the Application Performance Monitoring Defined Query Syntax.
+
+        Query results are filtered by the filter criteria specified in the where clause.
+
+        Further query results are grouped by the attributes specified in the group by clause.  Finally,
+
+        ordering (asc/desc) is done by the specified attributes in the order by clause.
+
+        '
+      operationId: Query
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/ApmDomainIdQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      - $ref: '#/components/parameters/SpanStartTimeGreaterThanOrEqualToParam'
+      - $ref: '#/components/parameters/SpanStartTimeLessThanParam'
+      responses:
+        200:
+          description: 'A response containing the query result set (selected attributes and aggregations) filtered, grouped and
+
+            sorted by the specified criteria, and the associated summary describing the query result metadata is retrieved.
+
+            '
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the page parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-total-items:
+              description: 'The total number of items that match the query.
+
+                '
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResultResponse'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: Query a trace, span, or service using the Application Performance Monitoring query syntax, and retrieve results (attributes and aggregations) for the queried entity.
+      tags:
+      - query
+      x-related-resource: '#/definitions/QueryResultResponse'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryDetails'
+        description: 'Request body containing the query to be run against the trace data and to filter and
+
+          retrieve trace data results.
+
+          '
+        required: true
+  /queries/quickPicks:
+    get:
+      description: 'Returns a list of predefined Quick Pick queries intended to assist the user
+
+        to choose a query to run.  There is no sorting applied on the results.
+
+        '
+      operationId: ListQuickPicks
+      parameters:
+      - $ref: '#/components/parameters/RequestIdHeader'
+      - $ref: '#/components/parameters/ApmDomainIdQueryParam'
+      - $ref: '#/components/parameters/PaginationLimitQueryParam'
+      - $ref: '#/components/parameters/PaginationTokenQueryParam'
+      responses:
+        200:
+          description: 'A collection of predefined Quick Pick queries is returned.
+
+            '
+          headers:
+            opc-next-page:
+              description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+                then a partial list might have been returned. Include this value as the page parameter for the
+
+                subsequent GET request to get the next batch of items.
+
+                '
+              schema:
+                type: string
+            opc-request-id:
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              schema:
+                type: string
+            opc-total-items:
+              description: 'The total number of items that match the query.
+
+                '
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/QuickPickSummary'
+                type: array
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        412:
+          $ref: '#/components/responses/412'
+        429:
+          $ref: '#/components/responses/429'
+        500:
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/DefaultError'
+      summary: List of predefined queries to assist the user to Quick Pick one and use.
+      tags:
+      - query
+      x-related-resource: '#/definitions/QuickPickSummary'
+components:
+  schemas:
+    QueryResultsTopologyInfo:
+      description: 'The structure that provides the metadata of a topology query.
+
+        '
+      properties:
+        nodes:
+          description: 'The information about the attributes of the topology nodes.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryResultsTopologyNodeInfo'
+          type: array
+      type: object
+    Error:
+      description: 'Details of an error that occurred.
+
+        '
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing.
+
+            '
+          type: string
+        message:
+          description: 'A human-readable error string.
+
+            '
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    QueryResultRowTypeSummary:
+      description: 'Summary of the datatype, unit and related metadata of an individual row element of a query result row that is returned.
+
+        '
+      properties:
+        dataType:
+          description: 'Datatype of the query result row element.
+
+            '
+          type: string
+        displayName:
+          description: 'Alias name if an alias is used for the query result row element or an assigned display name from the query language
+
+            in some default cases.
+
+            '
+          type: string
+        expression:
+          description: 'Actual show expression in the user typed query that produced this column.
+
+            '
+          type: string
+        queryResultRowTypeSummaries:
+          description: 'A query result row type summary object that represents a nested table structure.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryResultRowTypeSummary'
+          type: array
+        unit:
+          description: 'Granular unit in which the query result row element''s data is represented.
+
+            '
+          type: string
+      type: object
+    QueryResultWarning:
+      description: 'A warning message that can be included with a query result that provides information to the user.
+
+        '
+      properties:
+        message:
+          description: 'The text of the warning message.
+
+            '
+          type: string
+      type: object
+    QueryResultsOrderedBySummary:
+      description: 'Summary of the sort and order by attribute based on which the query results are organized.
+
+        '
+      properties:
+        queryResultsOrderedBy:
+          description: 'Attribute by which the query results are sorted.
+
+            '
+          type: string
+        queryResultsSortOrder:
+          description: 'The sort order for the attribute, either ''ASC'' or ''DESC''.
+
+            '
+          type: string
+      type: object
+    QueryDetails:
+      description: 'Request object containing the query to be run against the trace data.
+
+        '
+      properties:
+        queryText:
+          description: 'Application Performance Monitoring defined query string that filters and retrieves trace data results.
+
+            '
+          type: string
+      type: object
+    QueryResultsGroupedBySummary:
+      description: 'Summary of the attribute based on which the query results are grouped.
+
+        '
+      properties:
+        queryResultsGroupedByColumn:
+          description: 'Column or attribute in the query result, which is a group by value.
+
+            '
+          type: string
+      type: object
+    QueryResultRow:
+      description: 'Object that represents a single row of the query result.  It contains the queryResultRowData object that contains the actual data
+
+        represented by the elements of the query result row, and a queryResultRowMetadata object that contains the metadata about the data contained in
+
+        the query result row.
+
+        '
+      properties:
+        queryResultRowData:
+          additionalProperties:
+            type: object
+          description: 'A map containing the actual data represented by a single row of the query result.
+
+            The key is the column name or attribute specified in the show clause, or an aggregate function in the show clause.
+
+            The value is the actual value of that attribute or aggregate function of the corresponding single row of the query result set.
+
+            If an alias name is specified for an attribute or an aggregate function, then the key will be the alias name specified in the show
+
+            clause.  If an alias name is not specified for the group by aggregate function in the show clause, then the corresponding key
+
+            will be the appropriate aggregate_function_name_column_name (For example: count(traces) will be keyed as count_traces).  The datatype of the value
+
+            is presented in the queryResultRowTypeSummaries list in the queryResultMetadata structure, where the i-th queryResultRowTypeSummary object
+
+            represents the datatype of the i-th value when this map is iterated in order.
+
+            '
+          type: object
+        queryResultRowMetadata:
+          additionalProperties:
+            type: object
+          description: 'A map containing metadata or add-on data for the data presented in the queryResultRowData map.  Data required to present drill down
+
+            information from the queryResultRowData is presented as key-value pairs.
+
+            '
+          type: object
+      required:
+      - queryResultRowData
+      - queryResultRowMetadata
+      type: object
+    QueryResultResponse:
+      description: 'A response containing a collection of query rows (selected attributes and aggregations) filtered, grouped and
+
+        sorted by the specified criteria from the query that is run, and the associated summary describing the corresponding
+
+        query result metadata.
+
+        '
+      properties:
+        queryResultMetadata:
+          additionalProperties:
+            type: object
+          description: 'A map containing metadata or additional information.
+
+            '
+          type: object
+        queryResultMetadataSummary:
+          $ref: '#/components/schemas/QueryResultMetadataSummary'
+        queryResultRows:
+          description: 'A collection of objects with each object representing an individual row of the query result set.  The total number of objects
+
+            returned in this collection correspond to the total number of rows returned by the actual query that is run against
+
+            the queried entity.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryResultRow'
+          type: array
+        queryResultWarnings:
+          description: 'A structure that provides warnings, if any, along with the query results.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryResultWarning'
+          type: array
+      required:
+      - queryResultMetadataSummary
+      - queryResultRows
+      type: object
+    QuickPickSummary:
+      description: 'Summary of the Quick Pick query objects.
+
+        '
+      properties:
+        quickPickName:
+          description: 'Quick Pick name for the query.
+
+            '
+          type: string
+        quickPickQuery:
+          description: 'Query for the Quick Pick.
+
+            '
+          type: string
+      required:
+      - quickPickName
+      - quickPickQuery
+      type: object
+    QueryResultsTopologyNodeInfo:
+      description: 'The information about a node attribute.
+
+        '
+      properties:
+        nodeName:
+          description: The name of the node attribute.
+          type: string
+      type: object
+    QueryResultMetadataSummary:
+      description: 'Summary containing the metadata about the query result set.
+
+        '
+      properties:
+        queryResultRowTypeSummaries:
+          description: 'A collection of QueryResultRowTypeSummary objects that describe the type and properties of the individual row elements of the query rows
+
+            being returned.  The i-th element in this list contains the QueryResultRowTypeSummary of the i-th key-value pair in the QueryResultRowData map.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryResultRowTypeSummary'
+          type: array
+        queryResultsGroupedBy:
+          description: 'Columns or attributes of the query rows  which are group by values.  This is a list of ResultsGroupedBy summary objects,
+
+            and the list will contain as many elements as the attributes and aggregate functions in the group by clause in the select query.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryResultsGroupedBySummary'
+          type: array
+        queryResultsOrderedBy:
+          description: 'Order by which the query results are organized.  This is a list of queryResultsOrderedBy summary objects, and the list
+
+            will contain more than one OrderedBy summary object, if the sort was multidimensional.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryResultsOrderedBySummary'
+          type: array
+        queryResultsTopologyInfo:
+          $ref: '#/components/schemas/QueryResultsTopologyInfo'
+        sourceName:
+          description: 'Source of the query result set (traces, spans, and so on).
+
+            '
+          type: string
+        timeSeriesIntervalInMins:
+          description: 'Interval for the time series function in minutes.
+
+            '
+          type: integer
+      type: object
+  parameters:
+    PaginationTokenQueryParam:
+      description: 'The page token representing the page where to start retrieving results.
+
+        This is usually retrieved from a previous response.
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        default: 1
+        maxLength: 1024
+        minLength: 1
+    SpanStartTimeLessThanParam:
+      description: 'Include spans that have a `spanStartTime`less than this value.
+
+        '
+      in: query
+      name: timeSpanStartedLessThan
+      required: true
+      schema:
+        type: string
+        format: date-time
+    ApmDomainIdQueryParam:
+      description: 'The APM Domain ID for the intended request.
+
+        '
+      in: query
+      name: apmDomainId
+      required: true
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return.
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 50
+        minimum: 1
+    SpanStartTimeGreaterThanOrEqualToParam:
+      description: 'Include spans that have a `spanStartTime` equal to or greater than this value.
+
+        '
+      in: query
+      name: timeSpanStartedGreaterThanOrEqualTo
+      required: true
+      schema:
+        type: string
+        format: date-time
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request.  If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+  responses:
+    DefaultError:
+      description: 'Unknown Error
+
+        '
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+x-anchors:
+  x-common-splat-settings:
+  - allowCrossTenancy: true
+    mode: automated
+    nbacMode: '##NBAC_MODE##'
+  - throttling:
+      enableRegionalThrottling: true
+      mode: default
+      perTenantLimit:
+        rpsLimit: 300
+      perUserLimit:
+        rpmLimit: 1200
+        rpsLimit: 100
+  x-downstream-splat-expressions:
+  - downstream.getOr404('APM-DIS','GetApmDomainInfoCompartmentId',request.parameter.apmDomainId)
+  x-headers:
+    opc-next-page:
+      description: 'For pagination of a list of items. When paging through a list, if this header appears in the response,
+
+        then a partial list might have been returned. Include this value as the page parameter for the
+
+        subsequent GET request to get the next batch of items.
+
+        '
+      type: string
+    opc-request-id:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        '
+      type: string
+    opc-total-items:
+      description: 'The total number of items that match the query.
+
+        '
+      type: integer
+  x-nbac:
+  - '##NBAC_MODE##'
+  x-properties:
+    errorSpanCount:
+      description: "The number of spans with errors that have been processed by the system for the trace.\nNote that the number of spans with errors will be less than or equal to the total number of spans in the trace. \n"
+      format: int32
+      maximum: 604800
+      minimum: 0
+      type: integer
+    isFault:
+      description: 'Boolean flag that indicates whether the trace has an error.
+
+        '
+      type: boolean
+    key:
+      description: 'Unique identifier (traceId) for the trace that represents the span set.  Note that this field is
+
+        defined as traceKey in the API and it maps to the traceId in the trace data in Application Performance
+
+        Monitoring.
+
+        '
+      type: string
+    rootSpanDurationInMs:
+      description: 'Time taken for the root span operation to complete in milliseconds.
+
+        '
+      format: int32
+      maximum: 604800
+      minimum: 0
+      type: integer
+    rootSpanOperationName:
+      description: 'Root span name associated with the trace. This is the flow start operation name.
+
+        Null is displayed if the root span is not yet completed.
+
+        '
+      type: string
+    rootSpanServiceName:
+      description: 'Service associated with the trace.
+
+        '
+      type: string
+    serviceSummaries:
+      description: 'A summary of the spans by service.
+
+        '
+      items:
+        $ref: '#/components/schemas/TraceServiceSummary'
+      type: array
+    spanCount:
+      description: 'The number of spans that have been processed by the system for the trace.  Note that there
+
+        could be additional spans that have not been processed or reported yet if the trace is still
+
+        in progress.
+
+        '
+      format: int32
+      maximum: 604800
+      minimum: 0
+      type: integer
+    timeEarliestSpanStarted:
+      description: 'Start time of the earliest span in the span collection.
+
+        '
+      format: date-time
+      type: string
+    timeLatestSpanEnded:
+      description: 'End time of the span that most recently ended in the span collection.
+
+        '
+      format: date-time
+      type: string
+    timeRootSpanEnded:
+      description: 'End time of the root span for the span collection.
+
+        '
+      format: date-time
+      type: string
+    timeRootSpanStarted:
+      description: 'Start time of the root span for the span collection.
+
+        '
+      format: date-time
+      type: string
+    traceDurationInMs:
+      description: 'Time between the start of the earliest span and the end of the most recent span in milliseconds.
+
+        '
+      format: int32
+      maximum: 604800
+      minimum: 0
+      type: integer
+    traceErrorCode:
+      description: 'Error code of the trace.
+
+        '
+      type: string
+    traceErrorType:
+      description: 'Error type of the trace.
+
+        '
+      type: string
+    traceSourceName:
+      description: 'Source of trace (traces, syn_traces).
+
+        '
+      enum:
+      - TRACES
+      - SYN_TRACES
+      type: string
+    traceStatus:
+      description: 'The status of the trace.
+
+        The trace statuses are defined as follows:
+
+        complete - a root span has been recorded, but there is no information on the errors.
+
+        success - a complete root span is recorded there is a successful error type and error code - HTTP 200.
+
+        incomplete - the root span has not yet been received.
+
+        error - the root span returned with an error. There may or may not be an associated error code or error type.
+
+        '
+      type: string
+x-oracle-package: com.oracle.apm.service.dataserver

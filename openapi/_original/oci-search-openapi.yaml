@@ -1,0 +1,548 @@
+swagger: '2.0'
+info:
+  description: Search for resources in your cloud network.
+  title: Search Service API
+  version: '20180409'
+  x-provenance:
+    method: harvested
+    first_party: true
+    publisher: Oracle
+    source: https://docs.oracle.com/en-us/iaas/api/specs/b63d06c4cfd359bac0d6d407f3a255c7b03fc403937fe089ab94f759b40e16b1.yaml
+    harvested: '2026-08-04'
+    note: Published by Oracle as the contract for the Search Service API OCI service and stored verbatim;
+      API Evangelist added only this provenance block.
+  x-evidence:
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/index.json
+    what: Oracle's own index of every OCI service specification
+  - url: https://docs.oracle.com/en-us/iaas/api/specs/b63d06c4cfd359bac0d6d407f3a255c7b03fc403937fe089ab94f759b40e16b1.yaml
+    what: the harvested document for Search Service API
+basePath: /20180409
+schemes:
+- https
+produces:
+- application/json
+paths:
+  /resourceTypes:
+    get:
+      description: 'Lists all resource types that you can search or query for.
+
+        '
+      operationId: ListResourceTypes
+      parameters:
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/TenantIdQueryParam'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      responses:
+        400: &id002
+          description: A bad request was made or the request is not supported for the current tenant.
+          headers:
+            opc-request-id: &id001
+              description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+                Oracle about a particular request, please provide the request ID.
+
+                '
+              type: string
+          schema:
+            $ref: '#/definitions/Error'
+        401: &id003
+          description: User authentication has failed.
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Error'
+        404: &id004
+          description: Not authorized or not found.
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Error'
+        429: &id005
+          description: Too many requests.
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Error'
+        500: &id006
+          description: Internal server error.
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Error'
+        default: &id007
+          description: An error has occurred.
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/Error'
+        '200':
+          description: A page of search or query results.
+          headers:
+            opc-next-page:
+              description: Pagination token
+              type: string
+            opc-request-id: *id001
+          schema:
+            items:
+              $ref: '#/definitions/ResourceType'
+            type: array
+      summary: Lists the types of resources available for querying.
+      tags:
+      - ResourceSearch
+      x-example: 'GET /20180409/resourceTypes
+
+        Host: query.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+  /resourceTypes/{name}:
+    get:
+      description: 'Gets detailed information about a resource type by using the resource type name.
+
+        '
+      operationId: GetResourceType
+      parameters:
+      - $ref: '#/parameters/TenantIdQueryParam'
+      - $ref: '#/parameters/ResourceNamePathParam'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      responses:
+        400: *id002
+        401: *id003
+        404: *id004
+        429: *id005
+        500: *id006
+        default: *id007
+        '200':
+          description: The resource type definition.
+          headers:
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/ResourceType'
+      summary: Gets the resource type definition.
+      tags:
+      - ResourceSearch
+      x-example: 'GET /20180409/resourceTypes/Vcn
+
+        Host: query.us-phoenix-1.oraclecloud.com
+
+        <var>&lt;authorization and other headers&gt;</var>
+
+        '
+  /resources:
+    post:
+      description: "Queries any and all compartments in the specified tenancy to find resources that match\
+        \ the specified criteria.\nResults include resources that you have permission to view and can\
+        \ span different resource types. \nYou can also sort results based on a specified resource attribute.\n"
+      operationId: SearchResources
+      parameters:
+      - $ref: '#/parameters/PaginationLimitQueryParam'
+      - $ref: '#/parameters/PaginationTokenQueryParam'
+      - $ref: '#/parameters/TenantIdQueryParam'
+      - $ref: '#/parameters/OpcRequestIdHeaderParam'
+      - description: 'Request parameters that describe query criteria. For more information, see [SearchDetails](#/en/search/latest/datatypes/SearchDetails).
+
+          '
+        in: body
+        name: SearchDetails
+        required: true
+        schema:
+          $ref: '#/definitions/SearchDetails'
+      responses:
+        400: *id002
+        401: *id003
+        404: *id004
+        429: *id005
+        500: *id006
+        default: *id007
+        '200':
+          description: A page of search or query results.
+          headers:
+            opc-next-page: &id008
+              description: 'For pagination of a list of items. When paging through a list, if this header
+                appears in the response, then there are additional items still to get. Include this value
+                as the page parameter for the subsequent GET request. For information about pagination,
+                see [ListPagination](https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              type: string
+            opc-previous-page: &id009
+              description: 'For pagination of a list of items. When paging through a list, if this header
+                appears in the response, then there are additional items in previous pages to get. Include
+                this value as the page parameter for the subsequent GET request. The absence of this header
+                indicates that you have reached the first page of the list. For more information, see
+                [ListPagination](https://docs.oracle.com/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+                '
+              type: string
+            opc-request-id: *id001
+          schema:
+            $ref: '#/definitions/ResourceSummaryCollection'
+      summary: Finds resources in your cloud network.
+      tags:
+      - ResourceSearch
+      x-example: "POST /20180409/resources\nHost: query.us-phoenix-1.oraclecloud.com\n<var>&lt;authorization\
+        \ and other headers&gt;</var>\n{\n  \"type\": \"FreeText\",\n  \"text\": \"jane\",\n  \"matchingContextType\"\
+        : \"HIGHLIGHTS\"\n}\n"
+      x-related-resource: '#/definitions/ResourceSummary'
+definitions:
+  Error:
+    description: The representation of an error.
+    properties:
+      code:
+        description: 'A short error code that defines the error, meant for programmatic parsing. See [API
+          Errors](/Content/API/References/apierrors.htm).
+
+          '
+        type: string
+      message:
+        description: A human-readable error string.
+        type: string
+    required:
+    - code
+    - message
+    type: object
+  FreeTextSearchDetails:
+    allOf:
+    - $ref: '#/definitions/SearchDetails'
+    - discriminator: FreeText
+      properties:
+        text:
+          description: The text to search for.
+          type: string
+      required:
+      - text
+      type: object
+    description: A request containing arbitrary text that must be present in the resource.
+    type: object
+    x-example: "{\n  \"type\": \"FreeText\",\n  \"text\": \"admin\",\n  \"matchingContextType\": \"HIGHLIGHTS\"\
+      \n}\n"
+  QueryableFieldDescription:
+    description: An individual field that can be used as part of a query filter.
+    properties:
+      fieldName:
+        description: 'The name of the field to use when constructing the query. Field names are present
+          for all types except `OBJECT`.
+
+          '
+        type: string
+      fieldType:
+        description: 'The type of the field, which dictates what semantics and query constraints you can
+          use when searching or querying.
+
+          '
+        enum:
+        - IDENTIFIER
+        - STRING
+        - INTEGER
+        - RATIONAL
+        - BOOLEAN
+        - DATETIME
+        - IP
+        - OBJECT
+        type: string
+      isArray:
+        description: 'Indicates that this field is actually an array of the specified field type.
+
+          '
+        type: boolean
+      objectProperties:
+        description: 'If the field type is `OBJECT`, then this property will provide all the individual
+          properties of the object that can
+
+          be queried.
+
+          '
+        items:
+          $ref: '#/definitions/QueryableFieldDescription'
+        type: array
+    required:
+    - fieldType
+    - fieldName
+    type: object
+    x-example: "{\n  \"fieldName\": \"definedTags\", \n  \"fieldType\": \"OBJECT\", \n  \"isArray\": true,\
+      \ \n  \"objectProperties\": [\n    {\n      \"fieldName\": \"definedTags.key\", \n      \"fieldType\"\
+      : \"STRING\", \n      \"isArray\": false, \n      \"objectProperties\": null\n    }, \n    {\n \
+      \     \"fieldName\": \"definedTags.namespace\", \n      \"fieldType\": \"STRING\", \n      \"isArray\"\
+      : false, \n      \"objectProperties\": null\n    }, \n    {\n      \"fieldName\": \"definedTags.value\"\
+      , \n      \"fieldType\": \"STRING\", \n      \"isArray\": false, \n      \"objectProperties\": null\n\
+      \    }\n  ]\n}\n\n  \n"
+  ResourceSummary:
+    description: A resource that exists in the cloud network that you're querying.
+    properties:
+      availabilityDomain:
+        description: The availability domain where this resource exists, if applicable.
+        type: string
+      compartmentId:
+        description: The OCID of the compartment that contains this resource.
+        type: string
+      definedTags:
+        additionalProperties:
+          additionalProperties:
+            type: object
+          type: object
+        description: "Defined tags for this resource. Each key is predefined and scoped to a namespace.\
+          \ \nFor more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm). \n\
+          Example: `{\"Operations\": {\"CostCenter\": \"42\"}}`\n"
+        type: object
+      displayName:
+        description: The display name (or name) of this resource, if one exists.
+        type: string
+      freeformTags:
+        additionalProperties:
+          type: string
+        description: "Free-form tags for this resource. Each tag is a simple key-value pair with no predefined\
+          \ name, type, or namespace. \nFor more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).\
+          \ \nExample: `{\"Department\": \"Finance\"}`\n"
+        type: object
+      identifier:
+        description: The unique identifier for this particular resource, usually an OCID.
+        type: string
+      identityContext:
+        additionalProperties:
+          type: object
+        description: "Additional identifiers to use together in a \"Get\" request for a specified resource,\
+          \ only required for resource types \nthat explicitly cannot be retrieved by using a single identifier,\
+          \ such as the resource's OCID.\n"
+        type: object
+      lifecycleState:
+        description: The lifecycle state of this resource, if applicable.
+        type: string
+      resourceType:
+        description: The resource type name.
+        type: string
+      searchContext:
+        $ref: '#/definitions/SearchContext'
+      systemTags:
+        additionalProperties:
+          additionalProperties:
+            type: object
+          type: object
+        description: 'System tags associated with this resource, if any. System tags are set by Oracle
+          Cloud Infrastructure services. Each key is predefined and scoped to namespaces.
+
+          For more information, see [Resource Tags](https://docs.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+          Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+          '
+        type: object
+      timeCreated:
+        description: The time that this resource was created.
+        format: date-time
+        type: string
+    required:
+    - resourceType
+    - identifier
+    - compartmentId
+    type: object
+    x-example: "{\n  \"resourceType\": \"Compartment\",\n  \"identifier\": \"ocid1.compartment.oc1..exampleaeug24qzjpmwcvb33f3zz5kdh2jpvzm52n5faux3nndh3diys7pca\"\
+      ,\n  \"compartmentId\": \"ocidv1:tenancy:oc1:phx:1457636318783:examplea3lagrcvbljxg6mk55eo2fauxwy\"\
+      ,\n  \"timeCreated\": \"2017-01-20T00:18:14.236Z\",\n  \"displayName\": \"JanesCompartment\",\n\
+      \  \"availabilityDomain\": null,\n  \"lifecycleState\": \"ACTIVE\",\n  \"freeformTags\": null,\n\
+      \  \"definedTags\": null,\n  \"systemTags\": null,\n  \"additionalDetails\" : {\n    \"attachedVnic\"\
+      \ : [\n      {\n        \"publicIP\" : \"172.110.110.110\",\n        \"privateIP\" : \"10.10.10.10\"\
+      ,\n        \"isPrimary\" : true\n      },\n      {\n        \"publicIP\" : \"172.110.110.111\",\n\
+      \        \"privateIP\" : \"10.10.10.11\",\n        \"isPrimary\" : false\n      }]\n  },\n  \"searchContext\"\
+      : {\n    \"highlights\": {\n      \"description\": [\n        \"Compartment for &lt;h1&gt;Jane&lt;/h1&gt;\
+      \ Doe to use\"\n      ]\n    }\n  }\n}\n"
+  ResourceSummaryCollection:
+    description: A summary representation of resources that matched the search criteria.
+    properties:
+      items:
+        description: A list of resources.
+        items:
+          $ref: '#/definitions/ResourceSummary'
+        type: array
+    type: object
+    x-example: "{\n  \"items\": [\n    {\n      \"resourceType\": \"User\",\n      \"identifier\": \"\
+      ocid1.user.oc1..exampleavephoafuxcvbwb4t7dvik5m2ibuokweo6ofaux5pda7nxv2nwp3a\",\n      \"compartmentId\"\
+      : \"ocidv1:tenancy:oc1:phx:1457636318783:examplea3lagrcvbljxg6mk55eo2fauxwy\",\n      \"timeCreated\"\
+      : \"2016-12-12T19:31:03.749Z\",\n      \"displayName\": \"Jane.Doe\",\n      \"availabilityDomain\"\
+      : null,\n      \"lifecycleState\": \"ACTIVE\",\n      \"freeformTags\": {},\n      \"definedTags\"\
+      : {},\n      \"searchContext\": {\n        \"highlights\": {\n          \"description\": [\n   \
+      \         \"&lt;h1&gt;Jane&lt;/h1&gt; Doe's account\"\n          ]\n        }\n      }\n    },\n\
+      \    {\n      \"resourceType\": \"Compartment\",\n      \"identifier\": \"ocid1.compartment.oc1..exampleaeug24qzjpmwcvb33f3zz5kdh2jpvzm52n5faux3nndh3diys7pca\"\
+      ,\n      \"compartmentId\": \"ocidv1:tenancy:oc1:phx:1457636318783:examplea3lagrcvbljxg6mk55eo2fauxwy\"\
+      ,\n      \"timeCreated\": \"2017-01-20T00:18:14.236Z\",\n      \"displayName\": \"JanesCompartment\"\
+      ,\n      \"availabilityDomain\": null,\n      \"lifecycleState\": \"ACTIVE\",\n      \"freeformTags\"\
+      : {},\n      \"definedTags\": {},\n      \"searchContext\": {\n        \"highlights\": {\n     \
+      \     \"description\": [\n            \"Compartment for &lt;h1&gt;Jane&lt;/h1&gt; Doe to use\"\n\
+      \          ]\n        }\n      }\n    }\n  ]\n}\n"
+  ResourceType:
+    description: Defines a type of resource that you can find with a search or query.
+    properties:
+      fields:
+        description: 'List of all the fields and their value type that are indexed for querying.
+
+          '
+        items:
+          $ref: '#/definitions/QueryableFieldDescription'
+        type: array
+      name:
+        description: 'The unique name of the resource type, which matches the value returned as part of
+          the ResourceSummary object.
+
+          '
+        type: string
+    required:
+    - name
+    - fields
+    type: object
+    x-example: "[\n  {\n    \"fields\": [\n      {\n        \"fieldName\": \"freeformTags\", \n      \
+      \  \"fieldType\": \"OBJECT\", \n        \"isArray\": true, \n        \"objectProperties\": [\n \
+      \         {\n            \"fieldName\": \"freeformTags.value\", \n            \"fieldType\": \"\
+      STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n         \
+      \ }, \n          {\n            \"fieldName\": \"freeformTags.key\", \n            \"fieldType\"\
+      : \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n     \
+      \     }\n        ]\n      }, \n      {\n        \"fieldName\": \"displayName\", \n        \"fieldType\"\
+      : \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n  \
+      \    {\n        \"fieldName\": \"definedTags\", \n        \"fieldType\": \"OBJECT\", \n        \"\
+      isArray\": true, \n        \"objectProperties\": [\n          {\n            \"fieldName\": \"definedTags.key\"\
+      , \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\"\
+      : null\n          }, \n          {\n            \"fieldName\": \"definedTags.namespace\", \n   \
+      \         \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\"\
+      : null\n          }, \n          {\n            \"fieldName\": \"definedTags.value\", \n       \
+      \     \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\"\
+      : null\n          }\n        ]\n      },\n      {\n        \"fieldName\": \"systemTags\",\n    \
+      \    \"fieldType\": \"OBJECT\",\n        \"isArray\": true,\n        \"objectProperties\": [\n \
+      \         {\n            \"fieldName\": \"systemTags.key\",\n            \"fieldType\": \"STRING\"\
+      ,\n            \"isArray\": false,\n            \"objectProperties\": null\n          },\n     \
+      \     {\n            \"fieldName\": \"systemTags.namespace\",\n            \"fieldType\": \"STRING\"\
+      ,\n            \"isArray\": false,\n            \"objectProperties\": null\n          },\n     \
+      \     {\n            \"fieldName\": \"systemTags.value\",\n            \"fieldType\": \"STRING\"\
+      ,\n            \"isArray\": false,\n            \"objectProperties\": null\n          }\n      \
+      \  ]\n      },\n      {\n        \"fieldName\": \"lifecycleState\", \n        \"fieldType\": \"\
+      STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n\
+      \        \"fieldName\": \"compartmentId\", \n        \"fieldType\": \"IDENTIFIER\", \n        \"\
+      isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\"\
+      : \"availabilityDomain\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n\
+      \        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"timeLastIndexed\"\
+      , \n        \"fieldType\": \"DATETIME\", \n        \"isArray\": false, \n        \"objectProperties\"\
+      : null\n      }, \n      {\n        \"fieldName\": \"timeCreated\", \n        \"fieldType\": \"\
+      DATETIME\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n    \
+      \  {\n        \"fieldName\": \"identifier\", \n        \"fieldType\": \"IDENTIFIER\", \n       \
+      \ \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\"\
+      : \"cidrBlock\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"\
+      objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"dnsLabel\", \n        \"\
+      fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n  \
+      \    }, \n      {\n        \"fieldName\": \"vcnDomainName\", \n        \"fieldType\": \"STRING\"\
+      , \n        \"isArray\": false, \n        \"objectProperties\": null\n      }\n    ], \n    \"name\"\
+      : \"Vcn\"\n  },\n  ...\n]\n"
+  SearchContext:
+    description: Contains search context, such as highlighting, for found resources.
+    properties:
+      highlights:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: "Describes what in each field matched the search criteria by showing highlighted\
+          \ values, but only for free text searches or for structured \nqueries that use a MATCHING clause.\
+          \ The list of strings represents fragments of values that matched the query conditions. Highlighted\
+          \ \nvalues are wrapped with &lt;h1&gt;..&lt;/h1&gt; tags. All values are HTML-encoded (except\
+          \ &lt;h1&gt; tags).\n"
+        type: object
+    type: object
+    x-example: "{\n  \"searchContext\": {\n    \"highlights\": {\n      \"description\": [\n        \"\
+      Compartment for &lt;h1&gt;Jane&lt;/h1&gt; Doe to use\"\n      ]\n    }\n  }\n}\n"
+  SearchDetails:
+    description: A base request type that contains common criteria for searching for resources.
+    discriminator: type
+    properties:
+      matchingContextType:
+        description: 'The type of matching context returned in the response. If you specify `HIGHLIGHTS`,
+          then the service will highlight fragments in its response. (For more information, see ResourceSummary.searchContext
+          and SearchContext.) The default setting is `NONE`.
+
+          '
+        enum:
+        - NONE
+        - HIGHLIGHTS
+        type: string
+      type:
+        description: The type of SearchDetails, whether `FreeText` or `Structured`.
+        type: string
+    required:
+    - type
+    type: object
+    x-example: "{\n  \"type\": \"FreeText\",\n  \"text\": \"jane\",\n  \"matchingContextType\": \"HIGHLIGHTS\"\
+      \n}\n"
+  StructuredSearchDetails:
+    allOf:
+    - $ref: '#/definitions/SearchDetails'
+    - discriminator: Structured
+      properties:
+        query:
+          description: The structured query describing which resources to search for.
+          type: string
+      required:
+      - query
+      type: object
+    description: "A request that uses Search's structured query language to specify filter conditions\
+      \ to apply to search results. \nFor more information about writing queries, see [Search Language\
+      \ Syntax](https://docs.oracle.com/iaas/Content/Search/Concepts/querysyntax.htm).\n"
+    type: object
+    x-example: "{\n  \"type\": \"Structured\",\n  \"query\": \"query user resources where displayName\
+      \ = 'jane'\"\n}\n"
+parameters:
+  OpcRequestIdHeaderParam:
+    description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle
+      about a particular
+
+      request, please provide the complete request ID.
+
+      '
+    in: header
+    name: opc-request-id
+    type: string
+  PaginationLimitQueryParam:
+    default: 1000
+    description: The maximum number of items to return. The value must be between 1 and 1000.
+    in: query
+    maximum: 1000
+    minimum: 1
+    name: limit
+    type: integer
+  PaginationTokenQueryParam:
+    description: The page at which to start retrieving results.
+    in: query
+    maxLength: 1024
+    minLength: 1
+    name: page
+    type: string
+    x-default-description: 'null'
+  ResourceNamePathParam:
+    description: The name of the resource type.
+    in: path
+    minLength: 1
+    name: name
+    required: true
+    type: string
+  TenantIdQueryParam:
+    description: 'The tenancy ID, which can be used to specify a different tenancy (for cross-tenancy
+      authorization) when searching for resources in a different tenancy.
+
+      '
+    in: query
+    minLength: 1
+    name: tenantId
+    required: false
+    type: string
+    x-default-description: 'null'
+x-anchors:
+  x-headers:
+    opc-next-page: *id008
+    opc-previous-page: *id009
+    opc-request-id: *id001
+x-httpStatuses:
+  400: *id002
+  401: *id003
+  404: *id004
+  429: *id005
+  500: *id006
+  default: *id007
+x-obmcs-client-retries-table:
+  ResourceSearch:
+    enabled: true
