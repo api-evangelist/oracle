@@ -269,19 +269,25 @@ paths:
       x-related-resource: '#/definitions/ManagedDatabase'
 components:
   parameters:
-    PaginationTokenQueryParam:
-      description: 'The page token representing the page from where the next set of paginated results
-
-        are retrieved. This is usually retrieved from a previous list call.
-
-        '
+    AlertLogGroupByOptionalQueryParam:
+      description: The optional parameter used to group different alert logs.
       in: query
-      name: page
-      x-default-description: 'null'
+      name: groupBy
+      required: false
       schema:
         type: string
-        maxLength: 1024
-        minLength: 1
+        enum:
+        - LEVEL
+        - TYPE
+        default: TYPE
+    IsLogSearchTextRegularExpressionQueryParam:
+      description: The flag to indicate whether the search text is regular expression or not.
+      in: query
+      name: isRegularExpression
+      required: false
+      schema:
+        type: boolean
+        default: false
     LogBeginTimeOptionalQueryParam:
       description: The optional greater than or equal to timestamp to filter the logs.
       in: query
@@ -291,12 +297,91 @@ components:
       schema:
         type: string
         format: date-time
+    AlertLogLevelFilterOptionalQueryParam:
+      description: The optional parameter to filter the alert logs by log level.
+      in: query
+      name: levelFilter
+      required: false
+      schema:
+        type: string
+        enum:
+        - CRITICAL
+        - SEVERE
+        - IMPORTANT
+        - NORMAL
+        - ALL
+        default: ALL
+    AttentionLogGroupByOptionalQueryParam:
+      description: The optional parameter used to group different attention logs.
+      in: query
+      name: groupBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - URGENCY
+        - TYPE
+        default: TYPE
+    AttentionLogUrgencyFilterOptionalQueryParam:
+      description: The optional parameter to filter the attention logs by urgency.
+      in: query
+      name: urgencyFilter
+      required: false
+      schema:
+        type: string
+        enum:
+        - IMMEDIATE
+        - SOON
+        - DEFERRABLE
+        - INFO
+        - ALL
+        default: ALL
+    SortOrderQueryParam:
+      description: The option to sort information in ascending (‘ASC’) or descending (‘DESC’) order. Ascending order is the default order.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    AttentionLogSortByQueryParam:
+      description: The possible sortBy values of attention logs.
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - URGENCY
+        - TYPE
+        - MESSAGE
+        - TIMESTAMP
+        - SCOPE
+        - TARGET_USER
+        default: TIMESTAMP
+    NamedCredentialIdHeader:
+      description: The OCID of the Named Credential.
+      in: header
+      name: opc-named-credential-id
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
     LogSearchTextFilterOptionalQueryParam:
       description: The optional query parameter to filter the attention or alert logs by search text.
       in: query
       name: logSearchText
       required: false
       x-default-description: 'null'
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
     LogTypeFilterOptionalQueryParam:
@@ -315,35 +400,28 @@ components:
         - TRACE
         - ALL
         default: ALL
-    AlertLogLevelFilterOptionalQueryParam:
-      description: The optional parameter to filter the alert logs by log level.
-      in: query
-      name: levelFilter
-      required: false
+    ManagedDatabaseIdPathParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Managed Database.
+      in: path
+      name: managedDatabaseId
+      required: true
       schema:
         type: string
-        enum:
-        - CRITICAL
-        - SEVERE
-        - IMPORTANT
-        - NORMAL
-        - ALL
-        default: ALL
-    AttentionLogSortByQueryParam:
-      description: The possible sortBy values of attention logs.
+        maxLength: 255
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: 'The page token representing the page from where the next set of paginated results
+
+        are retrieved. This is usually retrieved from a previous list call.
+
+        '
       in: query
-      name: sortBy
-      required: false
+      name: page
+      x-default-description: 'null'
       schema:
         type: string
-        enum:
-        - URGENCY
-        - TYPE
-        - MESSAGE
-        - TIMESTAMP
-        - SCOPE
-        - TARGET_USER
-        default: TIMESTAMP
+        maxLength: 1024
+        minLength: 1
     PaginationLimitQueryParam:
       description: The maximum number of records returned in the paginated response.
       in: query
@@ -353,44 +431,6 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
-    NamedCredentialIdHeader:
-      description: The OCID of the Named Credential.
-      in: header
-      name: opc-named-credential-id
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The option to sort information in ascending (‘ASC’) or descending (‘DESC’) order. Ascending order is the default order.
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    IsLogSearchTextRegularExpressionQueryParam:
-      description: The flag to indicate whether the search text is regular expression or not.
-      in: query
-      name: isRegularExpression
-      required: false
-      schema:
-        type: boolean
-        default: false
-    AlertLogGroupByOptionalQueryParam:
-      description: The optional parameter used to group different alert logs.
-      in: query
-      name: groupBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - LEVEL
-        - TYPE
-        default: TYPE
     AlertLogSortByQueryParam:
       description: The possible sortBy values of attention logs.
       in: query
@@ -404,35 +444,6 @@ components:
         - MESSAGE
         - TIMESTAMP
         default: TIMESTAMP
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ManagedDatabaseIdPathParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Managed Database.
-      in: path
-      name: managedDatabaseId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    AttentionLogUrgencyFilterOptionalQueryParam:
-      description: The optional parameter to filter the attention logs by urgency.
-      in: query
-      name: urgencyFilter
-      required: false
-      schema:
-        type: string
-        enum:
-        - IMMEDIATE
-        - SOON
-        - DEFERRABLE
-        - INFO
-        - ALL
-        default: ALL
     LogEndTimeOptionalQueryParam:
       description: The optional less than or equal to timestamp to filter the logs.
       in: query
@@ -442,30 +453,64 @@ components:
       schema:
         type: string
         format: date-time
-    AttentionLogGroupByOptionalQueryParam:
-      description: The optional parameter used to group different attention logs.
-      in: query
-      name: groupBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - URGENCY
-        - TYPE
-        default: TYPE
   schemas:
-    Error:
-      description: Error Information.
+    AttentionLogCollection:
+      description: The list of attention logs.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
+        items:
+          description: An array of the attention logs.
+          items:
+            $ref: '#/components/schemas/AttentionLogSummary'
+          type: array
+        managedDatabaseId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Managed Database.
           type: string
       required:
-      - code
-      - message
+      - managedDatabaseId
+      - items
+      type: object
+    AlertLogSummary:
+      description: 'The detail for one alert log entry.
+
+        '
+      properties:
+        fileLocation:
+          description: The alert log file location.
+          type: string
+        messageContent:
+          description: The contents of the alert log message.
+          type: string
+        messageLevel:
+          description: The level of the alert log.
+          enum:
+          - CRITICAL
+          - SEVERE
+          - IMPORTANT
+          - NORMAL
+          - OTHER
+          type: string
+        messageType:
+          description: The type of alert log message.
+          enum:
+          - UNKNOWN
+          - INCIDENT_ERROR
+          - ERROR
+          - WARNING
+          - NOTIFICATION
+          - TRACE
+          - OTHER
+          type: string
+        supplementalDetail:
+          description: The supplemental details of the alert log.
+          type: string
+        timestamp:
+          description: The date and time the alert log was created.
+          format: date-time
+          type: string
+      required:
+      - messageLevel
+      - messageType
+      type: object
     AttentionLogCountSummary:
       description: 'The details for one attention log count entry.
 
@@ -494,20 +539,33 @@ components:
       - category
       - count
       type: object
-    AlertLogCountsCollection:
-      description: The collection of the counts of different level or type of alert logs.
+    AlertLogCountSummary:
+      description: 'The details for one alert log count entry.
+
+        '
       properties:
-        items:
-          description: An array of the counts of different urgency or type of alert logs.
-          items:
-            $ref: '#/components/schemas/AlertLogCountSummary'
-          type: array
-        managedDatabaseId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Managed Database.
+        category:
+          description: The category of different alert logs.
+          enum:
+          - UNKNOWN
+          - INCIDENT_ERROR
+          - ERROR
+          - WARNING
+          - NOTIFICATION
+          - TRACE
+          - CRITICAL
+          - SEVERE
+          - IMPORTANT
+          - NORMAL
+          - OTHER
           type: string
+        count:
+          default: 0
+          description: The count of alert logs with specific category.
+          type: integer
       required:
-      - managedDatabaseId
-      - items
+      - category
+      - count
       type: object
     AttentionLogSummary:
       description: 'The details for one attention log entry.
@@ -578,76 +636,18 @@ components:
       - managedDatabaseId
       - items
       type: object
-    AlertLogSummary:
-      description: 'The detail for one alert log entry.
-
-        '
+    Error:
+      description: Error Information.
       properties:
-        fileLocation:
-          description: The alert log file location.
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
-        messageContent:
-          description: The contents of the alert log message.
-          type: string
-        messageLevel:
-          description: The level of the alert log.
-          enum:
-          - CRITICAL
-          - SEVERE
-          - IMPORTANT
-          - NORMAL
-          - OTHER
-          type: string
-        messageType:
-          description: The type of alert log message.
-          enum:
-          - UNKNOWN
-          - INCIDENT_ERROR
-          - ERROR
-          - WARNING
-          - NOTIFICATION
-          - TRACE
-          - OTHER
-          type: string
-        supplementalDetail:
-          description: The supplemental details of the alert log.
-          type: string
-        timestamp:
-          description: The date and time the alert log was created.
-          format: date-time
+        message:
+          description: A human-readable error string.
           type: string
       required:
-      - messageLevel
-      - messageType
-      type: object
-    AlertLogCountSummary:
-      description: 'The details for one alert log count entry.
-
-        '
-      properties:
-        category:
-          description: The category of different alert logs.
-          enum:
-          - UNKNOWN
-          - INCIDENT_ERROR
-          - ERROR
-          - WARNING
-          - NOTIFICATION
-          - TRACE
-          - CRITICAL
-          - SEVERE
-          - IMPORTANT
-          - NORMAL
-          - OTHER
-          type: string
-        count:
-          default: 0
-          description: The count of alert logs with specific category.
-          type: integer
-      required:
-      - category
-      - count
-      type: object
+      - code
+      - message
     AlertLogCollection:
       description: The list of alert logs.
       properties:
@@ -663,13 +663,13 @@ components:
       - managedDatabaseId
       - items
       type: object
-    AttentionLogCollection:
-      description: The list of attention logs.
+    AlertLogCountsCollection:
+      description: The collection of the counts of different level or type of alert logs.
       properties:
         items:
-          description: An array of the attention logs.
+          description: An array of the counts of different urgency or type of alert logs.
           items:
-            $ref: '#/components/schemas/AttentionLogSummary'
+            $ref: '#/components/schemas/AlertLogCountSummary'
           type: array
         managedDatabaseId:
           description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Managed Database.

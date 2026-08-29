@@ -2456,20 +2456,70 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   schemas:
-    MaintenanceRun:
-      description: 'Details of a maintenance run.
-
-        '
+    NodeDetails:
+      description: Node details associated with a VM cluster network.
+      properties:
+        hostname:
+          description: The node host name.
+          example: sample-host
+          maxLength: 255
+          minLength: 1
+          type: string
+        ip:
+          description: The node IP address.
+          example: 192.0.2.20
+          maxLength: 255
+          minLength: 1
+          type: string
+        vip:
+          description: The node virtual IP (VIP) address.
+          example: 192.0.2.21
+          maxLength: 255
+          minLength: 1
+          type: string
+        vipHostname:
+          description: The node virtual IP (VIP) host name.
+          example: vip-host-name
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - hostname
+      - ip
+    MaintenanceExecutionCollection:
+      description: A collection of maintenance run execution history.
+      properties:
+        items:
+          description: A list of maintenance run execution history.
+          items:
+            $ref: '#/components/schemas/MaintenanceExecutionSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ChangeVmInstanceCompartmentDetails:
+      description: Updated compartment details.
       properties:
         compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to which the VM instance is moving.
+          example: ocid.compartment.oc1..<unique_ID>
+          maxLength: 255
           type: string
-        customActionTimeoutInMins:
-          description: 'Determines the amount of time the system will wait before the start of each server update operation.
+      required:
+      - compartmentId
+      type: object
+    VmInstanceSummary:
+      description: VM instance on Data Infrastructure summary.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM
 
-            Supported values are 15 to 120 minutes.
+            instance.
 
             '
+          type: string
+        cpusEnabled:
+          description: The number of CPU cores enabled for each VM instance.
           type: integer
         definedTags:
           additionalProperties:
@@ -2494,25 +2544,16 @@ components:
               bar-key: value
           type: object
         description:
-          description: Description of the maintenance run.
+          description: VM instance description.
           type: string
         displayName:
-          description: The user-friendly name for the maintenance run.
-          type: string
-        effectiveMaintenanceMethod:
-          description: 'The maintenance method ultimately applied to the maintenance run.
+          description: 'VM instance display name. This name does not have to be unique, and is changeable.
 
             '
-          enum:
-          - ROLLING
-          - NONROLLING
           type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
-        estimatedMaintenanceTimeInMins:
-          description: 'The estimated end-to-end maintenance duration (minutes).
-
-            '
-          type: integer
+        domainName:
+          description: The domain name of the VM instance.
+          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -2525,55 +2566,37 @@ components:
             bar-key: value
           type: object
         id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run.
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM instance.
+          type: string
+        imageId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM custom instance uploaded.
           type: string
         infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure on which the maintenance run execution occurs.
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
           type: string
-        isCustomActionTimeoutEnabled:
-          description: Whether a custom action timeout (waiting period) is configured for the server update operations.
+        isHaEnabled:
+          description: Indicates whether high availability is enabled for the VM instance.
           type: boolean
         lifecycleDetails:
-          description: Additional information about the current lifecycle state.
+          description: Lifecycle state details of the VM instance.
           type: string
         lifecycleState:
-          description: 'The current state of the maintenance run.
-
-            '
+          description: The current state of the VM instance.
           enum:
           - CREATING
-          - SCHEDULED
-          - IN_PROGRESS
-          - SUCCEEDED
-          - SKIPPED
-          - FAILED
+          - ACTIVE
+          - INACTIVE
           - UPDATING
           - DELETING
           - DELETED
-          - CANCELED
-          - PARTIAL_SUCCESS
           type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
-        maintenanceRunType:
-          description: Maintenance run type.
-          enum:
-          - QUARTERLY
-          - PLANNED
-          - MANDATORY
-          - SECURITY_MONTHLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
-        preferredMaintenanceMethod:
-          description: 'The maintenance method preference for the maintenance run, as selected by the user.
-
-            '
-          enum:
-          - ROLLING
-          - NONROLLING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
-        sourceVersion:
-          description: The Oracle Data Infrastructure version from which the maintenance is performed.
+          x-obmcs-top-level-enum: '#/definitions/VmInstanceLifecycleState'
+        memorySizeInGBs:
+          description: The memory to be allocated in GBs.
+          format: double
+          type: number
+        serverId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compute node on which VM instance should be launched.
           type: string
         systemTags:
           additionalProperties:
@@ -2597,45 +2620,56 @@ components:
             orcl-cloud:
               free-tier-retained: true
           type: object
-        targetVersion:
-          description: The Data Infrastructure version that will be applied as the outcome of the maintenance operation.
-          type: string
-        timeEnded:
-          description: The date and time the maintenance run was completed.
+        timeCreated:
+          description: 'The time that the VM instance was created. An RFC3339 formatted datetime string.
+
+            '
           format: date-time
           type: string
-        timeScheduled:
-          description: The date and time the maintenance run is scheduled to occur.
+        timeUpdated:
+          description: 'The time that the VM instance was last updated. An RFC3339 formatted datetime string.
+
+            '
           format: date-time
           type: string
-        timeStarted:
-          description: The date and time the maintenance run starts.
-          format: date-time
+        timeZone:
+          description: The time zone to use for the VM instance.
+          type: string
+        vmNetworkId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM Network.
           type: string
       required:
       - id
       - compartmentId
-      - displayName
       - lifecycleState
-      - timeScheduled
+      - cpusEnabled
+      - timeCreated
+      - timeUpdated
+      - timeZone
       type: object
-    Error:
-      description: Error details.
-      properties:
-        code:
-          description: A short error code that defines the error, which is used for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    UpdateVmClusterNetworkDetails:
-      description: 'Details for a VM cluster network.
+    VmClusterNetworkSummary:
+      description: 'Summary of the VM cluster network on Data Infrastructure.
 
         '
       properties:
+        associatedResourceId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the associated resource.
+          type: string
+        baseVmClusterId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the associated VM cluster.
+          type: string
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM cluster network.
+
+            '
+          type: string
+        consumerType:
+          description: Consumer type for the VM cluster network.
+          enum:
+          - INSTANCE
+          - CLUSTER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VmNetworkConsumerType'
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -2660,21 +2694,11 @@ components:
           type: object
         displayName:
           description: The user-friendly name for the VM cluster network. The name does not need to be unique.
-          example: Sample-update-vm-cluster-network
-          maxLength: 255
-          minLength: 1
           type: string
         dnsServers:
           description: The list of DNS server IP addresses. Maximum of 3 allowed.
-          example:
-          - 192.0.2.22
-          - 192.0.2.23
-          - 192.0.2.24
           items:
-            maxLength: 1024
-            minLength: 1
             type: string
-          maxItems: 3
           type: array
         freeformTags:
           additionalProperties:
@@ -2687,64 +2711,177 @@ components:
           example:
             bar-key: value
           type: object
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM cluster network.
+          type: string
+        infrastructureId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+          type: string
+        isScanEnabled:
+          description: 'Indicates whether Single Client Access Name (SCAN) is enabled on the VM cluster.
+
+            '
+          type: boolean
+        lifecycleDetails:
+          description: Lifecycle state details of the VM cluster network.
+          type: string
+        lifecycleState:
+          description: The current state of the virtual machine cluster network.
+          enum:
+          - CREATING
+          - REQUIRES_VALIDATION
+          - VALIDATING
+          - VALIDATED
+          - VALIDATION_FAILED
+          - UPDATING
+          - ALLOCATED
+          - DELETING
+          - DELETED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VmClusterNetworkLifecycleState'
         listenerPort:
           description: The listener TCP/IP port.
-          example: 1520
           maximum: 8999
           minimum: 1024
           type: integer
         listenerPortSsl:
-          description: The listener TCP/IP SSL port. Default is 2484.
+          description: The listener TCP/IP SSL port.
           maximum: 8999
           minimum: 1024
           type: integer
+        nodeCount:
+          description: Count of virtual machines in this VM cluster.
+          type: integer
         ntpServers:
           description: The list of NTP server IP addresses. Maximum of 3 allowed.
-          example:
-          - 192.0.2.25
           items:
-            maxLength: 1024
-            minLength: 1
             type: string
-          maxItems: 3
           type: array
         scans:
           description: The SCAN details.
           items:
             $ref: '#/components/schemas/ScanDetails'
-          maxItems: 3
           type: array
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
+
+            '
+          example:
+            orcl-cloud:
+              free-tier-retained: true
+          type: object
+        timeCreated:
+          description: 'The time that the VM cluster network was created. An RFC3339 formatted datetime string.
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time that the VM cluster network was last updated. An RFC3339 formatted datetime string.
+
+            '
+          format: date-time
+          type: string
         vmNetworks:
           description: Details of the client and backup networks.
           items:
             $ref: '#/components/schemas/VmNetworkDetails'
           type: array
-    ScanDetails:
-      description: 'The Single Client Access Name (SCAN) details.
-
-        '
+      required:
+      - id
+      - compartmentId
+      - displayName
+      - infrastructureId
+      - scans
+      - vmNetworks
+    WorkRequestCollection:
+      description: A collection of Work request resources.
       properties:
-        hostname:
-          description: The SCAN hostname.
-          example: scan-host
-          maxLength: 255
-          minLength: 1
-          type: string
-        ips:
-          description: The list of SCAN IP addresses. Three addresses should be provided.
-          example:
-          - 192.0.2.12
-          - 192.0.2.14
-          - 192.0.2.13
+        items:
+          description: A list of Work request resources.
           items:
-            maxLength: 1024
-            minLength: 1
-            type: string
-          maxItems: 3
+            $ref: '#/components/schemas/WorkRequest'
           type: array
       required:
-      - hostname
-      - ips
+      - items
+      type: object
+    ScaleInfrastructureStorageDetails:
+      description: The scale option to be selected for the infrastructure.
+      properties:
+        ssdConfigurationRequested:
+          description: The scale option to be selected for the infrastructure.
+          enum:
+          - SIX_SSDS
+          - TWELVE_SSDS
+          - EIGHTEEN_SSDS
+          - TWENTY_FOUR_SSDS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ShapeEnum'
+      type: object
+    StorageCapacityDetails:
+      description: Capacity details of the Storage disk group.
+      properties:
+        diskGroup:
+          description: Disk group name.
+          type: string
+        logicalFreeSpaceInGBs:
+          description: The total amount of logical disk space that is currently available for use in a disk group, in gigabytes (GB).
+          format: int64
+          type: integer
+        phyFreeSpaceInGBs:
+          description: The total amount of physical disk space that is currently available for use in a disk group, in gigabytes (GB).
+          format: int64
+          type: integer
+        phyReservedSpaceInGBs:
+          description: The total amount of physical disk space that is reserved for system use in a disk group, in gigabytes (GB).
+          format: int64
+          type: integer
+        phyTotalSpaceInGBs:
+          description: The total amount of physical disk space available in a disk group, in gigabytes (GB).
+          format: int64
+          type: integer
+        storageDiskRedundancy:
+          description: The Disk redundancy for Data Infrastructure storage.
+          enum:
+          - HIGH
+          - MIRROR
+          - FLEX
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/StorageDiskRedundancy'
+      type: object
+    MaintenanceRunCollection:
+      description: A collection of maintenance runs.
+      properties:
+        items:
+          description: A list of maintenance runs.
+          items:
+            $ref: '#/components/schemas/MaintenanceRunSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ShapeEnum:
+      description: Model Shapes for Data Infrastructure.
+      enum:
+      - SIX_SSDS
+      - TWELVE_SSDS
+      - EIGHTEEN_SSDS
+      - TWENTY_FOUR_SSDS
+      type: string
     UpdateVmInstanceDetails:
       description: Updated VM instance details.
       properties:
@@ -2800,600 +2937,60 @@ components:
             bar-key: value
           type: object
       type: object
-    InfrastructureCollection:
-      description: A collection of Data Infrastructure resources.
+    SystemStorageCapacityDetails:
+      description: Capacity details of different storage types.
+      properties:
+        acfs:
+          $ref: '#/components/schemas/AcfsCapacityDetails'
+        diskGroups:
+          description: List of storage disk group capacity details.
+          items:
+            $ref: '#/components/schemas/DiskGroupCapacityDetails'
+          type: array
+      type: object
+    WorkRequestErrorCollection:
+      description: A collection of work request error resources.
       properties:
         items:
-          description: A list of Data Infrastructure resources.
+          description: A list of work request error resources.
           items:
-            $ref: '#/components/schemas/InfrastructureSummary'
+            $ref: '#/components/schemas/WorkRequestError'
           type: array
       required:
       - items
       type: object
-    InfrastructureSummary:
-      description: 'Data Infrastructure resource summary.
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. Error codes are listed on
+
+            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+
+            '
+          type: string
+        message:
+          description: A human-readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time that the error occured. An RFC3339 standard formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    ActivateInfrastructureDetails:
+      description: 'The activation details for the Data Infrastructure.
 
         '
       properties:
-        acfsFileSystemStorageInGbs:
-          description: 'The amount of storage (in GB) in the DATA disk group that is reserved for creating local storage for VM Clusters and application VMs.
-
-            '
-          format: double
-          type: number
-        acfsFileSystemUsedStorageInGbs:
-          description: 'The amount of storage (in GB) in the DATA disk group that is currently utilized for creating local storage for VM Clusters and application VMs.
-
-            This attribute is deprecated and will be removed in a subsequent release. Please read from systemStorageCapacity instead.
-
-            '
-          format: double
-          type: number
-        adminNetworkcidr:
-          description: The CIDR block for the system network. The system network is a private network in Data Infrastructure and is not connected to your corporate network. The system network is used for storage (ASM) traffic, high-performance interconnect traffic and administration of infrastructure components.
-          type: string
-        backupNetworkBondingInterface:
-          description: The network bonding interface for backup network for the Data Infrastructure.
-          enum:
-          - BTBOND1
-          - BTBOND2
-          - BTBOND3
-          - BTBOND4
-          - BTBOND5
-          - BTBOND6
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
-        backupNetworkBondingMode:
-          description: The network bonding mode for Backup networks for the Data Infrastructure.
-          enum:
-          - ACTIVE_BACKUP
-          - LACP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
-        clientNetworkBondingInterface:
-          description: The network bonding interface for client network for the Data Infrastructure.
-          enum:
-          - BTBOND1
-          - BTBOND2
-          - BTBOND3
-          - BTBOND4
-          - BTBOND5
-          - BTBOND6
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
-        clientNetworkBondingMode:
-          description: The network bonding mode for Client networks for the Data Infrastructure.
-          enum:
-          - ACTIVE_BACKUP
-          - LACP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
-        cloudControlPlaneServer1:
-          description: The IP address for the first control plane server.
-          type: string
-        cloudControlPlaneServer2:
-          description: The IP address for the second control plane server.
-          type: string
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
-
-            '
-          type: string
-        computeCapacity:
-          $ref: '#/components/schemas/ComputeCapacityDetails'
-        contacts:
-          description: The list of contacts for the Data Infrastructure.
-          items:
-            $ref: '#/components/schemas/InfrastructureContact'
-          type: array
-        corporateProxy:
-          description: 'The corporate network proxy for access to the control plane network. Oracle recommends using an HTTPS proxy when possible
-
-            for enhanced security.
-
-            '
-          type: string
-        cpsNetworkBondingInterface:
-          description: The network bonding interface for CPS network for the Data Infrastructure.
-          enum:
-          - BTBOND1
-          - BTBOND2
-          - BTBOND3
-          - BTBOND4
-          - BTBOND5
-          - BTBOND6
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
-        cpsNetworkBondingMode:
-          description: The network bonding mode for CPS networks for the Data Infrastructure.
-          enum:
-          - ACTIVE_BACKUP
-          - LACP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          example:
-            foo-namespace:
-              bar-key: value
-          type: object
-        description:
-          description: Data Infrastructure description.
-          type: string
-        displayName:
-          description: 'The user-friendly name for the Data Infrastructure. The name does not need to be unique.
-
-            '
-          type: string
-        dnsServers:
-          description: The list of DNS server IP addresses. Maximum of 3 allowed.
-          items:
-            type: string
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          example:
-            bar-key: value
-          type: object
-        gateway:
-          description: The gateway for the control plane network.
-          type: string
-        id:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
-
-            '
-          type: string
-        lifecycleState:
-          description: The current state of the Data Infrastructure.
-          enum:
-          - CREATING
-          - REQUIRES_VALIDATION
-          - VALIDATING
-          - REQUIRES_ACTIVATION
-          - ACTIVATING
-          - ACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          - DISCONNECTED
-          - MAINTENANCE_IN_PROGRESS
-          - REQUIRES_MAINTENANCE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/InfrastructureLifecycleState'
-        lifecycleStateDetails:
-          description: Lifecycle state details of the Data Infrastructure.
-          type: string
-        maintenanceWindow:
-          $ref: '#/components/schemas/MaintenanceWindow'
-        netmask:
-          description: The netmask for the control plane network.
-          type: string
-        ntpServers:
-          description: The list of NTP server IP addresses. Maximum of 3 allowed.
-          items:
-            type: string
-          type: array
-        shape:
-          description: 'The shape of the Data Infrastructure. The shape determines the amount of CPU, storage, and memory resources allocated to the instance.
-
-            '
-          enum:
-          - SIX_SSDS
-          - TWELVE_SSDS
-          - EIGHTEEN_SSDS
-          - TWENTY_FOUR_SSDS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ShapeEnum'
-        ssdConfigurationRequested:
-          description: SSD configuration requested for the infrastructure.
-          enum:
-          - SIX_SSDS
-          - TWELVE_SSDS
-          - EIGHTEEN_SSDS
-          - TWENTY_FOUR_SSDS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ShapeEnum'
-        storageCapacity:
-          description: 'Capacity details of the Storage disk group.
-
-            This attribute is deprecated and will be removed in a subsequent release. Please
-
-            use systemStorageCapacity instead.
-
-            '
-          items:
-            $ref: '#/components/schemas/StorageCapacityDetails'
-          type: array
-        subscriptionPlanNumber:
-          description: The unique identifier for the subscription plan number.
-          maxLength: 255
-          minLength: 1
-          type: string
-        systemModel:
-          description: 'Data Infrastructure System Model specification. The system model determines the model of the Data Infrastructure hardware to be used.
-
-            '
-          enum:
-          - X11_HA_768
-          - X10_HA_512
-          - X8_HA_384
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SystemModelEnum'
-        systemStorageCapacity:
-          $ref: '#/components/schemas/SystemStorageCapacityDetails'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
-
-            '
-          example:
-            orcl-cloud:
-              free-tier-retained: true
-          type: object
-        timeActivated:
-          description: 'The time, in RFC3339 format, when the Data Infrastructure was activated.
-
-            '
-          format: date-time
-          type: string
-        timeCreated:
-          description: 'The time that the Data Infrastructure cluster was created. An RFC3339 formatted datetime string.
-
-            '
-          format: date-time
-          type: string
-        timeLastStateUpdated:
-          description: 'The time, in RFC3339 format, when the lifecycle state was last updated.
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The time that the Data Infrastructure was last updated. An RFC3339 formatted datetime string.
-
-            '
-          format: date-time
-          type: string
-        timeValidated:
-          description: 'The time, in RFC3339 format, when the Data Infrastructure network was validated.
-
-            '
-          format: date-time
-          type: string
-        version:
-          description: 'The version of the system software on the Data Infrastructure.
-
-            '
+        activationZipFile:
+          description: The activation zip file.
+          format: byte
           type: string
       required:
-      - id
-      - compartmentId
-      - displayName
-      - systemModel
-      - shape
-      - cloudControlPlaneServer1
-      - cloudControlPlaneServer2
-      - netmask
-      - gateway
-      - adminNetworkcidr
-      - dnsServers
-      - ntpServers
-      type: object
-    InfoVmNetworkDetails:
-      description: 'Details of the client or backup networks in a VM cluster.
-
-        '
-      properties:
-        domainName:
-          description: The network domain name.
-          example: us.oracle.com
-          maxLength: 255
-          minLength: 1
-          type: string
-        gateway:
-          description: The network gateway.
-          example: 192.0.2.18
-          maxLength: 255
-          minLength: 1
-          type: string
-        netmask:
-          description: The network netmask.
-          example: 192.0.2.17
-          maxLength: 255
-          minLength: 1
-          type: string
-        networkType:
-          description: The network type.
-          enum:
-          - CLIENT
-          - BACKUP
-          example: CLIENT
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VmClusterNetworkType'
-        prefix:
-          description: The network domain name prefix.
-          example: Test
-          maxLength: 255
-          minLength: 1
-          type: string
-        startingIp:
-          description: Starting ip address of the virtual machines.
-          example: 192.0.2.19
-          maxLength: 255
-          minLength: 1
-          type: string
-        vlanId:
-          description: The network VLAN ID.
-          example: 100
-          type: string
-      required:
-      - networkType
-      - domainName
-      - netmask
-      - gateway
-    DiskGroupCapacityDetails:
-      description: Capacity details of the storage disk group.
-      properties:
-        freeSpaceInGbs:
-          description: The total amount of logical disk space that is currently available for use, in gigabytes (GB).
-          format: double
-          type: number
-        reservedSpaceInGbs:
-          description: The total amount of logical disk space that is reserved for system use, in gigabytes (GB).
-          format: double
-          type: number
-        storageType:
-          description: The storage type for the Cloud Data Infrastructure.
-          type: string
-        totalSpaceInGbs:
-          description: The total amount of logical disk space available, in gigabytes (GB).
-          format: double
-          type: number
-      type: object
-    ShapeEnum:
-      description: Model Shapes for Data Infrastructure.
-      enum:
-      - SIX_SSDS
-      - TWELVE_SSDS
-      - EIGHTEEN_SSDS
-      - TWENTY_FOUR_SSDS
-      type: string
-    VmInstance:
-      description: VM instance details.
-      properties:
-        bootStorageSizeInGBs:
-          description: Boot storage memory to be allocated in GBs.
-          format: double
-          type: number
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM
-
-            instance.
-
-            '
-          type: string
-        cpusEnabled:
-          description: The number of CPU cores enabled for each VM instance.
-          type: integer
-        dataStorageSizeInGBs:
-          description: Data storage to be allocated in GBs.
-          format: double
-          type: number
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          example:
-            foo-namespace:
-              bar-key: value
-          type: object
-        description:
-          description: VM instance description.
-          type: string
-        displayName:
-          description: 'VM instance display name. This name does not have to be unique, and is changeable.
-
-            '
-          type: string
-        dnsServers:
-          description: The list of DNS server IP addresses. Maximum of 3 allowed.
-          items:
-            type: string
-          type: array
-        domainName:
-          description: The domain name of the VM instance.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          example:
-            bar-key: value
-          type: object
-        gateway:
-          description: The gateway IP address of the VM instance network.
-          maxLength: 255
-          minLength: 1
-          type: string
-        hostname:
-          description: The host name of the instance.
-          maxLength: 255
-          minLength: 1
-          type: string
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM instance.
-          type: string
-        imageId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM custom instance uploaded.
-          type: string
-        infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
-          type: string
-        ipAddress:
-          description: The IP address of the instance.
-          maxLength: 255
-          type: string
-        isHaEnabled:
-          description: Indicates whether high availability is enabled for the VM instance.
-          type: boolean
-        lifecycleDetails:
-          description: Lifecycle state details of the VM instance.
-          type: string
-        lifecycleState:
-          description: The current state of the VM instance.
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VmInstanceLifecycleState'
-        memorySizeInGBs:
-          description: The memory to be allocated in GBs.
-          format: double
-          type: number
-        metadata:
-          additionalProperties:
-            type: string
-          description: 'Custom metadata key/value pairs which can be used to:
-
-            - Provide information to [Cloud-Init](https://cloudinit.readthedocs.org/en/latest/) to be used for various system initialization tasks.
-
-            - Provide additional information which is exposed inside the instance context and can be queried or referenced by user-data scripts for dynamic configuration.
-
-            '
-          type: object
-        netmask:
-          description: The netmask of the VM instance network.
-          maxLength: 255
-          minLength: 1
-          type: string
-        ntpServers:
-          description: The list of NTP server addresses. Maximum of 3 allowed.
-          items:
-            type: string
-          type: array
-        serverId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compute node on which VM instance should be launched.
-          type: string
-        sshPublicKeys:
-          description: List of public key used for SSH access to the VM instance.
-          items:
-            type: string
-          type: array
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
-
-            '
-          example:
-            orcl-cloud:
-              free-tier-retained: true
-          type: object
-        timeCreated:
-          description: 'The time that the VM instance was created. An RFC3339 formatted datetime string.
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The time that the VM instance was last updated. An RFC3339 formatted datetime string.
-
-            '
-          format: date-time
-          type: string
-        timeZone:
-          description: The time zone to use for the VM instance.
-          type: string
-        userdata:
-          description: "Base64-encoded data to be used by Cloud-Init to run custom scripts or provide custom Cloud-Init configuration. \nFor information about how to take advantage of user data, see the [Cloud-Init Documentation](http://cloudinit.readthedocs.org/en/latest/topics/format.html).\n"
-          type: string
-        vlanId:
-          description: The network VLAN ID.
-          type: string
-        vmNetworkId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM Network.
-          type: string
-      required:
-      - id
-      - compartmentId
-      - lifecycleState
-      - cpusEnabled
-      - sshPublicKeys
-      - timeCreated
-      - timeUpdated
-      - timeZone
-      - infrastructureId
-      type: object
+      - activationZipFile
     VmClusterNetwork:
       description: 'Details of the VM cluster network on Data Infrastructure.
 
@@ -3555,36 +3152,158 @@ components:
       - infrastructureId
       - scans
       - vmNetworks
-    CreateVmInstanceDetails:
-      description: Create VM instance details.
+    RescheduleMaintenanceRunDetails:
+      description: Request parameters for rescheduling a maintenance run.
       properties:
-        bootStorageSizeInGBs:
-          description: Boot storage memory to be allocated in GBs.
-          example: 100
-          format: double
-          minimum: 50
-          type: number
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM
+        reason:
+          description: The reason for rescheduling the maintenance run.
+          example: ''
+          type: string
+        timeScheduled:
+          description: The new date and time for the scheduled maintenance run.
+          example: '2025-09-10T18:00:00.000Z'
+          format: date-time
+          type: string
+      required:
+      - timeScheduled
+      type: object
+    CreateVmClusterNetworkDetails:
+      description: 'Details for a VM cluster network.
 
-            instance.
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM cluster network.
 
             '
           example: ocid.compartment.oc1..<unique_ID>
           maxLength: 255
           minLength: 1
           type: string
-        cpusEnabled:
-          description: The number of CPU cores enabled for each VM instance.
+        consumerType:
+          description: Consumer type for the VM cluster network.
+          enum:
+          - INSTANCE
+          - CLUSTER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VmNetworkConsumerType'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          example:
+            foo-namespace:
+              bar-key: value
+          type: object
+        displayName:
+          description: The user-friendly name for the VM cluster network. The name does not need to be unique.
+          example: Sample-vm-cluster-network
+          maxLength: 255
+          minLength: 1
+          type: string
+        dnsServers:
+          description: The list of DNS server IP addresses. Maximum of 3 allowed.
+          example:
+          - 192.0.2.8
+          - 192.0.2.9
+          - 192.0.2.10
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          example:
+            bar-key: value
+          type: object
+        infrastructureId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+          example: ocid.baseinfrastructure.oc1.iad.<unique_ID>
+          maxLength: 255
+          minLength: 1
+          type: string
+        listenerPort:
+          default: 1521
+          description: The listener TCP/IP port.
+          example: 1520
+          maximum: 8999
+          minimum: 1024
+          type: integer
+        listenerPortSsl:
+          description: The listener TCP/IP SSL port. Default is 2484.
+          maximum: 8999
+          minimum: 1024
+          type: integer
+        nodeCount:
+          default: 2
+          description: Count of virtual machines in this VM cluster.
           example: 2
+          maximum: 2
           minimum: 1
           type: integer
-        dataStorageSizeInGBs:
-          description: Data storage to be allocated in GBs.
-          example: 100
-          format: double
-          minimum: 1
-          type: number
+        ntpServers:
+          description: The list of NTP server IP addresses. Maximum of 3 allowed.
+          example:
+          - 192.0.2.11
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+        scans:
+          description: The SCAN details.
+          items:
+            $ref: '#/components/schemas/ScanDetails'
+          maxItems: 3
+          type: array
+        vmNetworks:
+          description: Details of the client and backup networks.
+          items:
+            $ref: '#/components/schemas/VmNetworkDetails'
+          type: array
+      required:
+      - compartmentId
+      - displayName
+      - infrastructureId
+      - vmNetworks
+    MaintenanceRunSummary:
+      description: 'Summary of a maintenance run.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
+          type: string
+        customActionTimeoutInMins:
+          description: 'Determines the amount of time the system will wait before the start of each server update operation.
+
+            Supported values are 15 to 120 minutes.
+
+            '
+          type: integer
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -3608,18 +3327,25 @@ components:
               bar-key: value
           type: object
         description:
-          description: VM instance description.
-          example: Test Create Application VM
-          maxLength: 400
+          description: Description of the maintenance run.
           type: string
         displayName:
-          description: 'VM instance display name. This name does not have to be unique, and is changeable.
+          description: The user-friendly name for the maintenance run.
+          type: string
+        effectiveMaintenanceMethod:
+          description: 'The maintenance method ultimately applied to the maintenance run.
 
             '
-          example: Sample-app-vm
-          maxLength: 255
-          minLength: 1
+          enum:
+          - ROLLING
+          - NONROLLING
           type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
+        estimatedMaintenanceTimeInMins:
+          description: 'The estimated end-to-end maintenance duration (minutes).
+
+            '
+          type: integer
         freeformTags:
           additionalProperties:
             type: string
@@ -3631,55 +3357,57 @@ components:
           example:
             bar-key: value
           type: object
-        imageId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM custom instance uploaded.
-          maxLength: 255
-          minLength: 1
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run.
           type: string
         infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
-          example: ocid.baseinfrastructure.oc1.iad.<unique_ID>
-          maxLength: 255
-          minLength: 1
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure on which the maintenance run execution occurs.
           type: string
-        isHaEnabled:
-          default: true
-          description: 'If true, high availability is enabled for the VM instance. If false, high availability is not enabled for the VM instance.
-
-            '
-          example: true
+        isCustomActionTimeoutEnabled:
+          description: Whether a custom action timeout (waiting period) is configured for the server update operations.
           type: boolean
-        memorySizeInGBs:
-          description: The memory to be allocated in GBs.
-          example: 8
-          format: double
-          type: number
-        metadata:
-          additionalProperties:
-            type: string
-          description: 'Custom metadata key/value pairs which can be used to:
-
-            - Provide information to [Cloud-Init](https://cloudinit.readthedocs.org/en/latest/) to be used for various system initialization tasks.
-
-            - Provide additional information which is exposed inside the instance context and can be queried or referenced by user-data scripts for dynamic configuration.
+        lifecycleDetails:
+          description: Additional information about the current lifecycle state.
+          type: string
+        lifecycleState:
+          description: 'The current state of the maintenance run.
 
             '
-          type: object
-        serverId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compute node on which VM instance should be launched.
-          example: ocid.baseserver.oc1.iad.<unique_ID>
-          maxLength: 255
-          minLength: 1
+          enum:
+          - CREATING
+          - SCHEDULED
+          - IN_PROGRESS
+          - SUCCEEDED
+          - SKIPPED
+          - FAILED
+          - UPDATING
+          - DELETING
+          - DELETED
+          - CANCELED
+          - PARTIAL_SUCCESS
           type: string
-        sshPublicKeys:
-          description: List of public key used for SSH access to the VM instance.
-          example:
-          - '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQE...\n...\n-----END PUBLIC KEY-----'
-          items:
-            maxLength: 1024
-            minLength: 1
-            type: string
-          type: array
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
+        maintenanceRunType:
+          description: Maintenance run type.
+          enum:
+          - QUARTERLY
+          - PLANNED
+          - MANDATORY
+          - SECURITY_MONTHLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
+        preferredMaintenanceMethod:
+          description: 'The maintenance method preference for the maintenance run, as selected by the user.
+
+            '
+          enum:
+          - ROLLING
+          - NONROLLING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
+        sourceVersion:
+          description: The Oracle Data Infrastructure version from which the maintenance is performed.
+          type: string
         systemTags:
           additionalProperties:
             additionalProperties:
@@ -3702,39 +3430,201 @@ components:
             orcl-cloud:
               free-tier-retained: true
           type: object
-        timeZone:
-          description: The time zone to use for the VM instance.
-          example: UTC
+        targetVersion:
+          description: The Data Infrastructure version that will be applied as the outcome of the maintenance operation.
           type: string
-        userdata:
-          description: "Base64-encoded data to be used by Cloud-Init to run custom scripts or provide custom Cloud-Init configuration. \nFor information about how to take advantage of user data, see the [Cloud-Init Documentation](http://cloudinit.readthedocs.org/en/latest/topics/format.html).\n"
-          type: string
-        vmNetworkId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM Network.
-          example: ocid.basevmclusternetwork.oc1.iad.<unique_ID>
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      - cpusEnabled
-      - infrastructureId
-      - sshPublicKeys
-    RescheduleMaintenanceRunDetails:
-      description: Request parameters for rescheduling a maintenance run.
-      properties:
-        reason:
-          description: The reason for rescheduling the maintenance run.
-          example: ''
+        timeEnded:
+          description: The date and time the maintenance run was completed.
+          format: date-time
           type: string
         timeScheduled:
-          description: The new date and time for the scheduled maintenance run.
-          example: '2025-09-10T18:00:00.000Z'
+          description: The date and time the maintenance run is scheduled to occur.
+          format: date-time
+          type: string
+        timeStarted:
+          description: The date and time the maintenance run starts.
           format: date-time
           type: string
       required:
+      - id
+      - compartmentId
+      - displayName
+      - lifecycleState
       - timeScheduled
       type: object
+    InfoVmNetworkDetails:
+      description: 'Details of the client or backup networks in a VM cluster.
+
+        '
+      properties:
+        domainName:
+          description: The network domain name.
+          example: us.oracle.com
+          maxLength: 255
+          minLength: 1
+          type: string
+        gateway:
+          description: The network gateway.
+          example: 192.0.2.18
+          maxLength: 255
+          minLength: 1
+          type: string
+        netmask:
+          description: The network netmask.
+          example: 192.0.2.17
+          maxLength: 255
+          minLength: 1
+          type: string
+        networkType:
+          description: The network type.
+          enum:
+          - CLIENT
+          - BACKUP
+          example: CLIENT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VmClusterNetworkType'
+        prefix:
+          description: The network domain name prefix.
+          example: Test
+          maxLength: 255
+          minLength: 1
+          type: string
+        startingIp:
+          description: Starting ip address of the virtual machines.
+          example: 192.0.2.19
+          maxLength: 255
+          minLength: 1
+          type: string
+        vlanId:
+          description: The network VLAN ID.
+          example: 100
+          type: string
+      required:
+      - networkType
+      - domainName
+      - netmask
+      - gateway
+    UpdateMaintenanceRunDetails:
+      description: Request to update maintenance run resource.
+      properties:
+        customActionTimeoutInMins:
+          description: 'Determines the amount of time the system will wait before the start of each server update operation.
+
+            Supported values are 15 to 120 minutes.
+
+            '
+          type: integer
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          example:
+            foo-namespace:
+              bar-key: value
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          example:
+            bar-key: value
+          type: object
+        isCustomActionTimeoutEnabled:
+          description: If true, enables configuration of customActionTimeoutInMins for this maintenance run update request.
+          type: boolean
+        preferredMaintenanceMethod:
+          description: 'The maintenance method ultimately applied to the maintenance run.
+
+            '
+          enum:
+          - ROLLING
+          - NONROLLING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
+      required:
+      - customActionTimeoutInMins
+      type: object
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time that the log message was written. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    InfrastructureServer:
+      description: Data Infrastructure Server details.
+      properties:
+        baseVmCount:
+          description: Number of database virtual machines hosted on the server.
+          type: integer
+        computeCapacity:
+          $ref: '#/components/schemas/ComputeCapacityDetails'
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Oracle Data Server of Infrastructure.
+          type: string
+        ilomIpAddress:
+          description: Data Infrastructure Server ILOM IP address.
+          type: string
+        ilomName:
+          description: Data Infrastructure Server ILOM name.
+          type: string
+        instanceVmCount:
+          description: Number of instances hosted on the server.
+          type: integer
+        lifecycleState:
+          description: The current state of the Data Infrastructure server.
+          enum:
+          - CREATING
+          - REQUIRES_VALIDATION
+          - VALIDATING
+          - REQUIRES_ACTIVATION
+          - ACTIVATING
+          - ACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - DISCONNECTED
+          - MAINTENANCE_IN_PROGRESS
+          - REQUIRES_MAINTENANCE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/InfrastructureServerLifecycleState'
+        serverIpAddress:
+          description: Data Infrastructure Server IP address.
+          type: string
+        serverName:
+          description: Data Infrastructure Server name.
+          type: string
+      required:
+      - id
+      - serverName
+      - serverIpAddress
+      - ilomName
+      - ilomIpAddress
+      - lifecycleState
     Infrastructure:
       description: 'Details about Data Infrastructure resource.
 
@@ -4061,82 +3951,24 @@ components:
       - dnsServers
       - ntpServers
       type: object
-    ScaleInfrastructureStorageDetails:
-      description: The scale option to be selected for the infrastructure.
+    InfrastructureCollection:
+      description: A collection of Data Infrastructure resources.
       properties:
-        ssdConfigurationRequested:
-          description: The scale option to be selected for the infrastructure.
-          enum:
-          - SIX_SSDS
-          - TWELVE_SSDS
-          - EIGHTEEN_SSDS
-          - TWENTY_FOUR_SSDS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ShapeEnum'
+        items:
+          description: A list of Data Infrastructure resources.
+          items:
+            $ref: '#/components/schemas/InfrastructureSummary'
+          type: array
+      required:
+      - items
       type: object
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time that the log message was written. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    InfrastructureContact:
-      description: Contact details for Data Infrastructure.
-      properties:
-        email:
-          description: The email for the Data Infrastructure contact.
-          example: john.smith@example.com
-          maxLength: 255
-          minLength: 1
-          type: string
-        isContactMosValidated:
-          description: 'If `true`, this Data Infrastructure contact is a valid My Oracle Support (MOS) contact.
-
-            If `false`, this Data Infrastructure contact is not a valid MOS contact.
-
-            '
-          example: true
-          type: boolean
-        isPrimary:
-          description: 'If `true`, this Data Infrastructure contact is a primary contact.
-
-            If `false`, this Data Infrastructure is a secondary contact.
-
-            '
-          example: true
-          type: boolean
-        name:
-          description: The name of the Data Infrastructure contact.
-          example: John Smith
-          maxLength: 255
-          minLength: 1
-          type: string
-        phoneNumber:
-          description: The phone number for the Data Infrastructure contact.
-          example: 1-630-678-3456
-          maxLength: 255
-          type: string
-      required:
-      - name
-      - email
-      - isPrimary
-    GenerateRecommendedVmClusterNetworkDetails:
-      description: 'Generates a recommended VM cluster network configuration for VM cluster.
+    MaintenanceExecutionSummary:
+      description: 'Summary of a maintenance executions.
 
         '
       properties:
         compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM cluster network.
-
-            '
-          example: ocid.compartment.oc1..<unique_ID>
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
           type: string
         definedTags:
           additionalProperties:
@@ -4160,142 +3992,21 @@ components:
             foo-namespace:
               bar-key: value
           type: object
+        description:
+          description: Description of the maintenance run execution.
+          type: string
         displayName:
-          description: The user-friendly name for the VM cluster network. The name does not need to be unique.
-          example: sample-rec-vm-net-details
+          description: The user-friendly name for the maintenance run execution.
           type: string
-        dnsServers:
-          description: The list of DNS server IP addresses. Maximum of 3 allowed.
-          example:
-          - 192.0.2.26
-          - 192.0.2.28
-          - 192.0.2.27
-          items:
-            maxLength: 1024
-            minLength: 1
-            type: string
-          maxItems: 3
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
+        effectiveMaintenanceMethod:
+          description: 'The maintenance method ultimately applied to the maintenance run.
 
             '
-          example:
-            bar-key: value
-          type: object
-        infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
-          example: ocid.baseinfrastructure.oc1.iad.<unique_ID>
-          maxLength: 255
-          minLength: 1
-          type: string
-        listenerPort:
-          description: The listener TCP/IP port.
-          example: 1520
-          maximum: 8999
-          minimum: 1024
-          type: integer
-        listenerPortSsl:
-          description: The listener TCP/IP SSL port. Default is 2484.
-          maximum: 8999
-          minimum: 1024
-          type: integer
-        nodeCount:
-          default: 2
-          description: Count of virtual machines in this VM cluster.
-          example: 2
-          maximum: 2
-          minimum: 1
-          type: integer
-        ntpServers:
-          description: The list of NTP server IP addresses. Maximum of 3 allowed.
-          example:
-          - 192.0.2.29
-          items:
-            maxLength: 1024
-            minLength: 1
-            type: string
-          maxItems: 3
-          type: array
-        vmNetworks:
-          description: Details of the client and backup networks.
-          items:
-            $ref: '#/components/schemas/InfoVmNetworkDetails'
-          type: array
-      required:
-      - compartmentId
-      - infrastructureId
-      - displayName
-      - vmNetworks
-    AcfsCapacityDetails:
-      description: The amount of storage (in GB) in the DATA disk group that is currently utilized for creating local storage for VM Clusters and application VMs.
-      properties:
-        freeSpaceInGbs:
-          description: The total amount of logical disk space that is currently available for use, in gigabytes (GB).
-          format: double
-          type: number
-        totalSpaceInGbs:
-          description: The total amount of logical disk space available, in gigabytes (GB).
-          format: double
-          type: number
-      type: object
-    VmClusterNetworkSummary:
-      description: 'Summary of the VM cluster network on Data Infrastructure.
-
-        '
-      properties:
-        associatedResourceId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the associated resource.
-          type: string
-        baseVmClusterId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the associated VM cluster.
-          type: string
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM cluster network.
-
-            '
-          type: string
-        consumerType:
-          description: Consumer type for the VM cluster network.
           enum:
-          - INSTANCE
-          - CLUSTER
+          - ROLLING
+          - NONROLLING
           type: string
-          x-obmcs-top-level-enum: '#/definitions/VmNetworkConsumerType'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          example:
-            foo-namespace:
-              bar-key: value
-          type: object
-        displayName:
-          description: The user-friendly name for the VM cluster network. The name does not need to be unique.
-          type: string
-        dnsServers:
-          description: The list of DNS server IP addresses. Maximum of 3 allowed.
-          items:
-            type: string
-          type: array
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
         freeformTags:
           additionalProperties:
             type: string
@@ -4308,56 +4019,47 @@ components:
             bar-key: value
           type: object
         id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM cluster network.
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run execution.
           type: string
         infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure on which the maintenance run execution occurred.
           type: string
-        isScanEnabled:
-          description: 'Indicates whether Single Client Access Name (SCAN) is enabled on the VM cluster.
-
-            '
-          type: boolean
         lifecycleDetails:
-          description: Lifecycle state details of the VM cluster network.
+          description: Additional information about the current lifecycle state.
           type: string
         lifecycleState:
-          description: The current state of the virtual machine cluster network.
+          description: 'The state of the maintenance run execution.
+
+            '
           enum:
           - CREATING
-          - REQUIRES_VALIDATION
-          - VALIDATING
-          - VALIDATED
-          - VALIDATION_FAILED
+          - SCHEDULED
+          - IN_PROGRESS
+          - SUCCEEDED
+          - SKIPPED
+          - FAILED
           - UPDATING
-          - ALLOCATED
           - DELETING
           - DELETED
+          - CANCELED
+          - PARTIAL_SUCCESS
           type: string
-          x-obmcs-top-level-enum: '#/definitions/VmClusterNetworkLifecycleState'
-        listenerPort:
-          description: The listener TCP/IP port.
-          maximum: 8999
-          minimum: 1024
-          type: integer
-        listenerPortSsl:
-          description: The listener TCP/IP SSL port.
-          maximum: 8999
-          minimum: 1024
-          type: integer
-        nodeCount:
-          description: Count of virtual machines in this VM cluster.
-          type: integer
-        ntpServers:
-          description: The list of NTP server IP addresses. Maximum of 3 allowed.
-          items:
-            type: string
-          type: array
-        scans:
-          description: The SCAN details.
-          items:
-            $ref: '#/components/schemas/ScanDetails'
-          type: array
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
+        maintenanceRunId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run to which this maintenance execution belongs.
+          type: string
+        maintenanceRunType:
+          description: Maintenance run execution type.
+          enum:
+          - QUARTERLY
+          - PLANNED
+          - MANDATORY
+          - SECURITY_MONTHLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
+        sourceVersion:
+          description: The Oracle Data Infrastructure version from which the maintenance is performed.
+          type: string
         systemTags:
           additionalProperties:
             additionalProperties:
@@ -4380,30 +4082,410 @@ components:
             orcl-cloud:
               free-tier-retained: true
           type: object
-        timeCreated:
-          description: 'The time that the VM cluster network was created. An RFC3339 formatted datetime string.
-
-            '
+        targetVersion:
+          description: The Data Infrastructure version that will be applied as the outcome of the maintenance operation.
+          type: string
+        timeEnded:
+          description: The date and time the maintenance run was completed.
           format: date-time
           type: string
-        timeUpdated:
-          description: 'The time that the VM cluster network was last updated. An RFC3339 formatted datetime string.
-
-            '
+        timeScheduled:
+          description: The date and time the maintenance run is scheduled to occur.
           format: date-time
           type: string
+        timeStarted:
+          description: The date and time the maintenance run starts.
+          format: date-time
+          type: string
+        workRequestId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the work request executed by this execution.
+          type: string
+      required:
+      - id
+      - displayName
+      - lifecycleState
+      type: object
+    UpdateVmClusterNetworkDetails:
+      description: 'Details for a VM cluster network.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          example:
+            foo-namespace:
+              bar-key: value
+          type: object
+        displayName:
+          description: The user-friendly name for the VM cluster network. The name does not need to be unique.
+          example: Sample-update-vm-cluster-network
+          maxLength: 255
+          minLength: 1
+          type: string
+        dnsServers:
+          description: The list of DNS server IP addresses. Maximum of 3 allowed.
+          example:
+          - 192.0.2.22
+          - 192.0.2.23
+          - 192.0.2.24
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          example:
+            bar-key: value
+          type: object
+        listenerPort:
+          description: The listener TCP/IP port.
+          example: 1520
+          maximum: 8999
+          minimum: 1024
+          type: integer
+        listenerPortSsl:
+          description: The listener TCP/IP SSL port. Default is 2484.
+          maximum: 8999
+          minimum: 1024
+          type: integer
+        ntpServers:
+          description: The list of NTP server IP addresses. Maximum of 3 allowed.
+          example:
+          - 192.0.2.25
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+        scans:
+          description: The SCAN details.
+          items:
+            $ref: '#/components/schemas/ScanDetails'
+          maxItems: 3
+          type: array
         vmNetworks:
           description: Details of the client and backup networks.
           items:
             $ref: '#/components/schemas/VmNetworkDetails'
           type: array
+    InfrastructureScaleOption:
+      description: The available scale options for the infrastructure.
+      properties:
+        possibleSsdConfigurations:
+          description: The available scale options for the infrastructure.
+          items:
+            $ref: '#/components/schemas/ShapeEnum'
+          type: array
+      required:
+      - possibleSsdConfigurations
+    VmNetworkDetails:
+      description: 'Details of the client or backup networks in a VM cluster.
+
+        '
+      properties:
+        domainName:
+          description: The network domain name.
+          example: us.oracle.com
+          maxLength: 255
+          minLength: 1
+          type: string
+        gateway:
+          description: The network gateway.
+          example: 192.0.2.16
+          maxLength: 255
+          minLength: 1
+          type: string
+        netmask:
+          description: The network netmask.
+          example: 192.0.2.15
+          maxLength: 255
+          minLength: 1
+          type: string
+        networkType:
+          description: The network type.
+          enum:
+          - CLIENT
+          - BACKUP
+          example: CLIENT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VmClusterNetworkType'
+        nodes:
+          description: The list of node details.
+          items:
+            $ref: '#/components/schemas/NodeDetails'
+          type: array
+        prefix:
+          description: The network domain name prefix.
+          example: Test
+          maxLength: 255
+          type: string
+        vlanId:
+          description: The network VLAN ID.
+          example: 100
+          type: string
+      required:
+      - networkType
+      - nodes
+      - domainName
+      - netmask
+      - gateway
+    MaintenanceRun:
+      description: 'Details of a maintenance run.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
+          type: string
+        customActionTimeoutInMins:
+          description: 'Determines the amount of time the system will wait before the start of each server update operation.
+
+            Supported values are 15 to 120 minutes.
+
+            '
+          type: integer
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          example:
+            foo-namespace:
+              bar-key: value
+          type: object
+        description:
+          description: Description of the maintenance run.
+          type: string
+        displayName:
+          description: The user-friendly name for the maintenance run.
+          type: string
+        effectiveMaintenanceMethod:
+          description: 'The maintenance method ultimately applied to the maintenance run.
+
+            '
+          enum:
+          - ROLLING
+          - NONROLLING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
+        estimatedMaintenanceTimeInMins:
+          description: 'The estimated end-to-end maintenance duration (minutes).
+
+            '
+          type: integer
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          example:
+            bar-key: value
+          type: object
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run.
+          type: string
+        infrastructureId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure on which the maintenance run execution occurs.
+          type: string
+        isCustomActionTimeoutEnabled:
+          description: Whether a custom action timeout (waiting period) is configured for the server update operations.
+          type: boolean
+        lifecycleDetails:
+          description: Additional information about the current lifecycle state.
+          type: string
+        lifecycleState:
+          description: 'The current state of the maintenance run.
+
+            '
+          enum:
+          - CREATING
+          - SCHEDULED
+          - IN_PROGRESS
+          - SUCCEEDED
+          - SKIPPED
+          - FAILED
+          - UPDATING
+          - DELETING
+          - DELETED
+          - CANCELED
+          - PARTIAL_SUCCESS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
+        maintenanceRunType:
+          description: Maintenance run type.
+          enum:
+          - QUARTERLY
+          - PLANNED
+          - MANDATORY
+          - SECURITY_MONTHLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
+        preferredMaintenanceMethod:
+          description: 'The maintenance method preference for the maintenance run, as selected by the user.
+
+            '
+          enum:
+          - ROLLING
+          - NONROLLING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
+        sourceVersion:
+          description: The Oracle Data Infrastructure version from which the maintenance is performed.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
+
+            '
+          example:
+            orcl-cloud:
+              free-tier-retained: true
+          type: object
+        targetVersion:
+          description: The Data Infrastructure version that will be applied as the outcome of the maintenance operation.
+          type: string
+        timeEnded:
+          description: The date and time the maintenance run was completed.
+          format: date-time
+          type: string
+        timeScheduled:
+          description: The date and time the maintenance run is scheduled to occur.
+          format: date-time
+          type: string
+        timeStarted:
+          description: The date and time the maintenance run starts.
+          format: date-time
+          type: string
       required:
       - id
       - compartmentId
       - displayName
-      - infrastructureId
-      - scans
-      - vmNetworks
+      - lifecycleState
+      - timeScheduled
+      type: object
+    ComputeCapacityDetails:
+      description: Capacity details of the Data Infrastructure.
+      properties:
+        allocatedCores:
+          description: Total CPU cores count allocated..
+          type: integer
+        availableCores:
+          description: Total available CPU cores count.
+          type: integer
+        availableMemoryInGBs:
+          description: Available memory, in gigabytes (GB).
+          format: int64
+          type: integer
+        reservedCores:
+          description: Total Reserved CPU cores count.
+          type: integer
+        reservedMemoryInGBs:
+          description: Reserved memory, in gigabytes (GB).
+          format: int64
+          type: integer
+        totalCores:
+          description: Total CPU cores count.
+          type: integer
+        totalMemoryInGBs:
+          description: Total memory allocated, in gigabytes (GB).
+          format: int64
+          type: integer
+        usedMemoryInGBs:
+          description: Memory allocated to Oracle database virtual machine cluster or Instance, in gigabytes (GB).
+          format: int64
+          type: integer
+      type: object
+    ScanDetails:
+      description: 'The Single Client Access Name (SCAN) details.
+
+        '
+      properties:
+        hostname:
+          description: The SCAN hostname.
+          example: scan-host
+          maxLength: 255
+          minLength: 1
+          type: string
+        ips:
+          description: The list of SCAN IP addresses. Three addresses should be provided.
+          example:
+          - 192.0.2.12
+          - 192.0.2.14
+          - 192.0.2.13
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+      required:
+      - hostname
+      - ips
+    ChangeInfrastructureCompartmentDetails:
+      description: Updated compartment details.
+      properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to which the Data Infrastructure Cloud@Customer is moving.
+          example: ocid.compartment.oc1..<unique_ID>
+          maxLength: 255
+          type: string
+      required:
+      - compartmentId
+      type: object
     WorkRequest:
       description: Work request details.
       properties:
@@ -4569,629 +4651,6 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    CreateVmClusterNetworkDetails:
-      description: 'Details for a VM cluster network.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM cluster network.
-
-            '
-          example: ocid.compartment.oc1..<unique_ID>
-          maxLength: 255
-          minLength: 1
-          type: string
-        consumerType:
-          description: Consumer type for the VM cluster network.
-          enum:
-          - INSTANCE
-          - CLUSTER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VmNetworkConsumerType'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          example:
-            foo-namespace:
-              bar-key: value
-          type: object
-        displayName:
-          description: The user-friendly name for the VM cluster network. The name does not need to be unique.
-          example: Sample-vm-cluster-network
-          maxLength: 255
-          minLength: 1
-          type: string
-        dnsServers:
-          description: The list of DNS server IP addresses. Maximum of 3 allowed.
-          example:
-          - 192.0.2.8
-          - 192.0.2.9
-          - 192.0.2.10
-          items:
-            maxLength: 1024
-            minLength: 1
-            type: string
-          maxItems: 3
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          example:
-            bar-key: value
-          type: object
-        infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
-          example: ocid.baseinfrastructure.oc1.iad.<unique_ID>
-          maxLength: 255
-          minLength: 1
-          type: string
-        listenerPort:
-          default: 1521
-          description: The listener TCP/IP port.
-          example: 1520
-          maximum: 8999
-          minimum: 1024
-          type: integer
-        listenerPortSsl:
-          description: The listener TCP/IP SSL port. Default is 2484.
-          maximum: 8999
-          minimum: 1024
-          type: integer
-        nodeCount:
-          default: 2
-          description: Count of virtual machines in this VM cluster.
-          example: 2
-          maximum: 2
-          minimum: 1
-          type: integer
-        ntpServers:
-          description: The list of NTP server IP addresses. Maximum of 3 allowed.
-          example:
-          - 192.0.2.11
-          items:
-            maxLength: 1024
-            minLength: 1
-            type: string
-          maxItems: 3
-          type: array
-        scans:
-          description: The SCAN details.
-          items:
-            $ref: '#/components/schemas/ScanDetails'
-          maxItems: 3
-          type: array
-        vmNetworks:
-          description: Details of the client and backup networks.
-          items:
-            $ref: '#/components/schemas/VmNetworkDetails'
-          type: array
-      required:
-      - compartmentId
-      - displayName
-      - infrastructureId
-      - vmNetworks
-    SystemStorageCapacityDetails:
-      description: Capacity details of different storage types.
-      properties:
-        acfs:
-          $ref: '#/components/schemas/AcfsCapacityDetails'
-        diskGroups:
-          description: List of storage disk group capacity details.
-          items:
-            $ref: '#/components/schemas/DiskGroupCapacityDetails'
-          type: array
-      type: object
-    WorkRequestCollection:
-      description: A collection of Work request resources.
-      properties:
-        items:
-          description: A list of Work request resources.
-          items:
-            $ref: '#/components/schemas/WorkRequest'
-          type: array
-      required:
-      - items
-      type: object
-    MaintenanceExecutionSummary:
-      description: 'Summary of a maintenance executions.
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          example:
-            foo-namespace:
-              bar-key: value
-          type: object
-        description:
-          description: Description of the maintenance run execution.
-          type: string
-        displayName:
-          description: The user-friendly name for the maintenance run execution.
-          type: string
-        effectiveMaintenanceMethod:
-          description: 'The maintenance method ultimately applied to the maintenance run.
-
-            '
-          enum:
-          - ROLLING
-          - NONROLLING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          example:
-            bar-key: value
-          type: object
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run execution.
-          type: string
-        infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure on which the maintenance run execution occurred.
-          type: string
-        lifecycleDetails:
-          description: Additional information about the current lifecycle state.
-          type: string
-        lifecycleState:
-          description: 'The state of the maintenance run execution.
-
-            '
-          enum:
-          - CREATING
-          - SCHEDULED
-          - IN_PROGRESS
-          - SUCCEEDED
-          - SKIPPED
-          - FAILED
-          - UPDATING
-          - DELETING
-          - DELETED
-          - CANCELED
-          - PARTIAL_SUCCESS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
-        maintenanceRunId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run to which this maintenance execution belongs.
-          type: string
-        maintenanceRunType:
-          description: Maintenance run execution type.
-          enum:
-          - QUARTERLY
-          - PLANNED
-          - MANDATORY
-          - SECURITY_MONTHLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
-        sourceVersion:
-          description: The Oracle Data Infrastructure version from which the maintenance is performed.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
-
-            '
-          example:
-            orcl-cloud:
-              free-tier-retained: true
-          type: object
-        targetVersion:
-          description: The Data Infrastructure version that will be applied as the outcome of the maintenance operation.
-          type: string
-        timeEnded:
-          description: The date and time the maintenance run was completed.
-          format: date-time
-          type: string
-        timeScheduled:
-          description: The date and time the maintenance run is scheduled to occur.
-          format: date-time
-          type: string
-        timeStarted:
-          description: The date and time the maintenance run starts.
-          format: date-time
-          type: string
-        workRequestId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the work request executed by this execution.
-          type: string
-      required:
-      - id
-      - displayName
-      - lifecycleState
-      type: object
-    ChangeInfrastructureCompartmentDetails:
-      description: Updated compartment details.
-      properties:
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to which the Data Infrastructure Cloud@Customer is moving.
-          example: ocid.compartment.oc1..<unique_ID>
-          maxLength: 255
-          type: string
-      required:
-      - compartmentId
-      type: object
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work tracked in the work request.
-
-            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
-
-            work is complete for that resource. When work is complete, the state transitions to CREATED, UPDATED,
-
-            or DELETED.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - FAILED
-          - RELATED
-          - CANCELED_CREATE
-          - CANCELED_UPDATE
-          - CANCELED_DELETE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The type of resource being acted on by the work request.
-          type: string
-        entityUri:
-          description: The URI path for GET REST attachment to the resource metadata.
-          type: string
-        identifier:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the resource being acted on by the work request.
-          type: string
-      required:
-      - actionType
-      - entityType
-      - identifier
-    StorageCapacityDetails:
-      description: Capacity details of the Storage disk group.
-      properties:
-        diskGroup:
-          description: Disk group name.
-          type: string
-        logicalFreeSpaceInGBs:
-          description: The total amount of logical disk space that is currently available for use in a disk group, in gigabytes (GB).
-          format: int64
-          type: integer
-        phyFreeSpaceInGBs:
-          description: The total amount of physical disk space that is currently available for use in a disk group, in gigabytes (GB).
-          format: int64
-          type: integer
-        phyReservedSpaceInGBs:
-          description: The total amount of physical disk space that is reserved for system use in a disk group, in gigabytes (GB).
-          format: int64
-          type: integer
-        phyTotalSpaceInGBs:
-          description: The total amount of physical disk space available in a disk group, in gigabytes (GB).
-          format: int64
-          type: integer
-        storageDiskRedundancy:
-          description: The Disk redundancy for Data Infrastructure storage.
-          enum:
-          - HIGH
-          - MIRROR
-          - FLEX
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/StorageDiskRedundancy'
-      type: object
-    MaintenanceRunSummary:
-      description: 'Summary of a maintenance run.
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
-          type: string
-        customActionTimeoutInMins:
-          description: 'Determines the amount of time the system will wait before the start of each server update operation.
-
-            Supported values are 15 to 120 minutes.
-
-            '
-          type: integer
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          example:
-            foo-namespace:
-              bar-key: value
-          type: object
-        description:
-          description: Description of the maintenance run.
-          type: string
-        displayName:
-          description: The user-friendly name for the maintenance run.
-          type: string
-        effectiveMaintenanceMethod:
-          description: 'The maintenance method ultimately applied to the maintenance run.
-
-            '
-          enum:
-          - ROLLING
-          - NONROLLING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
-        estimatedMaintenanceTimeInMins:
-          description: 'The estimated end-to-end maintenance duration (minutes).
-
-            '
-          type: integer
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          example:
-            bar-key: value
-          type: object
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run.
-          type: string
-        infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure on which the maintenance run execution occurs.
-          type: string
-        isCustomActionTimeoutEnabled:
-          description: Whether a custom action timeout (waiting period) is configured for the server update operations.
-          type: boolean
-        lifecycleDetails:
-          description: Additional information about the current lifecycle state.
-          type: string
-        lifecycleState:
-          description: 'The current state of the maintenance run.
-
-            '
-          enum:
-          - CREATING
-          - SCHEDULED
-          - IN_PROGRESS
-          - SUCCEEDED
-          - SKIPPED
-          - FAILED
-          - UPDATING
-          - DELETING
-          - DELETED
-          - CANCELED
-          - PARTIAL_SUCCESS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
-        maintenanceRunType:
-          description: Maintenance run type.
-          enum:
-          - QUARTERLY
-          - PLANNED
-          - MANDATORY
-          - SECURITY_MONTHLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
-        preferredMaintenanceMethod:
-          description: 'The maintenance method preference for the maintenance run, as selected by the user.
-
-            '
-          enum:
-          - ROLLING
-          - NONROLLING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
-        sourceVersion:
-          description: The Oracle Data Infrastructure version from which the maintenance is performed.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
-
-            '
-          example:
-            orcl-cloud:
-              free-tier-retained: true
-          type: object
-        targetVersion:
-          description: The Data Infrastructure version that will be applied as the outcome of the maintenance operation.
-          type: string
-        timeEnded:
-          description: The date and time the maintenance run was completed.
-          format: date-time
-          type: string
-        timeScheduled:
-          description: The date and time the maintenance run is scheduled to occur.
-          format: date-time
-          type: string
-        timeStarted:
-          description: The date and time the maintenance run starts.
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - displayName
-      - lifecycleState
-      - timeScheduled
-      type: object
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed on
-
-            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human-readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time that the error occured. An RFC3339 standard formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    InfrastructureServer:
-      description: Data Infrastructure Server details.
-      properties:
-        baseVmCount:
-          description: Number of database virtual machines hosted on the server.
-          type: integer
-        computeCapacity:
-          $ref: '#/components/schemas/ComputeCapacityDetails'
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Oracle Data Server of Infrastructure.
-          type: string
-        ilomIpAddress:
-          description: Data Infrastructure Server ILOM IP address.
-          type: string
-        ilomName:
-          description: Data Infrastructure Server ILOM name.
-          type: string
-        instanceVmCount:
-          description: Number of instances hosted on the server.
-          type: integer
-        lifecycleState:
-          description: The current state of the Data Infrastructure server.
-          enum:
-          - CREATING
-          - REQUIRES_VALIDATION
-          - VALIDATING
-          - REQUIRES_ACTIVATION
-          - ACTIVATING
-          - ACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          - DISCONNECTED
-          - MAINTENANCE_IN_PROGRESS
-          - REQUIRES_MAINTENANCE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/InfrastructureServerLifecycleState'
-        serverIpAddress:
-          description: Data Infrastructure Server IP address.
-          type: string
-        serverName:
-          description: Data Infrastructure Server name.
-          type: string
-      required:
-      - id
-      - serverName
-      - serverIpAddress
-      - ilomName
-      - ilomIpAddress
-      - lifecycleState
-    VmClusterNetworkCollection:
-      description: A collection of VM cluster network Data Infrastructure resources.
-      properties:
-        items:
-          description: A list of VM cluster network resources.
-          items:
-            $ref: '#/components/schemas/VmClusterNetworkSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ActivateInfrastructureDetails:
-      description: 'The activation details for the Data Infrastructure.
-
-        '
-      properties:
-        activationZipFile:
-          description: The activation zip file.
-          format: byte
-          type: string
-      required:
-      - activationZipFile
     MaintenanceWindow:
       description: 'The scheduling details for the quarterly maintenance window. Patching and system updates take place during the maintenance window.
 
@@ -5254,65 +4713,27 @@ components:
           example: NO_PREFERENCE
           type: string
           x-obmcs-top-level-enum: '#/definitions/MaintenancePreference'
-    NodeDetails:
-      description: Node details associated with a VM cluster network.
-      properties:
-        hostname:
-          description: The node host name.
-          example: sample-host
-          maxLength: 255
-          minLength: 1
-          type: string
-        ip:
-          description: The node IP address.
-          example: 192.0.2.20
-          maxLength: 255
-          minLength: 1
-          type: string
-        vip:
-          description: The node virtual IP (VIP) address.
-          example: 192.0.2.21
-          maxLength: 255
-          minLength: 1
-          type: string
-        vipHostname:
-          description: The node virtual IP (VIP) host name.
-          example: vip-host-name
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - hostname
-      - ip
-    ChangeVmClusterNetworkCompartmentDetails:
-      description: Updated compartment details.
-      properties:
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to which the VM cluster network is moving.
-          example: ocid.compartment.oc1..<unique_ID>
-          maxLength: 255
-          type: string
-      required:
-      - compartmentId
-      type: object
-    UpdateInfrastructureDetails:
-      description: Request to update Data Infrastructure resource.
+    InfrastructureSummary:
+      description: 'Data Infrastructure resource summary.
+
+        '
       properties:
         acfsFileSystemStorageInGbs:
-          default: 4704
           description: 'The amount of storage (in GB) in the DATA disk group that is reserved for creating local storage for VM Clusters and application VMs.
 
             '
-          example: 4704
           format: double
-          minimum: 225
           type: number
-          x-obmcs-cli-param: acfs-size-in-gbs
+        acfsFileSystemUsedStorageInGbs:
+          description: 'The amount of storage (in GB) in the DATA disk group that is currently utilized for creating local storage for VM Clusters and application VMs.
+
+            This attribute is deprecated and will be removed in a subsequent release. Please read from systemStorageCapacity instead.
+
+            '
+          format: double
+          type: number
         adminNetworkcidr:
           description: The CIDR block for the system network. The system network is a private network in Data Infrastructure and is not connected to your corporate network. The system network is used for storage (ASM) traffic, high-performance interconnect traffic and administration of infrastructure components.
-          example: 192.0.2.0/24
-          maxLength: 255
-          minLength: 1
           type: string
         backupNetworkBondingInterface:
           description: The network bonding interface for backup network for the Data Infrastructure.
@@ -5324,16 +4745,13 @@ components:
           - BTBOND5
           - BTBOND6
           type: string
-          x-obmcs-cli-param: backup-bond-iface
           x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
         backupNetworkBondingMode:
           description: The network bonding mode for Backup networks for the Data Infrastructure.
           enum:
           - ACTIVE_BACKUP
           - LACP
-          example: LACP
           type: string
-          x-obmcs-cli-param: backup-bond-mode
           x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
         clientNetworkBondingInterface:
           description: The network bonding interface for client network for the Data Infrastructure.
@@ -5345,35 +4763,31 @@ components:
           - BTBOND5
           - BTBOND6
           type: string
-          x-obmcs-cli-param: client-bond-iface
           x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
         clientNetworkBondingMode:
           description: The network bonding mode for Client networks for the Data Infrastructure.
           enum:
           - ACTIVE_BACKUP
           - LACP
-          example: ACTIVE_BACKUP
           type: string
-          x-obmcs-cli-param: client-bond-mode
           x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
         cloudControlPlaneServer1:
           description: The IP address for the first control plane server.
-          example: 192.0.2.37
-          maxLength: 255
-          minLength: 1
           type: string
         cloudControlPlaneServer2:
           description: The IP address for the second control plane server.
-          example: 192.0.2.38
-          maxLength: 255
-          minLength: 1
           type: string
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
+
+            '
+          type: string
+        computeCapacity:
+          $ref: '#/components/schemas/ComputeCapacityDetails'
         contacts:
           description: The list of contacts for the Data Infrastructure.
           items:
             $ref: '#/components/schemas/InfrastructureContact'
-          maxItems: 10
-          minItems: 1
           type: array
         corporateProxy:
           description: 'The corporate network proxy for access to the control plane network. Oracle recommends using an HTTPS proxy when possible
@@ -5381,9 +4795,6 @@ components:
             for enhanced security.
 
             '
-          example: http://192.0.2.45:8080
-          maxLength: 255
-          minLength: 1
           type: string
         cpsNetworkBondingInterface:
           description: The network bonding interface for CPS network for the Data Infrastructure.
@@ -5395,7 +4806,6 @@ components:
           - BTBOND5
           - BTBOND6
           type: string
-          x-obmcs-cli-param: cps-bond-iface
           x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
         cpsNetworkBondingMode:
           description: The network bonding mode for CPS networks for the Data Infrastructure.
@@ -5403,15 +4813,7 @@ components:
           - ACTIVE_BACKUP
           - LACP
           type: string
-          x-obmcs-cli-param: cps-bond-mode
           x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
-        dataDiskPercentage:
-          default: 80
-          description: Percentage of disk space assigned for DATA disk group. Remaining disk space will get assiged to RECO disk group
-          example: 80
-          maximum: 90
-          minimum: 10
-          type: integer
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -5436,29 +4838,16 @@ components:
           type: object
         description:
           description: Data Infrastructure description.
-          example: Test Update Data Infrastructure
-          maxLength: 255
-          minLength: 1
           type: string
         displayName:
           description: 'The user-friendly name for the Data Infrastructure. The name does not need to be unique.
 
             '
-          example: Sample-update-data-infra
-          maxLength: 255
-          minLength: 1
           type: string
         dnsServers:
           description: The list of DNS server IP addresses. Maximum of 3 allowed.
-          example:
-          - 192.0.2.41
-          - 192.0.2.42
-          - 192.0.2.43
           items:
-            maxLength: 1024
-            minLength: 1
             type: string
-          maxItems: 3
           type: array
         freeformTags:
           additionalProperties:
@@ -5473,27 +4862,41 @@ components:
           type: object
         gateway:
           description: The gateway for the control plane network.
-          example: 192.0.2.40
-          maxLength: 255
-          minLength: 1
+          type: string
+        id:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+
+            '
+          type: string
+        lifecycleState:
+          description: The current state of the Data Infrastructure.
+          enum:
+          - CREATING
+          - REQUIRES_VALIDATION
+          - VALIDATING
+          - REQUIRES_ACTIVATION
+          - ACTIVATING
+          - ACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - DISCONNECTED
+          - MAINTENANCE_IN_PROGRESS
+          - REQUIRES_MAINTENANCE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/InfrastructureLifecycleState'
+        lifecycleStateDetails:
+          description: Lifecycle state details of the Data Infrastructure.
           type: string
         maintenanceWindow:
           $ref: '#/components/schemas/MaintenanceWindow'
         netmask:
           description: The netmask for the control plane network.
-          example: 192.0.2.39
-          maxLength: 255
-          minLength: 1
           type: string
         ntpServers:
           description: The list of NTP server IP addresses. Maximum of 3 allowed.
-          example:
-          - 192.0.2.44
           items:
-            maxLength: 1024
-            minLength: 1
             type: string
-          maxItems: 3
           type: array
         shape:
           description: 'The shape of the Data Infrastructure. The shape determines the amount of CPU, storage, and memory resources allocated to the instance.
@@ -5504,9 +4907,33 @@ components:
           - TWELVE_SSDS
           - EIGHTEEN_SSDS
           - TWENTY_FOUR_SSDS
-          example: SIX_SSDS
           type: string
           x-obmcs-top-level-enum: '#/definitions/ShapeEnum'
+        ssdConfigurationRequested:
+          description: SSD configuration requested for the infrastructure.
+          enum:
+          - SIX_SSDS
+          - TWELVE_SSDS
+          - EIGHTEEN_SSDS
+          - TWENTY_FOUR_SSDS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ShapeEnum'
+        storageCapacity:
+          description: 'Capacity details of the Storage disk group.
+
+            This attribute is deprecated and will be removed in a subsequent release. Please
+
+            use systemStorageCapacity instead.
+
+            '
+          items:
+            $ref: '#/components/schemas/StorageCapacityDetails'
+          type: array
+        subscriptionPlanNumber:
+          description: The unique identifier for the subscription plan number.
+          maxLength: 255
+          minLength: 1
+          type: string
         systemModel:
           description: 'Data Infrastructure System Model specification. The system model determines the model of the Data Infrastructure hardware to be used.
 
@@ -5515,288 +4942,10 @@ components:
           - X11_HA_768
           - X10_HA_512
           - X8_HA_384
-          example: X11_HA_768
           type: string
           x-obmcs-top-level-enum: '#/definitions/SystemModelEnum'
-        vlanId:
-          description: The CPS network VLAN ID.
-          example: 100
-          type: string
-      type: object
-    MaintenanceExecutionCollection:
-      description: A collection of maintenance run execution history.
-      properties:
-        items:
-          description: A list of maintenance run execution history.
-          items:
-            $ref: '#/components/schemas/MaintenanceExecutionSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ComputeCapacityDetails:
-      description: Capacity details of the Data Infrastructure.
-      properties:
-        allocatedCores:
-          description: Total CPU cores count allocated..
-          type: integer
-        availableCores:
-          description: Total available CPU cores count.
-          type: integer
-        availableMemoryInGBs:
-          description: Available memory, in gigabytes (GB).
-          format: int64
-          type: integer
-        reservedCores:
-          description: Total Reserved CPU cores count.
-          type: integer
-        reservedMemoryInGBs:
-          description: Reserved memory, in gigabytes (GB).
-          format: int64
-          type: integer
-        totalCores:
-          description: Total CPU cores count.
-          type: integer
-        totalMemoryInGBs:
-          description: Total memory allocated, in gigabytes (GB).
-          format: int64
-          type: integer
-        usedMemoryInGBs:
-          description: Memory allocated to Oracle database virtual machine cluster or Instance, in gigabytes (GB).
-          format: int64
-          type: integer
-      type: object
-    VmInstanceCollection:
-      description: A collection of VM instance on Data Infrastructure summary resources.
-      properties:
-        items:
-          description: A list of VM instance summary resources.
-          items:
-            $ref: '#/components/schemas/VmInstanceSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ChangeVmInstanceCompartmentDetails:
-      description: Updated compartment details.
-      properties:
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to which the VM instance is moving.
-          example: ocid.compartment.oc1..<unique_ID>
-          maxLength: 255
-          type: string
-      required:
-      - compartmentId
-      type: object
-    UpdateMaintenanceRunDetails:
-      description: Request to update maintenance run resource.
-      properties:
-        customActionTimeoutInMins:
-          description: 'Determines the amount of time the system will wait before the start of each server update operation.
-
-            Supported values are 15 to 120 minutes.
-
-            '
-          type: integer
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          example:
-            foo-namespace:
-              bar-key: value
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          example:
-            bar-key: value
-          type: object
-        isCustomActionTimeoutEnabled:
-          description: If true, enables configuration of customActionTimeoutInMins for this maintenance run update request.
-          type: boolean
-        preferredMaintenanceMethod:
-          description: 'The maintenance method ultimately applied to the maintenance run.
-
-            '
-          enum:
-          - ROLLING
-          - NONROLLING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
-      required:
-      - customActionTimeoutInMins
-      type: object
-    MaintenanceRunCollection:
-      description: A collection of maintenance runs.
-      properties:
-        items:
-          description: A list of maintenance runs.
-          items:
-            $ref: '#/components/schemas/MaintenanceRunSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestErrorCollection:
-      description: A collection of work request error resources.
-      properties:
-        items:
-          description: A list of work request error resources.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
-    ValidateInfrastructureDetails:
-      description: 'The validation details for the Data Infrastructure.
-
-        '
-      properties:
-        validationZipFile:
-          description: The validation zip file.
-          format: byte
-          type: string
-      required:
-      - validationZipFile
-    InfrastructureScaleOption:
-      description: The available scale options for the infrastructure.
-      properties:
-        possibleSsdConfigurations:
-          description: The available scale options for the infrastructure.
-          items:
-            $ref: '#/components/schemas/ShapeEnum'
-          type: array
-      required:
-      - possibleSsdConfigurations
-    MaintenanceExecution:
-      description: 'Details of a maintenance execution.
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
-          type: string
-        customActionTimeoutInMins:
-          description: 'Determines the amount of time the system will wait before the start of each server update operation.
-
-            Supported values are 15 to 120 minutes.
-
-            '
-          type: integer
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          example:
-            foo-namespace:
-              bar-key: value
-          type: object
-        description:
-          description: Description of the maintenance run execution.
-          type: string
-        displayName:
-          description: The user-friendly name for the maintenance run execution.
-          type: string
-        effectiveMaintenanceMethod:
-          description: 'The maintenance method ultimately applied to the maintenance run.
-
-            '
-          enum:
-          - ROLLING
-          - NONROLLING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          example:
-            bar-key: value
-          type: object
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run execution.
-          type: string
-        infrastructureId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure on which the maintenance run execution occurred.
-          type: string
-        isCustomActionTimeoutEnabled:
-          description: At the time of execution whether the custom action time out is enabled for the maintenance run that is being executed.
-          type: boolean
-        lifecycleDetails:
-          description: Additional information about the current lifecycle state.
-          type: string
-        lifecycleState:
-          description: 'The state of the maintenance run execution.
-
-            '
-          enum:
-          - CREATING
-          - SCHEDULED
-          - IN_PROGRESS
-          - SUCCEEDED
-          - SKIPPED
-          - FAILED
-          - UPDATING
-          - DELETING
-          - DELETED
-          - CANCELED
-          - PARTIAL_SUCCESS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
-        maintenanceRunId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run to which this maintenance execution belongs.
-          type: string
-        maintenanceRunType:
-          description: Maintenance run execution type.
-          enum:
-          - QUARTERLY
-          - PLANNED
-          - MANDATORY
-          - SECURITY_MONTHLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
-        sourceVersion:
-          description: The Oracle Data Infrastructure version from which the maintenance is performed.
-          type: string
+        systemStorageCapacity:
+          $ref: '#/components/schemas/SystemStorageCapacityDetails'
         systemTags:
           additionalProperties:
             additionalProperties:
@@ -5819,29 +4968,112 @@ components:
             orcl-cloud:
               free-tier-retained: true
           type: object
-        targetVersion:
-          description: The Data Infrastructure version that will be applied as the outcome of the maintenance operation.
-          type: string
-        timeEnded:
-          description: The date and time the maintenance run was completed.
+        timeActivated:
+          description: 'The time, in RFC3339 format, when the Data Infrastructure was activated.
+
+            '
           format: date-time
           type: string
-        timeScheduled:
-          description: The date and time the maintenance run is scheduled to occur.
+        timeCreated:
+          description: 'The time that the Data Infrastructure cluster was created. An RFC3339 formatted datetime string.
+
+            '
           format: date-time
           type: string
-        timeStarted:
-          description: The date and time the maintenance run starts.
+        timeLastStateUpdated:
+          description: 'The time, in RFC3339 format, when the lifecycle state was last updated.
+
+            '
           format: date-time
           type: string
-        workRequestId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the work request executed by this execution.
+        timeUpdated:
+          description: 'The time that the Data Infrastructure was last updated. An RFC3339 formatted datetime string.
+
+            '
+          format: date-time
+          type: string
+        timeValidated:
+          description: 'The time, in RFC3339 format, when the Data Infrastructure network was validated.
+
+            '
+          format: date-time
+          type: string
+        version:
+          description: 'The version of the system software on the Data Infrastructure.
+
+            '
           type: string
       required:
       - id
+      - compartmentId
       - displayName
-      - lifecycleState
+      - systemModel
+      - shape
+      - cloudControlPlaneServer1
+      - cloudControlPlaneServer2
+      - netmask
+      - gateway
+      - adminNetworkcidr
+      - dnsServers
+      - ntpServers
       type: object
+    DiskGroupCapacityDetails:
+      description: Capacity details of the storage disk group.
+      properties:
+        freeSpaceInGbs:
+          description: The total amount of logical disk space that is currently available for use, in gigabytes (GB).
+          format: double
+          type: number
+        reservedSpaceInGbs:
+          description: The total amount of logical disk space that is reserved for system use, in gigabytes (GB).
+          format: double
+          type: number
+        storageType:
+          description: The storage type for the Cloud Data Infrastructure.
+          type: string
+        totalSpaceInGbs:
+          description: The total amount of logical disk space available, in gigabytes (GB).
+          format: double
+          type: number
+      type: object
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
+
+            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
+
+            work is complete for that resource. When work is complete, the state transitions to CREATED, UPDATED,
+
+            or DELETED.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - FAILED
+          - RELATED
+          - CANCELED_CREATE
+          - CANCELED_UPDATE
+          - CANCELED_DELETE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The type of resource being acted on by the work request.
+          type: string
+        entityUri:
+          description: The URI path for GET REST attachment to the resource metadata.
+          type: string
+        identifier:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the resource being acted on by the work request.
+          type: string
+      required:
+      - actionType
+      - entityType
+      - identifier
     CreateInfrastructureDetails:
       description: 'Request to create Data Infrastructure resource.
 
@@ -6095,9 +5327,795 @@ components:
       - gateway
       - dnsServers
       - ntpServers
-    VmInstanceSummary:
-      description: VM instance on Data Infrastructure summary.
+    ChangeVmClusterNetworkCompartmentDetails:
+      description: Updated compartment details.
       properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to which the VM cluster network is moving.
+          example: ocid.compartment.oc1..<unique_ID>
+          maxLength: 255
+          type: string
+      required:
+      - compartmentId
+      type: object
+    CreateVmInstanceDetails:
+      description: Create VM instance details.
+      properties:
+        bootStorageSizeInGBs:
+          description: Boot storage memory to be allocated in GBs.
+          example: 100
+          format: double
+          minimum: 50
+          type: number
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM
+
+            instance.
+
+            '
+          example: ocid.compartment.oc1..<unique_ID>
+          maxLength: 255
+          minLength: 1
+          type: string
+        cpusEnabled:
+          description: The number of CPU cores enabled for each VM instance.
+          example: 2
+          minimum: 1
+          type: integer
+        dataStorageSizeInGBs:
+          description: Data storage to be allocated in GBs.
+          example: 100
+          format: double
+          minimum: 1
+          type: number
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          example:
+            foo-namespace:
+              bar-key: value
+          type: object
+        description:
+          description: VM instance description.
+          example: Test Create Application VM
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'VM instance display name. This name does not have to be unique, and is changeable.
+
+            '
+          example: Sample-app-vm
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          example:
+            bar-key: value
+          type: object
+        imageId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM custom instance uploaded.
+          maxLength: 255
+          minLength: 1
+          type: string
+        infrastructureId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+          example: ocid.baseinfrastructure.oc1.iad.<unique_ID>
+          maxLength: 255
+          minLength: 1
+          type: string
+        isHaEnabled:
+          default: true
+          description: 'If true, high availability is enabled for the VM instance. If false, high availability is not enabled for the VM instance.
+
+            '
+          example: true
+          type: boolean
+        memorySizeInGBs:
+          description: The memory to be allocated in GBs.
+          example: 8
+          format: double
+          type: number
+        metadata:
+          additionalProperties:
+            type: string
+          description: 'Custom metadata key/value pairs which can be used to:
+
+            - Provide information to [Cloud-Init](https://cloudinit.readthedocs.org/en/latest/) to be used for various system initialization tasks.
+
+            - Provide additional information which is exposed inside the instance context and can be queried or referenced by user-data scripts for dynamic configuration.
+
+            '
+          type: object
+        serverId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compute node on which VM instance should be launched.
+          example: ocid.baseserver.oc1.iad.<unique_ID>
+          maxLength: 255
+          minLength: 1
+          type: string
+        sshPublicKeys:
+          description: List of public key used for SSH access to the VM instance.
+          example:
+          - '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQE...\n...\n-----END PUBLIC KEY-----'
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          type: array
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
+
+            '
+          example:
+            orcl-cloud:
+              free-tier-retained: true
+          type: object
+        timeZone:
+          description: The time zone to use for the VM instance.
+          example: UTC
+          type: string
+        userdata:
+          description: "Base64-encoded data to be used by Cloud-Init to run custom scripts or provide custom Cloud-Init configuration. \nFor information about how to take advantage of user data, see the [Cloud-Init Documentation](http://cloudinit.readthedocs.org/en/latest/topics/format.html).\n"
+          type: string
+        vmNetworkId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM Network.
+          example: ocid.basevmclusternetwork.oc1.iad.<unique_ID>
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      - cpusEnabled
+      - infrastructureId
+      - sshPublicKeys
+    InfrastructureContact:
+      description: Contact details for Data Infrastructure.
+      properties:
+        email:
+          description: The email for the Data Infrastructure contact.
+          example: john.smith@example.com
+          maxLength: 255
+          minLength: 1
+          type: string
+        isContactMosValidated:
+          description: 'If `true`, this Data Infrastructure contact is a valid My Oracle Support (MOS) contact.
+
+            If `false`, this Data Infrastructure contact is not a valid MOS contact.
+
+            '
+          example: true
+          type: boolean
+        isPrimary:
+          description: 'If `true`, this Data Infrastructure contact is a primary contact.
+
+            If `false`, this Data Infrastructure is a secondary contact.
+
+            '
+          example: true
+          type: boolean
+        name:
+          description: The name of the Data Infrastructure contact.
+          example: John Smith
+          maxLength: 255
+          minLength: 1
+          type: string
+        phoneNumber:
+          description: The phone number for the Data Infrastructure contact.
+          example: 1-630-678-3456
+          maxLength: 255
+          type: string
+      required:
+      - name
+      - email
+      - isPrimary
+    GenerateRecommendedVmClusterNetworkDetails:
+      description: 'Generates a recommended VM cluster network configuration for VM cluster.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM cluster network.
+
+            '
+          example: ocid.compartment.oc1..<unique_ID>
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          example:
+            foo-namespace:
+              bar-key: value
+          type: object
+        displayName:
+          description: The user-friendly name for the VM cluster network. The name does not need to be unique.
+          example: sample-rec-vm-net-details
+          type: string
+        dnsServers:
+          description: The list of DNS server IP addresses. Maximum of 3 allowed.
+          example:
+          - 192.0.2.26
+          - 192.0.2.28
+          - 192.0.2.27
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          example:
+            bar-key: value
+          type: object
+        infrastructureId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+          example: ocid.baseinfrastructure.oc1.iad.<unique_ID>
+          maxLength: 255
+          minLength: 1
+          type: string
+        listenerPort:
+          description: The listener TCP/IP port.
+          example: 1520
+          maximum: 8999
+          minimum: 1024
+          type: integer
+        listenerPortSsl:
+          description: The listener TCP/IP SSL port. Default is 2484.
+          maximum: 8999
+          minimum: 1024
+          type: integer
+        nodeCount:
+          default: 2
+          description: Count of virtual machines in this VM cluster.
+          example: 2
+          maximum: 2
+          minimum: 1
+          type: integer
+        ntpServers:
+          description: The list of NTP server IP addresses. Maximum of 3 allowed.
+          example:
+          - 192.0.2.29
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+        vmNetworks:
+          description: Details of the client and backup networks.
+          items:
+            $ref: '#/components/schemas/InfoVmNetworkDetails'
+          type: array
+      required:
+      - compartmentId
+      - infrastructureId
+      - displayName
+      - vmNetworks
+    ScaleVmInstanceDetails:
+      description: Scale the VM instance.
+      properties:
+        cpusEnabled:
+          description: The number of CPU cores to be enabled for VM instance.
+          example: 2
+          minimum: 1
+          type: integer
+        memorySizeInGBs:
+          description: The memory to be allocated in GBs.
+          format: double
+          type: number
+      type: object
+    ValidateInfrastructureDetails:
+      description: 'The validation details for the Data Infrastructure.
+
+        '
+      properties:
+        validationZipFile:
+          description: The validation zip file.
+          format: byte
+          type: string
+      required:
+      - validationZipFile
+    WorkRequestLogEntryCollection:
+      description: A collection of work request log entry resources.
+      properties:
+        items:
+          description: A list of work request log entry resources.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    AcfsCapacityDetails:
+      description: The amount of storage (in GB) in the DATA disk group that is currently utilized for creating local storage for VM Clusters and application VMs.
+      properties:
+        freeSpaceInGbs:
+          description: The total amount of logical disk space that is currently available for use, in gigabytes (GB).
+          format: double
+          type: number
+        totalSpaceInGbs:
+          description: The total amount of logical disk space available, in gigabytes (GB).
+          format: double
+          type: number
+      type: object
+    UpdateInfrastructureDetails:
+      description: Request to update Data Infrastructure resource.
+      properties:
+        acfsFileSystemStorageInGbs:
+          default: 4704
+          description: 'The amount of storage (in GB) in the DATA disk group that is reserved for creating local storage for VM Clusters and application VMs.
+
+            '
+          example: 4704
+          format: double
+          minimum: 225
+          type: number
+          x-obmcs-cli-param: acfs-size-in-gbs
+        adminNetworkcidr:
+          description: The CIDR block for the system network. The system network is a private network in Data Infrastructure and is not connected to your corporate network. The system network is used for storage (ASM) traffic, high-performance interconnect traffic and administration of infrastructure components.
+          example: 192.0.2.0/24
+          maxLength: 255
+          minLength: 1
+          type: string
+        backupNetworkBondingInterface:
+          description: The network bonding interface for backup network for the Data Infrastructure.
+          enum:
+          - BTBOND1
+          - BTBOND2
+          - BTBOND3
+          - BTBOND4
+          - BTBOND5
+          - BTBOND6
+          type: string
+          x-obmcs-cli-param: backup-bond-iface
+          x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
+        backupNetworkBondingMode:
+          description: The network bonding mode for Backup networks for the Data Infrastructure.
+          enum:
+          - ACTIVE_BACKUP
+          - LACP
+          example: LACP
+          type: string
+          x-obmcs-cli-param: backup-bond-mode
+          x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
+        clientNetworkBondingInterface:
+          description: The network bonding interface for client network for the Data Infrastructure.
+          enum:
+          - BTBOND1
+          - BTBOND2
+          - BTBOND3
+          - BTBOND4
+          - BTBOND5
+          - BTBOND6
+          type: string
+          x-obmcs-cli-param: client-bond-iface
+          x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
+        clientNetworkBondingMode:
+          description: The network bonding mode for Client networks for the Data Infrastructure.
+          enum:
+          - ACTIVE_BACKUP
+          - LACP
+          example: ACTIVE_BACKUP
+          type: string
+          x-obmcs-cli-param: client-bond-mode
+          x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
+        cloudControlPlaneServer1:
+          description: The IP address for the first control plane server.
+          example: 192.0.2.37
+          maxLength: 255
+          minLength: 1
+          type: string
+        cloudControlPlaneServer2:
+          description: The IP address for the second control plane server.
+          example: 192.0.2.38
+          maxLength: 255
+          minLength: 1
+          type: string
+        contacts:
+          description: The list of contacts for the Data Infrastructure.
+          items:
+            $ref: '#/components/schemas/InfrastructureContact'
+          maxItems: 10
+          minItems: 1
+          type: array
+        corporateProxy:
+          description: 'The corporate network proxy for access to the control plane network. Oracle recommends using an HTTPS proxy when possible
+
+            for enhanced security.
+
+            '
+          example: http://192.0.2.45:8080
+          maxLength: 255
+          minLength: 1
+          type: string
+        cpsNetworkBondingInterface:
+          description: The network bonding interface for CPS network for the Data Infrastructure.
+          enum:
+          - BTBOND1
+          - BTBOND2
+          - BTBOND3
+          - BTBOND4
+          - BTBOND5
+          - BTBOND6
+          type: string
+          x-obmcs-cli-param: cps-bond-iface
+          x-obmcs-top-level-enum: '#/definitions/NetworkBondingInterfaceEnum'
+        cpsNetworkBondingMode:
+          description: The network bonding mode for CPS networks for the Data Infrastructure.
+          enum:
+          - ACTIVE_BACKUP
+          - LACP
+          type: string
+          x-obmcs-cli-param: cps-bond-mode
+          x-obmcs-top-level-enum: '#/definitions/NetworkBondingMode'
+        dataDiskPercentage:
+          default: 80
+          description: Percentage of disk space assigned for DATA disk group. Remaining disk space will get assiged to RECO disk group
+          example: 80
+          maximum: 90
+          minimum: 10
+          type: integer
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          example:
+            foo-namespace:
+              bar-key: value
+          type: object
+        description:
+          description: Data Infrastructure description.
+          example: Test Update Data Infrastructure
+          maxLength: 255
+          minLength: 1
+          type: string
+        displayName:
+          description: 'The user-friendly name for the Data Infrastructure. The name does not need to be unique.
+
+            '
+          example: Sample-update-data-infra
+          maxLength: 255
+          minLength: 1
+          type: string
+        dnsServers:
+          description: The list of DNS server IP addresses. Maximum of 3 allowed.
+          example:
+          - 192.0.2.41
+          - 192.0.2.42
+          - 192.0.2.43
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          example:
+            bar-key: value
+          type: object
+        gateway:
+          description: The gateway for the control plane network.
+          example: 192.0.2.40
+          maxLength: 255
+          minLength: 1
+          type: string
+        maintenanceWindow:
+          $ref: '#/components/schemas/MaintenanceWindow'
+        netmask:
+          description: The netmask for the control plane network.
+          example: 192.0.2.39
+          maxLength: 255
+          minLength: 1
+          type: string
+        ntpServers:
+          description: The list of NTP server IP addresses. Maximum of 3 allowed.
+          example:
+          - 192.0.2.44
+          items:
+            maxLength: 1024
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+        shape:
+          description: 'The shape of the Data Infrastructure. The shape determines the amount of CPU, storage, and memory resources allocated to the instance.
+
+            '
+          enum:
+          - SIX_SSDS
+          - TWELVE_SSDS
+          - EIGHTEEN_SSDS
+          - TWENTY_FOUR_SSDS
+          example: SIX_SSDS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ShapeEnum'
+        systemModel:
+          description: 'Data Infrastructure System Model specification. The system model determines the model of the Data Infrastructure hardware to be used.
+
+            '
+          enum:
+          - X11_HA_768
+          - X10_HA_512
+          - X8_HA_384
+          example: X11_HA_768
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SystemModelEnum'
+        vlanId:
+          description: The CPS network VLAN ID.
+          example: 100
+          type: string
+      type: object
+    MaintenanceExecution:
+      description: 'Details of a maintenance execution.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
+          type: string
+        customActionTimeoutInMins:
+          description: 'Determines the amount of time the system will wait before the start of each server update operation.
+
+            Supported values are 15 to 120 minutes.
+
+            '
+          type: integer
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tag keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          example:
+            foo-namespace:
+              bar-key: value
+          type: object
+        description:
+          description: Description of the maintenance run execution.
+          type: string
+        displayName:
+          description: The user-friendly name for the maintenance run execution.
+          type: string
+        effectiveMaintenanceMethod:
+          description: 'The maintenance method ultimately applied to the maintenance run.
+
+            '
+          enum:
+          - ROLLING
+          - NONROLLING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceMethodEnum'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. This tag option exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          example:
+            bar-key: value
+          type: object
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run execution.
+          type: string
+        infrastructureId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure on which the maintenance run execution occurred.
+          type: string
+        isCustomActionTimeoutEnabled:
+          description: At the time of execution whether the custom action time out is enabled for the maintenance run that is being executed.
+          type: boolean
+        lifecycleDetails:
+          description: Additional information about the current lifecycle state.
+          type: string
+        lifecycleState:
+          description: 'The state of the maintenance run execution.
+
+            '
+          enum:
+          - CREATING
+          - SCHEDULED
+          - IN_PROGRESS
+          - SUCCEEDED
+          - SKIPPED
+          - FAILED
+          - UPDATING
+          - DELETING
+          - DELETED
+          - CANCELED
+          - PARTIAL_SUCCESS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
+        maintenanceRunId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the maintenance run to which this maintenance execution belongs.
+          type: string
+        maintenanceRunType:
+          description: Maintenance run execution type.
+          enum:
+          - QUARTERLY
+          - PLANNED
+          - MANDATORY
+          - SECURITY_MONTHLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
+        sourceVersion:
+          description: The Oracle Data Infrastructure version from which the maintenance is performed.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{ "orcl-cloud": { "free-tier-retained": "true" } }`
+
+            '
+          example:
+            orcl-cloud:
+              free-tier-retained: true
+          type: object
+        targetVersion:
+          description: The Data Infrastructure version that will be applied as the outcome of the maintenance operation.
+          type: string
+        timeEnded:
+          description: The date and time the maintenance run was completed.
+          format: date-time
+          type: string
+        timeScheduled:
+          description: The date and time the maintenance run is scheduled to occur.
+          format: date-time
+          type: string
+        timeStarted:
+          description: The date and time the maintenance run starts.
+          format: date-time
+          type: string
+        workRequestId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the work request executed by this execution.
+          type: string
+      required:
+      - id
+      - displayName
+      - lifecycleState
+      type: object
+    Error:
+      description: Error details.
+      properties:
+        code:
+          description: A short error code that defines the error, which is used for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    VmInstanceCollection:
+      description: A collection of VM instance on Data Infrastructure summary resources.
+      properties:
+        items:
+          description: A list of VM instance summary resources.
+          items:
+            $ref: '#/components/schemas/VmInstanceSummary'
+          type: array
+      required:
+      - items
+      type: object
+    VmClusterNetworkCollection:
+      description: A collection of VM cluster network Data Infrastructure resources.
+      properties:
+        items:
+          description: A list of VM cluster network resources.
+          items:
+            $ref: '#/components/schemas/VmClusterNetworkSummary'
+          type: array
+      required:
+      - items
+      type: object
+    VmInstance:
+      description: VM instance details.
+      properties:
+        bootStorageSizeInGBs:
+          description: Boot storage memory to be allocated in GBs.
+          format: double
+          type: number
         compartmentId:
           description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment containing the VM
 
@@ -6108,6 +6126,10 @@ components:
         cpusEnabled:
           description: The number of CPU cores enabled for each VM instance.
           type: integer
+        dataStorageSizeInGBs:
+          description: Data storage to be allocated in GBs.
+          format: double
+          type: number
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -6138,6 +6160,11 @@ components:
 
             '
           type: string
+        dnsServers:
+          description: The list of DNS server IP addresses. Maximum of 3 allowed.
+          items:
+            type: string
+          type: array
         domainName:
           description: The domain name of the VM instance.
           type: string
@@ -6152,6 +6179,16 @@ components:
           example:
             bar-key: value
           type: object
+        gateway:
+          description: The gateway IP address of the VM instance network.
+          maxLength: 255
+          minLength: 1
+          type: string
+        hostname:
+          description: The host name of the instance.
+          maxLength: 255
+          minLength: 1
+          type: string
         id:
           description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM instance.
           type: string
@@ -6160,6 +6197,10 @@ components:
           type: string
         infrastructureId:
           description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+          type: string
+        ipAddress:
+          description: The IP address of the instance.
+          maxLength: 255
           type: string
         isHaEnabled:
           description: Indicates whether high availability is enabled for the VM instance.
@@ -6182,9 +6223,35 @@ components:
           description: The memory to be allocated in GBs.
           format: double
           type: number
+        metadata:
+          additionalProperties:
+            type: string
+          description: 'Custom metadata key/value pairs which can be used to:
+
+            - Provide information to [Cloud-Init](https://cloudinit.readthedocs.org/en/latest/) to be used for various system initialization tasks.
+
+            - Provide additional information which is exposed inside the instance context and can be queried or referenced by user-data scripts for dynamic configuration.
+
+            '
+          type: object
+        netmask:
+          description: The netmask of the VM instance network.
+          maxLength: 255
+          minLength: 1
+          type: string
+        ntpServers:
+          description: The list of NTP server addresses. Maximum of 3 allowed.
+          items:
+            type: string
+          type: array
         serverId:
           description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compute node on which VM instance should be launched.
           type: string
+        sshPublicKeys:
+          description: List of public key used for SSH access to the VM instance.
+          items:
+            type: string
+          type: array
         systemTags:
           additionalProperties:
             additionalProperties:
@@ -6222,6 +6289,12 @@ components:
         timeZone:
           description: The time zone to use for the VM instance.
           type: string
+        userdata:
+          description: "Base64-encoded data to be used by Cloud-Init to run custom scripts or provide custom Cloud-Init configuration. \nFor information about how to take advantage of user data, see the [Cloud-Init Documentation](http://cloudinit.readthedocs.org/en/latest/topics/format.html).\n"
+          type: string
+        vlanId:
+          description: The network VLAN ID.
+          type: string
         vmNetworkId:
           description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM Network.
           type: string
@@ -6230,188 +6303,13 @@ components:
       - compartmentId
       - lifecycleState
       - cpusEnabled
+      - sshPublicKeys
       - timeCreated
       - timeUpdated
       - timeZone
-      type: object
-    VmNetworkDetails:
-      description: 'Details of the client or backup networks in a VM cluster.
-
-        '
-      properties:
-        domainName:
-          description: The network domain name.
-          example: us.oracle.com
-          maxLength: 255
-          minLength: 1
-          type: string
-        gateway:
-          description: The network gateway.
-          example: 192.0.2.16
-          maxLength: 255
-          minLength: 1
-          type: string
-        netmask:
-          description: The network netmask.
-          example: 192.0.2.15
-          maxLength: 255
-          minLength: 1
-          type: string
-        networkType:
-          description: The network type.
-          enum:
-          - CLIENT
-          - BACKUP
-          example: CLIENT
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VmClusterNetworkType'
-        nodes:
-          description: The list of node details.
-          items:
-            $ref: '#/components/schemas/NodeDetails'
-          type: array
-        prefix:
-          description: The network domain name prefix.
-          example: Test
-          maxLength: 255
-          type: string
-        vlanId:
-          description: The network VLAN ID.
-          example: 100
-          type: string
-      required:
-      - networkType
-      - nodes
-      - domainName
-      - netmask
-      - gateway
-    WorkRequestLogEntryCollection:
-      description: A collection of work request log entry resources.
-      properties:
-        items:
-          description: A list of work request log entry resources.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    ScaleVmInstanceDetails:
-      description: Scale the VM instance.
-      properties:
-        cpusEnabled:
-          description: The number of CPU cores to be enabled for VM instance.
-          example: 2
-          minimum: 1
-          type: integer
-        memorySizeInGBs:
-          description: The memory to be allocated in GBs.
-          format: double
-          type: number
+      - infrastructureId
       type: object
   parameters:
-    IfMatchHeader:
-      description: 'For Optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the ''if-match'' parameter to the value of the
-
-        Etag from a previous GET or POST response for that resource.
-
-        The resource is updated or deleted only if the Etag that you
-
-        provide matches the current Etag value for the resource.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    IsScanEnabledParam:
-      description: A filter to return VM cluster network resources that matches the specified value.
-      in: query
-      name: isScanEnabled
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    SortOrderQueryParam:
-      description: The sort order that you want to use, which is either `ASC` or `DESC`.
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    TimeAcceptedGreaterThanOrEqualToQueryParam:
-      description: Filter maintenance run for after given time.
-      in: query
-      name: timeAcceptedGreaterThanOrEqualTo
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    VmClusterNetworkIdPathParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM cluster network.
-      in: path
-      name: vmClusterNetworkId
-      required: true
-      schema:
-        type: string
-    maintenanceRunIdPathParam:
-      description: The maintenance run OCID.
-      in: path
-      name: maintenanceRunId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request identifier.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    MaintenanceRunLifecycleStateQueryParam:
-      description: A filter to return only resources that match the given lifecycle states.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - CREATING
-          - SCHEDULED
-          - IN_PROGRESS
-          - SUCCEEDED
-          - SKIPPED
-          - FAILED
-          - UPDATING
-          - DELETING
-          - DELETED
-          - CANCELED
-          - PARTIAL_SUCCESS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
-    MaintenanceRunIdQueryParam:
-      description: The maintenance run OCID.
-      in: query
-      name: maintenanceRunId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     SortByQueryParam:
       description: 'The field by which you want to sort. You can provide only one type of sort order. The default order for `timeCreated` is descending. The default order for `displayName` is ascending. If no value is specified, then `timeCreated` is the default.
 
@@ -6427,34 +6325,6 @@ components:
         - displayName
         - buildIdentifier
         default: timeCreated
-    optionalDataInfrastructureIdQueryParam:
-      description: The Data Infrastructure ID.
-      in: query
-      name: infrastructureId
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    VmNetworkConsumerTypeQueryParam:
-      description: VM network consumer type.
-      in: query
-      name: vmNetworkConsumerType
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/VmNetworkConsumerType'
-      schema:
-        type: string
-        enum:
-        - INSTANCE
-        - CLUSTER
-    WorkRequestIdPathParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
     TypeQueryParam:
       description: The maintenance execution type.
       in: query
@@ -6467,70 +6337,98 @@ components:
         enum:
         - NOTIFY
         - EXECUTE
-    DisplayNameQueryParam:
-      description: A filter to return resources that match the entire display name given. The match is case sensitive.
+    VmInstanceLifecycleStateQueryParam:
+      description: A filter to return resources that match the specified lifecycle state.
       in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    maintenanceExecutionIdPathParam:
-      description: The maintenance execution OCID.
-      in: path
-      name: maintenanceExecutionId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which you want to start retrieving results. This token is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request, so the request can be retried without risk of processing that
-
-        same action again, in the event of a timeout or server error. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        was deleted and purged from the system, then a retry of the original creation request
-
-        can be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
+      name: lifecycleState
       required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
       schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    BaseServerIdQueryParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure Server Id.
+        type: array
+        items:
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VmInstanceLifecycleState'
+    IsForceDeleteInfrastructureQueryParam:
+      description: "When set to `true`, infrastructure will be deleted even if it has dependent resources. \nIf set to `false`, deletion will fail if the infrastructure has dependent resources.\nDefault is `false`.\n"
       in: query
-      name: baseServerId
+      name: isForceDeleteInfrastructure
+      required: false
+      x-obmcs-cli-param: is-force-delete
+      schema:
+        type: boolean
+        default: false
+    VmClusterNetworkNodeCountQueryParam:
+      description: Count of virtual machines in this VM cluster.
+      in: query
+      name: nodeCount
       required: false
       x-default-description: 'null'
       schema:
-        type: string
-    InfrastructureIdQueryParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+        type: integer
+    SortOrderQueryParam:
+      description: The sort order that you want to use, which is either `ASC` or `DESC`.
       in: query
-      name: infrastructureId
-      required: false
-      x-default-description: 'null'
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
       schema:
         type: string
-    TimeAcceptedLessThanOrEqualToQueryParam:
-      description: Filter maintenance run for before given time.
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    OptionalMaintenanceRunTypeQueryParam:
+      description: The sub-type of the maintenance run.
       in: query
-      name: timeAcceptedLessThanOrEqualTo
+      name: maintenanceRunType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
+      schema:
+        type: string
+        enum:
+        - QUARTERLY
+        - PLANNED
+        - MANDATORY
+        - SECURITY_MONTHLY
+    InfrastructureLifecycleStateQueryParam:
+      description: A filter to return resources that match the specified lifecycle state.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - CREATING
+          - REQUIRES_VALIDATION
+          - VALIDATING
+          - REQUIRES_ACTIVATION
+          - ACTIVATING
+          - ACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - DISCONNECTED
+          - MAINTENANCE_IN_PROGRESS
+          - REQUIRES_MAINTENANCE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/InfrastructureLifecycleState'
+    TimeAcceptedGreaterThanOrEqualToQueryParam:
+      description: Filter maintenance run for after given time.
+      in: query
+      name: timeAcceptedGreaterThanOrEqualTo
       required: false
       x-default-description: 'null'
       schema:
@@ -6559,6 +6457,73 @@ components:
           - DELETED
           type: string
           x-obmcs-top-level-enum: '#/definitions/VmClusterNetworkLifecycleState'
+    RequestIdHeader:
+      description: The client request identifier.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which you want to start retrieving results. This token is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    optionalDataInfrastructureIdQueryParam:
+      description: The Data Infrastructure ID.
+      in: query
+      name: infrastructureId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    BaseServerIdQueryParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure Server Id.
+      in: query
+      name: baseServerId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    maintenanceRunIdPathParam:
+      description: The maintenance run OCID.
+      in: path
+      name: maintenanceRunId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    VmNetworkConsumerTypeQueryParam:
+      description: VM network consumer type.
+      in: query
+      name: vmNetworkConsumerType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/VmNetworkConsumerType'
+      schema:
+        type: string
+        enum:
+        - INSTANCE
+        - CLUSTER
+    InfrastructureIdQueryParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
+      in: query
+      name: infrastructureId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    IsScanEnabledParam:
+      description: A filter to return VM cluster network resources that matches the specified value.
+      in: query
+      name: isScanEnabled
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
     CompartmentIdQueryParam:
       description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
 
@@ -6572,8 +6537,91 @@ components:
       required: true
       schema:
         type: string
-    InfrastructureLifecycleStateQueryParam:
-      description: A filter to return resources that match the specified lifecycle state.
+    VmClusterNetworkIdPathParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM cluster network.
+      in: path
+      name: vmClusterNetworkId
+      required: true
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For Optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the ''if-match'' parameter to the value of the
+
+        Etag from a previous GET or POST response for that resource.
+
+        The resource is updated or deleted only if the Etag that you
+
+        provide matches the current Etag value for the resource.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    MaintenanceRunIdQueryParam:
+      description: The maintenance run OCID.
+      in: query
+      name: maintenanceRunId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ResourceIdQueryParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the work request resource.
+      in: query
+      name: resourceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    WorkRequestIdPathParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    maintenanceExecutionIdPathParam:
+      description: The maintenance execution OCID.
+      in: path
+      name: maintenanceExecutionId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    VmInstanceIdPathParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM instance.
+      in: path
+      name: vmInstanceId
+      required: true
+      schema:
+        type: string
+    DisplayNameQueryParam:
+      description: A filter to return resources that match the entire display name given. The match is case sensitive.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    TimeAcceptedLessThanOrEqualToQueryParam:
+      description: Filter maintenance run for before given time.
+      in: query
+      name: timeAcceptedLessThanOrEqualTo
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    MaintenanceRunLifecycleStateQueryParam:
+      description: A filter to return only resources that match the given lifecycle states.
       in: query
       name: lifecycleState
       required: false
@@ -6585,34 +6633,18 @@ components:
         items:
           enum:
           - CREATING
-          - REQUIRES_VALIDATION
-          - VALIDATING
-          - REQUIRES_ACTIVATION
-          - ACTIVATING
-          - ACTIVE
+          - SCHEDULED
+          - IN_PROGRESS
+          - SUCCEEDED
+          - SKIPPED
+          - FAILED
           - UPDATING
           - DELETING
           - DELETED
-          - DISCONNECTED
-          - MAINTENANCE_IN_PROGRESS
-          - REQUIRES_MAINTENANCE
+          - CANCELED
+          - PARTIAL_SUCCESS
           type: string
-          x-obmcs-top-level-enum: '#/definitions/InfrastructureLifecycleState'
-    VmClusterNetworkNodeCountQueryParam:
-      description: Count of virtual machines in this VM cluster.
-      in: query
-      name: nodeCount
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: integer
-    VmInstanceIdPathParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the VM instance.
-      in: path
-      name: vmInstanceId
-      required: true
-      schema:
-        type: string
+          x-obmcs-top-level-enum: '#/definitions/MaintenanceRunLifecycleState'
     PaginationLimitQueryParam:
       description: The maximum number of items to return in a page.
       in: query
@@ -6622,57 +6654,25 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
-    OptionalMaintenanceRunTypeQueryParam:
-      description: The sub-type of the maintenance run.
-      in: query
-      name: maintenanceRunType
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request, so the request can be retried without risk of processing that
+
+        same action again, in the event of a timeout or server error. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        was deleted and purged from the system, then a retry of the original creation request
+
+        can be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
       required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/MaintenanceRunTypeEnum'
       schema:
         type: string
-        enum:
-        - QUARTERLY
-        - PLANNED
-        - MANDATORY
-        - SECURITY_MONTHLY
-    ResourceIdQueryParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the work request resource.
-      in: query
-      name: resourceId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    IsForceDeleteInfrastructureQueryParam:
-      description: "When set to `true`, infrastructure will be deleted even if it has dependent resources. \nIf set to `false`, deletion will fail if the infrastructure has dependent resources.\nDefault is `false`.\n"
-      in: query
-      name: isForceDeleteInfrastructure
-      required: false
-      x-obmcs-cli-param: is-force-delete
-      schema:
-        type: boolean
-        default: false
-    VmInstanceLifecycleStateQueryParam:
-      description: A filter to return resources that match the specified lifecycle state.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VmInstanceLifecycleState'
+        maxLength: 64
+        minLength: 1
     InfrastructureIdPathParam:
       description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Data Infrastructure.
       in: path

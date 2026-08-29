@@ -552,137 +552,117 @@ paths:
         description: The filter group information to update.
         required: true
 components:
-  parameters:
-    PaginationTokenQueryParam:
-      description: The value of the `opc-next-page` response header from the previous "List" call.
-      in: query
-      name: page
-      schema:
-        type: string
-        maxLength: 3000
-        minLength: 1
-    SortByQueryParam:
-      description: 'The criteria to sort by. You can specify only one sort order. The default sort order for the creation date of resources is descending. The default sort order for display names is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    AnnouncementSubscriptionIdentifierPathParam:
-      description: The OCID of the announcement subscription.
-      in: path
-      name: announcementSubscriptionId
-      required: true
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: 'The OCID of the compartment.
-
-        '
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 512
-        minLength: 1
-    IfMatchHeader:
-      description: The locking version, used for optimistic concurrency control.
-      in: header
-      name: if-match
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return in a paginated "List" call.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    AnnouncementSubscriptionIdentifierQueryParam:
-      description: The OCID of the announcement subscription.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, whether ascending ('ASC') or descending ('DESC').
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    FilterGroupNamePathParam:
-      description: The name of the filter group.
-      in: path
-      name: filterGroupName
-      required: true
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about
-
-        a particular request, please provide the complete request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: A filter to return only announcement subscriptions that match the given lifecycle state.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/AnnouncementSubscription/lifecycleState'
-      schema:
-        type: string
   schemas:
+    UpdateFilterGroupDetails:
+      description: The details for updating a filter group in an announcement subscription.
+      properties:
+        filters:
+          description: A list of filters against which the Announcements service will match announcements. You cannot combine the RESOURCE_ID filter with any other type of filter within a given filter group. For filter types that support multiple values, specify the values individually.
+          items:
+            $ref: '#/components/schemas/Filter'
+          minItems: 1
+          type: array
+      required:
+      - filters
+      type: object
+      x-example: "{\n  \"name\": \"filterbyiaasus\",\n  \"filters\": [\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US East (Ashburn)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (Phoenix)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (San Jose)\"\n    },\n    {\n      \"type\": \"PLATFORM_TYPE\",\n      \"value\": \"IAAS\"\n  ]\n}\n"
+    Filter:
+      description: Criteria that the Announcements service uses to match announcements so it can provide only desired announcements to subscribers.
+      properties:
+        type:
+          description: The type of filter. You cannot combine the RESOURCE_ID filter with any other type of filter within a given filter group. For filter types that support multiple values, specify the values individually.
+          enum:
+          - COMPARTMENT_ID
+          - PLATFORM_TYPE
+          - REGION
+          - SERVICE
+          - RESOURCE_ID
+          - ANNOUNCEMENT_TYPE
+          type: string
+        value:
+          description: The value of the filter.
+          type: string
+      required:
+      - type
+      - value
+      type: object
+      x-example: "{\n  \"type\": \"ANNOUNCEMENT_TYPE\",\n  \"value\": \"ACTION_REQUIRED\"\n}\n"
+    UpdateAnnouncementSubscriptionDetails:
+      description: The details for updating an announcement subscription.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: A description of the announcement subscription. Avoid entering confidential information.
+          maxLength: 400
+          type: string
+        displayName:
+          description: A user-friendly name for the announcement subscription. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        onsTopicId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the Notifications service topic that is the target for publishing announcements that match the configured announcement subscription. The caller of the operation needs the ONS_TOPIC_PUBLISH permission for the targeted Notifications service topic. For more information about Notifications permissions, see [Details for Notifications](/Content/Identity/policyreference/notificationpolicyreference.htm).
+
+            '
+          type: string
+        preferredLanguage:
+          default: en-US
+          description: (For announcement subscriptions with SaaS configured as the platform type or Oracle Fusion Applications as the service, or both, only) The language in which the user prefers to receive emailed announcements. Specify the preference with a value that uses the x-obmcs-human-language format. For example fr-FR.
+          example: fr-FR
+          format: x-obmcs-human-language
+          type: string
+        preferredTimeZone:
+          default: UTC
+          description: The time zone in which the user prefers to receive announcements. Specify the preference with a value that uses the IANA Time Zone Database format (x-obmcs-time-zone). For example - America/Los_Angeles
+          example: America/Los_Angeles
+          format: x-obmcs-time-zone
+          type: string
+      type: object
+      x-example: "{\n  \"definedTags\": {},\n  \"description\": \"announcements for Brazil region (required and recommended actions)\",\n  \"displayName\": \"subscription-brazilactions\",\n  \"freeformTags\": {},\n  \"onsTopicId\": \"ocid1.onstopic.oc1.phx.examplea4s4glpxfc22s7tmcvbitc7yiyjpft2faux3yb2oya2hihkyzieia\",\n  \"preferredTimeZone\": \"America/Los_Angeles\"\n}\n"
+    CreateFilterGroupDetails:
+      description: The details for creating a new filter group for an announcement subscription.
+      properties:
+        filters:
+          description: A list of filters against which the Announcements service will match announcements. You cannot have more than one of any given filter type within a filter group.
+          items:
+            $ref: '#/components/schemas/Filter'
+          minItems: 1
+          type: array
+        name:
+          description: The name of the filter group. The name must be unique and it cannot be changed. Avoid entering confidential information.
+          type: string
+      required:
+      - name
+      - filters
+      type: object
+      x-example: "{\n  \"name\": \"filterbyregion-us\",\n  \"filters\": [\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US East (Ashburn)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (Phoenix)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (San Jose)\"\n    }\n  ]\n}\n"
     CreateAnnouncementSubscriptionDetails:
       description: The details for creating a new announcement subscription.
       properties:
@@ -760,110 +740,6 @@ components:
       - onsTopicId
       type: object
       x-example: "{\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleauingds4uwkcvbxv4ijs7zxuqnoewldef4fauxs7vaax2fab4gcsq\",\n  \"definedTags\": {},\n  \"description\": \"announcements for Brazil region required and recommended actions\",\n  \"displayName\": \"subscription-brazilactions\",\n  \"filterGroups\": {\n    \"filterbybrazilactions\": {\n      \"filters\": [\n        {\n          \"type\": \"REGION\",\n          \"value\": \"Brazil East (Sao Paulo)\"\n        },\n        {\n          \"type\": \"REGION\",\n          \"value\": \"Brazil Southeast (Vinhedo)\"\n        },\n        {\n          \"type\": \"ANNOUNCEMENT_TYPE\",\n          \"value\": \"ACTION_RECOMMENDED\"\n        },\n        {\n          \"type\": \"ANNOUNCEMENT_TYPE\",\n          \"value\": \"ACTION_REQUIRED\"\n        }\n      ]\n    }\n  }\n  \"freeformTags\": {},\n  \"onsTopicId\": \"ocid1.onstopic.oc1.phx.examplea4s4glpxfc22s7tmcvbitc7yiyjpft2faux3yb2oya2hihkyzieia\"\n}\n"
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    UpdateAnnouncementSubscriptionDetails:
-      description: The details for updating an announcement subscription.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: A description of the announcement subscription. Avoid entering confidential information.
-          maxLength: 400
-          type: string
-        displayName:
-          description: A user-friendly name for the announcement subscription. Does not have to be unique, and it's changeable. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        onsTopicId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the Notifications service topic that is the target for publishing announcements that match the configured announcement subscription. The caller of the operation needs the ONS_TOPIC_PUBLISH permission for the targeted Notifications service topic. For more information about Notifications permissions, see [Details for Notifications](/Content/Identity/policyreference/notificationpolicyreference.htm).
-
-            '
-          type: string
-        preferredLanguage:
-          default: en-US
-          description: (For announcement subscriptions with SaaS configured as the platform type or Oracle Fusion Applications as the service, or both, only) The language in which the user prefers to receive emailed announcements. Specify the preference with a value that uses the x-obmcs-human-language format. For example fr-FR.
-          example: fr-FR
-          format: x-obmcs-human-language
-          type: string
-        preferredTimeZone:
-          default: UTC
-          description: The time zone in which the user prefers to receive announcements. Specify the preference with a value that uses the IANA Time Zone Database format (x-obmcs-time-zone). For example - America/Los_Angeles
-          example: America/Los_Angeles
-          format: x-obmcs-time-zone
-          type: string
-      type: object
-      x-example: "{\n  \"definedTags\": {},\n  \"description\": \"announcements for Brazil region (required and recommended actions)\",\n  \"displayName\": \"subscription-brazilactions\",\n  \"freeformTags\": {},\n  \"onsTopicId\": \"ocid1.onstopic.oc1.phx.examplea4s4glpxfc22s7tmcvbitc7yiyjpft2faux3yb2oya2hihkyzieia\",\n  \"preferredTimeZone\": \"America/Los_Angeles\"\n}\n"
-    AnnouncementSubscriptionCollection:
-      description: The results of a search for announcement subscriptions. This object contains both announcement subscription summary objects and other information, such as metadata.
-      properties:
-        items:
-          description: A list of announcement subscriptions.
-          items:
-            $ref: '#/components/schemas/AnnouncementSubscriptionSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"id\": \"ocid1.announcementsubscription.oc1.phx.examplea37fvnaial3u5l6cvbwelj37dbuxl5fauxv3ux54jbn2mewx3ddna\",\n      \"displayName\": \"announcement-subscription-5\",\n      \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\",\n      \"timeCreated\": \"2023-09-18T22:45:27.948Z\",\n      \"timeUpdated\": \"2023-01-06T23:19:27.948Z\",\n      \"lifecycleState\": \"ACTIVE\",\n      \"lifecycleDetails\": null,\n      \"onsTopicId\": \"ocid1.onstopic.oc1.phx.exampleagbx3or53zcvboatv24o5k4yyvnrph2fauxpekkwgovs7ue7mtixa\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"systemTags\": {}\n    },\n    {\n      \"id\": \"ocid1.announcementsubscription.oc1.phx.examplea37fvnaiam2cvbefolukref6a3f323ffauxixzktfy37nmjf37nvq\",\n      \"displayName\": \"announcement-subscription-2\",\n      \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\",\n      \"timeCreated\": \"2022-09-18T23:14:05.756Z\",\n      \"timeUpdated\": \"2022-09-18T23:14:05.756Z\",\n      \"lifecycleState\": \"ACTIVE\",\n      \"lifecycleDetails\": null,\n      \"onsTopicId\": \"ocid1.onstopic.oc1.phx.exampleay4zq6zpisulo6cvb4hy3cjaljxo2e35fauxkamd7jnwkhalztpkq\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"systemTags\": {}\n    },\n    {\n      \"id\": \"ocid1.announcementsubscription.oc1.phx.examplea37fvnaiacfq6oa5cvbt2csvefzddrex4kcoezc2yzekjufauxmha\",\n      \"displayName\": \"announcement-subscription-1\",\n      \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\",\n      \"timeCreated\": \"2022-09-16T23:55:33.329Z\",\n      \"timeUpdated\": \"2023-01-06T23:22:32.956Z\",\n      \"lifecycleState\": \"ACTIVE\",\n      \"lifecycleDetails\": null,\n      \"onsTopicId\": \"ocid1.onstopic.oc1.phx.exampleahxrbayxljicvb2hkny3el5gvj7hru3ubqfauxxt3zw3krmgbsh7a\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"systemTags\": {}\n    }\n  ]\n}\n"
-    Filter:
-      description: Criteria that the Announcements service uses to match announcements so it can provide only desired announcements to subscribers.
-      properties:
-        type:
-          description: The type of filter. You cannot combine the RESOURCE_ID filter with any other type of filter within a given filter group. For filter types that support multiple values, specify the values individually.
-          enum:
-          - COMPARTMENT_ID
-          - PLATFORM_TYPE
-          - REGION
-          - SERVICE
-          - RESOURCE_ID
-          - ANNOUNCEMENT_TYPE
-          type: string
-        value:
-          description: The value of the filter.
-          type: string
-      required:
-      - type
-      - value
-      type: object
-      x-example: "{\n  \"type\": \"ANNOUNCEMENT_TYPE\",\n  \"value\": \"ACTION_REQUIRED\"\n}\n"
     AnnouncementSubscriptionSummary:
       description: A summary representation of an announcement subscription.
       properties:
@@ -958,47 +834,18 @@ components:
       - onsTopicId
       type: object
       x-example: "{\n  \"id\": \"ocid1.announcementsubscription.oc1.phx.examplea37fvnaiacfq6oa5cvbt2csvefzddrex4kcoezc2yzekjufauxmha\",\n  \"displayName\": \"announcement-subscription-1\",\n  \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\",\n  \"timeCreated\": \"2022-09-16T23:55:33.329Z\",\n  \"timeUpdated\": \"2023-01-06T23:22:32.956Z\",\n  \"lifecycleState\": \"ACTIVE\",\n  \"lifecycleDetails\": null,\n  \"onsTopicId\": \"ocid1.onstopic.oc1.phx.exampleahxrbayxljicvb2hkny3el5gvj7hru3ubqfauxxt3zw3krmgbsh7a\",\n  \"freeformTags\": {},\n  \"definedTags\": {},\n  \"systemTags\": {}\n}\n"
-    UpdateFilterGroupDetails:
-      description: The details for updating a filter group in an announcement subscription.
+    Error:
+      description: Error Information.
       properties:
-        filters:
-          description: A list of filters against which the Announcements service will match announcements. You cannot combine the RESOURCE_ID filter with any other type of filter within a given filter group. For filter types that support multiple values, specify the values individually.
-          items:
-            $ref: '#/components/schemas/Filter'
-          minItems: 1
-          type: array
-      required:
-      - filters
-      type: object
-      x-example: "{\n  \"name\": \"filterbyiaasus\",\n  \"filters\": [\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US East (Ashburn)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (Phoenix)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (San Jose)\"\n    },\n    {\n      \"type\": \"PLATFORM_TYPE\",\n      \"value\": \"IAAS\"\n  ]\n}\n"
-    FilterGroupDetails:
-      description: The details of a group of filters to match announcements against. A filter group combines one or more individual filters.
-      properties:
-        filters:
-          description: A list of filters against which the Announcements service matches announcements. You cannot combine the RESOURCE_ID filter with any other type of filter within a given filter group. For filter types that support multiple values, specify the values individually.
-          items:
-            $ref: '#/components/schemas/Filter'
-          type: array
-      required:
-      - filters
-      type: object
-      x-example: "{\n  \"name\": \"filterbyiaasus\",\n  \"filters\": [\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US East (Ashburn)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (Phoenix)\"\n    },\n    {\n      \"type\": \"PLATFORM_TYPE\",\n      \"value\": \"IAAS\"\n  ]\n}\n"
-    ChangeAnnouncementSubscriptionCompartmentDetails:
-      description: The details of the request to change the compartment of the announcement subscription.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
-
-            into which you want to move the announcement subscription.
-
-            '
-          maxLength: 255
-          minLength: 1
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
           type: string
       required:
-      - compartmentId
-      type: object
-      x-example: "{\n  \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\"\n}\n"
+      - code
+      - message
     FilterGroup:
       description: A group of filters to match announcements against.
       properties:
@@ -1015,6 +862,34 @@ components:
       - filters
       type: object
       x-example: "{\n  \"name\": \"filterbycomputeactions\",\n    \"filters\": [\n      {\n        \"type\": \"ANNOUNCEMENT_TYPE\",\n        \"value\": \"ACTION_REQUIRED\"\n      },\n      {\n        \"type\": \"ANNOUNCEMENT_TYPE\",\n        \"value\": \"ACTION_RECOMMENDED\"\n      },\n      {\n        \"type\": \"SERVICE\",\n        \"value\": \"Oracle Cloud Infrastructure Compute\"\n      }\n    ]\n}\n"
+    AnnouncementSubscriptionCollection:
+      description: The results of a search for announcement subscriptions. This object contains both announcement subscription summary objects and other information, such as metadata.
+      properties:
+        items:
+          description: A list of announcement subscriptions.
+          items:
+            $ref: '#/components/schemas/AnnouncementSubscriptionSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"id\": \"ocid1.announcementsubscription.oc1.phx.examplea37fvnaial3u5l6cvbwelj37dbuxl5fauxv3ux54jbn2mewx3ddna\",\n      \"displayName\": \"announcement-subscription-5\",\n      \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\",\n      \"timeCreated\": \"2023-09-18T22:45:27.948Z\",\n      \"timeUpdated\": \"2023-01-06T23:19:27.948Z\",\n      \"lifecycleState\": \"ACTIVE\",\n      \"lifecycleDetails\": null,\n      \"onsTopicId\": \"ocid1.onstopic.oc1.phx.exampleagbx3or53zcvboatv24o5k4yyvnrph2fauxpekkwgovs7ue7mtixa\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"systemTags\": {}\n    },\n    {\n      \"id\": \"ocid1.announcementsubscription.oc1.phx.examplea37fvnaiam2cvbefolukref6a3f323ffauxixzktfy37nmjf37nvq\",\n      \"displayName\": \"announcement-subscription-2\",\n      \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\",\n      \"timeCreated\": \"2022-09-18T23:14:05.756Z\",\n      \"timeUpdated\": \"2022-09-18T23:14:05.756Z\",\n      \"lifecycleState\": \"ACTIVE\",\n      \"lifecycleDetails\": null,\n      \"onsTopicId\": \"ocid1.onstopic.oc1.phx.exampleay4zq6zpisulo6cvb4hy3cjaljxo2e35fauxkamd7jnwkhalztpkq\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"systemTags\": {}\n    },\n    {\n      \"id\": \"ocid1.announcementsubscription.oc1.phx.examplea37fvnaiacfq6oa5cvbt2csvefzddrex4kcoezc2yzekjufauxmha\",\n      \"displayName\": \"announcement-subscription-1\",\n      \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\",\n      \"timeCreated\": \"2022-09-16T23:55:33.329Z\",\n      \"timeUpdated\": \"2023-01-06T23:22:32.956Z\",\n      \"lifecycleState\": \"ACTIVE\",\n      \"lifecycleDetails\": null,\n      \"onsTopicId\": \"ocid1.onstopic.oc1.phx.exampleahxrbayxljicvb2hkny3el5gvj7hru3ubqfauxxt3zw3krmgbsh7a\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"systemTags\": {}\n    }\n  ]\n}\n"
+    ChangeAnnouncementSubscriptionCompartmentDetails:
+      description: The details of the request to change the compartment of the announcement subscription.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which you want to move the announcement subscription.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\"\n}\n"
     AnnouncementSubscription:
       description: 'A subscription with the Announcements service to receive selected announcements in the format and delivery mechanisms supported by a corresponding topic endpoint configured in the Oracle Cloud Infrastructure Notifications service.
 
@@ -1140,23 +1015,148 @@ components:
       - onsTopicId
       type: object
       x-example: "{\n  \"id\": \"ocid1.announcementsubscription.oc1.phx.exampleaqisx3ryazu44rhjcvbwasbdkv3tmurqkqri6yd3p6wzfauxdqmqa\",\n  \"displayName\": \"actionrequired-subscription\",\n  \"description\": \"subscription for required actions\",\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleauingds4uwkcvbxv4ijs7zxuqnoewldef4fauxs7vaax2fab4gcsq\",\n  \"timeCreated\": \"2022-03-01T23:55:57.672Z\",\n  \"timeUpdated\": \"2022-03-01T23:55:57.672Z\",\n  \"lifecycleState\": \"ACTIVE\",\n  \"lifecycleDetails\": null,\n  \"onsTopicId\": \"ocid1.onstopic.oc1.phx.exampleac37suzoqdnp3hg3jmopb32zcvbitupvwvovlufauxsirkjveeqsa\",\n  \"filterGroups\": {\n    \"filterbytype\": {\n      \"name\": \"filterbytype\",\n      \"filters\": [\n        {\n          \"type\": \"ANNOUNCEMENT_TYPE\",\n          \"value\": \"ACTION_REQUIRED\"\n        }\n      ]\n    }\n  },\n  \"freeformTags\": {},\n  \"definedTags\": {},\n  \"systemTags\": {}\n}\n"
-    CreateFilterGroupDetails:
-      description: The details for creating a new filter group for an announcement subscription.
+    FilterGroupDetails:
+      description: The details of a group of filters to match announcements against. A filter group combines one or more individual filters.
       properties:
         filters:
-          description: A list of filters against which the Announcements service will match announcements. You cannot have more than one of any given filter type within a filter group.
+          description: A list of filters against which the Announcements service matches announcements. You cannot combine the RESOURCE_ID filter with any other type of filter within a given filter group. For filter types that support multiple values, specify the values individually.
           items:
             $ref: '#/components/schemas/Filter'
-          minItems: 1
           type: array
-        name:
-          description: The name of the filter group. The name must be unique and it cannot be changed. Avoid entering confidential information.
-          type: string
       required:
-      - name
       - filters
       type: object
-      x-example: "{\n  \"name\": \"filterbyregion-us\",\n  \"filters\": [\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US East (Ashburn)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (Phoenix)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (San Jose)\"\n    }\n  ]\n}\n"
+      x-example: "{\n  \"name\": \"filterbyiaasus\",\n  \"filters\": [\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US East (Ashburn)\"\n    },\n    {\n      \"type\": \"REGION\",\n      \"value\": \"US West (Phoenix)\"\n    },\n    {\n      \"type\": \"PLATFORM_TYPE\",\n      \"value\": \"IAAS\"\n  ]\n}\n"
+  parameters:
+    SortByQueryParam:
+      description: 'The criteria to sort by. You can specify only one sort order. The default sort order for the creation date of resources is descending. The default sort order for display names is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    AnnouncementSubscriptionIdentifierQueryParam:
+      description: The OCID of the announcement subscription.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    LifecycleStateQueryParam:
+      description: A filter to return only announcement subscriptions that match the given lifecycle state.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/AnnouncementSubscription/lifecycleState'
+      schema:
+        type: string
+    AnnouncementSubscriptionIdentifierPathParam:
+      description: The OCID of the announcement subscription.
+      in: path
+      name: announcementSubscriptionId
+      required: true
+      schema:
+        type: string
+    FilterGroupNamePathParam:
+      description: The name of the filter group.
+      in: path
+      name: filterGroupName
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, whether ascending ('ASC') or descending ('DESC').
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RequestIdHeader:
+      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+        a particular request, please provide the complete request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The value of the `opc-next-page` response header from the previous "List" call.
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 3000
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return in a paginated "List" call.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: 'The OCID of the compartment.
+
+        '
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 512
+        minLength: 1
+    IfMatchHeader:
+      description: The locking version, used for optimistic concurrency control.
+      in: header
+      name: if-match
+      schema:
+        type: string
   responses:
     default:
       description: Unknown Error

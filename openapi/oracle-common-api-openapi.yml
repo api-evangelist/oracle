@@ -278,185 +278,7 @@ paths:
       - common
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
-  parameters:
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    ResourceIdentifierQueryParam:
-      description: The ID of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    WorkRequestStatusQueryParam:
-      description: A filter to return only resources for which the lifecycleState matches the given OperationStatus.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-      schema:
-        type: string
-        enum:
-        - ACCEPTED
-        - IN_PROGRESS
-        - WAITING
-        - FAILED
-        - SUCCEEDED
-        - CANCELING
-        - CANCELED
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
-    WorkRequestIdPathParam:
-      description: The ID of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order can be provided. By default, the order for timeAccepted is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   schemas:
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    WorkRequestSummaryCollection:
-      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestSummary objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestResource:
-      description: A resource that a work request creates and operates on.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work is tracked in the work request.
-
-            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
-
-            work is complete for that resource. At that point, the resource will transition to CREATED, UPDATED,
-
-            or DELETED, respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type that the work request affects.
-          type: string
-        entityUri:
-          description: The URI path where you can perform a GET operation to access the resource metadata.
-          type: string
-        identifier:
-          description: The identifier of the resource that the work request affects.
-          type: string
-        metadata:
-          additionalProperties:
-            type: string
-          description: Additional information that helps to explain the resource.
-          enum:
-          - IS_DRY_RUN
-          type: object
-          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
-      required:
-      - actionType
-      - entityType
-      - identifier
     WorkRequestErrorCollection:
       description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
       properties:
@@ -468,6 +290,27 @@ components:
       required:
       - items
       type: object
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occurred. Error codes are listed at,
+
+            https://docs.cloud.oracle.com/Content/API/References/apierrors.htm
+
+            '
+          type: string
+        message:
+          description: A human-readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time when the error occurred. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
     WorkRequestSummary:
       description: A summary of the status of a work request.
       properties:
@@ -560,51 +403,6 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occurred. Error codes are listed at,
-
-            https://docs.cloud.oracle.com/Content/API/References/apierrors.htm
-
-            '
-          type: string
-        message:
-          description: A human-readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time when the error occurred. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time when the log message was written. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestLogEntries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
     WorkRequest:
       description: A description of work request status.
       properties:
@@ -697,6 +495,208 @@ components:
       - resources
       - percentComplete
       - timeAccepted
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestLogEntries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time when the log message was written. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    WorkRequestSummaryCollection:
+      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestSummary objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestResource:
+      description: A resource that a work request creates and operates on.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the work is tracked in the work request.
+
+            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
+
+            work is complete for that resource. At that point, the resource will transition to CREATED, UPDATED,
+
+            or DELETED, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - RELATED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type that the work request affects.
+          type: string
+        entityUri:
+          description: The URI path where you can perform a GET operation to access the resource metadata.
+          type: string
+        identifier:
+          description: The identifier of the resource that the work request affects.
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: Additional information that helps to explain the resource.
+          enum:
+          - IS_DRY_RUN
+          type: object
+          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
+      required:
+      - actionType
+      - entityType
+      - identifier
+  parameters:
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order can be provided. By default, the order for timeAccepted is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestIdPathParam:
+      description: The ID of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    WorkRequestStatusQueryParam:
+      description: A filter to return only resources for which the lifecycleState matches the given OperationStatus.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - WAITING
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    ResourceIdentifierQueryParam:
+      description: The ID of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   responses:
     default:
       description: Unknown Error

@@ -781,21 +781,80 @@ paths:
         '
 components:
   parameters:
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `3`
-
-        '
+    ProfileTypeQueryParam:
+      description: A filter to return registration profiles that match the given profile type.
       in: query
-      name: page
+      name: profileType
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - SOFTWARESOURCE
+          - GROUP
+          - LIFECYCLE
+          - STATION
+          - WINDOWS_STANDALONE
+          - UBUNTU_STANDALONE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ProfileType'
+        uniqueItems: true
+    ChangeProfileCompartmentDetailsParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the profile to.
+      in: body
+      name: ChangeProfileCompartmentDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/ChangeProfileCompartmentDetails'
+    ProfileIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the registration profile. A filter used to return the specified profile.
+      in: query
+      name: profileId
+      required: false
       x-default-description: 'null'
       schema:
         type: string
-        minLength: 1
+    MultiManagementStationQueryParam:
+      description: "A filter to return resources that are associated with the specified management \nstation [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).\n"
+      in: query
+      name: managementStation
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+    MultiManagementStationNotEqualToQueryParam:
+      description: "A filter to return resources that aren't associated with the specified management \nstation [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).\n"
+      in: query
+      name: managementStationNotEqualTo
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+    MultiDisplayNameQueryParam:
+      description: A filter to return resources that match the given display names.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          maxLength: 255
+          minLength: 1
+          type: string
+        maxItems: 5
+        uniqueItems: true
     OsFamilyQueryParam:
       description: A filter to return only resources that match the given operating system family.
       in: query
@@ -819,64 +878,28 @@ components:
         - UBUNTU_20_04
         - UBUNTU_22_04
         - UBUNTU_24_04
-    MultiDisplayNameQueryParam:
-      description: A filter to return resources that match the given display names.
+    ProfileLifecycleStateQueryParam:
+      description: A filter to return only registration profiles in the given state.
       in: query
-      name: displayName
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          maxLength: 255
-          minLength: 1
-          type: string
-        maxItems: 5
-        uniqueItems: true
-    MultiManagementStationQueryParam:
-      description: "A filter to return resources that are associated with the specified management \nstation [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).\n"
-      in: query
-      name: managementStation
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        uniqueItems: true
-    DisplayNameContainsQueryParam:
-      description: A filter to return resources that may partially match the given display name.
-      in: query
-      name: displayNameContains
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    CompartmentIdQueryParam:
-      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
+      name: lifecycleState
       required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/Profile/lifecycleState'
+      schema:
+        type: string
+    ProfileVersionQueryParam:
+      description: The version of the registration profile.
+      in: query
+      name: profileVersion
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ProfileVersionPathParam:
+      description: The version of the registration profile.
+      in: path
+      name: profileVersion
+      required: true
       schema:
         type: string
     RegistrationTypeQueryParam:
@@ -892,67 +915,16 @@ components:
           type: string
           x-obmcs-enumref: '#/definitions/Profile/registrationType'
         uniqueItems: true
-    ChangeProfileCompartmentDetailsParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the profile to.
-      in: body
-      name: ChangeProfileCompartmentDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/ChangeProfileCompartmentDetails'
-    ProfileIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the registration profile. A filter used to return the specified profile.
-      in: query
-      name: profileId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    IsServiceProvidedProfileQueryParam:
-      description: 'A filter to return only service-provided profiles.
+    IsDefaultProfileQueryParam:
+      description: 'A filter to return only default profiles.
 
         '
       in: query
-      name: isServiceProvidedProfile
+      name: isDefaultProfile
       required: false
       x-default-description: 'null'
       schema:
         type: boolean
-    ProfileVersionQueryParam:
-      description: The version of the registration profile.
-      in: query
-      name: profileVersion
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `50`
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
-    VendorNameQueryParam:
-      description: A filter to return only resources that match the given vendor name.
-      in: query
-      name: vendorName
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/VendorName'
-      schema:
-        type: string
-        enum:
-        - ORACLE
-        - MICROSOFT
-        - CANONICAL
     SortOrderQueryParam:
       description: The sort order to use, either 'ASC' or 'DESC'.
       in: query
@@ -968,71 +940,27 @@ components:
         enum:
         - ASC
         - DESC
-    ProfileIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the registration profile.
-      in: path
-      name: profileId
-      required: true
-      schema:
-        type: string
-    ProfileLifecycleStateQueryParam:
-      description: A filter to return only registration profiles in the given state.
+    VendorNameQueryParam:
+      description: A filter to return only resources that match the given vendor name.
       in: query
-      name: lifecycleState
-      required: false
+      name: vendorName
       x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/Profile/lifecycleState'
-      schema:
-        type: string
-    ProfileTypeQueryParam:
-      description: A filter to return registration profiles that match the given profile type.
-      in: query
-      name: profileType
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - SOFTWARESOURCE
-          - GROUP
-          - LIFECYCLE
-          - STATION
-          - WINDOWS_STANDALONE
-          - UBUNTU_STANDALONE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ProfileType'
-        uniqueItems: true
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    ProfileSortByQueryParam:
-      description: "The field to sort by. Only one sort order may be provided. \nDefault order for timeCreated is descending. \nDefault order for displayName is ascending.\n"
-      in: query
-      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/VendorName'
       schema:
         type: string
         enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
+        - ORACLE
+        - MICROSOFT
+        - CANONICAL
+    DisplayNameContainsQueryParam:
+      description: A filter to return resources that may partially match the given display name.
+      in: query
+      name: displayNameContains
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     ArchTypeQueryParam:
       description: A filter to return only profiles that match the given archType.
       in: query
@@ -1057,326 +985,108 @@ components:
       name: opc-request-id
       schema:
         type: string
-    IsDefaultProfileQueryParam:
-      description: 'A filter to return only default profiles.
+    ProfileSortByQueryParam:
+      description: "The field to sort by. Only one sort order may be provided. \nDefault order for timeCreated is descending. \nDefault order for displayName is ascending.\n"
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    IsServiceProvidedProfileQueryParam:
+      description: 'A filter to return only service-provided profiles.
 
         '
       in: query
-      name: isDefaultProfile
+      name: isServiceProvidedProfile
       required: false
       x-default-description: 'null'
       schema:
         type: boolean
-    MultiManagementStationNotEqualToQueryParam:
-      description: "A filter to return resources that aren't associated with the specified management \nstation [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).\n"
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `3`
+
+        '
       in: query
-      name: managementStationNotEqualTo
+      name: page
       x-default-description: 'null'
-      style: form
-      explode: true
       schema:
-        type: array
-        items:
-          type: string
-        uniqueItems: true
-    ProfileVersionPathParam:
-      description: The version of the registration profile.
+        type: string
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `50`
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    ProfileIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the registration profile.
       in: path
-      name: profileVersion
+      name: profileId
       required: true
       schema:
         type: string
-  schemas:
-    Error:
-      description: Provides the information for an error.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    AttachSoftwareSourcesToProfileDetails:
-      description: Provides the information used to attach software sources to a profile.
-      properties:
-        softwareSources:
-          description: List of software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) to attach to the profile.
-          items:
-            type: string
-          type: array
-      required:
-      - softwareSources
-    LifecycleStageDetails:
-      description: Provides identifying information for the specified lifecycle stage.
-      properties:
-        displayName:
-          description: Lifecycle stage name.
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle stage.
-          type: string
-      required:
-      - id
-      type: object
-    AvailableSoftwareSourceSummary:
-      description: "Provides summary information about an available software source. \nAn available software source can be added to a managed instance. \nAfter a software source is added, packages from that software source can be installed on that managed instance.\n"
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the software source.
-          type: string
-        description:
-          description: Software source description.
-          type: string
-        displayName:
-          description: User-friendly name for the software source.
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
-          type: string
-        softwareSourceType:
-          description: Type of the software source.
-          enum:
-          - VENDOR
-          - CUSTOM
-          - VERSIONED
-          - PRIVATE
-          - THIRD_PARTY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
-      required:
-      - displayName
-      - id
-      - compartmentId
-      - softwareSourceType
-      type: object
-    ProfileCollection:
-      description: 'The set of registration profiles returned for the [ListProfiles](#/en/osmh/latest/Profile/ListProfiles) operation.
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
 
         '
-      properties:
-        items:
-          description: List of registration profiles.
-          items:
-            $ref: '#/components/schemas/ProfileSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"id\": \"ocid1.osmhprofile.oc1..exampleuniqueID\",\n      \"displayName\": \"profile-example\",\n      \"description\": null,\n      \"compartmentId\": \"ocid1.tenancy.oc1..exampleuniqueID\",\n      \"managementStationId\": \"ocid1.osmhmanagementstation.oc1..exampleuniqueID\",\n      \"profileType\": \"STATION\",\n      \"registrationType\": \"NON_OCI_LINUX\",\n      \"vendorName\": \"ORACLE\",\n      \"osFamily\": \"ORACLE_LINUX_8\",\n      \"archType\": \"X86_64\",\n      \"timeCreated\": \"2024-09-17T22:47:18.167Z\",\n      \"lifecycleState\": \"ACTIVE\",\n      \"isDefaultProfile\": false,\n      \"isServiceProvidedProfile\": false,\n      \"freeformTags\": {},\n      \"definedTags\": {\n          \"Oracle-Tags\": {\n              \"CreatedBy\": \"owner\",\n              \"CreatedOn\": \"2024-09-17T22:47:18.086Z\"\n          }\n      },\n      \"systemTags\": {}\n    }\n  ]\n} \n"
-    DetachSoftwareSourcesFromProfileDetails:
-      description: Provides the information used to detach software sources from a profile.
-      properties:
-        softwareSources:
-          description: List of software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) to detach from the profile.
-          items:
-            type: string
-          type: array
-      required:
-      - softwareSources
-    LifecycleEnvironmentDetails:
-      description: Provides identifying information for the specified lifecycle environment.
-      properties:
-        displayName:
-          description: Lifecycle environment name.
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle environment.
-          type: string
-      required:
-      - id
-      type: object
-    ProfileSummary:
-      description: Provides summary information for a registration profile.
-      properties:
-        archType:
-          description: The architecture type.
-          enum:
-          - X86_64
-          - AARCH64
-          - I686
-          - NOARCH
-          - SRC
-          - I386
-          - AMD64
-          - ARM64
-          - ALL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ArchType'
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the registration profile.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: User-specified description of the registration profile.
-          type: string
-        displayName:
-          description: A user-friendly name for the profile.
-          format: x-obmcs-ascii-identifier
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the registration profile.
-          type: string
-        isDefaultProfile:
-          default: false
-          description: 'Indicates if the profile is set as the default. There is exactly one default profile for a specified architecture, OS family, registration type, and vendor. When registering an instance with the corresonding characteristics, the default profile is used, unless another profile is specified.
-
-            '
-          type: boolean
-        isServiceProvidedProfile:
-          default: false
-          description: 'Indicates if the profile was created by the service. OS Management Hub provides a limited set of standardized profiles that can be used to register Autonomous Linux or Windows instances.
-
-            '
-          type: boolean
-        lifecycleState:
-          description: The current state of the registration profile.
-          type: string
-          x-obmcs-enumref: '#/definitions/Profile/lifecycleState'
-        managementStationId:
-          description: "The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station to associate with an \ninstance once registered. Management stations are only used with non-OCI instances.\n"
-          maxLength: 255
-          minLength: 1
-          type: string
-        osFamily:
-          description: The operating system family.
-          enum:
-          - ORACLE_LINUX_10
-          - ORACLE_LINUX_9
-          - ORACLE_LINUX_8
-          - ORACLE_LINUX_7
-          - ORACLE_LINUX_6
-          - WINDOWS_SERVER_2016
-          - WINDOWS_SERVER_2019
-          - WINDOWS_SERVER_2022
-          - WINDOWS_SERVER_2025
-          - WINDOWS_11
-          - ALL
-          - UBUNTU_20_04
-          - UBUNTU_22_04
-          - UBUNTU_24_04
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OsFamily'
-        profileType:
-          description: The type of registration profile.
-          enum:
-          - SOFTWARESOURCE
-          - GROUP
-          - LIFECYCLE
-          - STATION
-          - WINDOWS_STANDALONE
-          - UBUNTU_STANDALONE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ProfileType'
-        registrationType:
-          description: The type of instance to register.
-          type: string
-          x-obmcs-enumref: '#/definitions/Profile/registrationType'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The time the registration profile was created (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-            '
-          format: date-time
-          type: string
-        vendorName:
-          description: The vendor of the operating system for the instance.
-          enum:
-          - ORACLE
-          - MICROSOFT
-          - CANONICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VendorName'
-      required:
-      - id
-      - compartmentId
-      type: object
-      x-example: "{\n  \"id\": \"ocid1.osmhprofile.oc1..exampleuniqueID\",\n  \"displayName\": \"profile-example\",\n  \"description\": null,\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleuniqueID\",\n  \"managementStationId\": \"ocid1.osmhmanagementstation.oc1..exampleuniqueID\",\n  \"profileType\": \"STATION\",\n  \"registrationType\": \"NON_OCI_LINUX\",\n  \"vendorName\": \"ORACLE\",\n  \"osFamily\": \"ORACLE_LINUX_8\",\n  \"archType\": \"X86_64\",\n  \"timeCreated\": \"2024-09-17T22:47:18.167Z\",\n  \"lifecycleState\": \"ACTIVE\",\n  \"isDefaultProfile\": false,\n  \"isServiceProvidedProfile\": false,\n  \"freeformTags\": {},\n  \"definedTags\": {\n    \"Oracle-Tags\": {\n      \"CreatedBy\": \"owner\",\n      \"CreatedOn\": \"2024-09-17T22:47:18.086Z\"\n    }\n  },\n  \"systemTags\": {}\n}\n"
-    AttachLifecycleStageToProfileDetails:
-      description: Provides the information used to attach a lifecycle stage to a profile.
-      properties:
-        lifecycleStageId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle stage that the instance will be associated with.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - lifecycleStageId
-    AttachManagementStationToProfileDetails:
-      description: Provides the information used to attach a management station to a profile.
-      properties:
-        managementStationId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station that the instance will be associated with.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - managementStationId
-    ChangeProfileCompartmentDetails:
-      description: Provides the information used to move a profile to another compartment.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the profile to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      type: object
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+  schemas:
     Profile:
       description: Object that defines the registration profile.
       discriminator:
@@ -1554,21 +1264,217 @@ components:
       - osFamily
       - archType
       type: object
-    SoftwareSourceDetails:
-      description: Provides identifying information for the specified software source.
+    LifecycleStageDetails:
+      description: Provides identifying information for the specified lifecycle stage.
       properties:
+        displayName:
+          description: Lifecycle stage name.
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle stage.
+          type: string
+      required:
+      - id
+      type: object
+    ProfileSummary:
+      description: Provides summary information for a registration profile.
+      properties:
+        archType:
+          description: The architecture type.
+          enum:
+          - X86_64
+          - AARCH64
+          - I686
+          - NOARCH
+          - SRC
+          - I386
+          - AMD64
+          - ARM64
+          - ALL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ArchType'
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the registration profile.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: User-specified description of the registration profile.
+          type: string
+        displayName:
+          description: A user-friendly name for the profile.
+          format: x-obmcs-ascii-identifier
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the registration profile.
+          type: string
+        isDefaultProfile:
+          default: false
+          description: 'Indicates if the profile is set as the default. There is exactly one default profile for a specified architecture, OS family, registration type, and vendor. When registering an instance with the corresonding characteristics, the default profile is used, unless another profile is specified.
+
+            '
+          type: boolean
+        isServiceProvidedProfile:
+          default: false
+          description: 'Indicates if the profile was created by the service. OS Management Hub provides a limited set of standardized profiles that can be used to register Autonomous Linux or Windows instances.
+
+            '
+          type: boolean
+        lifecycleState:
+          description: The current state of the registration profile.
+          type: string
+          x-obmcs-enumref: '#/definitions/Profile/lifecycleState'
+        managementStationId:
+          description: "The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station to associate with an \ninstance once registered. Management stations are only used with non-OCI instances.\n"
+          maxLength: 255
+          minLength: 1
+          type: string
+        osFamily:
+          description: The operating system family.
+          enum:
+          - ORACLE_LINUX_10
+          - ORACLE_LINUX_9
+          - ORACLE_LINUX_8
+          - ORACLE_LINUX_7
+          - ORACLE_LINUX_6
+          - WINDOWS_SERVER_2016
+          - WINDOWS_SERVER_2019
+          - WINDOWS_SERVER_2022
+          - WINDOWS_SERVER_2025
+          - WINDOWS_11
+          - ALL
+          - UBUNTU_20_04
+          - UBUNTU_22_04
+          - UBUNTU_24_04
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OsFamily'
+        profileType:
+          description: The type of registration profile.
+          enum:
+          - SOFTWARESOURCE
+          - GROUP
+          - LIFECYCLE
+          - STATION
+          - WINDOWS_STANDALONE
+          - UBUNTU_STANDALONE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ProfileType'
+        registrationType:
+          description: The type of instance to register.
+          type: string
+          x-obmcs-enumref: '#/definitions/Profile/registrationType'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The time the registration profile was created (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+
+            '
+          format: date-time
+          type: string
+        vendorName:
+          description: The vendor of the operating system for the instance.
+          enum:
+          - ORACLE
+          - MICROSOFT
+          - CANONICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VendorName'
+      required:
+      - id
+      - compartmentId
+      type: object
+      x-example: "{\n  \"id\": \"ocid1.osmhprofile.oc1..exampleuniqueID\",\n  \"displayName\": \"profile-example\",\n  \"description\": null,\n  \"compartmentId\": \"ocid1.tenancy.oc1..exampleuniqueID\",\n  \"managementStationId\": \"ocid1.osmhmanagementstation.oc1..exampleuniqueID\",\n  \"profileType\": \"STATION\",\n  \"registrationType\": \"NON_OCI_LINUX\",\n  \"vendorName\": \"ORACLE\",\n  \"osFamily\": \"ORACLE_LINUX_8\",\n  \"archType\": \"X86_64\",\n  \"timeCreated\": \"2024-09-17T22:47:18.167Z\",\n  \"lifecycleState\": \"ACTIVE\",\n  \"isDefaultProfile\": false,\n  \"isServiceProvidedProfile\": false,\n  \"freeformTags\": {},\n  \"definedTags\": {\n    \"Oracle-Tags\": {\n      \"CreatedBy\": \"owner\",\n      \"CreatedOn\": \"2024-09-17T22:47:18.086Z\"\n    }\n  },\n  \"systemTags\": {}\n}\n"
+    ProfileCollection:
+      description: 'The set of registration profiles returned for the [ListProfiles](#/en/osmh/latest/Profile/ListProfiles) operation.
+
+        '
+      properties:
+        items:
+          description: List of registration profiles.
+          items:
+            $ref: '#/components/schemas/ProfileSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"id\": \"ocid1.osmhprofile.oc1..exampleuniqueID\",\n      \"displayName\": \"profile-example\",\n      \"description\": null,\n      \"compartmentId\": \"ocid1.tenancy.oc1..exampleuniqueID\",\n      \"managementStationId\": \"ocid1.osmhmanagementstation.oc1..exampleuniqueID\",\n      \"profileType\": \"STATION\",\n      \"registrationType\": \"NON_OCI_LINUX\",\n      \"vendorName\": \"ORACLE\",\n      \"osFamily\": \"ORACLE_LINUX_8\",\n      \"archType\": \"X86_64\",\n      \"timeCreated\": \"2024-09-17T22:47:18.167Z\",\n      \"lifecycleState\": \"ACTIVE\",\n      \"isDefaultProfile\": false,\n      \"isServiceProvidedProfile\": false,\n      \"freeformTags\": {},\n      \"definedTags\": {\n          \"Oracle-Tags\": {\n              \"CreatedBy\": \"owner\",\n              \"CreatedOn\": \"2024-09-17T22:47:18.086Z\"\n          }\n      },\n      \"systemTags\": {}\n    }\n  ]\n} \n"
+    LifecycleEnvironmentDetails:
+      description: Provides identifying information for the specified lifecycle environment.
+      properties:
+        displayName:
+          description: Lifecycle environment name.
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle environment.
+          type: string
+      required:
+      - id
+      type: object
+    AvailableSoftwareSourceSummary:
+      description: "Provides summary information about an available software source. \nAn available software source can be added to a managed instance. \nAfter a software source is added, packages from that software source can be installed on that managed instance.\n"
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the software source.
+          type: string
         description:
           description: Software source description.
           type: string
         displayName:
-          description: Software source name.
+          description: User-friendly name for the software source.
           type: string
         id:
           description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
           type: string
-        isMandatoryForAutonomousLinux:
-          description: Indicates whether this is a required software source for Autonomous Linux instances. If true, the user can't unselect it.
-          type: boolean
         softwareSourceType:
           description: Type of the software source.
           enum:
@@ -1580,7 +1486,10 @@ components:
           type: string
           x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
       required:
+      - displayName
       - id
+      - compartmentId
+      - softwareSourceType
       type: object
     ManagedInstanceGroupDetails:
       description: Provides identifying information for the specified managed instance group.
@@ -1594,16 +1503,6 @@ components:
       required:
       - id
       type: object
-    AttachManagedInstanceGroupToProfileDetails:
-      description: Provides the information used to attach a managed instance group to a profile.
-      properties:
-        managedInstanceGroupId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance group that the instance will be associated with.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - managedInstanceGroupId
     AvailableSoftwareSourceCollection:
       description: "The set of available software sources returned for the [ListManagedInstanceAvailableSoftwareSources](#/en/osmh/latest/ManagedInstance/ListManagedInstanceAvailableSoftwareSources) or the \n[ListManagedInstanceGroupAvailableSoftwareSources](#/en/osmh/latest/ManagedInstanceGroup/ListManagedInstanceGroupAvailableSoftwareSources) operation.\n"
       properties:
@@ -1615,16 +1514,89 @@ components:
       required:
       - items
       type: object
-    DetachManagementStationFromProfileDetails:
-      description: Provides the information used to detach a management station from a profile.
+    AttachManagementStationToProfileDetails:
+      description: Provides the information used to attach a management station to a profile.
       properties:
         managementStationId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station to detach from the profile.
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station that the instance will be associated with.
           maxLength: 255
           minLength: 1
           type: string
       required:
       - managementStationId
+    UpdateProfileDetails:
+      description: Provides the information used to update a registration profile.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: User-specified description of the profile.
+          maxLength: 400
+          type: string
+        displayName:
+          description: A user-friendly name for the profile. Does not have to be unique. Avoid entering confidential information.
+          format: x-obmcs-ascii-identifier
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        isDefaultProfile:
+          default: false
+          description: 'Indicates if the profile is set as the default. There is exactly one default profile for a specified architecture, OS family, registration type, and vendor. When registering an instance with the corresonding characteristics, the default profile is used, unless another profile is specified.
+
+            '
+          type: boolean
+      type: object
+    AttachManagedInstanceGroupToProfileDetails:
+      description: Provides the information used to attach a managed instance group to a profile.
+      properties:
+        managedInstanceGroupId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance group that the instance will be associated with.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - managedInstanceGroupId
+    AttachSoftwareSourcesToProfileDetails:
+      description: Provides the information used to attach software sources to a profile.
+      properties:
+        softwareSources:
+          description: List of software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) to attach to the profile.
+          items:
+            type: string
+          type: array
+      required:
+      - softwareSources
     CreateProfileDetails:
       description: Provides the information used to create a new registration profile.
       discriminator:
@@ -1714,58 +1686,45 @@ components:
       - compartmentId
       - profileType
       type: object
-    UpdateProfileDetails:
-      description: Provides the information used to update a registration profile.
+    Error:
+      description: Provides the information for an error.
       properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    SoftwareSourceDetails:
+      description: Provides identifying information for the specified software source.
+      properties:
         description:
-          description: User-specified description of the profile.
-          maxLength: 400
+          description: Software source description.
           type: string
         displayName:
-          description: A user-friendly name for the profile. Does not have to be unique. Avoid entering confidential information.
-          format: x-obmcs-ascii-identifier
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          description: Software source name.
           type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        isDefaultProfile:
-          default: false
-          description: 'Indicates if the profile is set as the default. There is exactly one default profile for a specified architecture, OS family, registration type, and vendor. When registering an instance with the corresonding characteristics, the default profile is used, unless another profile is specified.
-
-            '
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
+          type: string
+        isMandatoryForAutonomousLinux:
+          description: Indicates whether this is a required software source for Autonomous Linux instances. If true, the user can't unselect it.
           type: boolean
+        softwareSourceType:
+          description: Type of the software source.
+          enum:
+          - VENDOR
+          - CUSTOM
+          - VERSIONED
+          - PRIVATE
+          - THIRD_PARTY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
+      required:
+      - id
       type: object
     ProfileVersion:
       description: Represents a specific version of a registration profile.
@@ -1894,6 +1853,47 @@ components:
       - vendorName
       - osFamily
       - archType
+      type: object
+    AttachLifecycleStageToProfileDetails:
+      description: Provides the information used to attach a lifecycle stage to a profile.
+      properties:
+        lifecycleStageId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle stage that the instance will be associated with.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - lifecycleStageId
+    DetachSoftwareSourcesFromProfileDetails:
+      description: Provides the information used to detach software sources from a profile.
+      properties:
+        softwareSources:
+          description: List of software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) to detach from the profile.
+          items:
+            type: string
+          type: array
+      required:
+      - softwareSources
+    DetachManagementStationFromProfileDetails:
+      description: Provides the information used to detach a management station from a profile.
+      properties:
+        managementStationId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station to detach from the profile.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - managementStationId
+    ChangeProfileCompartmentDetails:
+      description: Provides the information used to move a profile to another compartment.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the profile to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
       type: object
   responses:
     default:

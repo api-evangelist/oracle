@@ -346,34 +346,184 @@ paths:
         description: The information to use to update the announcement's read status.
         required: true
 components:
-  schemas:
-    Property:
-      description: 'A generic property that might be associated with the affected resource.
+  parameters:
+    SortAnnouncementsByQueryParam:
+      description: 'The criteria to sort by. You can specify only one sort order.
 
         '
-      properties:
-        name:
-          description: The name of the property.
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeOneValue
+        - timeTwoValue
+        - timeCreated
+        - referenceTicketNumber
+        - summary
+        - announcementType
+    ExcludeTypesQueryParam:
+      description: Exclude The type of announcement.
+      in: query
+      name: excludeAnnouncementTypes
+      schema:
+        type: array
+        items:
+          maxLength: 64
+          minLength: 1
           type: string
-        value:
-          description: The value of the property.
+    EnvironmentNameQueryParam:
+      description: A filter to return only announcements that match a specific environment name.
+      in: query
+      name: environmentName
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ShouldShowOnlyLatestInChainQueryParam:
+      description: A filter to display only the latest announcement in a chain.
+      in: query
+      name: shouldShowOnlyLatestInChain
+      schema:
+        type: boolean
+        default: false
+    PlatformTypeQueryParam:
+      description: A filter to return only announcements affecting a specific platform.
+      in: query
+      name: platformType
+      x-default-description: No default value for PlatformType
+      schema:
+        type: string
+        enum:
+        - IAAS
+        - SAAS
+        - PAAS
+        maxLength: 64
+        minLength: 1
+    ServiceQueryParam:
+      description: A filter to return only announcements affecting a specific service.
+      in: query
+      name: service
+      schema:
+        type: string
+        maxLength: 256
+        minLength: 1
+    TimeOneLatestTimeQueryParam:
+      description: The boundary for the latest `timeOneValue` date on announcements that you want to see.
+      in: query
+      name: timeOneLatestTime
+      schema:
+        type: string
+        format: date-time
+    AnnouncementTypeQueryParam:
+      description: The type of announcement.
+      in: query
+      name: announcementType
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    SortAnnouncementsOrderQueryParam:
+      description: 'The sort order to use. (Sorting by `announcementType` orders the announcements list according to importance.)
+
+        '
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    AnnouncementIdPathParam:
+      description: The OCID of the announcement.
+      in: path
+      name: announcementId
+      required: true
+      schema:
+        type: string
+    BannerQueryParam:
+      description: Whether the announcement is displayed as a console banner.
+      in: query
+      name: isBanner
+      schema:
+        type: boolean
+    AnnouncementLifecycleStateQueryParam:
+      description: The announcement's current lifecycle state.
+      in: query
+      name: lifecycleState
+      schema:
+        type: string
+        enum:
+        - ACTIVE
+        - INACTIVE
+    RequestIdHeader:
+      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about
+
+        a particular request, please provide the complete request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    TimeOneEarliestTimeQueryParam:
+      description: The boundary for the earliest `timeOneValue` date on announcements that you want to see.
+      in: query
+      name: timeOneEarliestTime
+      schema:
+        type: string
+        format: date-time
+    PaginationTokenQueryParam:
+      description: The value of the `opc-next-page` response header from the previous "List" call.
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 3000
+        minLength: 1
+    FilterByChainIdQueryParam:
+      description: A filter to return only announcements belonging to the specified announcement chain ID.
+      in: query
+      name: chainId
+      schema:
+        type: string
+    CompartmentIdQueryParam:
+      description: 'The OCID of the compartment.
+
+        '
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 512
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return in a paginated "List" call.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    IfMatchHeader:
+      description: The locking version, used for optimistic concurrency control.
+      in: header
+      name: if-match
+      schema:
+        type: string
+  schemas:
+    AnnouncementCompartment:
+      description: Compartment details of an announcement.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment to which the announcement belongs to.
           type: string
       required:
-      - name
-      - value
+      - compartmentId
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
+      x-example: "{\n  \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\"\n}\n"
     AnnouncementUserStatusDetails:
       description: 'An announcement''s status regarding whether it has been acknowledged by a user.
 
@@ -402,6 +552,68 @@ components:
       - userId
       type: object
       x-example: "{\n  \"userStatusAnnouncementId\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n  \"userId\" : \"ocid1.user.region1..exampleaorxz3psplonigcvbzy5oaiwiubh7k7ip6zgklfauxic67kksu4oq\",\n  \"timeAcknowledged\" : \"2019-01-28T23:21:57.342Z\"\n}\n"
+    Property:
+      description: 'A generic property that might be associated with the affected resource.
+
+        '
+      properties:
+        name:
+          description: The name of the property.
+          type: string
+        value:
+          description: The value of the property.
+          type: string
+      required:
+      - name
+      - value
+      type: object
+    AffectedResource:
+      description: 'The resource affected by the event described in the announcement.
+
+        '
+      properties:
+        additionalProperties:
+          description: Additional properties associated with the resource.
+          items:
+            $ref: '#/components/schemas/Property'
+          type: array
+        region:
+          description: The region where the affected resource exists.
+          type: string
+        resourceId:
+          description: The OCID of the affected resource.
+          maxLength: 255
+          minLength: 1
+          type: string
+        resourceName:
+          description: The friendly name of the resource.
+          type: string
+      required:
+      - resourceId
+      - resourceName
+      - region
+      type: object
+      x-example: "{\n  \"resourceId\" : \"ocid1.instance.oc1.iad.exampler2amtptcvblufks3mzzajtwkcxcu4mbjc3fauxwqo6nvpjqr2mb3a\",\n  \"resourceName\" : \"OCIULADMIN\",\n  \"region\" : \"us-ashburn-1\"\n}\n"
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    AnnouncementSummary:
+      allOf:
+      - $ref: '#/components/schemas/BaseAnnouncement'
+      - discriminator: AnnouncementSummary
+      description: 'A summary representation of an announcement.
+
+        '
+      x-example: "{\n  \"type\" : \"AnnouncementSummary\",\n  \"id\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n  \"referenceTicketNumber\" : \"ANN-123\",\n  \"summary\" : \"Patch required for all Linux OS v20 and v21 versions deployed before January 1, 2019.\",\n  \"timeOneTitle\" : \"Time Started\",\n  \"timeOneValue\" : \"2019-01-01T21:00:00.000Z\",\n  \"timeTwoTitle\" : \"Time Ended\",\n  \"timeTwoValue\" : \"2019-01-28T21:15:00.000Z\",\n  \"services\" : [ \"Compute\" ],\n  \"affectedRegions\" : [ \"us-ashburn-1\" ],\n  \"announcementType\" : \"ACTION_REQUIRED\",\n  \"lifecycleState\" : \"ACTIVE\",\n  \"isBanner\" : false,\n  \"timeCreated\" : \"2019-01-01T23:29:32.072Z\",\n  \"timeUpdated\" : \"2019-01-06T00:47:26.198Z\"\n}\n"
     BaseAnnouncement:
       description: Incident information that forms the basis of an announcement. Avoid entering confidential information.
       discriminator:
@@ -566,6 +778,23 @@ components:
       - services
       - affectedRegions
       x-example: "{\n  \"type\" : \"Announcement\",\n  \"id\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n  \"referenceTicketNumber\" : \"ANN-123\",\n  \"summary\" : \"Patch required for all Linux OS v20 and v21 versions deployed before January 1, 2019.\",\n  \"timeOneTitle\" : \"Time Started\",\n  \"timeOneType\"  : \"START_TIME\",\n  \"timeOneValue\" : \"2019-01-01T21:00:00.000Z\",\n  \"timeTwoTitle\" : \"Time Ended\",\n  \"timeTwoType \" : \"END_TIME\",\n  \"timeTwoValue\" : \"2019-01-28T21:15:00.000Z\",\n  \"services\" : [ \"Compute\" ],\n  \"affectedRegions\" : [ \"us-ashburn-1\" ],\n  \"announcementType\" : \"ACTION_REQUIRED\",\n  \"lifecycleState\" : \"ACTIVE\",\n  \"isBanner\" : false,\n  \"timeCreated\" : \"2019-01-01T23:29:32.072Z\",\n  \"timeUpdated\" : \"2019-01-06T00:47:26.198Z\"\n}\n"
+    AnnouncementsCollection:
+      description: 'A list of announcements that match filter criteria, if any. Results contain both the announcements and the user-specific status of the announcements.
+
+        '
+      properties:
+        items:
+          description: A collection of announcements.
+          items:
+            $ref: '#/components/schemas/AnnouncementSummary'
+          type: array
+        userStatuses:
+          description: The user-specific status for found announcements.
+          items:
+            $ref: '#/components/schemas/AnnouncementUserStatusDetails'
+          type: array
+      type: object
+      x-example: "{\n  \"items\" : [\n    {\n      \"type\" : \"AnnouncementSummary\",\n      \"id\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n      \"referenceTicketNumber\" : \"ANN-123\",\n      \"summary\" : \"Patch required for all Linux OS v20 and v21 versions deployed before January 1, 2019.\",\n      \"timeOneTitle\" : \"Time Started\",\n      \"timeOneValue\" : \"2018-01-01T21:00:00.000Z\",\n      \"timeTwoTitle\" : \"Time Ended\",\n      \"timeTwoValue\" : \"2019-01-28T21:15:00.000Z\",\n      \"services\" : [ \"Compute\" ],\n      \"affectedRegions\" : [ \"us-ashburn-1\" ],\n      \"announcementType\" : \"ACTION_REQUIRED\",\n      \"lifecycleState\" : \"ACTIVE\",\n      \"isBanner\" : false,\n      \"timeCreated\" : \"2019-01-01T23:29:32.072Z\",\n      \"timeUpdated\" : \"2019-01-06T00:47:26.198Z\"\n    },\n    {\n      \"type\" : \"AnnouncementSummary\",\n      \"id\" : \"ocid1.announcement.region1..exampleaphhzyhfzsgfcvbgjm6ardqh6h4xn3cyhc5wfauxdi423cesdm6aq\",\n      \"referenceTicketNumber\" : \"ANN-12345\",\n      \"summary\" : \"Increased latency when using Compute APIs within the us-ashburn-1 region\",\n      \"timeOneTitle\" : \"Time Started\",\n      \"timeOneValue\" : \"2019-01-17T21:45:03.535Z\",\n      \"timeTwoTitle\" : \"Time Ended\",\n      \"timeTwoValue\" : \"2019-01-18T00:45:03.535Z\",\n      \"services\" : [ \"Compute\" ],\n      \"affectedRegions\" : [ \"us-ashburn-1\" ],\n      \"announcementType\" : \"INFORMATION\",\n      \"lifecycleState\" : \"ACTIVE\",\n      \"isBanner\" : false,\n      \"timeCreated\" : \"2018-01-17T23:21:11.378Z\",\n      \"timeUpdated\" : \"2019-01-18T22:46:16.613Z\"\n    },\n    {\n      \"type\" : \"AnnouncementSummary\",\n      \"id\" : \"ocid1.announcement.region1..exampleazf2ztmktv6ls3syed7ecvbaw6z6tiavgkwgmvlfn36faux7c2x7a\",\n      \"referenceTicketNumber\" : \"ANN-54321\",\n      \"summary\" : \"Investigating dropped connections between regions\",\n      \"timeOneTitle\" : \"Time Started\",\n      \"timeOneValue\" : \"2019-01-28T23:17:34.944Z\",\n      \"timeTwoTitle\" : null,\n      \"timeTwoValue\" : null,\n      \"services\" : [ \"Networking\" ],\n      \"affectedRegions\" : [ \"us-ashburn-1\" ],\n      \"announcementType\" : \"PRODUCTION_EVENT_NOTIFICATION\",\n      \"lifecycleState\" : \"ACTIVE\",\n      \"isBanner\" : true,\n      \"timeCreated\" : \"2018-01-29T02:29:06.805Z\",\n      \"timeUpdated\" : \"2018-01-29T02:29:06.805Z\"\n    }\n  ],\n  \"userStatuses\" : [\n    {\n      \"userStatusAnnouncementId\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n      \"userId\" : \"ocid1.user.region1..exampleaorxz3psplonigcvbzy5oaiwiubh7k7ip6zgklfauxic67kksu4oq\",\n      \"timeAcknowledged\" : \"2019-01-17T23:21:57.342Z\"\n    },\n    {\n      \"userStatusAnnouncementId\" : \"ocid1.announcement.region1..exampleaphhzyhfzsgfcvbgjm6ardqh6h4xn3cyhc5wfauxdi423cesdm6aq\",\n      \"userId\" : \"ocid1.user.region1..exampleaorxz3psplonigcvbzy5oaiwiubh7k7ip6zgklfauxic67kksu4oq\",\n      \"timeAcknowledged\" : null\n    },\n    {\n      \"userStatusAnnouncementId\" : \"ocid1.announcement.region1..exampleazf2ztmktv6ls3syed7ecvbaw6z6tiavgkwgmvlfn36faux7c2x7a\",\n      \"userId\" : \"ocid1.user.region1..exampleaorxz3psplonigcvbzy5oaiwiubh7k7ip6zgklfauxic67kksu4oq\",\n      \"timeAcknowledged\" : null\n    }\n  ]\n}\n"
     Announcement:
       allOf:
       - $ref: '#/components/schemas/BaseAnnouncement'
@@ -597,235 +826,6 @@ components:
 
         '
       x-example: "{\n  \"type\" : \"Announcement\",\n  \"id\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n  \"referenceTicketNumber\" : \"ANN-123\",\n  \"summary\" : \"Patch required for all Linux OS v20 and v21 versions deployed before January 1, 2019.\",\n  \"timeOneTitle\" : \"Time Started\",\n  \"timeOneValue\" : \"2019-01-01T21:00:00.000Z\",\n  \"timeTwoTitle\" : \"Time Ended\",\n  \"timeTwoValue\" : \"2019-01-28T21:15:00.000Z\",\n  \"services\" : [ \"Compute\" ],\n  \"affectedRegions\" : [ \"us-ashburn-1\" ],\n  \"announcementType\" : \"ACTION_REQUIRED\",\n  \"lifecycleState\" : \"ACTIVE\",\n  \"isBanner\" : false,\n  \"timeCreated\" : \"2019-01-01T23:29:32.072Z\",\n  \"timeUpdated\" : \"2019-01-06T00:47:26.198Z\",\n  \"description\" : \"All versions of Linux OS have been patched for a security vulnerability. However, existing instances deployed prior to January 1, 2019 require customers to apply a patch themselves.\\nReview the list of impacted resources to determine which instances require action.\",\n  \"additionalInformation\" : \"For more information about the vulnerability, see CVE 12345.\",\n  \"followups\" : [ ],\n  \"affectedResources\" : [\n    {\n      \"resourceId\" : \"ocid1.instance.oc1.iad.exampler2amtptcvblufks3mzzajtwkcxcu4mbjc3fauxwqo6nvpjqr2mb3a\",\n      \"resourceName\" : \"OCIULADMIN\",\n      \"region\" : \"us-ashburn-1\"\n    },\n    {\n      \"resourceId\" : \"ocid1.instance.oc1.iad.examplert3fvrwrmylfhtcvbiyebg4sqiqjytb3iph64v3b6tfauxma5koha\",\n      \"resourceName\" : \"1234567:INTEGRATION:OICDVQSic:wls:vm-1\",\n      \"region\" : \"us-ashburn-1\"\n    },\n    {\n      \"resourceId\" : \"ocid1.instance.oc1.iad.exampler52l2kcvb6aicisbg4arsedumiwao35p4faux5p5lkuuoq76nenhq\",\n      \"resourceName\" : \"3456789:wtss:QA1234Auto2QSwtss:NGINX:vm-2\",\n      \"region\" : \"us-ashburn-1\"\n    },\n    {\n      \"resourceId\" : \"ocid1.instance.oc1.iad.examplerz7g4b5bcvbnb7txuiek7tjbytffauxypdx4tp4oicxdmwoksiujq\",\n      \"resourceName\" : \"9876543:wtss:Prod4321Auto1wtss:NGINX:vm-2\",\n      \"region\" : \"us-ashburn-1\"\n    },\n    {\n      \"resourceId\" : \"ocid1.instance.oc1.iad.exampleroww4scvb2zvtnyin6oh5ngd2uuwgg3g5fmnq4w3rszfauxy6diva\",\n      \"resourceName\" : \"7654321:wtss:VBQSwtss:NGINX:vm-2\",\n      \"region\" : \"us-ashburn-1\"\n    }\n  ]\n}\n"
-    AnnouncementSummary:
-      allOf:
-      - $ref: '#/components/schemas/BaseAnnouncement'
-      - discriminator: AnnouncementSummary
-      description: 'A summary representation of an announcement.
-
-        '
-      x-example: "{\n  \"type\" : \"AnnouncementSummary\",\n  \"id\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n  \"referenceTicketNumber\" : \"ANN-123\",\n  \"summary\" : \"Patch required for all Linux OS v20 and v21 versions deployed before January 1, 2019.\",\n  \"timeOneTitle\" : \"Time Started\",\n  \"timeOneValue\" : \"2019-01-01T21:00:00.000Z\",\n  \"timeTwoTitle\" : \"Time Ended\",\n  \"timeTwoValue\" : \"2019-01-28T21:15:00.000Z\",\n  \"services\" : [ \"Compute\" ],\n  \"affectedRegions\" : [ \"us-ashburn-1\" ],\n  \"announcementType\" : \"ACTION_REQUIRED\",\n  \"lifecycleState\" : \"ACTIVE\",\n  \"isBanner\" : false,\n  \"timeCreated\" : \"2019-01-01T23:29:32.072Z\",\n  \"timeUpdated\" : \"2019-01-06T00:47:26.198Z\"\n}\n"
-    AnnouncementsCollection:
-      description: 'A list of announcements that match filter criteria, if any. Results contain both the announcements and the user-specific status of the announcements.
-
-        '
-      properties:
-        items:
-          description: A collection of announcements.
-          items:
-            $ref: '#/components/schemas/AnnouncementSummary'
-          type: array
-        userStatuses:
-          description: The user-specific status for found announcements.
-          items:
-            $ref: '#/components/schemas/AnnouncementUserStatusDetails'
-          type: array
-      type: object
-      x-example: "{\n  \"items\" : [\n    {\n      \"type\" : \"AnnouncementSummary\",\n      \"id\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n      \"referenceTicketNumber\" : \"ANN-123\",\n      \"summary\" : \"Patch required for all Linux OS v20 and v21 versions deployed before January 1, 2019.\",\n      \"timeOneTitle\" : \"Time Started\",\n      \"timeOneValue\" : \"2018-01-01T21:00:00.000Z\",\n      \"timeTwoTitle\" : \"Time Ended\",\n      \"timeTwoValue\" : \"2019-01-28T21:15:00.000Z\",\n      \"services\" : [ \"Compute\" ],\n      \"affectedRegions\" : [ \"us-ashburn-1\" ],\n      \"announcementType\" : \"ACTION_REQUIRED\",\n      \"lifecycleState\" : \"ACTIVE\",\n      \"isBanner\" : false,\n      \"timeCreated\" : \"2019-01-01T23:29:32.072Z\",\n      \"timeUpdated\" : \"2019-01-06T00:47:26.198Z\"\n    },\n    {\n      \"type\" : \"AnnouncementSummary\",\n      \"id\" : \"ocid1.announcement.region1..exampleaphhzyhfzsgfcvbgjm6ardqh6h4xn3cyhc5wfauxdi423cesdm6aq\",\n      \"referenceTicketNumber\" : \"ANN-12345\",\n      \"summary\" : \"Increased latency when using Compute APIs within the us-ashburn-1 region\",\n      \"timeOneTitle\" : \"Time Started\",\n      \"timeOneValue\" : \"2019-01-17T21:45:03.535Z\",\n      \"timeTwoTitle\" : \"Time Ended\",\n      \"timeTwoValue\" : \"2019-01-18T00:45:03.535Z\",\n      \"services\" : [ \"Compute\" ],\n      \"affectedRegions\" : [ \"us-ashburn-1\" ],\n      \"announcementType\" : \"INFORMATION\",\n      \"lifecycleState\" : \"ACTIVE\",\n      \"isBanner\" : false,\n      \"timeCreated\" : \"2018-01-17T23:21:11.378Z\",\n      \"timeUpdated\" : \"2019-01-18T22:46:16.613Z\"\n    },\n    {\n      \"type\" : \"AnnouncementSummary\",\n      \"id\" : \"ocid1.announcement.region1..exampleazf2ztmktv6ls3syed7ecvbaw6z6tiavgkwgmvlfn36faux7c2x7a\",\n      \"referenceTicketNumber\" : \"ANN-54321\",\n      \"summary\" : \"Investigating dropped connections between regions\",\n      \"timeOneTitle\" : \"Time Started\",\n      \"timeOneValue\" : \"2019-01-28T23:17:34.944Z\",\n      \"timeTwoTitle\" : null,\n      \"timeTwoValue\" : null,\n      \"services\" : [ \"Networking\" ],\n      \"affectedRegions\" : [ \"us-ashburn-1\" ],\n      \"announcementType\" : \"PRODUCTION_EVENT_NOTIFICATION\",\n      \"lifecycleState\" : \"ACTIVE\",\n      \"isBanner\" : true,\n      \"timeCreated\" : \"2018-01-29T02:29:06.805Z\",\n      \"timeUpdated\" : \"2018-01-29T02:29:06.805Z\"\n    }\n  ],\n  \"userStatuses\" : [\n    {\n      \"userStatusAnnouncementId\" : \"ocid1.announcement.region1..examplear73oue4jdywjjvietoc6im3cvb6xae4falm3faux5us3iwra3t6q\",\n      \"userId\" : \"ocid1.user.region1..exampleaorxz3psplonigcvbzy5oaiwiubh7k7ip6zgklfauxic67kksu4oq\",\n      \"timeAcknowledged\" : \"2019-01-17T23:21:57.342Z\"\n    },\n    {\n      \"userStatusAnnouncementId\" : \"ocid1.announcement.region1..exampleaphhzyhfzsgfcvbgjm6ardqh6h4xn3cyhc5wfauxdi423cesdm6aq\",\n      \"userId\" : \"ocid1.user.region1..exampleaorxz3psplonigcvbzy5oaiwiubh7k7ip6zgklfauxic67kksu4oq\",\n      \"timeAcknowledged\" : null\n    },\n    {\n      \"userStatusAnnouncementId\" : \"ocid1.announcement.region1..exampleazf2ztmktv6ls3syed7ecvbaw6z6tiavgkwgmvlfn36faux7c2x7a\",\n      \"userId\" : \"ocid1.user.region1..exampleaorxz3psplonigcvbzy5oaiwiubh7k7ip6zgklfauxic67kksu4oq\",\n      \"timeAcknowledged\" : null\n    }\n  ]\n}\n"
-    AffectedResource:
-      description: 'The resource affected by the event described in the announcement.
-
-        '
-      properties:
-        additionalProperties:
-          description: Additional properties associated with the resource.
-          items:
-            $ref: '#/components/schemas/Property'
-          type: array
-        region:
-          description: The region where the affected resource exists.
-          type: string
-        resourceId:
-          description: The OCID of the affected resource.
-          maxLength: 255
-          minLength: 1
-          type: string
-        resourceName:
-          description: The friendly name of the resource.
-          type: string
-      required:
-      - resourceId
-      - resourceName
-      - region
-      type: object
-      x-example: "{\n  \"resourceId\" : \"ocid1.instance.oc1.iad.exampler2amtptcvblufks3mzzajtwkcxcu4mbjc3fauxwqo6nvpjqr2mb3a\",\n  \"resourceName\" : \"OCIULADMIN\",\n  \"region\" : \"us-ashburn-1\"\n}\n"
-    AnnouncementCompartment:
-      description: Compartment details of an announcement.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment to which the announcement belongs to.
-          type: string
-      required:
-      - compartmentId
-      type: object
-      x-example: "{\n  \"compartmentId\": \"ocid1.compartment.oc1..exampleaoeapbnmopz4mi63cvbywa5h5vsr52ewvxwl6fauxcakeprhzmw2q\"\n}\n"
-  parameters:
-    TimeOneEarliestTimeQueryParam:
-      description: The boundary for the earliest `timeOneValue` date on announcements that you want to see.
-      in: query
-      name: timeOneEarliestTime
-      schema:
-        type: string
-        format: date-time
-    PaginationTokenQueryParam:
-      description: The value of the `opc-next-page` response header from the previous "List" call.
-      in: query
-      name: page
-      schema:
-        type: string
-        maxLength: 3000
-        minLength: 1
-    SortAnnouncementsOrderQueryParam:
-      description: 'The sort order to use. (Sorting by `announcementType` orders the announcements list according to importance.)
-
-        '
-      in: query
-      name: sortOrder
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    ExcludeTypesQueryParam:
-      description: Exclude The type of announcement.
-      in: query
-      name: excludeAnnouncementTypes
-      schema:
-        type: array
-        items:
-          maxLength: 64
-          minLength: 1
-          type: string
-    CompartmentIdQueryParam:
-      description: 'The OCID of the compartment.
-
-        '
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 512
-        minLength: 1
-    IfMatchHeader:
-      description: The locking version, used for optimistic concurrency control.
-      in: header
-      name: if-match
-      schema:
-        type: string
-    PlatformTypeQueryParam:
-      description: A filter to return only announcements affecting a specific platform.
-      in: query
-      name: platformType
-      x-default-description: No default value for PlatformType
-      schema:
-        type: string
-        enum:
-        - IAAS
-        - SAAS
-        - PAAS
-        maxLength: 64
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return in a paginated "List" call.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    BannerQueryParam:
-      description: Whether the announcement is displayed as a console banner.
-      in: query
-      name: isBanner
-      schema:
-        type: boolean
-    FilterByChainIdQueryParam:
-      description: A filter to return only announcements belonging to the specified announcement chain ID.
-      in: query
-      name: chainId
-      schema:
-        type: string
-    ServiceQueryParam:
-      description: A filter to return only announcements affecting a specific service.
-      in: query
-      name: service
-      schema:
-        type: string
-        maxLength: 256
-        minLength: 1
-    ShouldShowOnlyLatestInChainQueryParam:
-      description: A filter to display only the latest announcement in a chain.
-      in: query
-      name: shouldShowOnlyLatestInChain
-      schema:
-        type: boolean
-        default: false
-    AnnouncementIdPathParam:
-      description: The OCID of the announcement.
-      in: path
-      name: announcementId
-      required: true
-      schema:
-        type: string
-    TimeOneLatestTimeQueryParam:
-      description: The boundary for the latest `timeOneValue` date on announcements that you want to see.
-      in: query
-      name: timeOneLatestTime
-      schema:
-        type: string
-        format: date-time
-    SortAnnouncementsByQueryParam:
-      description: 'The criteria to sort by. You can specify only one sort order.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeOneValue
-        - timeTwoValue
-        - timeCreated
-        - referenceTicketNumber
-        - summary
-        - announcementType
-    AnnouncementTypeQueryParam:
-      description: The type of announcement.
-      in: query
-      name: announcementType
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    AnnouncementLifecycleStateQueryParam:
-      description: The announcement's current lifecycle state.
-      in: query
-      name: lifecycleState
-      schema:
-        type: string
-        enum:
-        - ACTIVE
-        - INACTIVE
-    EnvironmentNameQueryParam:
-      description: A filter to return only announcements that match a specific environment name.
-      in: query
-      name: environmentName
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about
-
-        a particular request, please provide the complete request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

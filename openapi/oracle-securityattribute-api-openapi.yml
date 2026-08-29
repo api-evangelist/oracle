@@ -1098,115 +1098,203 @@ paths:
               $ref: '#/components/schemas/BulkEditSecurityAttributeDetails'
         description: The request object for bulk editing security attributes on resources in the compartment.
 components:
+  parameters:
+    SecurityAttributeNamePathParam:
+      description: 'The name of the security attribute.
+
+        '
+      in: path
+      name: securityAttributeName
+      required: true
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 1
+    ShouldIncludeSubcompartments:
+      description: 'An optional boolean parameter indicating whether to retrieve all security attribute namespaces in subcompartments. If this
+
+        parameter is not specified, only the namespaces defined in the specified compartment are retrieved.
+
+        '
+      in: query
+      name: compartmentIdInSubtree
+      required: false
+      x-default-description: false
+      schema:
+        type: boolean
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide one sort order (`sortOrder`). Default order for
+
+        TIMECREATED is descending. Default order for NAME is ascending. The NAME
+
+        sort order is case sensitive.
+
+
+        **Note:** In general, some "List" operations (for example, `ListInstances`) let you
+
+        optionally filter by Availability Domain if the scope of the resource type is within a
+
+        single Availability Domain. If you call one of these "List" operations without specifying
+
+        an Availability Domain, the resources are grouped by Availability Domain, then sorted.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        enum:
+        - TIMECREATED
+        - NAME
+    SortOrderQueryParam:
+      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is `DESC` when sorting by time and `ASC` otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestIdPathParam:
+      description: The OCID of the work request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    SecurityAttributeNamespaceIdPathParam:
+      description: 'The OCID of the security attribute namespace.
+
+        '
+      in: path
+      name: securityAttributeNamespaceId
+      required: true
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` response header from the previous "List" call.
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 512
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of running that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and removed from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return in a paginated "List" call.
+
+        '
+      in: query
+      name: limit
+      x-default-description: 'null'
+      schema:
+        type: integer
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    ResourceIdentifierQueryParam:
+      description: The identifier of the resource the work request affects.
+      in: query
+      name: resourceIdentifier
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    NameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: name
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+        that resource. The resource will be updated or deleted only if the etag you provide
+
+        matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   schemas:
-    SecurityAttributeWorkRequestErrorSummary:
-      description: 'The error entity.
-
-        '
+    BulkEditResource:
       properties:
-        code:
-          description: A machine-usable code for the error that occured.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-        timestamp:
-          description: 'Date and time the error happened, in the format defined by RFC3339.
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-    SecurityAttributeSummary:
-      description: 'A security attribute definition that belongs to a specific security attribute namespace.
-
-        '
-      properties:
-        compartmentId:
-          description: The OCID of the compartment that contains the security attribute.
-          maxLength: 100
-          minLength: 1
-          type: string
-        description:
-          description: The description you assign to the security attribute.
-          maxLength: 400
-          minLength: 1
-          type: string
         id:
-          description: The OCID of the security attribute.
-          maxLength: 100
-          minLength: 1
+          description: The unique OCID of the resource.
           type: string
-        isRetired:
-          description: 'Whether the security attribute is retired.
-
-            See [Managing Security Attributes](/Content/zero-trust-packet-routing/managing-security-attributes.htm).
-
-            '
-          type: boolean
-        lifecycleState:
-          description: The security attribute's current state. After creating a security attribute, make sure its `lifecycleState` is ACTIVE before using it. After retiring a security attribute, make sure its `lifecycleState` is INACTIVE before using it. If you delete a security attribute, you cannot delete another security attribute until the deleted security attribute's `lifecycleState` changes from DELETING to DELETED.
-          type: string
-          x-obmcs-enumref: '#/definitions/SecurityAttribute/lifecycleState'
-        name:
-          description: 'The name assigned to the security attribute during creation. This is the security attribute.
-
-            The name must be unique within the security attribute namespace and cannot be changed.
-
-            '
-          maxLength: 100
-          minLength: 1
-          type: string
-        securityAttributeNamespaceId:
-          description: The OCID of the namespace that contains the security attribute.
-          maxLength: 100
-          minLength: 1
-          type: string
-        securityAttributeNamespaceName:
-          description: 'The name of the security attribute namespace that contains the security attribute.
-
-            '
-          maxLength: 100
-          minLength: 1
-          type: string
-        timeCreated:
-          description: 'Date and time the security attribute was created, in the format defined by RFC3339.
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        type:
-          description: The data type of the security attribute.
-          type: string
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error message.
-          type: string
-      required:
-      - code
-      - message
-    BulkDeleteSecurityAttributesDetails:
-      description: Properties for deleting security attributes in bulk.
-      properties:
-        securityAttributeIds:
-          description: The OCIDs of the security attributes to delete.
-          items:
+        metadata:
+          additionalProperties:
+            description: Additional information that helps to identify the resource.
             type: string
-          type: array
-          uniqueItems: true
+          description: 'Additional information that identifies the resource for bulk editing of tags. This information is provided in the resource''s API documentation.
+
+            '
+          example: "UPDATE API for bucket require 'namespaceName' and 'bucketName'.\nhttps://docs.cloud.oracle.com/en-us/iaas/api/#/en/objectstorage/20160918/Bucket/DeleteBucket\nhttps://docs.cloud.oracle.com/en-us/iaas/api/#/en/objectstorage/20160918/Bucket/UpdateBucket\n\nTo add a bucket for bulk actions, specify 'namespaceName' and 'bucketName' in\nthe metadata property:\n{\n  \"identifier\": \"ocid_of_bucket\"\n  \"entityType\": \"bucket\",\n  \"metadata\":\n  {\n    \"namespaceName\": \"sampleNamespace\",\n    \"bucketName\": \"sampleBucket\"\n  }\n}\n"
+          type: object
+        resourceType:
+          description: The type of resource. See [BulkEditResourceTypes](#/en/identity/latest/BulkEditTagsResourceTypeCollection/ListBulkEditTagsResourceTypes).
+          type: string
       required:
-      - securityAttributeIds
+      - id
+      - resourceType
       type: object
     SecurityAttributeNamespace:
       description: 'A managed container for security attributes. A security attribute namespace is unique in a tenancy. For more information,
@@ -1337,27 +1425,87 @@ components:
       - description
       - isRetired
       - timeCreated
-    BulkEditResource:
+    SecurityAttributeSummary:
+      description: 'A security attribute definition that belongs to a specific security attribute namespace.
+
+        '
       properties:
-        id:
-          description: The unique OCID of the resource.
+        compartmentId:
+          description: The OCID of the compartment that contains the security attribute.
+          maxLength: 100
+          minLength: 1
           type: string
-        metadata:
-          additionalProperties:
-            description: Additional information that helps to identify the resource.
-            type: string
-          description: 'Additional information that identifies the resource for bulk editing of tags. This information is provided in the resource''s API documentation.
+        description:
+          description: The description you assign to the security attribute.
+          maxLength: 400
+          minLength: 1
+          type: string
+        id:
+          description: The OCID of the security attribute.
+          maxLength: 100
+          minLength: 1
+          type: string
+        isRetired:
+          description: 'Whether the security attribute is retired.
+
+            See [Managing Security Attributes](/Content/zero-trust-packet-routing/managing-security-attributes.htm).
 
             '
-          example: "UPDATE API for bucket require 'namespaceName' and 'bucketName'.\nhttps://docs.cloud.oracle.com/en-us/iaas/api/#/en/objectstorage/20160918/Bucket/DeleteBucket\nhttps://docs.cloud.oracle.com/en-us/iaas/api/#/en/objectstorage/20160918/Bucket/UpdateBucket\n\nTo add a bucket for bulk actions, specify 'namespaceName' and 'bucketName' in\nthe metadata property:\n{\n  \"identifier\": \"ocid_of_bucket\"\n  \"entityType\": \"bucket\",\n  \"metadata\":\n  {\n    \"namespaceName\": \"sampleNamespace\",\n    \"bucketName\": \"sampleBucket\"\n  }\n}\n"
-          type: object
-        resourceType:
-          description: The type of resource. See [BulkEditResourceTypes](#/en/identity/latest/BulkEditTagsResourceTypeCollection/ListBulkEditTagsResourceTypes).
+          type: boolean
+        lifecycleState:
+          description: The security attribute's current state. After creating a security attribute, make sure its `lifecycleState` is ACTIVE before using it. After retiring a security attribute, make sure its `lifecycleState` is INACTIVE before using it. If you delete a security attribute, you cannot delete another security attribute until the deleted security attribute's `lifecycleState` changes from DELETING to DELETED.
+          type: string
+          x-obmcs-enumref: '#/definitions/SecurityAttribute/lifecycleState'
+        name:
+          description: 'The name assigned to the security attribute during creation. This is the security attribute.
+
+            The name must be unique within the security attribute namespace and cannot be changed.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        securityAttributeNamespaceId:
+          description: The OCID of the namespace that contains the security attribute.
+          maxLength: 100
+          minLength: 1
+          type: string
+        securityAttributeNamespaceName:
+          description: 'The name of the security attribute namespace that contains the security attribute.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        timeCreated:
+          description: 'Date and time the security attribute was created, in the format defined by RFC3339.
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        type:
+          description: The data type of the security attribute.
+          type: string
+    SecurityAttributeWorkRequestLogSummary:
+      description: 'The log entity.
+
+        '
+      properties:
+        message:
+          description: A human-readable error string.
+          type: string
+        timestamp:
+          description: 'Date and time the log was written, in the format defined by RFC3339.
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
           type: string
       required:
-      - id
-      - resourceType
-      type: object
+      - message
     BulkEditSecurityAttributeDetails:
       properties:
         bulkEditOperations:
@@ -1385,64 +1533,83 @@ components:
       - resources
       - bulkEditOperations
       type: object
-    BulkEditSecurityAttributeOperationDetails:
+    BulkDeleteSecurityAttributesDetails:
+      description: Properties for deleting security attributes in bulk.
       properties:
-        operationType:
-          description: 'An enum-like description of the type of operation.
+        securityAttributeIds:
+          description: The OCIDs of the security attributes to delete.
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - securityAttributeIds
+      type: object
+    UpdateSecurityAttributeNamespaceDetails:
+      description: 'Details of the security attribute namespace to be updated.
 
-
-            * `ADD_WHERE_ABSENT` adds a security attribute only if it does not already exist on the resource.
-
-            * `SET_WHERE_PRESENT` updates the value for a security attribute only if it is present on the resource.
-
-            * `ADD_OR_SET` combines the first two operations to add a security attribute if it does not already exist on the resource
-
-            or update the value if it is present on the resource.
-
-            * `REMOVE` removes the security attribute from the resource. It''s removed from the resource regardless of the value.
-
-            '
-          enum:
-          - ADD_WHERE_ABSENT
-          - SET_WHERE_PRESENT
-          - ADD_OR_SET
-          - REMOVE
-          type: string
-        securityAttributes:
+        '
+      properties:
+        definedTags:
           additionalProperties:
             additionalProperties:
-              description: 'The value of the attribute. Only the String type is supported.
+              description: 'The value of the tag. Only the String type is supported.
 
                 '
               type: object
             description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
 
+
               Example: `{"CostCenter": "42"}`
 
               '
             type: object
-          description: 'Security attributes for this resource. Each key is predefined and scoped to a namespace.
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
 
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
 
-            Example: ``{"oracle-zpr": {"td": {"value": "42", "mode": "audit"}}}``
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
 
             '
           type: object
-      required:
-      - operationType
-      - securityAttributes
-      type: object
-    SecurityAttributeWorkRequestLogSummary:
-      description: 'The log entity.
+        description:
+          description: The description you assign to the security attribute namespace to help you identify it.
+          maxLength: 400
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        isRetired:
+          description: 'Indicates whether the security attribute namespace is retired.
+
+            See [Managing Security Attribute Namespaces](/Content/zero-trust-packet-routing/managing-security-attribute-namespaces.htm).
+
+            '
+          type: boolean
+    SecurityAttributeWorkRequestErrorSummary:
+      description: 'The error entity.
 
         '
       properties:
+        code:
+          description: A machine-usable code for the error that occured.
+          type: string
         message:
           description: A human-readable error string.
           type: string
         timestamp:
-          description: 'Date and time the log was written, in the format defined by RFC3339.
+          description: 'Date and time the error happened, in the format defined by RFC3339.
 
             Example: `2016-08-25T21:10:29.600Z`
 
@@ -1450,6 +1617,7 @@ components:
           format: date-time
           type: string
       required:
+      - code
       - message
     BaseSecurityAttributeValidator:
       description: 'Validates a security attribute value. Each validator performs validation steps in addition to the standard
@@ -1486,212 +1654,81 @@ components:
           type: string
       required:
       - validatorType
-    SecurityAttribute:
-      description: 'A security attribute that belongs to a specific security attribute namespace. Security attributes must be created in a tenancy before
-
-        a user can apply them to resources.
-
-        For more information, see [Managing Security Attributes](/Content/zero-trust-packet-routing/managing-security-attributes.htm).
-
-
-        **Warning:** Oracle recommends that you avoid using any confidential information when you supply string values
-
-        using the API.
+    SecurityAttributeWorkRequestSummary:
+      description: 'The work request summary. Tracks the status of the asynchronous operation.
 
         '
       properties:
         compartmentId:
-          description: The OCID of the compartment that contains the security attribute definition.
-          maxLength: 100
-          minLength: 1
-          type: string
-        description:
-          description: The description of the security attribute.
-          maxLength: 400
-          minLength: 1
+          description: The OCID of the compartment that contains the work request.
           type: string
         id:
-          description: The OCID of the security attribute definition.
-          maxLength: 100
-          minLength: 1
+          description: The OCID of the work request.
           type: string
-        isRetired:
-          description: 'Indicates whether the security attribute is retired.
-
-            See [Managing Security Attribute Namespaces](/Content/zero-trust-packet-routing/managing-security-attribute-namespaces.htm).
-
-            '
-          type: boolean
-        lifecycleState:
-          description: The security attribute's current state. After creating a security attribute, make sure its `lifecycleState` is ACTIVE before using it. After retiring a security attribute, make sure its `lifecycleState` is INACTIVE before using it. If you delete a security attribute, you cannot delete another security attribute until the deleted tag's `lifecycleState` changes from DELETING to DELETED.
+        operationType:
+          description: An enum-like description of the type of work the work request is doing.
           enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETING
-          - DELETED
+          - DELETE_SECURITY_ATTRIBUTE_DEFINITION
+          - DELETE_NON_EMPTY_SECURITY_ATTRIBUTE_NAMESPACE
+          - BULK_DELETE_SECURITY_ATTRIBUTES
+          - BULK_EDIT_OF_SECURITY_ATTRIBUTES
           type: string
-        name:
-          description: 'The name assigned to the security attribute during creation. This is the security attribute key.
-
-            The name must be unique within the security attribute namespace and cannot be changed.
-
-            '
-          maxLength: 100
-          minLength: 1
-          type: string
-        securityAttributeNamespaceId:
-          description: The OCID of the security attribute namespace that contains the security attribute definition.
-          maxLength: 100
-          minLength: 1
-          type: string
-        securityAttributeNamespaceName:
-          description: 'The name of the security attribute namespace that contains the security attribute.
+          x-obmcs-top-level-enum: '#/definitions/WorkRequestOperationType'
+        percentComplete:
+          description: 'How much progress the operation has made.
 
             '
-          maxLength: 100
-          minLength: 1
-          type: string
-        timeCreated:
-          description: 'Date and time the security attribute was created, in the format defined by RFC3339.
+          format: float
+          maximum: 100
+          minimum: 1
+          type: number
+        resources:
+          description: 'The resources this work request affects.
 
+            '
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The current status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - PARTIALLY_SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/WorkRequestStatus'
+        timeAccepted:
+          description: 'Date and time the work was accepted, in the format defined by RFC3339.
 
             Example: `2016-08-25T21:10:29.600Z`
 
             '
           format: date-time
           type: string
-        type:
-          description: The data type of the security attribute.
+        timeFinished:
+          description: 'Date and time the work completed, in the format defined by RFC3339.
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
           type: string
-        validator:
-          $ref: '#/components/schemas/BaseSecurityAttributeValidator'
+        timeStarted:
+          description: 'Date and time the work started, in the format defined by RFC3339.
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
       required:
-      - compartmentId
-      - securityAttributeNamespaceId
-      - securityAttributeNamespaceName
       - id
-      - name
-      - description
-      - isRetired
-      - timeCreated
-    ChangeSecurityAttributeNamespaceCompartmentDetails:
-      description: 'Details of the compartment the resource is being moved to.
-
-        '
-      properties:
-        compartmentId:
-          description: The Oracle Cloud ID (OCID) of the destination compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-    WorkRequestResource:
-      description: 'The resource entity.
-
-        '
-      properties:
-        actionType:
-          description: The way in which this resource was affected by the work tracked by the work request.
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - RELATED
-          - IN_PROGRESS
-          - FAILED
-          type: string
-        entityType:
-          description: The resource type the work request is affects.
-          type: string
-        entityUri:
-          description: The URI path that the user can do a GET on to access the resource metadata.
-          type: string
-        identifier:
-          description: The resource identifier the work request affects.
-          type: string
-      required:
-      - identifier
-      - actionType
-      - entityType
-    UpdateSecurityAttributeDetails:
-      description: 'Details of the security attribute to be updated for a specific security attribute namespace.
-
-        '
-      properties:
-        description:
-          description: The description of the security attribute during creation.
-          maxLength: 400
-          minLength: 1
-          type: string
-        isRetired:
-          description: 'Whether the security attribute is retired.
-
-            See [Managing Security Attributes](/Content/zero-trust-packet-routing/managing-security-attributes.htm).
-
-            '
-          type: boolean
-        validator:
-          $ref: '#/components/schemas/BaseSecurityAttributeValidator'
-    CreateSecurityAttributeNamespaceDetails:
-      description: 'Details of the security attribute namespace to be created for a specific compartment.
-
-        '
-      properties:
-        compartmentId:
-          description: The OCID of the tenancy containing the security attribute namespace.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: The description you assign to the security attribute namespace during creation.
-          maxLength: 400
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        name:
-          description: 'The name you assign to the security attribute namespace during creation. The name must be unique across all namespaces in the tenancy and cannot be changed.
-
-            '
-          maxLength: 100
-          minLength: 1
-          type: string
-      required:
-      - name
-      - compartmentId
-      - description
+      - operationType
+      - status
     SecurityAttributeNamespaceSummary:
       description: 'A container for security attributes.
 
@@ -1821,6 +1858,54 @@ components:
       required:
       - name
       - description
+    BulkEditSecurityAttributeOperationDetails:
+      properties:
+        operationType:
+          description: 'An enum-like description of the type of operation.
+
+
+            * `ADD_WHERE_ABSENT` adds a security attribute only if it does not already exist on the resource.
+
+            * `SET_WHERE_PRESENT` updates the value for a security attribute only if it is present on the resource.
+
+            * `ADD_OR_SET` combines the first two operations to add a security attribute if it does not already exist on the resource
+
+            or update the value if it is present on the resource.
+
+            * `REMOVE` removes the security attribute from the resource. It''s removed from the resource regardless of the value.
+
+            '
+          enum:
+          - ADD_WHERE_ABSENT
+          - SET_WHERE_PRESENT
+          - ADD_OR_SET
+          - REMOVE
+          type: string
+        securityAttributes:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the attribute. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Security attributes for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: ``{"oracle-zpr": {"td": {"value": "42", "mode": "audit"}}}``
+
+            '
+          type: object
+      required:
+      - operationType
+      - securityAttributes
+      type: object
     SecurityAttributeWorkRequest:
       description: 'The asynchronous API request does not take effect immediately. This request spawns an asynchronous
 
@@ -1898,11 +1983,14 @@ components:
       - id
       - operationType
       - status
-    UpdateSecurityAttributeNamespaceDetails:
-      description: 'Details of the security attribute namespace to be updated.
+    CreateSecurityAttributeNamespaceDetails:
+      description: 'Details of the security attribute namespace to be created for a specific compartment.
 
         '
       properties:
+        compartmentId:
+          description: The OCID of the tenancy containing the security attribute namespace.
+          type: string
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -1927,7 +2015,7 @@ components:
             '
           type: object
         description:
-          description: The description you assign to the security attribute namespace to help you identify it.
+          description: The description you assign to the security attribute namespace during creation.
           maxLength: 400
           minLength: 1
           type: string
@@ -1943,264 +2031,176 @@ components:
 
             '
           type: object
+        name:
+          description: 'The name you assign to the security attribute namespace during creation. The name must be unique across all namespaces in the tenancy and cannot be changed.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+      required:
+      - name
+      - compartmentId
+      - description
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+      required:
+      - code
+      - message
+    ChangeSecurityAttributeNamespaceCompartmentDetails:
+      description: 'Details of the compartment the resource is being moved to.
+
+        '
+      properties:
+        compartmentId:
+          description: The Oracle Cloud ID (OCID) of the destination compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+    SecurityAttribute:
+      description: 'A security attribute that belongs to a specific security attribute namespace. Security attributes must be created in a tenancy before
+
+        a user can apply them to resources.
+
+        For more information, see [Managing Security Attributes](/Content/zero-trust-packet-routing/managing-security-attributes.htm).
+
+
+        **Warning:** Oracle recommends that you avoid using any confidential information when you supply string values
+
+        using the API.
+
+        '
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains the security attribute definition.
+          maxLength: 100
+          minLength: 1
+          type: string
+        description:
+          description: The description of the security attribute.
+          maxLength: 400
+          minLength: 1
+          type: string
+        id:
+          description: The OCID of the security attribute definition.
+          maxLength: 100
+          minLength: 1
+          type: string
         isRetired:
-          description: 'Indicates whether the security attribute namespace is retired.
+          description: 'Indicates whether the security attribute is retired.
 
             See [Managing Security Attribute Namespaces](/Content/zero-trust-packet-routing/managing-security-attribute-namespaces.htm).
 
             '
           type: boolean
-    SecurityAttributeWorkRequestSummary:
-      description: 'The work request summary. Tracks the status of the asynchronous operation.
+        lifecycleState:
+          description: The security attribute's current state. After creating a security attribute, make sure its `lifecycleState` is ACTIVE before using it. After retiring a security attribute, make sure its `lifecycleState` is INACTIVE before using it. If you delete a security attribute, you cannot delete another security attribute until the deleted tag's `lifecycleState` changes from DELETING to DELETED.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETING
+          - DELETED
+          type: string
+        name:
+          description: 'The name assigned to the security attribute during creation. This is the security attribute key.
+
+            The name must be unique within the security attribute namespace and cannot be changed.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        securityAttributeNamespaceId:
+          description: The OCID of the security attribute namespace that contains the security attribute definition.
+          maxLength: 100
+          minLength: 1
+          type: string
+        securityAttributeNamespaceName:
+          description: 'The name of the security attribute namespace that contains the security attribute.
+
+            '
+          maxLength: 100
+          minLength: 1
+          type: string
+        timeCreated:
+          description: 'Date and time the security attribute was created, in the format defined by RFC3339.
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        type:
+          description: The data type of the security attribute.
+          type: string
+        validator:
+          $ref: '#/components/schemas/BaseSecurityAttributeValidator'
+      required:
+      - compartmentId
+      - securityAttributeNamespaceId
+      - securityAttributeNamespaceName
+      - id
+      - name
+      - description
+      - isRetired
+      - timeCreated
+    UpdateSecurityAttributeDetails:
+      description: 'Details of the security attribute to be updated for a specific security attribute namespace.
 
         '
       properties:
-        compartmentId:
-          description: The OCID of the compartment that contains the work request.
+        description:
+          description: The description of the security attribute during creation.
+          maxLength: 400
+          minLength: 1
           type: string
-        id:
-          description: The OCID of the work request.
-          type: string
-        operationType:
-          description: An enum-like description of the type of work the work request is doing.
-          enum:
-          - DELETE_SECURITY_ATTRIBUTE_DEFINITION
-          - DELETE_NON_EMPTY_SECURITY_ATTRIBUTE_NAMESPACE
-          - BULK_DELETE_SECURITY_ATTRIBUTES
-          - BULK_EDIT_OF_SECURITY_ATTRIBUTES
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/WorkRequestOperationType'
-        percentComplete:
-          description: 'How much progress the operation has made.
+        isRetired:
+          description: 'Whether the security attribute is retired.
+
+            See [Managing Security Attributes](/Content/zero-trust-packet-routing/managing-security-attributes.htm).
 
             '
-          format: float
-          maximum: 100
-          minimum: 1
-          type: number
-        resources:
-          description: 'The resources this work request affects.
+          type: boolean
+        validator:
+          $ref: '#/components/schemas/BaseSecurityAttributeValidator'
+    WorkRequestResource:
+      description: 'The resource entity.
 
-            '
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: The current status of the work request.
+        '
+      properties:
+        actionType:
+          description: The way in which this resource was affected by the work tracked by the work request.
           enum:
-          - ACCEPTED
+          - CREATED
+          - UPDATED
+          - DELETED
+          - RELATED
           - IN_PROGRESS
           - FAILED
-          - SUCCEEDED
-          - PARTIALLY_SUCCEEDED
-          - CANCELING
-          - CANCELED
           type: string
-          x-obmcs-top-level-enum: '#/definitions/WorkRequestStatus'
-        timeAccepted:
-          description: 'Date and time the work was accepted, in the format defined by RFC3339.
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
+        entityType:
+          description: The resource type the work request is affects.
           type: string
-        timeFinished:
-          description: 'Date and time the work completed, in the format defined by RFC3339.
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
+        entityUri:
+          description: The URI path that the user can do a GET on to access the resource metadata.
           type: string
-        timeStarted:
-          description: 'Date and time the work started, in the format defined by RFC3339.
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
+        identifier:
+          description: The resource identifier the work request affects.
           type: string
       required:
-      - id
-      - operationType
-      - status
-  parameters:
-    NameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: name
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    PaginationTokenQueryParam:
-      description: 'The value of the `opc-next-page` response header from the previous "List" call.
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        maxLength: 512
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide one sort order (`sortOrder`). Default order for
-
-        TIMECREATED is descending. Default order for NAME is ascending. The NAME
-
-        sort order is case sensitive.
-
-
-        **Note:** In general, some "List" operations (for example, `ListInstances`) let you
-
-        optionally filter by Availability Domain if the scope of the resource type is within a
-
-        single Availability Domain. If you call one of these "List" operations without specifying
-
-        an Availability Domain, the resources are grouped by Availability Domain, then sorted.
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        enum:
-        - TIMECREATED
-        - NAME
-    SecurityAttributeNamespaceIdPathParam:
-      description: 'The OCID of the security attribute namespace.
-
-        '
-      in: path
-      name: securityAttributeNamespaceId
-      required: true
-      schema:
-        type: string
-        maxLength: 100
-        minLength: 1
-    ResourceIdentifierQueryParam:
-      description: The identifier of the resource the work request affects.
-      in: query
-      name: resourceIdentifier
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
-
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'The maximum number of items to return in a paginated "List" call.
-
-        '
-      in: query
-      name: limit
-      x-default-description: 'null'
-      schema:
-        type: integer
-        maximum: 1000
-        minimum: 1
-    WorkRequestIdPathParam:
-      description: The OCID of the work request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is `DESC` when sorting by time and `ASC` otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    SecurityAttributeNamePathParam:
-      description: 'The name of the security attribute.
-
-        '
-      in: path
-      name: securityAttributeName
-      required: true
-      schema:
-        type: string
-        maxLength: 100
-        minLength: 1
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of running that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and removed from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ShouldIncludeSubcompartments:
-      description: 'An optional boolean parameter indicating whether to retrieve all security attribute namespaces in subcompartments. If this
-
-        parameter is not specified, only the namespaces defined in the specified compartment are retrieved.
-
-        '
-      in: query
-      name: compartmentIdInSubtree
-      required: false
-      x-default-description: false
-      schema:
-        type: boolean
+      - identifier
+      - actionType
+      - entityType
   responses:
     default:
       description: Unknown Error

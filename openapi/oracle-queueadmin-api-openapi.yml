@@ -1,7 +1,7 @@
 openapi: 3.2.0
 info:
   description: Use the Queue API to produce and consume messages, create queues, and manage related items. For more information, see [Queue](/iaas/Content/queue/overview.htm).
-  title: Queue Queue Admin API
+  title: Queue Admin API
   version: '20210201'
   x-provenance:
     method: harvested
@@ -840,16 +840,94 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntryCollection'
 components:
   schemas:
-    QueueCollection:
-      description: Results of a queue search. Contains both QueueSummary items and other information, such as metadata.
+    CapabilityDetails:
+      description: Base object for capabilities
+      discriminator:
+        propertyName: type
       properties:
-        items:
-          description: List of queues.
+        type:
+          description: The type of the capability
+          enum:
+          - CONSUMER_GROUPS
+          - LARGE_MESSAGES
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/QueueCapability'
+      type: object
+    UpdateQueueDetails:
+      description: The information to be updated.
+      properties:
+        capabilities:
+          description: The list of capabilities enabled on the queue
           items:
-            $ref: '#/components/schemas/QueueSummary'
+            $ref: '#/components/schemas/CapabilityDetails'
           type: array
-      required:
-      - items
+        channelConsumptionLimit:
+          default: 100
+          description: The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel  can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources.
+          maximum: 100
+          minimum: 1
+          type: integer
+        customEncryptionKeyId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content. A string with a length of 0 means the custom key should be removed from queue.
+          maxLength: 255
+          minLength: 0
+          type: string
+        deadLetterQueueDeliveryCount:
+          default: 0
+          description: 'The number of times a message can be delivered to a consumer before being moved to the dead letter queue.
+
+            A value of 0 indicates that the DLQ is not used.
+
+            Changing that value to a lower threshold does not retroactively move in-flight messages in the dead letter queue.
+
+            '
+          minimum: 0
+          type: integer
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the queue.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        timeoutInSeconds:
+          default: 30
+          description: The default polling timeout of the messages in the queue, in seconds.
+          maximum: 30
+          minimum: 0
+          type: integer
+        visibilityInSeconds:
+          default: 30
+          description: The default visibility timeout of the messages consumed from the queue, in seconds.
+          maximum: 43200
+          minimum: 1
+          type: integer
       type: object
     ChangeQueueCompartmentDetails:
       description: The information to be updated.
@@ -866,28 +944,303 @@ components:
       required:
       - compartmentId
       type: object
-    Error:
-      description: Error Information.
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestError:
+      description: An error encountered while executing a work request.
       properties:
         code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+          description: 'A machine-usable code for the error that occured. Error codes are listed on
+
+            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+
+            '
           type: string
         message:
-          description: A human-readable error string.
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An [RFC 3339](https://tools.ietf.org/rfc/rfc3339) formatted datetime string.
+          format: date-time
           type: string
       required:
       - code
       - message
-    ConsumerGroupCollection:
-      description: Results of a consumer group search. Contains both ConsumerGroupSummary items and other information, such as metadata.
+      - timestamp
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The ID of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_QUEUE
+          - UPDATE_QUEUE
+          - DELETE_QUEUE
+          - MOVE_QUEUE
+          - PURGE_QUEUE
+          - CREATE_CONSUMER_GROUP
+          - UPDATE_CONSUMER_GROUP
+          - DELETE_CONSUMER_GROUP
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequest:
+      description: A description of workrequest status
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_QUEUE
+          - UPDATE_QUEUE
+          - DELETE_QUEUE
+          - MOVE_QUEUE
+          - PURGE_QUEUE
+          - CREATE_CONSUMER_GROUP
+          - UPDATE_CONSUMER_GROUP
+          - DELETE_CONSUMER_GROUP
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
       properties:
         items:
-          description: List of consumer groups.
+          description: List of workRequestLogEntries.
           items:
-            $ref: '#/components/schemas/ConsumerGroupSummary'
+            $ref: '#/components/schemas/WorkRequestLogEntry'
           type: array
       required:
       - items
+      type: object
+    QueueCollection:
+      description: Results of a queue search. Contains both QueueSummary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of queues.
+          items:
+            $ref: '#/components/schemas/QueueSummary'
+          type: array
+      required:
+      - items
+      type: object
+    CreateQueueDetails:
+      description: The information about a new queue.
+      properties:
+        capabilities:
+          description: The capability to add on the queue
+          items:
+            $ref: '#/components/schemas/CapabilityDetails'
+          type: array
+        channelConsumptionLimit:
+          default: 100
+          description: The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel  can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources.
+          maximum: 100
+          minimum: 1
+          type: integer
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
+          maxLength: 255
+          minLength: 1
+          type: string
+        customEncryptionKeyId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content.
+          maxLength: 255
+          minLength: 1
+          type: string
+        deadLetterQueueDeliveryCount:
+          default: 0
+          description: The number of times a message can be delivered to a consumer before being moved to the dead letter queue. A value of 0 indicates that the DLQ is not used.
+          minimum: 0
+          type: integer
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The user-friendly name of the queue.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        retentionInSeconds:
+          default: 86400
+          description: The retention period of messages in the queue, in seconds.
+          maximum: 604800
+          minimum: 10
+          type: integer
+        timeoutInSeconds:
+          default: 30
+          description: The default polling timeout of the messages in the queue, in seconds.
+          maximum: 30
+          minimum: 0
+          type: integer
+        visibilityInSeconds:
+          default: 30
+          description: The default visibility timeout of the messages consumed from the queue, in seconds.
+          maximum: 43200
+          minimum: 1
+          type: integer
+      required:
+      - displayName
+      - compartmentId
       type: object
     ConsumerGroup:
       description: A detailed representation of a consumer group.
@@ -950,158 +1303,6 @@ components:
           - FAILED
           - INACTIVE
           type: string
-        queueId:
-          description: The OCID of the associated queue.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The time that the consumer group was created, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
-
-
-            Example: `2018-04-20T00:00:07.405Z`
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The time that the consumer group was updated, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
-
-
-            Example: `2018-04-20T00:00:07.405Z`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - timeCreated
-      - timeUpdated
-      - lifecycleState
-      - filter
-      - queueId
-      type: object
-    CreateConsumerGroupDetails:
-      description: The information about a new consumer group.
-      properties:
-        deadLetterQueueDeliveryCount:
-          description: "The number of times a message can be delivered to a consumer before being moved to the dead letter queue. \nA value of 0 indicates that the DLQ is not used.\nIf the value isn't specified, it will be using the value defined at the queue level.\n"
-          minimum: 0
-          type: integer
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The user-friendly name of the consumer group.
-          maxLength: 255
-          minLength: 1
-          type: string
-        filter:
-          description: The filter used by the consumer group. Only messages matching the filter will be available by consumers of the group.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        isEnabled:
-          default: true
-          description: "Used to enable or disable the consumer group. \nAn enabled consumer group will have a lifecycle state of ACTIVE, while a disabled will have its state as INACTIVE.\n"
-          type: boolean
-        queueId:
-          description: The OCID of the associated queue.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - displayName
-      - queueId
-      type: object
-    ConsumerGroupSummary:
-      description: Summary of the consumer group.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user-friendly name for the consumer group. It has to be unique within the same queue in a case-insensitive manner. It's changeable. Avoid entering confidential information.
-          type: string
-        filter:
-          description: The filter used by the consumer group. Only messages matching the filter will be available by consumers of the group.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: A unique identifier for the consumer group that is immutable on creation.
-          type: string
-        lifecycleDetails:
-          description: Any additional details about the current state of the consumer group.
-          type: string
-        lifecycleState:
-          description: The current state of the consumer group.
-          type: string
-          x-obmcs-enumref: '#/definitions/ConsumerGroup/lifecycleState'
         queueId:
           description: The OCID of the associated queue.
           type: string
@@ -1285,179 +1486,6 @@ components:
       - timeoutInSeconds
       - deadLetterQueueDeliveryCount
       type: object
-    CreateQueueDetails:
-      description: The information about a new queue.
-      properties:
-        capabilities:
-          description: The capability to add on the queue
-          items:
-            $ref: '#/components/schemas/CapabilityDetails'
-          type: array
-        channelConsumptionLimit:
-          default: 100
-          description: The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel  can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources.
-          maximum: 100
-          minimum: 1
-          type: integer
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the queue.
-          maxLength: 255
-          minLength: 1
-          type: string
-        customEncryptionKeyId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content.
-          maxLength: 255
-          minLength: 1
-          type: string
-        deadLetterQueueDeliveryCount:
-          default: 0
-          description: The number of times a message can be delivered to a consumer before being moved to the dead letter queue. A value of 0 indicates that the DLQ is not used.
-          minimum: 0
-          type: integer
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The user-friendly name of the queue.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        retentionInSeconds:
-          default: 86400
-          description: The retention period of messages in the queue, in seconds.
-          maximum: 604800
-          minimum: 10
-          type: integer
-        timeoutInSeconds:
-          default: 30
-          description: The default polling timeout of the messages in the queue, in seconds.
-          maximum: 30
-          minimum: 0
-          type: integer
-        visibilityInSeconds:
-          default: 30
-          description: The default visibility timeout of the messages consumed from the queue, in seconds.
-          maximum: 43200
-          minimum: 1
-          type: integer
-      required:
-      - displayName
-      - compartmentId
-      type: object
-    CapabilityDetails:
-      description: Base object for capabilities
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: The type of the capability
-          enum:
-          - CONSUMER_GROUPS
-          - LARGE_MESSAGES
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/QueueCapability'
-      type: object
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work tracked in the work request.
-
-            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
-
-            work is complete for that resource at which point it will transition to CREATED, UPDATED,
-
-            or DELETED, respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type the work request affects.
-          type: string
-        entityUri:
-          description: The URI path that the user can do a GET on to access the resource metadata
-          type: string
-        identifier:
-          description: The identifier of the resource the work request affects.
-          type: string
-      required:
-      - actionType
-      - entityType
-      - identifier
-    WorkRequestSummaryCollection:
-      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestSummary objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    PurgeQueueDetails:
-      description: Purge parameters.
-      properties:
-        channelIds:
-          description: "Optional parameter to specify the destination of purge operation. \nIf the channel ID is specified, the purge operation will delete all the messages in the specific channels. \nIf the channel ID is not specified, the purge operation will delete all the messages in the queue and in the child channels.\n"
-          items:
-            maxLength: 64
-            minLength: 1
-            type: string
-          type: array
-        consumerGroupId:
-          description: "The consumer group ID to purge. If the CONSUMER_GROUPS capability is enabled on the queue, omitting that field\nwill purge the \"Primary Consumer Group\", otherwise it will purge the queue. \nIf you wish to purge all consumer groups in the queue, you can pass the special value 'all'.\n"
-          type: string
-        purgeType:
-          description: 'Type of the purge to perform:
-
-            - NORMAL - purge only the normal queue
-
-            - DLQ - purge only the dead letter queue
-
-            - BOTH - purge both the normal queue and the dead letter queue
-
-            '
-          enum:
-          - NORMAL
-          - DLQ
-          - BOTH
-          type: string
-      required:
-      - purgeType
-      type: object
     UpdateConsumerGroupDetails:
       description: The information to be updated.
       properties:
@@ -1512,146 +1540,47 @@ components:
           description: "Used to enable or disable the consumer group. \nAn enabled consumer group will have a lifecycle state of ACTIVE, while a disabled will have its state as INACTIVE.\n"
           type: boolean
       type: object
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestError objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestSummary:
-      description: A summary of the status of a work request.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        id:
-          description: The ID of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - CREATE_QUEUE
-          - UPDATE_QUEUE
-          - DELETE_QUEUE
-          - MOVE_QUEUE
-          - PURGE_QUEUE
-          - CREATE_CONSUMER_GROUP
-          - UPDATE_CONSUMER_GROUP
-          - DELETE_CONSUMER_GROUP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    WorkRequestError:
-      description: An error encountered while executing a work request.
+    Error:
+      description: Error Information.
       properties:
         code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed on
-
-            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
-
-            '
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
         message:
-          description: A human readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured. An [RFC 3339](https://tools.ietf.org/rfc/rfc3339) formatted datetime string.
-          format: date-time
+          description: A human-readable error string.
           type: string
       required:
       - code
       - message
-      - timestamp
-    UpdateQueueDetails:
-      description: The information to be updated.
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
       properties:
-        capabilities:
-          description: The list of capabilities enabled on the queue
-          items:
-            $ref: '#/components/schemas/CapabilityDetails'
-          type: array
-        channelConsumptionLimit:
-          default: 100
-          description: The percentage of allocated queue resources that can be consumed by a single channel. For example, if a queue has a storage limit of 2Gb, and a single channel consumption limit is 0.1 (10%), that means data size of a single channel  can't exceed 200Mb. Consumption limit of 100% (default) means that a single channel can consume up-to all allocated queue's resources.
-          maximum: 100
-          minimum: 1
-          type: integer
-        customEncryptionKeyId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the custom encryption key to be used to encrypt messages content. A string with a length of 0 means the custom key should be removed from queue.
-          maxLength: 255
-          minLength: 0
+        message:
+          description: Human-readable log message.
           type: string
+        timestamp:
+          description: The time the log message was written. An [RFC 3339](https://tools.ietf.org/rfc/rfc3339) formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    WorkRequestSummaryCollection:
+      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestSummary objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    CreateConsumerGroupDetails:
+      description: The information about a new consumer group.
+      properties:
         deadLetterQueueDeliveryCount:
-          default: 0
-          description: 'The number of times a message can be delivered to a consumer before being moved to the dead letter queue.
-
-            A value of 0 indicates that the DLQ is not used.
-
-            Changing that value to a lower threshold does not retroactively move in-flight messages in the dead letter queue.
-
-            '
+          description: "The number of times a message can be delivered to a consumer before being moved to the dead letter queue. \nA value of 0 indicates that the DLQ is not used.\nIf the value isn't specified, it will be using the value defined at the queue level.\n"
           minimum: 0
           type: integer
         definedTags:
@@ -1674,9 +1603,12 @@ components:
             '
           type: object
         displayName:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the queue.
+          description: The user-friendly name of the consumer group.
           maxLength: 255
           minLength: 1
+          type: string
+        filter:
+          description: The filter used by the consumer group. Only messages matching the filter will be available by consumers of the group.
           type: string
         freeformTags:
           additionalProperties:
@@ -1687,18 +1619,18 @@ components:
 
             '
           type: object
-        timeoutInSeconds:
-          default: 30
-          description: The default polling timeout of the messages in the queue, in seconds.
-          maximum: 30
-          minimum: 0
-          type: integer
-        visibilityInSeconds:
-          default: 30
-          description: The default visibility timeout of the messages consumed from the queue, in seconds.
-          maximum: 43200
-          minimum: 1
-          type: integer
+        isEnabled:
+          default: true
+          description: "Used to enable or disable the consumer group. \nAn enabled consumer group will have a lifecycle state of ACTIVE, while a disabled will have its state as INACTIVE.\n"
+          type: boolean
+        queueId:
+          description: The OCID of the associated queue.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - displayName
+      - queueId
       type: object
     QueueSummary:
       description: Summary of the queue.
@@ -1804,118 +1736,188 @@ components:
       - lifecycleState
       - messagesEndpoint
       type: object
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
+    ConsumerGroupSummary:
+      description: Summary of the consumer group.
       properties:
-        message:
-          description: Human-readable log message.
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: A user-friendly name for the consumer group. It has to be unique within the same queue in a case-insensitive manner. It's changeable. Avoid entering confidential information.
           type: string
-        timestamp:
-          description: The time the log message was written. An [RFC 3339](https://tools.ietf.org/rfc/rfc3339) formatted datetime string
+        filter:
+          description: The filter used by the consumer group. Only messages matching the filter will be available by consumers of the group.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: A unique identifier for the consumer group that is immutable on creation.
+          type: string
+        lifecycleDetails:
+          description: Any additional details about the current state of the consumer group.
+          type: string
+        lifecycleState:
+          description: The current state of the consumer group.
+          type: string
+          x-obmcs-enumref: '#/definitions/ConsumerGroup/lifecycleState'
+        queueId:
+          description: The OCID of the associated queue.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The time that the consumer group was created, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time that the consumer group was updated, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+
+
+            Example: `2018-04-20T00:00:07.405Z`
+
+            '
           format: date-time
           type: string
       required:
-      - message
-      - timestamp
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
+      - id
+      - displayName
+      - timeCreated
+      - timeUpdated
+      - lifecycleState
+      - filter
+      - queueId
+      type: object
+    ConsumerGroupCollection:
+      description: Results of a consumer group search. Contains both ConsumerGroupSummary items and other information, such as metadata.
       properties:
         items:
-          description: List of workRequestLogEntries.
+          description: List of consumer groups.
           items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
+            $ref: '#/components/schemas/ConsumerGroupSummary'
           type: array
       required:
       - items
       type: object
-    WorkRequest:
-      description: A description of workrequest status
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
       properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request. Work requests should be scoped to
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
 
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
 
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
+            work is complete for that resource at which point it will transition to CREATED, UPDATED,
 
-            resource whose compartment should be used
+            or DELETED, respectively.
 
             '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
           enum:
-          - CREATE_QUEUE
-          - UPDATE_QUEUE
-          - DELETE_QUEUE
-          - MOVE_QUEUE
-          - PURGE_QUEUE
-          - CREATE_CONSUMER_GROUP
-          - UPDATE_CONSUMER_GROUP
-          - DELETE_CONSUMER_GROUP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
+          - CREATED
+          - UPDATED
+          - DELETED
           - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
+          - RELATED
           type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type the work request affects.
           type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
+        entityUri:
+          description: The URI path that the user can do a GET on to access the resource metadata
           type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
+        identifier:
+          description: The identifier of the resource the work request affects.
           type: string
       required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
+      - actionType
+      - entityType
+      - identifier
+    PurgeQueueDetails:
+      description: Purge parameters.
+      properties:
+        channelIds:
+          description: "Optional parameter to specify the destination of purge operation. \nIf the channel ID is specified, the purge operation will delete all the messages in the specific channels. \nIf the channel ID is not specified, the purge operation will delete all the messages in the queue and in the child channels.\n"
+          items:
+            maxLength: 64
+            minLength: 1
+            type: string
+          type: array
+        consumerGroupId:
+          description: "The consumer group ID to purge. If the CONSUMER_GROUPS capability is enabled on the queue, omitting that field\nwill purge the \"Primary Consumer Group\", otherwise it will purge the queue. \nIf you wish to purge all consumer groups in the queue, you can pass the special value 'all'.\n"
+          type: string
+        purgeType:
+          description: 'Type of the purge to perform:
+
+            - NORMAL - purge only the normal queue
+
+            - DLQ - purge only the dead letter queue
+
+            - BOTH - purge both the normal queue and the dead letter queue
+
+            '
+          enum:
+          - NORMAL
+          - DLQ
+          - BOTH
+          type: string
+      required:
+      - purgeType
+      type: object
   parameters:
-    PaginationTokenQueryParam:
-      description: For list pagination. The value of the opc-next-page response header from the previous "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+    ConsumerGroupLifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
       in: query
-      name: page
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/ConsumerGroup/lifecycleState'
       schema:
         type: string
-        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
@@ -1928,46 +1930,6 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
-    QueueIdentifierPathParam:
-      description: The unique queue identifier.
-      in: path
-      name: queueId
-      required: true
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: For list pagination. The maximum number of results per page, or items to return in a paginated "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
     LifecycleStateQueryParam:
       description: A filter to return only resources their lifecycleState matches the given lifecycleState.
       in: query
@@ -1977,11 +1939,25 @@ components:
       x-obmcs-enumref: '#/definitions/Queue/lifecycleState'
       schema:
         type: string
-    WorkRequestIdPathParam:
-      description: The ID of the asynchronous request.
+    QueueIdentifierCgQueryParam:
+      description: The unique queue identifier.
+      in: query
+      name: queueId
+      x-default-description: 'null'
+      schema:
+        type: string
+    ConsumerGroupIdentifierPathParam:
+      description: The unique consumer group identifier.
       in: path
-      name: workRequestId
+      name: consumerGroupId
       required: true
+      schema:
+        type: string
+    ConsumerGroupIdentifierQueryParam:
+      description: The unique consumer group identifier.
+      in: query
+      name: id
+      x-default-description: 'null'
       schema:
         type: string
     SortOrderQueryParam:
@@ -1995,26 +1971,53 @@ components:
         - ASC
         - DESC
         default: ASC
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
+    WorkRequestIdPathParam:
+      description: The ID of the asynchronous request.
+      in: path
       name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    ConsumerGroupLifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/ConsumerGroup/lifecycleState'
+      required: true
       schema:
         type: string
     QueueIdentifierQueryParam:
       description: The unique queue identifier.
       in: query
       name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    QueueIdentifierPathParam:
+      description: The unique queue identifier.
+      in: path
+      name: queueId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: For list pagination. The value of the opc-next-page response header from the previous "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
       x-default-description: 'null'
       schema:
         type: string
@@ -2037,40 +2040,37 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    QueueIdentifierCgQueryParam:
-      description: The unique queue identifier.
+    PaginationLimitQueryParam:
+      description: For list pagination. The maximum number of results per page, or items to return in a paginated "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
       in: query
-      name: queueId
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ConsumerGroupIdentifierQueryParam:
-      description: The unique consumer group identifier.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
       in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ConsumerGroupIdentifierPathParam:
-      description: The unique consumer group identifier.
-      in: path
-      name: consumerGroupId
-      required: true
+      name: if-match
+      required: false
       schema:
         type: string
   responses:

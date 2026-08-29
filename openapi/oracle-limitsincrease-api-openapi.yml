@@ -2063,14 +2063,6 @@ paths:
       x-related-resource: '#/definitions/LimitsIncreaseRequest'
 components:
   parameters:
-    PaginationTokenQueryParam:
-      description: The next page token.
-      in: query
-      name: page
-      required: false
-      x-default-description: By default, it will start with the first page.
-      schema:
-        type: string
     SortByQueryParam:
       description: 'The field to sort by. You can specify only one sort order. The default order for `timeCreated` is descending. The default order for `displayName` is ascending.
 
@@ -2083,14 +2075,36 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
-    PublicLimitNameQueryParam:
-      description: 'The name of the limit.
+    IdempotencyTokenHeader:
+      description: 'Idempotency token to make sure that a second create operation won''t fail if the first one succeeded.
+
+        This can be any random string.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+    LimitsIncreaseItemSortByQueryParam:
+      description: 'The field to sort by. You can specify only one sort order. The default order for `timeCreated` is descending.
 
         '
       in: query
-      name: limitName
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        default: timeCreated
+    LifecycleStateQueryParam:
+      description: 'Lifecycle state of the limit increase request.
+
+        '
+      in: query
+      name: lifecycleState
       required: false
-      x-default-description: If not present, returns questions for all limits
+      x-default-description: If lifecycleState is not provided, return requests in all lifecycleStates
       schema:
         type: string
         default: null
@@ -2105,71 +2119,6 @@ components:
       required: true
       schema:
         type: string
-    LimitsIncreaseRequestIdQueryParam:
-      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request.
-
-        '
-      in: query
-      name: limitsIncreaseRequestId
-      required: false
-      x-default-description: If limitsIncreaseRequestId is not provided, return request for all limit increase requests
-      schema:
-        type: string
-        default: null
-    IfMatchHeader:
-      description: 'This value (etag) should be passed when you want to ensure that no-one else has changed the value while you''re making
-
-        an update. To get the current etag, make a GET call and read the current etag header.
-
-        If GET returns 404, and you still want to ensure that noone else has executed a SET operation, pass the following
-
-        header instead: `if-none-match: *`
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: Maximum number of items returned in a page.
-      in: query
-      name: limit
-      required: false
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    IdempotencyTokenHeader:
-      description: 'Idempotency token to make sure that a second create operation won''t fail if the first one succeeded.
-
-        This can be any random string.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-    LimitsIncreaseItemRequestIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request.
-      in: path
-      name: limitsIncreaseItemRequestId
-      required: true
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: 'Lifecycle state of the limit increase request.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: If lifecycleState is not provided, return requests in all lifecycleStates
-      schema:
-        type: string
-        default: null
     ServiceQueryParam:
       description: 'Name of service that owns the limit.
 
@@ -2178,6 +2127,40 @@ components:
       name: service
       required: false
       x-default-description: If service is not provided, return requests for all services
+      schema:
+        type: string
+        default: null
+    PublicServiceQueryParam:
+      description: 'The name of the service.
+
+        '
+      in: query
+      name: serviceName
+      required: false
+      x-default-description: If not present, returns questions for all services
+      schema:
+        type: string
+        default: null
+    QuestionsSortByQueryParam:
+      description: 'The field to sort by. Both fields will sort alphabetically
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - serviceName
+        - limitName
+        default: serviceName
+    LimitsIncreaseRequestIdQueryParam:
+      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request.
+
+        '
+      in: query
+      name: limitsIncreaseRequestId
+      required: false
+      x-default-description: If limitsIncreaseRequestId is not provided, return request for all limit increase requests
       schema:
         type: string
         default: null
@@ -2197,34 +2180,26 @@ components:
         enum:
         - ASC
         - DESC
-    QuestionsSortByQueryParam:
-      description: 'The field to sort by. Both fields will sort alphabetically
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - serviceName
-        - limitName
-        default: serviceName
-    PublicServiceQueryParam:
-      description: 'The name of the service.
-
-        '
-      in: query
-      name: serviceName
-      required: false
-      x-default-description: If not present, returns questions for all services
-      schema:
-        type: string
-        default: null
     LimitsIncreaseRequestIdPathParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request.
       in: path
       name: limitsIncreaseRequestId
       required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: Override request id for request tracking purposes.
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The next page token.
+      in: query
+      name: page
+      required: false
+      x-default-description: By default, it will start with the first page.
       schema:
         type: string
     DisplayNameQueryParam:
@@ -2236,536 +2211,50 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    RequestIdHeader:
-      description: Override request id for request tracking purposes.
-      in: header
-      name: opc-request-id
+    PaginationLimitQueryParam:
+      description: Maximum number of items returned in a page.
+      in: query
+      name: limit
       required: false
       schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    LimitsIncreaseItemRequestIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request.
+      in: path
+      name: limitsIncreaseItemRequestId
+      required: true
+      schema:
         type: string
-    LimitsIncreaseItemSortByQueryParam:
-      description: 'The field to sort by. You can specify only one sort order. The default order for `timeCreated` is descending.
+    PublicLimitNameQueryParam:
+      description: 'The name of the limit.
 
         '
       in: query
-      name: sortBy
+      name: limitName
+      required: false
+      x-default-description: If not present, returns questions for all limits
       schema:
         type: string
-        enum:
-        - timeCreated
-        default: timeCreated
+        default: null
+    IfMatchHeader:
+      description: 'This value (etag) should be passed when you want to ensure that no-one else has changed the value while you''re making
+
+        an update. To get the current etag, make a GET call and read the current etag header.
+
+        If GET returns 404, and you still want to ensure that noone else has executed a SET operation, pass the following
+
+        header instead: `if-none-match: *`
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   schemas:
-    Error:
-      description: Generic error object.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    LimitsIncreaseRequestCollection:
-      description: 'Collection of property summaries for limit increase requests.
-
-        '
-      properties:
-        items:
-          description: A list of limit increase requests.
-          items:
-            $ref: '#/components/schemas/LimitsIncreaseRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    PatchLimitsIncreaseRequestDetails:
-      description: 'Configuration details for new comments to be added to the limit increase request.
-
-        For more information, see
-
-        [Adding Comments to a Limit Increase Request](/iaas/Content/General/service-limits/comment-request.htm).
-
-        '
-      properties:
-        items:
-          description: List of patch instructions for adding comments.
-          items:
-            $ref: '#/components/schemas/PatchInstruction'
-          type: array
-      type: object
-    CreateLimitsIncreaseItemRequestDetails:
-      description: 'The configuration details for creating a limit increase item within a limit increase request.
-
-        For more information, see
-
-        [Creating a Limit Increase Request](/iaas/Content/General/service-limits/create-requests.htm).
-
-        '
-      properties:
-        limitName:
-          description: The name of the limit to be increased.
-          maxLength: 255
-          minLength: 1
-          type: string
-        questionnaireResponse:
-          description: List of questionnaire responses.
-          items:
-            $ref: '#/components/schemas/LimitsIncreaseItemQuestionRequest'
-          type: array
-        region:
-          description: The region for the limit increase.
-          maxLength: 255
-          minLength: 1
-          type: string
-        scope:
-          description: 'The scope of the limit increase item.
-
-            For OCI, use the logical availability domain (AD) of the request.
-
-            For Multicloud, use the availability zone (AZ) of the request
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        serviceName:
-          description: The name of the service that owns the limit.
-          maxLength: 255
-          minLength: 1
-          type: string
-        value:
-          description: The requested value of the increase.
-          format: int64
-          type: integer
-      required:
-      - serviceName
-      - limitName
-      - value
-      - region
-      type: object
-    LimitsIncreaseRequestComment:
-      description: 'The properties that define a comment in a limit increase request.
-
-        '
-      properties:
-        message:
-          description: The comment message.
-          type: string
-        senderType:
-          description: The comment sender type.
-          enum:
-          - CUSTOMER
-          - ORACLE
-          type: string
-        timeCreated:
-          description: The time that the comment was created. Format defined by RFC3339.
-          format: date-time
-          type: string
-      required:
-      - message
-      - timeCreated
-      - senderType
-      type: object
-    LimitsIncreaseRequestSummary:
-      description: 'A summary of properties for a limit increase request.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the limit increase request.
-
-            Note: The tenancy is the root compartment.
-
-            '
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The user-friendly name of the limit increase request. Avoid entering confidential information.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request.
-          type: string
-        itemsInRequest:
-          description: Number of limit increase items in the limit increase request.
-          format: int64
-          type: integer
-        justification:
-          description: Reason for the limit increase request.
-          type: string
-        lifecycleState:
-          description: The current state of the limit increase request.
-          type: string
-          x-obmcs-enumref: '#/definitions/LimitsIncreaseRequest/lifecycleState'
-        subscriptionId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenancy subscription for the limit increase request.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time that the limit increase request was created.
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - lifecycleState
-      - displayName
-      - itemsInRequest
-      - timeCreated
-      - freeformTags
-      - definedTags
-      type: object
-    UpdateLimitsIncreaseRequestDetails:
-      description: The configuration details for updating a limit increase request.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      type: object
-    LimitsIncreaseItemRequestSummary:
-      description: 'A summary of properties for a limit increase item within the indicated limit increase request.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the limit increase item.
-
-            Note: The tenancy is the root compartment.
-
-            '
-          type: string
-        currentValue:
-          description: The value of the limit for the tenancy at the time of the request. Purely informative.
-          format: int64
-          type: integer
-        id:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase item.
-
-            '
-          type: string
-        lifecycleState:
-          description: The current status of the limit increase item.
-          type: string
-          x-obmcs-enumref: '#/definitions/LimitsIncreaseItemRequest/lifecycleState'
-        limitName:
-          description: 'The name of the limit to be increased.
-
-            '
-          type: string
-        limitsIncreaseRequestId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request that the limit increase item belongs to.
-          type: string
-        region:
-          description: The region code for the limit increase item.
-          type: string
-        scope:
-          description: 'The scope of the limit increase item.
-
-            For OCI, use the logical availability domain (AD) of the request.
-
-            For Multicloud, use the availability zone (AZ) of the request
-
-            '
-          type: string
-        serviceName:
-          description: 'The name of the service that owns the limit.
-
-            '
-          type: string
-        timeCreated:
-          description: The time that the limit increase request was created. Format defined by RFC3339.
-          format: date-time
-          type: string
-        value:
-          description: The requested value for the limit.
-          format: int64
-          type: integer
-      required:
-      - id
-      - compartmentId
-      - serviceName
-      - limitName
-      - region
-      - currentValue
-      - value
-      - limitsIncreaseRequestId
-      - lifecycleState
-      - timeCreated
-      type: object
-      x-example: "{\n  \"id\" : \"<var>&lt;item_OCID&gt;</var>\",\n  \"compartmentId\" : \"<var>&lt;compartment_OCID&gt;</var>\",\n  \"region\" : \"us-ashburn-1\",\n  \"scope\" : \"ABcd:US-ASHBURN-1\",\n  \"serviceName\" : \"compute\",\n  \"limitName\" : \"dense-io-e5-core-count\",\n  \"value\" : 50,\n  \"currentValue\" : 20,\n  \"limitsIncreaseRequestId\" : \"<var>&lt;request_OCID&gt;</var>\",\n  \"timeCreated\" : \"2024-04-15T23:46:54.321Z\",\n  \"status\" : \"SUCCEEDED\"\n}\n"
-    CreateLimitsIncreaseRequestDetails:
-      description: The configuration details for creating a limit increase request.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment for the new limit increase request.
-
-            Note: The tenancy is the root compartment.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'The user-friendly name of the limit increase request. Avoid entering confidential information.
-
-            '
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        justification:
-          description: Reason for the limit increase request.
-          maxLength: 500
-          minLength: 1
-          type: string
-        limitsIncreaseItemRequests:
-          description: List of items in the limit increase request.
-          items:
-            $ref: '#/components/schemas/CreateLimitsIncreaseItemRequestDetails'
-          type: array
-        subscriptionId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenancy subscription for the limit increase request.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - displayName
-      - compartmentId
-      - justification
-      - limitsIncreaseItemRequests
-      type: object
-    PatchInstruction:
-      description: A single patch instruction for a new comment to be added to the limit increase request.
-      discriminator:
-        propertyName: operation
-      properties:
-        operation:
-          description: 'Operation to perform on an element in the list.
-
-            '
-          enum:
-          - INSERT
-          type: string
-        selection:
-          description: 'The set of values to which the operation applies as a [JMESPath expression](https://jmespath.org/specification.html) for evaluation against the context resource.
-
-            An operation fails if the selection yields an exception, except as otherwise specified.
-
-            Note that comparisons involving non-primitive values (objects or arrays) are not supported and will always evaluate to false.
-
-            '
-          type: string
-      required:
-      - operation
-      - selection
-    LimitsIncreaseItemRequest:
-      description: 'The properties that define a limit increase item in a limit increase request.
-
-        For information about limit increase requests, see
-
-        [Working with Limit Increase Requests](/iaas/Content/General/service-limits/requests.htm).
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the limit increase item.
-
-            Note: The tenancy is the root compartment).
-
-            '
-          type: string
-        currentValue:
-          description: The value of the limit for the tenancy at the time of the request. Purely informative.
-          format: int64
-          type: integer
-        id:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase item.
-
-            '
-          type: string
-        lifecycleState:
-          description: The current status of the limit increase item.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - SUCCEEDED
-          - CANCELED
-          - FAILED
-          type: string
-        limitName:
-          description: 'The name of the limit to be increased.
-
-            '
-          type: string
-        limitsIncreaseRequestId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request that the limit increase item belongs to.
-
-            '
-          type: string
-        questionnaireResponse:
-          description: List of questionnaire responses for the limit increase item.
-          items:
-            $ref: '#/components/schemas/LimitsIncreaseItemQuestionResponse'
-          type: array
-        region:
-          description: The region code for the limit increase item.
-          type: string
-        scope:
-          description: 'The scope of the limit increase item.
-
-            For OCI, use the logical availability domain (AD) of the request.
-
-            For Multicloud, use the availability zone (AZ) of the request
-
-            '
-          type: string
-        serviceName:
-          description: 'The name of the service that owns the limit.
-
-            '
-          type: string
-        timeCreated:
-          description: The time that the limit increase item was created. Format defined by RFC3339.
-          format: date-time
-          type: string
-        timeResolution:
-          description: The time that the limit increase item was resolved. Format defined by RFC3339.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time that the limit increase item was last updated. Format defined by RFC3339.
-          format: date-time
-          type: string
-        value:
-          description: The new value requested for the limit.
-          format: int64
-          type: integer
-      required:
-      - id
-      - compartmentId
-      - serviceName
-      - limitName
-      - currentValue
-      - region
-      - value
-      - limitsIncreaseRequestId
-      - lifecycleState
-      - timeCreated
-      type: object
-      x-example: "{\n  \"id\" : \"<var>&lt;item_OCID&gt;</var>\",\n  \"compartmentId\" : \"<var>&lt;compartment_OCID&gt;</var>\",\n  \"region\" : \"us-ashburn-1\",\n  \"scope\" : \"ABcd:US-ASHBURN-1\",\n  \"serviceName\" : \"compute\",\n  \"limitName\" : \"dense-io-e5-core-count\",\n  \"value\" : 50,\n  \"limitsIncreaseRequestId\" : \"<var>&lt;request_OCID&gt;</var>\",\n  \"timeResolution\" : \"2024-04-15T23:46:54.321Z\",\n  \"lifecycleState\" : \"SUCCEEDED\"\n}\n"
-    LimitsIncreaseItemRequestCollection:
-      description: 'Collection of property summaries for limit increase items within the indicated limit increase request.
-
-        '
-      properties:
-        items:
-          description: List of limit increase items.
-          items:
-            $ref: '#/components/schemas/LimitsIncreaseItemRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
     LimitsIncreaseRequest:
       description: 'The properties that define a limit increase request.
 
@@ -2909,6 +2398,283 @@ components:
       required:
       - items
       type: object
+    LimitsIncreaseItemRequest:
+      description: 'The properties that define a limit increase item in a limit increase request.
+
+        For information about limit increase requests, see
+
+        [Working with Limit Increase Requests](/iaas/Content/General/service-limits/requests.htm).
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the limit increase item.
+
+            Note: The tenancy is the root compartment).
+
+            '
+          type: string
+        currentValue:
+          description: The value of the limit for the tenancy at the time of the request. Purely informative.
+          format: int64
+          type: integer
+        id:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase item.
+
+            '
+          type: string
+        lifecycleState:
+          description: The current status of the limit increase item.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - SUCCEEDED
+          - CANCELED
+          - FAILED
+          type: string
+        limitName:
+          description: 'The name of the limit to be increased.
+
+            '
+          type: string
+        limitsIncreaseRequestId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request that the limit increase item belongs to.
+
+            '
+          type: string
+        questionnaireResponse:
+          description: List of questionnaire responses for the limit increase item.
+          items:
+            $ref: '#/components/schemas/LimitsIncreaseItemQuestionResponse'
+          type: array
+        region:
+          description: The region code for the limit increase item.
+          type: string
+        scope:
+          description: 'The scope of the limit increase item.
+
+            For OCI, use the logical availability domain (AD) of the request.
+
+            For Multicloud, use the availability zone (AZ) of the request
+
+            '
+          type: string
+        serviceName:
+          description: 'The name of the service that owns the limit.
+
+            '
+          type: string
+        timeCreated:
+          description: The time that the limit increase item was created. Format defined by RFC3339.
+          format: date-time
+          type: string
+        timeResolution:
+          description: The time that the limit increase item was resolved. Format defined by RFC3339.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time that the limit increase item was last updated. Format defined by RFC3339.
+          format: date-time
+          type: string
+        value:
+          description: The new value requested for the limit.
+          format: int64
+          type: integer
+      required:
+      - id
+      - compartmentId
+      - serviceName
+      - limitName
+      - currentValue
+      - region
+      - value
+      - limitsIncreaseRequestId
+      - lifecycleState
+      - timeCreated
+      type: object
+      x-example: "{\n  \"id\" : \"<var>&lt;item_OCID&gt;</var>\",\n  \"compartmentId\" : \"<var>&lt;compartment_OCID&gt;</var>\",\n  \"region\" : \"us-ashburn-1\",\n  \"scope\" : \"ABcd:US-ASHBURN-1\",\n  \"serviceName\" : \"compute\",\n  \"limitName\" : \"dense-io-e5-core-count\",\n  \"value\" : 50,\n  \"limitsIncreaseRequestId\" : \"<var>&lt;request_OCID&gt;</var>\",\n  \"timeResolution\" : \"2024-04-15T23:46:54.321Z\",\n  \"lifecycleState\" : \"SUCCEEDED\"\n}\n"
+    LimitsIncreaseRequestSummary:
+      description: 'A summary of properties for a limit increase request.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the limit increase request.
+
+            Note: The tenancy is the root compartment.
+
+            '
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The user-friendly name of the limit increase request. Avoid entering confidential information.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request.
+          type: string
+        itemsInRequest:
+          description: Number of limit increase items in the limit increase request.
+          format: int64
+          type: integer
+        justification:
+          description: Reason for the limit increase request.
+          type: string
+        lifecycleState:
+          description: The current state of the limit increase request.
+          type: string
+          x-obmcs-enumref: '#/definitions/LimitsIncreaseRequest/lifecycleState'
+        subscriptionId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenancy subscription for the limit increase request.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time that the limit increase request was created.
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - lifecycleState
+      - displayName
+      - itemsInRequest
+      - timeCreated
+      - freeformTags
+      - definedTags
+      type: object
+    CreateLimitsIncreaseRequestDetails:
+      description: The configuration details for creating a limit increase request.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment for the new limit increase request.
+
+            Note: The tenancy is the root compartment.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'The user-friendly name of the limit increase request. Avoid entering confidential information.
+
+            '
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        justification:
+          description: Reason for the limit increase request.
+          maxLength: 500
+          minLength: 1
+          type: string
+        limitsIncreaseItemRequests:
+          description: List of items in the limit increase request.
+          items:
+            $ref: '#/components/schemas/CreateLimitsIncreaseItemRequestDetails'
+          type: array
+        subscriptionId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenancy subscription for the limit increase request.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - displayName
+      - compartmentId
+      - justification
+      - limitsIncreaseItemRequests
+      type: object
+    LimitsIncreaseRequestComment:
+      description: 'The properties that define a comment in a limit increase request.
+
+        '
+      properties:
+        message:
+          description: The comment message.
+          type: string
+        senderType:
+          description: The comment sender type.
+          enum:
+          - CUSTOMER
+          - ORACLE
+          type: string
+        timeCreated:
+          description: The time that the comment was created. Format defined by RFC3339.
+          format: date-time
+          type: string
+      required:
+      - message
+      - timeCreated
+      - senderType
+      type: object
     LimitsIncreaseItemQuestionResponse:
       description: 'A question and its response.
 
@@ -2927,6 +2693,231 @@ components:
       - id
       - questionText
       - questionResponse
+      type: object
+    PatchLimitsIncreaseRequestDetails:
+      description: 'Configuration details for new comments to be added to the limit increase request.
+
+        For more information, see
+
+        [Adding Comments to a Limit Increase Request](/iaas/Content/General/service-limits/comment-request.htm).
+
+        '
+      properties:
+        items:
+          description: List of patch instructions for adding comments.
+          items:
+            $ref: '#/components/schemas/PatchInstruction'
+          type: array
+      type: object
+    LimitsIncreaseItemRequestSummary:
+      description: 'A summary of properties for a limit increase item within the indicated limit increase request.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the limit increase item.
+
+            Note: The tenancy is the root compartment.
+
+            '
+          type: string
+        currentValue:
+          description: The value of the limit for the tenancy at the time of the request. Purely informative.
+          format: int64
+          type: integer
+        id:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase item.
+
+            '
+          type: string
+        lifecycleState:
+          description: The current status of the limit increase item.
+          type: string
+          x-obmcs-enumref: '#/definitions/LimitsIncreaseItemRequest/lifecycleState'
+        limitName:
+          description: 'The name of the limit to be increased.
+
+            '
+          type: string
+        limitsIncreaseRequestId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the limit increase request that the limit increase item belongs to.
+          type: string
+        region:
+          description: The region code for the limit increase item.
+          type: string
+        scope:
+          description: 'The scope of the limit increase item.
+
+            For OCI, use the logical availability domain (AD) of the request.
+
+            For Multicloud, use the availability zone (AZ) of the request
+
+            '
+          type: string
+        serviceName:
+          description: 'The name of the service that owns the limit.
+
+            '
+          type: string
+        timeCreated:
+          description: The time that the limit increase request was created. Format defined by RFC3339.
+          format: date-time
+          type: string
+        value:
+          description: The requested value for the limit.
+          format: int64
+          type: integer
+      required:
+      - id
+      - compartmentId
+      - serviceName
+      - limitName
+      - region
+      - currentValue
+      - value
+      - limitsIncreaseRequestId
+      - lifecycleState
+      - timeCreated
+      type: object
+      x-example: "{\n  \"id\" : \"<var>&lt;item_OCID&gt;</var>\",\n  \"compartmentId\" : \"<var>&lt;compartment_OCID&gt;</var>\",\n  \"region\" : \"us-ashburn-1\",\n  \"scope\" : \"ABcd:US-ASHBURN-1\",\n  \"serviceName\" : \"compute\",\n  \"limitName\" : \"dense-io-e5-core-count\",\n  \"value\" : 50,\n  \"currentValue\" : 20,\n  \"limitsIncreaseRequestId\" : \"<var>&lt;request_OCID&gt;</var>\",\n  \"timeCreated\" : \"2024-04-15T23:46:54.321Z\",\n  \"status\" : \"SUCCEEDED\"\n}\n"
+    LimitsIncreaseItemQuestionRequest:
+      description: 'A question response.
+
+        '
+      properties:
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the question.
+          type: string
+        questionResponse:
+          description: The response to the question.
+          type: string
+      required:
+      - id
+      - questionResponse
+      type: object
+    LimitsIncreaseItemRequestCollection:
+      description: 'Collection of property summaries for limit increase items within the indicated limit increase request.
+
+        '
+      properties:
+        items:
+          description: List of limit increase items.
+          items:
+            $ref: '#/components/schemas/LimitsIncreaseItemRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    Error:
+      description: Generic error object.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    UpdateLimitsIncreaseRequestDetails:
+      description: The configuration details for updating a limit increase request.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+      type: object
+    LimitsIncreaseRequestCollection:
+      description: 'Collection of property summaries for limit increase requests.
+
+        '
+      properties:
+        items:
+          description: A list of limit increase requests.
+          items:
+            $ref: '#/components/schemas/LimitsIncreaseRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    CreateLimitsIncreaseItemRequestDetails:
+      description: 'The configuration details for creating a limit increase item within a limit increase request.
+
+        For more information, see
+
+        [Creating a Limit Increase Request](/iaas/Content/General/service-limits/create-requests.htm).
+
+        '
+      properties:
+        limitName:
+          description: The name of the limit to be increased.
+          maxLength: 255
+          minLength: 1
+          type: string
+        questionnaireResponse:
+          description: List of questionnaire responses.
+          items:
+            $ref: '#/components/schemas/LimitsIncreaseItemQuestionRequest'
+          type: array
+        region:
+          description: The region for the limit increase.
+          maxLength: 255
+          minLength: 1
+          type: string
+        scope:
+          description: 'The scope of the limit increase item.
+
+            For OCI, use the logical availability domain (AD) of the request.
+
+            For Multicloud, use the availability zone (AZ) of the request
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        serviceName:
+          description: The name of the service that owns the limit.
+          maxLength: 255
+          minLength: 1
+          type: string
+        value:
+          description: The requested value of the increase.
+          format: int64
+          type: integer
+      required:
+      - serviceName
+      - limitName
+      - value
+      - region
       type: object
     LimitsIncreaseQuestionSummary:
       description: 'A summary of properties for a question to be asked for a certain limit.
@@ -2974,31 +2965,34 @@ components:
       - questionType
       - isRequired
       type: object
-    LimitsIncreaseItemQuestionRequest:
-      description: 'A question response.
-
-        '
+    PatchInstruction:
+      description: A single patch instruction for a new comment to be added to the limit increase request.
+      discriminator:
+        propertyName: operation
       properties:
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the question.
-          type: string
-        questionResponse:
-          description: The response to the question.
-          type: string
-      required:
-      - id
-      - questionResponse
-      type: object
-  responses:
-    200OK_LimitsIncreaseRequest:
-      description: Detailed information about the limit increase request
-      headers:
-        etag:
-          description: 'For optimistic concurrency control. See `if-match`.
+        operation:
+          description: 'Operation to perform on an element in the list.
 
             '
-          schema:
-            type: string
+          enum:
+          - INSERT
+          type: string
+        selection:
+          description: 'The set of values to which the operation applies as a [JMESPath expression](https://jmespath.org/specification.html) for evaluation against the context resource.
+
+            An operation fails if the selection yields an exception, except as otherwise specified.
+
+            Note that comparisons involving non-primitive values (objects or arrays) are not supported and will always evaluate to false.
+
+            '
+          type: string
+      required:
+      - operation
+      - selection
+  responses:
+    204OK_NoContent:
+      description: OK with NoContent.
+      headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
@@ -3007,10 +3001,6 @@ components:
             '
           schema:
             type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LimitsIncreaseRequest'
     200OK_LimitsIncreaseItemRequest:
       description: Detailed information about the limit increase item request
       headers:
@@ -3032,9 +3022,15 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/LimitsIncreaseItemRequest'
-    204OK_NoContent:
-      description: OK with NoContent.
+    200OK_LimitsIncreaseRequest:
+      description: Detailed information about the limit increase request
       headers:
+        etag:
+          description: 'For optimistic concurrency control. See `if-match`.
+
+            '
+          schema:
+            type: string
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
@@ -3043,6 +3039,10 @@ components:
             '
           schema:
             type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LimitsIncreaseRequest'
 x-anchors:
   x-headers:
     etag:

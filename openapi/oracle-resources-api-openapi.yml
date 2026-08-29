@@ -172,6 +172,29 @@ paths:
       x-related-resource: '#/definitions/ResourceQuotumSummary'
 components:
   parameters:
+    RequestIdHeader:
+      description: Unique, Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    EntitlementIdQueryParam:
+      description: Subscription or entitlement ID.
+      in: query
+      name: entitlementId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationLimitParam:
+      description: The maximum number of items to return in the paginated response.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 50
+        maximum: 1000
+        minimum: 1
     ServiceNameQueryParam:
       description: Service name.
       in: query
@@ -198,36 +221,12 @@ components:
         type: string
         maxLength: 512
         minLength: 1
-    SortByParam:
-      description: The field to sort by. Supports one sort order.
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - TIMECREATED
-        - TIMESTART
-        default: TIMECREATED
     ServiceEntitlementIdQueryParam:
       description: Service entitlement ID.
       in: query
       name: serviceEntitlement
       required: false
       x-default-description: 'null'
-      schema:
-        type: string
-    EntitlementIdQueryParam:
-      description: Subscription or entitlement ID.
-      in: query
-      name: entitlementId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: Unique, Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-      in: header
-      name: opc-request-id
       schema:
         type: string
     ResourceCompartmentIdQueryParam:
@@ -239,28 +238,35 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    PaginationLimitParam:
-      description: The maximum number of items to return in the paginated response.
+    SortByParam:
+      description: The field to sort by. Supports one sort order.
       in: query
-      name: limit
+      name: sortBy
       schema:
-        type: integer
-        default: 50
-        maximum: 1000
-        minimum: 1
+        type: string
+        enum:
+        - TIMECREATED
+        - TIMESTART
+        default: TIMECREATED
   schemas:
-    ResourcesCollection:
-      description: The resources of a service.
+    SkuProducts:
+      description: 'The SKU product ID details for a resource.
+
+        '
       properties:
-        items:
-          description: The list of resource details for a service.
-          items:
-            $ref: '#/components/schemas/ResourceSummary'
-          maxItems: 2000
-          minItems: 0
-          type: array
-      required:
-      - items
+        cloudCreditType:
+          description: The cloud credit type for the resource.
+          example: CLOUDCM
+          type: string
+        skuId:
+          description: The SKU ID for the resource.
+          example: B88269
+          type: string
+        skuType:
+          description: The SKU type for the resource.
+          example: COMMITMENT
+          type: string
+      type: object
     ResourceQuotumSummary:
       description: 'The resource quota balance details.
 
@@ -300,54 +306,6 @@ components:
         service:
           description: The service name.
           example: Compute
-          type: string
-      type: object
-    Error:
-      description: Error object model.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-      type: object
-    ResourceQuotumCollection:
-      description: The quota details of resources in a tenancy.
-      properties:
-        isAllowed:
-          default: true
-          description: Indicates if further quota consumption is allowed.
-          type: boolean
-        items:
-          description: The list of resource quota details.
-          items:
-            $ref: '#/components/schemas/ResourceQuotumSummary'
-          maxItems: 1000
-          minItems: 0
-          type: array
-      required:
-      - items
-      - isAllowed
-    SkuProducts:
-      description: 'The SKU product ID details for a resource.
-
-        '
-      properties:
-        cloudCreditType:
-          description: The cloud credit type for the resource.
-          example: CLOUDCM
-          type: string
-        skuId:
-          description: The SKU ID for the resource.
-          example: B88269
-          type: string
-        skuType:
-          description: The SKU type for the resource.
-          example: COMMITMENT
           type: string
       type: object
     ResourceSummary:
@@ -404,6 +362,48 @@ components:
           - POINT_DATA
           type: string
       type: object
+    Error:
+      description: Error object model.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    ResourcesCollection:
+      description: The resources of a service.
+      properties:
+        items:
+          description: The list of resource details for a service.
+          items:
+            $ref: '#/components/schemas/ResourceSummary'
+          maxItems: 2000
+          minItems: 0
+          type: array
+      required:
+      - items
+    ResourceQuotumCollection:
+      description: The quota details of resources in a tenancy.
+      properties:
+        isAllowed:
+          default: true
+          description: Indicates if further quota consumption is allowed.
+          type: boolean
+        items:
+          description: The list of resource quota details.
+          items:
+            $ref: '#/components/schemas/ResourceQuotumSummary'
+          maxItems: 1000
+          minItems: 0
+          type: array
+      required:
+      - items
+      - isAllowed
 x-anchors:
   x-headers:
     opc-next-page:

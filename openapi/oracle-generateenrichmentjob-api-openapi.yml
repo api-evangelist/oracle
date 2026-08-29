@@ -90,6 +90,56 @@ paths:
         description: Details for the new EnrichmentJob.
         required: true
 components:
+  parameters:
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    semanticStoreIdPathParam:
+      description: The OCID of the semantic store
+      in: path
+      name: semanticStoreId
+      required: true
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   schemas:
     EnrichmentJobConfiguration:
       description: 'An EnrichmentJobConfiguration describes the database objects that will be targeted by an EnrichmentJob, as described by the job''s type.
@@ -108,6 +158,54 @@ components:
           x-obmcs-top-level-enum: '#/definitions/EnrichmentJobType'
       required:
       - enrichmentJobType
+      type: object
+    GenerateEnrichmentJobDetails:
+      description: The details required to create an EnrichmentJob.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: An optional description of the EnrichmentJob.
+          maxLength: 400
+          minLength: 1
+          type: string
+          x-default-description: 'null'
+        displayName:
+          description: A user-friendly display name. It does not have to be unique and can be modified. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        enrichmentJobConfiguration:
+          $ref: '#/components/schemas/EnrichmentJobConfiguration'
+        enrichmentJobType:
+          description: Enrichment job type. Currently supported Full Build (All supported objects in a given schema) and Partial Build (Selected tables and/or supported objects in a given schema).
+          enum:
+          - FULL_BUILD
+          - PARTIAL_BUILD
+          - DELTA_REFRESH
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/EnrichmentJobType'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+      required:
+      - enrichmentJobType
+      - enrichmentJobConfiguration
       type: object
     EnrichmentJob:
       description: 'Object representing to EnrichmentJob.
@@ -219,54 +317,6 @@ components:
       - lifecycleDetails
       - lifecycleState
       type: object
-    GenerateEnrichmentJobDetails:
-      description: The details required to create an EnrichmentJob.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: An optional description of the EnrichmentJob.
-          maxLength: 400
-          minLength: 1
-          type: string
-          x-default-description: 'null'
-        displayName:
-          description: A user-friendly display name. It does not have to be unique and can be modified. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        enrichmentJobConfiguration:
-          $ref: '#/components/schemas/EnrichmentJobConfiguration'
-        enrichmentJobType:
-          description: Enrichment job type. Currently supported Full Build (All supported objects in a given schema) and Partial Build (Selected tables and/or supported objects in a given schema).
-          enum:
-          - FULL_BUILD
-          - PARTIAL_BUILD
-          - DELTA_REFRESH
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/EnrichmentJobType'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      required:
-      - enrichmentJobType
-      - enrichmentJobConfiguration
-      type: object
     Error:
       description: Error Information.
       properties:
@@ -279,56 +329,6 @@ components:
       required:
       - code
       - message
-  parameters:
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    semanticStoreIdPathParam:
-      description: The OCID of the semantic store
-      in: path
-      name: semanticStoreId
-      required: true
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

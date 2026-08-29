@@ -285,6 +285,127 @@ paths:
         description: The information to be updated.
         required: true
 components:
+  parameters:
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        - id
+        default: timeCreated
+    PartnerIdOptionalQueryParam:
+      description: The unique identifier (OCID) of the associated partner.
+      in: query
+      name: partnerId
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    LockboxAccessContextAttributeLifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/LockboxAccessContextAttribute/lifecycleState'
+      schema:
+        type: string
+    LockboxAccessContextAttributeIdentifierPathParam:
+      description: unique AccessContextAttribute identifier
+      in: path
+      name: lockboxAccessContextAttributeId
+      required: true
+      schema:
+        type: string
+    LockboxAccessContextAttributeNameQueryParam:
+      description: A filter to return the access context attribute that matches the entire name given.
+      in: query
+      name: name
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   schemas:
     UpdateLockboxAccessContextAttributeDetails:
       description: The action to be updated.
@@ -337,6 +458,47 @@ components:
         values:
           $ref: '#/components/schemas/AccessContextAttributeValueCollection'
       type: object
+    AccessContextAttributeValueCollection:
+      description: Contains access context attritbue value entries
+      properties:
+        items:
+          description: List of access context attribute values
+          items:
+            $ref: '#/components/schemas/AccessContextAttributeValue'
+          type: array
+      required:
+      - items
+      type: object
+    AccessContextAttributeValue:
+      description: Defined by partner, these attributes provides context for creating access request
+      properties:
+        simultaneousAccessState:
+          description: If this credential allows simultaneous access
+          enum:
+          - ENABLED
+          - DISABLED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SimultaneousAccessState'
+        value:
+          description: The value of the access context attribute
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - value
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     LockboxAccessContextAttributeSummary:
       description: the access context attributes are needed for creating a lockbox
       properties:
@@ -432,18 +594,6 @@ components:
       - name
       - partnerId
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     LockboxAccessContextAttribute:
       description: the access context attributes are needed for creating a lockbox
       properties:
@@ -545,17 +695,6 @@ components:
       - name
       - partnerId
       type: object
-    LockboxAccessContextAttributeCollection:
-      description: Results of access context attribute search.
-      properties:
-        items:
-          description: List of AccessContextAttribute.
-          items:
-            $ref: '#/components/schemas/LockboxAccessContextAttributeSummary'
-          type: array
-      required:
-      - items
-      type: object
     CreateLockboxAccessContextAttributeDetails:
       description: The information about new AccessContextAttribute
       properties:
@@ -618,156 +757,17 @@ components:
       - name
       - partnerId
       type: object
-    AccessContextAttributeValue:
-      description: Defined by partner, these attributes provides context for creating access request
-      properties:
-        simultaneousAccessState:
-          description: If this credential allows simultaneous access
-          enum:
-          - ENABLED
-          - DISABLED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SimultaneousAccessState'
-        value:
-          description: The value of the access context attribute
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - value
-      type: object
-    AccessContextAttributeValueCollection:
-      description: Contains access context attritbue value entries
+    LockboxAccessContextAttributeCollection:
+      description: Results of access context attribute search.
       properties:
         items:
-          description: List of access context attribute values
+          description: List of AccessContextAttribute.
           items:
-            $ref: '#/components/schemas/AccessContextAttributeValue'
+            $ref: '#/components/schemas/LockboxAccessContextAttributeSummary'
           type: array
       required:
       - items
       type: object
-  parameters:
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        - id
-        default: timeCreated
-    LockboxAccessContextAttributeNameQueryParam:
-      description: A filter to return the access context attribute that matches the entire name given.
-      in: query
-      name: name
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    LockboxAccessContextAttributeLifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/LockboxAccessContextAttribute/lifecycleState'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    PartnerIdOptionalQueryParam:
-      description: The unique identifier (OCID) of the associated partner.
-      in: query
-      name: partnerId
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    LockboxAccessContextAttributeIdentifierPathParam:
-      description: unique AccessContextAttribute identifier
-      in: path
-      name: lockboxAccessContextAttributeId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

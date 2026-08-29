@@ -398,6 +398,15 @@ paths:
       x-obmcs-client-retries-enabled: true
 components:
   parameters:
+    FilterByConfigurationIdQueryParam:
+      description: The requested Configuration instance.
+      in: query
+      name: configurationId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     ConfigurationIdPathParam:
       description: The OCID of the Configuration.
       in: path
@@ -407,46 +416,15 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    PaginationTokenQueryParam:
-      description: 'The value of the `opc-next-page` or `opc-prev-page` response header from
-
-        the previous list call. For information about pagination, see [List
-
-        Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
-
-        '
+    FilterByConfigurationLifecycleStateQueryParam:
+      description: Configuration Lifecycle State
       in: query
-      name: page
+      name: lifecycleState
+      required: false
+      x-obmcs-enumref: '#/definitions/Configuration/lifecycleState'
       schema:
         type: string
-        maxLength: 4096
-        minLength: 1
-    FilterByServiceFeatureSupportedQueryParam:
-      description: 'Return shapes that are supported by the service feature.
-
-        '
-      in: query
-      name: isSupportedFor
-      required: false
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - DBSYSTEM
-          - HEATWAVECLUSTER
-          type: string
-        default:
-        - DBSYSTEM
-        uniqueItems: true
-    FilterByAvailabilityDomainQueryOptionalParam:
-      description: The name of the Availability Domain.
-      in: query
-      name: availabilityDomain
-      required: false
-      schema:
-        type: string
+        default: AVAILABLE
     IfNoneMatchHeader:
       description: 'For conditional requests. In the GET call for a resource, set the
 
@@ -464,6 +442,28 @@ components:
       x-default-description: No conditional request is made.
       schema:
         type: string
+    FilterByDisplayNameQueryParam:
+      description: A filter to return only the resource matching the given display name exactly.
+      in: query
+      name: displayName
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+    FilterByConfigurationTypeQueryParam:
+      description: The requested Configuration types.
+      in: query
+      name: type
+      required: false
+      schema:
+        type: array
+        items:
+          enum:
+          - DEFAULT
+          - CUSTOM
+          type: string
+        default: '[DEFAULT]'
+        uniqueItems: true
     OpcRetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case
 
@@ -484,29 +484,108 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    FilterByConfigurationLifecycleStateQueryParam:
-      description: Configuration Lifecycle State
+    FilterByCompartmentIdQueryParam:
+      description: The compartment [OCID](/Content/General/Concepts/identifiers.htm).
       in: query
-      name: lifecycleState
-      required: false
-      x-obmcs-enumref: '#/definitions/Configuration/lifecycleState'
+      name: compartmentId
+      required: true
       schema:
         type: string
-        default: AVAILABLE
-    FilterByConfigurationTypeQueryParam:
-      description: The requested Configuration types.
+        maxLength: 255
+        minLength: 1
+    FilterByServiceFeatureSupportedQueryParam:
+      description: 'Return shapes that are supported by the service feature.
+
+        '
       in: query
-      name: type
+      name: isSupportedFor
       required: false
+      style: form
+      explode: true
       schema:
         type: array
         items:
           enum:
-          - DEFAULT
-          - CUSTOM
+          - DBSYSTEM
+          - HEATWAVECLUSTER
           type: string
-        default: '[DEFAULT]'
+        default:
+        - DBSYSTEM
         uniqueItems: true
+    SortOrderQueryParam:
+      description: The sort order to use (ASC or DESC).
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    OpcRequestIdHeader:
+      description: 'Customer-defined unique identifier for the request. If you need to
+
+        contact Oracle about a specific request, please provide the request
+
+        ID that you supplied in this header with the request.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    FilterByShapeNameQueryParam:
+      description: The requested Shape name.
+      in: query
+      name: shapeName
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    FilterByNameQueryParam:
+      description: Name
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` or `opc-prev-page` response header from
+
+        the previous list call. For information about pagination, see [List
+
+        Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    FilterByAvailabilityDomainQueryOptionalParam:
+      description: The name of the Availability Domain.
+      in: query
+      name: availabilityDomain
+      required: false
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return in a paginated list call. For information about pagination, see
+
+        [List Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call for a
 
@@ -523,63 +602,6 @@ components:
       name: if-match
       schema:
         type: string
-    FilterByCompartmentIdQueryParam:
-      description: The compartment [OCID](/Content/General/Concepts/identifiers.htm).
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    FilterByDisplayNameQueryParam:
-      description: A filter to return only the resource matching the given display name exactly.
-      in: query
-      name: displayName
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-    PaginationLimitQueryParam:
-      description: 'The maximum number of items to return in a paginated list call. For information about pagination, see
-
-        [List Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    FilterByNameQueryParam:
-      description: Name
-      in: query
-      name: name
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-    FilterByShapeNameQueryParam:
-      description: The requested Shape name.
-      in: query
-      name: shapeName
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SortOrderQueryParam:
-      description: The sort order to use (ASC or DESC).
-      in: query
-      name: sortOrder
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
     SortByConfigurationFieldQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Time fields are default ordered as descending. Display name is default ordered as ascending.
 
@@ -595,29 +617,23 @@ components:
         - timeCreated
         - timeUpdated
         default: timeCreated
-    FilterByConfigurationIdQueryParam:
-      description: The requested Configuration instance.
-      in: query
-      name: configurationId
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    OpcRequestIdHeader:
-      description: 'Customer-defined unique identifier for the request. If you need to
-
-        contact Oracle about a specific request, please provide the request
-
-        ID that you supplied in this header with the request.
+  schemas:
+    Option:
+      description: 'The value of an option for a particular version of the DB System engine.
 
         '
-      in: header
-      name: opc-request-id
-      required: false
-      schema:
-        type: string
-  schemas:
+      properties:
+        name:
+          description: The option name.
+          maxLength: 64
+          minLength: 1
+          type: string
+        value:
+          description: The option value.
+          maxLength: 1024
+          type: string
+      required:
+      - name
     Configuration:
       description: 'The set of MySQL variables to be used when deploying a MySQL Database Service DB System.
 
@@ -746,6 +762,20 @@ components:
       - lifecycleState
       - variables
       - options
+    Version:
+      description: 'A supported MySQL Version.
+
+        '
+      properties:
+        description:
+          description: A link to a page describing the version.
+          type: string
+        version:
+          description: The specific version identifier
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
     UpdateConfigurationDetails:
       description: 'The details required to update a Configuration.
 
@@ -789,6 +819,105 @@ components:
 
             '
           type: object
+    ConfigurationSummary:
+      description: 'The general details of a Configuration such as its id, displayName, type, and shape association.
+
+        '
+      properties:
+        compartmentId:
+          description: OCID of the Compartment the Configuration exists in.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: User-provided data about the Configuration.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: The display name of the Configuration.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the Configuration.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current state of the Configuration.
+          type: string
+          x-obmcs-enumref: '#/definitions/Configuration/lifecycleState'
+        shapeName:
+          description: The name of the associated Shape.
+          maxLength: 255
+          minLength: 1
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The date and time the Configuration was created, as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the Configuration was last updated, as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+          format: date-time
+          type: string
+        type:
+          description: The Configuration type, DEFAULT or CUSTOM
+          type: string
+          x-obmcs-enumref: '#/definitions/Configuration/type'
+      required:
+      - id
+      - compartmentId
+      - shapeName
+      - type
+      - lifecycleState
     CreateConfigurationDetails:
       description: 'The details required to create a new Configuration.
 
@@ -878,20 +1007,43 @@ components:
       required:
       - code
       - message
-    InitializationVariables:
-      description: 'DEPRECATED -- please use the `options` field instead.
+    ShapeSummary:
+      description: 'The shape of the DB System. The shape determines resources to allocate
 
-        User-defined service variables set only at DB system initialization. These variables cannot be changed later at runtime.
+        to the DB System - CPU cores and memory for VM shapes; CPU cores, memory
+
+        and storage for non-VM (or bare metal) shapes.  For a description of
+
+        shapes, see [DB System Shape Options](/mysql-database/doc/shapes.htm).
 
         '
       properties:
-        lowerCaseTableNames:
-          default: CASE_SENSITIVE
-          description: "Represents the MySQL server system variable lower_case_table_names (https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_lower_case_table_names).\nlowerCaseTableNames controls case-sensitivity of tables and schema names and how they are stored in the DB System.\nValid values are:\n  - CASE_SENSITIVE - (default) Table and schema name comparisons are case-sensitive and stored as specified. (lower_case_table_names=0)\n  - CASE_INSENSITIVE_LOWERCASE - Table and schema name comparisons are not case-sensitive and stored in lowercase. (lower_case_table_names=1)\n"
-          enum:
-          - CASE_SENSITIVE
-          - CASE_INSENSITIVE_LOWERCASE
+        cpuCoreCount:
+          description: The number of CPU Cores the Instance provides. These are "OCPU"s.
+          type: integer
+        isSupportedFor:
+          description: 'What service features the shape is supported for.
+
+            '
+          items:
+            enum:
+            - DBSYSTEM
+            - HEATWAVECLUSTER
+            type: string
+          type: array
+          uniqueItems: true
+        memorySizeInGBs:
+          description: The amount of RAM the Instance provides. This is an IEC base-2 number.
+          type: integer
+        name:
+          description: The name of the shape used for the DB System.
+          maxLength: 255
+          minLength: 1
           type: string
+      required:
+      - name
+      - cpuCoreCount
+      - memorySizeInGBs
     VersionSummary:
       description: 'A summary of the supported MySQL Versions families, and a list of their supported minor versions.
 
@@ -2793,218 +2945,21 @@ components:
           minimum: 1
           type: integer
           x-obmcs-mysql-isDynamic: true
-    Version:
-      description: 'A supported MySQL Version.
+    InitializationVariables:
+      description: 'DEPRECATED -- please use the `options` field instead.
+
+        User-defined service variables set only at DB system initialization. These variables cannot be changed later at runtime.
 
         '
       properties:
-        description:
-          description: A link to a page describing the version.
+        lowerCaseTableNames:
+          default: CASE_SENSITIVE
+          description: "Represents the MySQL server system variable lower_case_table_names (https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_lower_case_table_names).\nlowerCaseTableNames controls case-sensitivity of tables and schema names and how they are stored in the DB System.\nValid values are:\n  - CASE_SENSITIVE - (default) Table and schema name comparisons are case-sensitive and stored as specified. (lower_case_table_names=0)\n  - CASE_INSENSITIVE_LOWERCASE - Table and schema name comparisons are not case-sensitive and stored in lowercase. (lower_case_table_names=1)\n"
+          enum:
+          - CASE_SENSITIVE
+          - CASE_INSENSITIVE_LOWERCASE
           type: string
-        version:
-          description: The specific version identifier
-          maxLength: 255
-          minLength: 1
-          type: string
-      type: object
-    Option:
-      description: 'The value of an option for a particular version of the DB System engine.
-
-        '
-      properties:
-        name:
-          description: The option name.
-          maxLength: 64
-          minLength: 1
-          type: string
-        value:
-          description: The option value.
-          maxLength: 1024
-          type: string
-      required:
-      - name
-    ShapeSummary:
-      description: 'The shape of the DB System. The shape determines resources to allocate
-
-        to the DB System - CPU cores and memory for VM shapes; CPU cores, memory
-
-        and storage for non-VM (or bare metal) shapes.  For a description of
-
-        shapes, see [DB System Shape Options](/mysql-database/doc/shapes.htm).
-
-        '
-      properties:
-        cpuCoreCount:
-          description: The number of CPU Cores the Instance provides. These are "OCPU"s.
-          type: integer
-        isSupportedFor:
-          description: 'What service features the shape is supported for.
-
-            '
-          items:
-            enum:
-            - DBSYSTEM
-            - HEATWAVECLUSTER
-            type: string
-          type: array
-          uniqueItems: true
-        memorySizeInGBs:
-          description: The amount of RAM the Instance provides. This is an IEC base-2 number.
-          type: integer
-        name:
-          description: The name of the shape used for the DB System.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - name
-      - cpuCoreCount
-      - memorySizeInGBs
-    ConfigurationSummary:
-      description: 'The general details of a Configuration such as its id, displayName, type, and shape association.
-
-        '
-      properties:
-        compartmentId:
-          description: OCID of the Compartment the Configuration exists in.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: User-provided data about the Configuration.
-          maxLength: 400
-          minLength: 1
-          type: string
-        displayName:
-          description: The display name of the Configuration.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the Configuration.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The current state of the Configuration.
-          type: string
-          x-obmcs-enumref: '#/definitions/Configuration/lifecycleState'
-        shapeName:
-          description: The name of the associated Shape.
-          maxLength: 255
-          minLength: 1
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The date and time the Configuration was created, as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the Configuration was last updated, as described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-          format: date-time
-          type: string
-        type:
-          description: The Configuration type, DEFAULT or CUSTOM
-          type: string
-          x-obmcs-enumref: '#/definitions/Configuration/type'
-      required:
-      - id
-      - compartmentId
-      - shapeName
-      - type
-      - lifecycleState
   responses:
-    409-Conflict:
-      description: Conflict
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    404-NotFound:
-      description: Not Found
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    400-BadRequest:
-      description: Bad Request
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     500-ServerError:
       description: Internal Server Error
       headers:
@@ -3020,38 +2975,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    DefaultError:
-      description: An error has occurred.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    412-PreconditionFailed:
-      description: Precondition Failed
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    401-Unauthorized:
-      description: Unauthorized
+    400-BadRequest:
+      description: Bad Request
       headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
@@ -3097,6 +3022,81 @@ components:
           description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
           schema:
             type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404-NotFound:
+      description: Not Found
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    409-Conflict:
+      description: Conflict
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    DefaultError:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401-Unauthorized:
+      description: Unauthorized
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    412-PreconditionFailed:
+      description: Precondition Failed
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
       content:
         application/json:
           schema:

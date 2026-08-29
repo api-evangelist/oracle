@@ -913,8 +913,83 @@ paths:
       x-related-resource: '#/definitions/WorkItemSummary'
 components:
   schemas:
-    UpdateAnalyzeApplicationsConfigurationDetails:
-      description: Attributes to update an Analyze Applications Configuration.
+    WorkItemDetails:
+      description: The minimum details of a work item.
+      discriminator:
+        propertyName: kind
+      properties:
+        kind:
+          description: The kind of work item details.
+          enum:
+          - BASIC
+          - JAVA_MIGRATION
+          - PERFORMANCE_TUNING
+          type: string
+        workItemType:
+          description: The work item type.
+          enum:
+          - PERFORMANCE_TUNING
+          - JAVA_MIGRATION
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/WorkItemType'
+      required:
+      - kind
+      type: object
+    RequestJavaMigrationAnalysisDetails:
+      description: The data to bulk create Java Migration Analysis.
+      properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment where the Java Migration Analysis will be created.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        targets:
+          description: The list of targets for the Java Migration Analysis.
+          items:
+            $ref: '#/components/schemas/JavaMigrationAnalysisTarget'
+          maxItems: 1000
+          type: array
+      required:
+      - compartmentId
+      - targets
+      type: object
+    AnalyzeApplicationsConfiguration:
+      description: The configuration for analyzing applications.
       properties:
         bucketName:
           description: The name of the bucket used for analyzing applications.
@@ -926,8 +1001,22 @@ components:
           maxLength: 255
           minLength: 1
           type: string
+      required:
+      - namespaceName
+      - bucketName
       type: object
       x-example: "{\n  \"namespaceName\": \"oardccsi\",\n  \"bucketName\": \"jmsutils-java-migration\"\n}\n"
+    WorkRequestErrorCollection:
+      description: A list of work request errors. Can contain both errors and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work request errors.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
     PerformanceTuningAnalysisSummary:
       description: Summary information about a Performance Tuning Analysis.
       properties:
@@ -1012,71 +1101,231 @@ components:
       - createdBy
       type: object
       x-example: "{\n  \"id\": \"ocid1.jfrreport\",\n  \"workRequestId\": \"ocid1.jmsworkrequest.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n  \"compartmentId\": \"ocid1.tenancy.oc1..aaaaaaaawgbzspd6cjovpmic7dahwbalg4opcbixgguo6z2s7t335m6labcd\",\n  \"analysisProjectName\": \"my-project\",\n  \"warningCount\": 3,\n  \"result\": \"ACTION_RECOMMENDED\",\n  \"resultObjectStoragePath\": \"/JMS/utils/results/performanceTuning/performanceTuningResult.json\",\n  \"artifactObjectStoragePath\": \"/JMS/utils/myartifacts2.jfr\",\n  \"timeCreated\": \"2024-11-07T09:14:20.300Z\",\n  \"timeStarted\": \"2024-11-07T09:14:20.300Z\",\n  \"timeFinished\": \"2024-11-07T09:14:20.300Z\",\n  \"createdBy\": {\n    \"id\": \"ocid1.user.oc1..aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n    \"displayName\": \"userName\"    \n  }\n}\n"
-    RequestJavaMigrationAnalysisDetails:
-      description: The data to bulk create Java Migration Analysis.
-      properties:
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment where the Java Migration Analysis will be created.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        targets:
-          description: The list of targets for the Java Migration Analysis.
-          items:
-            $ref: '#/components/schemas/JavaMigrationAnalysisTarget'
-          maxItems: 1000
-          type: array
-      required:
-      - compartmentId
-      - targets
-      type: object
-    Error:
-      description: Error information.
+    WorkRequestError:
+      description: An error encountered while performing an operation that is tracked by a work request.
       properties:
         code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
+
+            [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+            '
           type: string
         message:
           description: A human-readable error message.
           type: string
+        timestamp:
+          description: 'The date and time the error occurred, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
       required:
       - code
       - message
+      - timestamp
+    WorkRequestSummary:
+      description: Summary information about an asynchronous work request.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
+
+            '
+          type: string
+        createdBy:
+          $ref: '#/components/schemas/Principal'
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+          type: string
+        operationType:
+          description: The asynchronous operation tracked by this work request.
+          enum:
+          - REQUEST_JAVA_MIGRATION_SA_ANALYSIS
+          - REQUEST_PERFORMANCE_TUNING_SA_ANALYSIS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
+
+            that must be performed.
+
+            '
+          format: float
+          type: number
+        resources:
+          description: The resources that are affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELLING
+          - CANCELLED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the work request was created, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the work request was finished, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the work request was started, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the work request was updated, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    Principal:
+      description: An authorized principal.
+      properties:
+        displayName:
+          description: The name of the principal.
+          type: string
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the principal.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - displayName
+      type: object
+      x-example: "{\n  \"createdBy\": {\n    \"id\": \"ocid1.principal.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n    \"displayName\": \"userName\"\n  }\n}\n"
+    WorkRequest:
+      description: 'An asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
+
+        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
+
+        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
+
+            '
+          type: string
+        completedTaskCount:
+          description: The number of tasks had been executed to a terminal state.
+          type: integer
+        createdBy:
+          $ref: '#/components/schemas/Principal'
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+          type: string
+        operationType:
+          description: The asynchronous operation tracked by this work request.
+          enum:
+          - REQUEST_JAVA_MIGRATION_SA_ANALYSIS
+          - REQUEST_PERFORMANCE_TUNING_SA_ANALYSIS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
+
+            that must be performed.
+
+            '
+          format: float
+          type: number
+        resources:
+          description: The resources that are affected by the work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELLING
+          - CANCELLED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the work request was created, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the work request was finished, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the work request was started, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the work request was updated, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        totalTaskCount:
+          description: The total number of tasks to be executed for this work request.
+          type: integer
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
     JavaMigrationAnalysisCollection:
       description: Results of a Java Migration Analysis search. Contains JavaMigrationAnalysisSummary items.
       properties:
@@ -1088,24 +1337,17 @@ components:
       required:
       - items
       type: object
-    AnalyzeApplicationsConfiguration:
-      description: The configuration for analyzing applications.
+    WorkRequestLogEntryCollection:
+      description: A list of work request logs. Can contain both logs and other information, such as metadata.
       properties:
-        bucketName:
-          description: The name of the bucket used for analyzing applications.
-          maxLength: 255
-          minLength: 1
-          type: string
-        namespaceName:
-          description: The Object Storage namespace used for analyzing applications.
-          maxLength: 255
-          minLength: 1
-          type: string
+        items:
+          description: A list of work request log entries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
       required:
-      - namespaceName
-      - bucketName
+      - items
       type: object
-      x-example: "{\n  \"namespaceName\": \"oardccsi\",\n  \"bucketName\": \"jmsutils-java-migration\"\n}\n"
     WorkItemSummary:
       description: Work item to complete a work request.
       properties:
@@ -1145,17 +1387,6 @@ components:
       - status
       - details
       - retryCount
-      type: object
-    WorkItemCollection:
-      description: A list of WorkItem.
-      properties:
-        items:
-          description: A list of work request items.
-          items:
-            $ref: '#/components/schemas/WorkItemSummary'
-          type: array
-      required:
-      - items
       type: object
     PerformanceTuningAnalysis:
       description: 'To use any of the API operations, you must be authorized by an IAM policy. If you''re not authorized, talk to
@@ -1249,6 +1480,112 @@ components:
       - createdBy
       type: object
       x-example: "{\n  \"id\": \"ocid1.jfrreport\",\n  \"workRequestId\": \"ocid1.jmsworkrequest.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n  \"compartmentId\": \"ocid1.tenancy.oc1..aaaaaaaawgbzspd6cjovpmic7dahwbalg4opcbixgguo6z2s7t335m6labcd\",\n  \"analysisProjectName\": \"my-project\",\n  \"warningCount\": 3,\n  \"result\": \"ACTION_RECOMMENDED\",\n  \"resultObjectStoragePath\": \"/JMS/utils/results/performanceTuning/performanceTuningResult.json\",\n  \"artifactObjectStoragePath\": \"/JMS/utils/myartifacts2.jfr\",\n  \"timeCreated\": \"2024-11-07T09:14:20.300Z\",\n  \"timeStarted\": \"2024-11-07T09:14:20.300Z\",\n  \"timeFinished\": \"2024-11-07T09:14:20.300Z\",\n  \"createdBy\": {\n    \"id\": \"ocid1.user.oc1..aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n    \"displayName\": \"userName\"    \n  }\n}\n"
+    PerformanceTuningAnalysisCollection:
+      description: Results of a Performance Tuning Analysis search. Contains PerformanceTuningAnalysisSummary items.
+      properties:
+        items:
+          description: List of Performance Tuning Analysis.
+          items:
+            $ref: '#/components/schemas/PerformanceTuningAnalysisSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateAnalyzeApplicationsConfigurationDetails:
+      description: Attributes to update an Analyze Applications Configuration.
+      properties:
+        bucketName:
+          description: The name of the bucket used for analyzing applications.
+          maxLength: 255
+          minLength: 1
+          type: string
+        namespaceName:
+          description: The Object Storage namespace used for analyzing applications.
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+      x-example: "{\n  \"namespaceName\": \"oardccsi\",\n  \"bucketName\": \"jmsutils-java-migration\"\n}\n"
+    WorkItemCollection:
+      description: A list of WorkItem.
+      properties:
+        items:
+          description: A list of work request items.
+          items:
+            $ref: '#/components/schemas/WorkItemSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateSubscriptionAcknowledgmentConfigurationDetails:
+      description: Attributes to update a Subscription Acknowledgment Configuration.
+      properties:
+        isAcknowledged:
+          default: false
+          description: Flag to determine whether the subscription was acknowledged or not.
+          type: boolean
+      type: object
+      x-example: "{\n  \"isAcknowledged\": true\n}\n"
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestLogEntry:
+      description: A log message from performing an operation that is tracked by a work request.
+      properties:
+        message:
+          description: A human-readable log message.
+          type: string
+        timestamp:
+          description: 'The date and time the log message was written, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    WorkRequestSummaryCollection:
+      description: A list of work requests. Can contain both work requests and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work requests.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    SubscriptionAcknowledgmentConfiguration:
+      description: The configuration for subscription acknowledgment.
+      properties:
+        acknowledgedBy:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the principal that ackwnoledged the subscription.
+          type: string
+        isAcknowledged:
+          default: false
+          description: Flag to determine whether the subscription was acknowledged or not.
+          type: boolean
+        timeAcknowledged:
+          description: 'The date and time the subscription was acknowledged (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - isAcknowledged
+      type: object
+      x-example: "{\n  \"isAcknowledged\": true,\n  \"acknowledgedBy\": \"ocid1.principal.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n  \"timeAcknowledged\": \"2024-11-07T09:14:20.300Z\"\n}\n"
     JavaMigrationAnalysisSummary:
       description: Summary information about a Java Migration Analysis.
       properties:
@@ -1353,26 +1690,24 @@ components:
       - createdBy
       type: object
       x-example: "{\n  \"id\": \"ocid1.jmsreport....\",\n  \"workRequestId\": \"ocid1.jmsworkrequest.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n  \"compartmentId\": \"ocid1.tenancy.oc1..aaaaaaaawgbzspd6cjovpmic7dahwbalg4opcbixgguo6z2s7t335m6labcd\",\n  \"analysisProjectName\": \"my-project\",\n  \"inputApplicationsObjectStoragePaths\": [\n      \"/JMS/Utils/myartifacts1.jar\",\n      \"/JMS/Utils/myartifacts2.war\",\n      \"/JMS/Utils/myartifacts3.ear\"\n  ],\n  \"targetJdkVersion\": \"17\",\n  \"namespaceName\": \"oardccsi\",\n  \"bucketName\": \"jmsutils-java-migration\",\n  \"analysisResultObjectStoragePath\": \"JMS/utils/results/javaMigration/ocid1.jmsworkrequest.dev.dev.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea/045225cc-d174-4694-8053-8033de48e23a/my-project/targetJdkVersion-17/\",\n  \"analysisResultFiles\": [\n      \"diagsbyapi-p3.json\",\n      \"my-project.zip\",\n      \"diagsbyclass-p4.json\",\n      \"diagsbyapi-p3-summary.json\",\n      \"diagsbyclass-mandatory.json\",\n      \"diagsbyapi-p4-summary.json\",\n      \"diagsbyclass-p2.json\",\n      \"diagsbyapi-p2.json\",\n      \"diagsbyclass-recommended.json\",\n      \"jarsummaries-without-classsummaries.json\",\n      \"diagsbyapi-p1.json\",\n      \"diagsbyapi-p4.json\",\n      \"diagsbyapi-summary-counts.json\",\n      \"diagsbyclass-p1.json\",\n      \"diagsbyapi-p2-summary.json\",\n      \"diagsbyapi-p1-summary.json\",\n      \"execsummary.json\",\n      \"diagsbyclass-p3.json\",\n      \"analysis.json\"\n  ],\n  \"timeCreated\": \"2024-11-07T09:14:20.300Z\",\n  \"timeStarted\": \"2024-11-07T09:14:20.300Z\",\n  \"timeFinished\": \"2024-11-07T09:14:20.300Z\",\n  \"createdBy\": {\n    \"id\": \"ocid1.principal.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n    \"displayName\": \"userName\"    \n  }\n}\n"
-    SubscriptionAcknowledgmentConfiguration:
-      description: The configuration for subscription acknowledgment.
+    PerformanceTuningAnalysisTarget:
+      description: The target for the Performance Tuning Analysis
       properties:
-        acknowledgedBy:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the principal that ackwnoledged the subscription.
+        analysisProjectName:
+          description: Name of the analysis project.
+          maxLength: 255
+          minLength: 1
           type: string
-        isAcknowledged:
-          default: false
-          description: Flag to determine whether the subscription was acknowledged or not.
-          type: boolean
-        timeAcknowledged:
-          description: 'The date and time the subscription was acknowledged (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-
-            '
-          format: date-time
+        artifactObjectStoragePath:
+          description: Object storage path to the artifact.
+          maxLength: 255
+          minLength: 1
           type: string
       required:
-      - isAcknowledged
+      - analysisProjectName
+      - artifactObjectStoragePath
       type: object
-      x-example: "{\n  \"isAcknowledged\": true,\n  \"acknowledgedBy\": \"ocid1.principal.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n  \"timeAcknowledged\": \"2024-11-07T09:14:20.300Z\"\n}\n"
+      x-example: "{\n  \"analysisProjectName\": \"my-project1\",\n  \"artifactObjectStoragePath\":  \"/JMS/Utils/myartifacts1.jfr\",\n}\n"
     RequestPerformanceTuningAnalysisDetails:
       description: The data to create Performance Tuning Analysis.
       properties:
@@ -1426,6 +1761,51 @@ components:
       - compartmentId
       - targets
       type: object
+    JavaMigrationAnalysisTarget:
+      description: The target for the Java Migration Analysis
+      properties:
+        analysisProjectName:
+          description: Name of the analysis project.
+          maxLength: 255
+          minLength: 1
+          type: string
+        excludePackagePrefixes:
+          description: 'Package prefixes to be excluded from the migration analysis. Either this or includePackagePrefixes can be specified.
+
+            '
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          type: array
+        includePackagePrefixes:
+          description: 'Package prefixes to be included from the migration analysis. Either this or excludePackagePrefixes can be specified.
+
+            '
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          type: array
+        inputApplicationsObjectStoragePaths:
+          description: Object storage paths to the input files applications to be analysed.
+          items:
+            maxLength: 8192
+            minLength: 1
+            type: string
+          maxItems: 10
+          type: array
+        targetJdkVersions:
+          description: Version of the target JDKs.
+          items:
+            type: string
+          type: array
+      required:
+      - analysisProjectName
+      - inputApplicationsObjectStoragePaths
+      - targetJdkVersions
+      type: object
+      x-example: "{\n  \"analysisProjectName\": \"my-project1\",\n  \"applicationsObjectStoragePaths\": [\n      \"/JMS/Utils/myartifacts1.jar\",\n      \"/JMS/Utils/myartifacts2.war\"\n    ],\n  \"targetJdkVersion\": \"11\",\n  \"includePackagePrefixes\": [\n      \"lombok\",\n      \"junit.test\"\n  ],\n  \"excludePackagePrefixes\": [\n      \"lombok\",\n      \"junit.test\"\n  ]\n}\n"
     WorkRequestResource:
       description: A resource created or operated on by a work request.
       properties:
@@ -1469,26 +1849,6 @@ components:
       - actionType
       - entityType
       - identifier
-    WorkRequestSummaryCollection:
-      description: A list of work requests. Can contain both work requests and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work requests.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateSubscriptionAcknowledgmentConfigurationDetails:
-      description: Attributes to update a Subscription Acknowledgment Configuration.
-      properties:
-        isAcknowledged:
-          default: false
-          description: Flag to determine whether the subscription was acknowledged or not.
-          type: boolean
-      type: object
-      x-example: "{\n  \"isAcknowledged\": true\n}\n"
     JavaMigrationAnalysis:
       description: 'To use any of the API operations, you must be authorized by an IAM policy. If you''re not authorized, talk to
 
@@ -1599,418 +1959,66 @@ components:
       - createdBy
       type: object
       x-example: "{\n  \"id\": \"ocid1.jmsreport....\",\n  \"workRequestId\": \"ocid1.jmsworkrequest.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n  \"compartmentId\": \"ocid1.tenancy.oc1..aaaaaaaawgbzspd6cjovpmic7dahwbalg4opcbixgguo6z2s7t335m6labcd\",\n  \"analysisProjectName\": \"my-project\",\n  \"inputApplicationsObjectStoragePaths\": [\n      \"/JMS/Utils/myartifacts1.jar\",\n      \"/JMS/Utils/myartifacts2.war\",\n      \"/JMS/Utils/myartifacts3.ear\"\n  ],\n  \"targetJdkVersion\": \"17\",\n  \"namespaceName\": \"oardccsi\",\n  \"bucketName\": \"jmsutils-java-migration\",\n  \"analysisResultObjectStoragePath\": \"JMS/utils/results/javaMigration/ocid1.jmsworkrequest.dev.dev.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea/045225cc-d174-4694-8053-8033de48e23a/my-project/targetJdkVersion-17/\",\n  \"analysisResultFiles\": [\n      \"diagsbyapi-p3.json\",\n      \"my-project.zip\",\n      \"diagsbyclass-p4.json\",\n      \"diagsbyapi-p3-summary.json\",\n      \"diagsbyclass-mandatory.json\",\n      \"diagsbyapi-p4-summary.json\",\n      \"diagsbyclass-p2.json\",\n      \"diagsbyapi-p2.json\",\n      \"diagsbyclass-recommended.json\",\n      \"jarsummaries-without-classsummaries.json\",\n      \"diagsbyapi-p1.json\",\n      \"diagsbyapi-p4.json\",\n      \"diagsbyapi-summary-counts.json\",\n      \"diagsbyclass-p1.json\",\n      \"diagsbyapi-p2-summary.json\",\n      \"diagsbyapi-p1-summary.json\",\n      \"execsummary.json\",\n      \"diagsbyclass-p3.json\",\n      \"analysis.json\"\n  ],\n  \"timeCreated\": \"2024-11-07T09:14:20.300Z\",\n  \"timeStarted\": \"2024-11-07T09:14:20.300Z\",\n  \"timeFinished\": \"2024-11-07T09:14:20.300Z\",\n  \"createdBy\": {\n    \"id\": \"ocid1.user.oc1..aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n    \"displayName\": \"userName\"    \n  }\n}\n"
-    PerformanceTuningAnalysisCollection:
-      description: Results of a Performance Tuning Analysis search. Contains PerformanceTuningAnalysisSummary items.
-      properties:
-        items:
-          description: List of Performance Tuning Analysis.
-          items:
-            $ref: '#/components/schemas/PerformanceTuningAnalysisSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestErrorCollection:
-      description: A list of work request errors. Can contain both errors and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work request errors.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
-    JavaMigrationAnalysisTarget:
-      description: The target for the Java Migration Analysis
-      properties:
-        analysisProjectName:
-          description: Name of the analysis project.
-          maxLength: 255
-          minLength: 1
-          type: string
-        excludePackagePrefixes:
-          description: 'Package prefixes to be excluded from the migration analysis. Either this or includePackagePrefixes can be specified.
-
-            '
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          type: array
-        includePackagePrefixes:
-          description: 'Package prefixes to be included from the migration analysis. Either this or excludePackagePrefixes can be specified.
-
-            '
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          type: array
-        inputApplicationsObjectStoragePaths:
-          description: Object storage paths to the input files applications to be analysed.
-          items:
-            maxLength: 8192
-            minLength: 1
-            type: string
-          maxItems: 10
-          type: array
-        targetJdkVersions:
-          description: Version of the target JDKs.
-          items:
-            type: string
-          type: array
-      required:
-      - analysisProjectName
-      - inputApplicationsObjectStoragePaths
-      - targetJdkVersions
-      type: object
-      x-example: "{\n  \"analysisProjectName\": \"my-project1\",\n  \"applicationsObjectStoragePaths\": [\n      \"/JMS/Utils/myartifacts1.jar\",\n      \"/JMS/Utils/myartifacts2.war\"\n    ],\n  \"targetJdkVersion\": \"11\",\n  \"includePackagePrefixes\": [\n      \"lombok\",\n      \"junit.test\"\n  ],\n  \"excludePackagePrefixes\": [\n      \"lombok\",\n      \"junit.test\"\n  ]\n}\n"
-    Principal:
-      description: An authorized principal.
-      properties:
-        displayName:
-          description: The name of the principal.
-          type: string
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the principal.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - id
-      - displayName
-      type: object
-      x-example: "{\n  \"createdBy\": {\n    \"id\": \"ocid1.principal.aaaaaaaamh2kjcjdka2dwakgsfutru4ml4mswwnm6zdcowoqxhbv6qvkrcea\",\n    \"displayName\": \"userName\"\n  }\n}\n"
-    WorkRequestSummary:
-      description: Summary information about an asynchronous work request.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
-
-            '
-          type: string
-        createdBy:
-          $ref: '#/components/schemas/Principal'
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
-          type: string
-        operationType:
-          description: The asynchronous operation tracked by this work request.
-          enum:
-          - REQUEST_JAVA_MIGRATION_SA_ANALYSIS
-          - REQUEST_PERFORMANCE_TUNING_SA_ANALYSIS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
-
-            that must be performed.
-
-            '
-          format: float
-          type: number
-        resources:
-          description: The resources that are affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: The status of the work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - NEEDS_ATTENTION
-          - FAILED
-          - SUCCEEDED
-          - CANCELLING
-          - CANCELLED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the work request was created, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the work request was finished, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the work request was started, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the work request was updated, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    WorkRequestError:
-      description: An error encountered while performing an operation that is tracked by a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
-
-            [API Errors](/iaas/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error message.
-          type: string
-        timestamp:
-          description: 'The date and time the error occurred, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    WorkItemDetails:
-      description: The minimum details of a work item.
-      discriminator:
-        propertyName: kind
-      properties:
-        kind:
-          description: The kind of work item details.
-          enum:
-          - BASIC
-          - JAVA_MIGRATION
-          - PERFORMANCE_TUNING
-          type: string
-        workItemType:
-          description: The work item type.
-          enum:
-          - PERFORMANCE_TUNING
-          - JAVA_MIGRATION
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/WorkItemType'
-      required:
-      - kind
-      type: object
-    WorkRequestLogEntry:
-      description: A log message from performing an operation that is tracked by a work request.
-      properties:
-        message:
-          description: A human-readable log message.
-          type: string
-        timestamp:
-          description: 'The date and time the log message was written, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    PerformanceTuningAnalysisTarget:
-      description: The target for the Performance Tuning Analysis
-      properties:
-        analysisProjectName:
-          description: Name of the analysis project.
-          maxLength: 255
-          minLength: 1
-          type: string
-        artifactObjectStoragePath:
-          description: Object storage path to the artifact.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - analysisProjectName
-      - artifactObjectStoragePath
-      type: object
-      x-example: "{\n  \"analysisProjectName\": \"my-project1\",\n  \"artifactObjectStoragePath\":  \"/JMS/Utils/myartifacts1.jfr\",\n}\n"
-    WorkRequestLogEntryCollection:
-      description: A list of work request logs. Can contain both logs and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work request log entries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequest:
-      description: 'An asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
-
-        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
-
-        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
-
-            '
-          type: string
-        completedTaskCount:
-          description: The number of tasks had been executed to a terminal state.
-          type: integer
-        createdBy:
-          $ref: '#/components/schemas/Principal'
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
-          type: string
-        operationType:
-          description: The asynchronous operation tracked by this work request.
-          enum:
-          - REQUEST_JAVA_MIGRATION_SA_ANALYSIS
-          - REQUEST_PERFORMANCE_TUNING_SA_ANALYSIS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
-
-            that must be performed.
-
-            '
-          format: float
-          type: number
-        resources:
-          description: The resources that are affected by the work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: The status of the work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - NEEDS_ATTENTION
-          - FAILED
-          - SUCCEEDED
-          - CANCELLING
-          - CANCELLED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the work request was created, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the work request was finished, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the work request was started, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the work request was updated, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        totalTaskCount:
-          description: The total number of tasks to be executed for this work request.
-          type: integer
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
   parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. The token is usually retrieved from a previous list call.
+    PerformanceTuningAnalysisIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Performance Tuning Analysis.
       in: query
-      name: page
+      name: id
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 4096
-        minLength: 1
-    ResourceIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
+    AnalysisProjectNameQueryParam:
+      description: The project name of the Performance Tuning Analysis to query for.
       in: query
-      name: resourceId
+      name: analysisProjectName
       x-default-description: 'null'
       schema:
         type: string
-    PerformanceTuningAnalysisResultQueryParam:
-      description: The result of the Performance Tuning Analysis to query for.
-      in: query
-      name: performanceTuningAnalysisResult
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/PerformanceTuningAnalysis/result'
-      schema:
-        type: string
-    JavaMigrationAnalysisIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Java Migration Analysis.
-      in: path
-      name: javaMigrationAnalysisId
-      required: true
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
-
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
 
         '
-      in: header
-      name: if-match
-      required: false
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    SortOrderQueryParam:
+      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is `DESC` when sorting by time and `ASC` otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    JavaMigrationAnalysisSortByQueryParam:
+      description: 'The field to sort Java Migration Analysis. Only one sort order may be provided.
+
+        '
+      in: query
+      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/JavaMigrationAnalysisSortBy'
+      schema:
+        type: string
+        enum:
+        - TIME_CREATED
+        - TIME_STARTED
+        - TIME_FINISHED
+        default: timeCreated
+    WorkRequestIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: path
+      name: workRequestId
+      required: true
       schema:
         type: string
     WorkRequestStatusQueryParam:
@@ -2031,49 +2039,11 @@ components:
         - SUCCEEDED
         - CANCELLING
         - CANCELLED
-    PerformanceTuningAnalysisIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Performance Tuning Analysis.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    WorkRequestIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+    JavaMigrationAnalysisIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Java Migration Analysis.
       in: path
-      name: workRequestId
+      name: javaMigrationAnalysisId
       required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is `DESC` when sorting by time and `ASC` otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    WorkRequestIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
       schema:
         type: string
     WorkRequestLogAndErrorSortByQueryParam:
@@ -2087,6 +2057,58 @@ components:
         enum:
         - timeCreated
         default: timeCreated
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PerformanceTuningAnalysisResultQueryParam:
+      description: The result of the Performance Tuning Analysis to query for.
+      in: query
+      name: performanceTuningAnalysisResult
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/PerformanceTuningAnalysis/result'
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. The token is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    JavaMigrationAnalysisIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Java Migration Analysis.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    PerformanceTuningAnalysisIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Performance Tuning Analysis.
+      in: path
+      name: performanceTuningAnalysisId
+      required: true
+      schema:
+        type: string
+    WorkRequestIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -2106,63 +2128,26 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    JavaMigrationAnalysisIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Java Migration Analysis.
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: id
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-    PerformanceTuningAnalysisIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Performance Tuning Analysis.
-      in: path
-      name: performanceTuningAnalysisId
-      required: true
-      schema:
-        type: string
-    JavaMigrationAnalysisSortByQueryParam:
-      description: 'The field to sort Java Migration Analysis. Only one sort order may be provided.
-
-        '
+    ResourceIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
       in: query
-      name: sortBy
-      x-obmcs-top-level-enum: '#/definitions/JavaMigrationAnalysisSortBy'
-      schema:
-        type: string
-        enum:
-        - TIME_CREATED
-        - TIME_STARTED
-        - TIME_FINISHED
-        default: timeCreated
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    AnalysisProjectNameQueryParam:
-      description: The project name of the Performance Tuning Analysis to query for.
-      in: query
-      name: analysisProjectName
+      name: resourceId
       x-default-description: 'null'
       schema:
         type: string
@@ -2180,6 +2165,21 @@ components:
         - TIME_STARTED
         - TIME_FINISHED
         default: timeCreated
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+        that resource. The resource will be updated or deleted only if the etag you provide
+
+        matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   responses:
     default:
       description: Unknown Error

@@ -551,223 +551,157 @@ paths:
       x-related-resource: '#/definitions/Deployment'
 components:
   schemas:
-    SetQueryParameterPolicy:
-      description: 'Set parameters on the query string as they pass through the gateway.
+    ApiSpecificationRouteResponsePolicies:
+      description: 'Behavior applied to any responses sent by the API for requests on this route.
+
+        '
+      properties:
+        headerTransformations:
+          $ref: '#/components/schemas/HeaderTransformationPolicy'
+        responseCacheStore:
+          $ref: '#/components/schemas/ResponseCacheStorePolicy'
+      type: object
+    DynamicSelectionKey:
+      description: Base policy for defining how to match the context variable in an incoming request with selection keys when dynamically routing and dynamically authenticating requests.
+      discriminator:
+        propertyName: type
+      properties:
+        isDefault:
+          default: false
+          description: Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests.
+          type: boolean
+        name:
+          description: Name assigned to the branch.
+          maxLength: 1024
+          minLength: 1
+          type: string
+        type:
+          default: ANY_OF
+          description: Type of the selection key.
+          enum:
+          - ANY_OF
+          - WILDCARD
+          type: string
+      required:
+      - name
+      type: object
+    UpdateDeploymentDetails:
+      description: The information to be updated.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a
+
+              namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a
+
+            namespace. For more information, see
+
+            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+
+            Example: `My new resource`
+
+            '
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair
+
+            with no predefined name, type, or namespace. For more information, see
+
+            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        specification:
+          $ref: '#/components/schemas/ApiSpecification'
+      type: object
+    AccessLogPolicy:
+      description: 'Configures the logging policies for the access logs of an API Deployment.
+
+        '
+      properties:
+        isEnabled:
+          default: false
+          description: 'Enables pushing of access logs to the legacy OCI Object Storage log archival bucket.
+
+
+            Oracle recommends using the OCI Logging service to enable, retrieve, and query access logs
+
+            for an API Deployment. If there is an active log object for the API Deployment and its
+
+            category is set to ''access'' in OCI Logging service, the logs will not be uploaded to the
+
+            legacy OCI Object Storage log archival bucket.
+
+
+            Please note that the functionality to push to the legacy OCI Object Storage log
+
+            archival bucket has been deprecated and will be removed in the future.
+
+            '
+          type: boolean
+      type: object
+    AuthenticationServerPolicy:
+      description: Policy for the details regarding each authentication server under dynamic authentication. We specify the value of selectors for which this authentication server must be selected for a request under keys. We specify the configuration details of authentication server under authenticationServerDetail.
+      properties:
+        authenticationServerDetail:
+          $ref: '#/components/schemas/AuthenticationPolicy'
+        key:
+          $ref: '#/components/schemas/DynamicSelectionKey'
+      required:
+      - key
+      - authenticationServerDetail
+      type: object
+    RenameHeaderPolicy:
+      description: 'Rename HTTP headers as they pass through the gateway.
 
         '
       properties:
         items:
-          description: 'The list of query parameters.
-
-            '
+          description: The list of headers.
           items:
-            $ref: '#/components/schemas/SetQueryParameterPolicyItem'
+            $ref: '#/components/schemas/RenameHeaderPolicyItem'
           maxItems: 20
           minItems: 1
           type: array
       required:
       - items
       type: object
-    ResourceLock:
-      description: 'Resource locks are used to prevent certain APIs from being called for the resource.
-
-        A full lock prevents both updating the resource and deleting the resource. A delete
-
-        lock prevents deleting the resource.
-
-        '
+    RequestParameterValidation:
+      description: Common parameter validation properties.
       properties:
-        message:
-          description: 'A message added by the creator of the lock. This is typically used to give an
-
-            indication of why the resource is locked.
-
-            '
-          type: string
-        relatedResourceId:
-          description: 'The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
-
-            '
-          type: string
-        timeCreated:
-          description: When the lock was created.
-          format: date-time
-          type: string
-        type:
-          description: Type of the lock.
-          enum:
-          - FULL
-          - DELETE
+        name:
+          description: Parameter name.
           type: string
       required:
-      - type
-      type: object
-    RateLimitingPolicy:
-      description: Limit the number of requests that should be handled for the specified window using a specfic key.
-      properties:
-        rateInRequestsPerSecond:
-          description: The maximum number of requests per second to allow.
-          type: integer
-        rateKey:
-          description: The key used to group requests together.
-          enum:
-          - CLIENT_IP
-          - TOTAL
-          type: string
-      required:
-      - rateInRequestsPerSecond
-      - rateKey
-      type: object
-    RenameQueryParameterPolicyItem:
-      description: 'The value will be a copy of the original value of the source parameter and will not be affected by any other
-
-        transformation policies applied to that parameter.
-
-        '
-      properties:
-        from:
-          description: 'The original case-sensitive name of the query parameter.  This name must be unique across transformation
-
-            policies.
-
-            '
-          example: bookId
-          maxLength: 2048
-          minLength: 1
-          type: string
-        to:
-          description: 'The new name of the query parameter.  This name must be unique across transformation policies.
-
-            '
-          example: bookIsbn
-          maxLength: 2048
-          minLength: 1
-          type: string
-      required:
-      - from
-      - to
-      type: object
-    ResponseCacheStorePolicy:
-      description: 'Base policy for how a response from a backend is cached in the Response Cache.
-
-        '
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Type of the Response Cache Store Policy.
-          enum:
-          - FIXED_TTL_STORE_POLICY
-          type: string
-      required:
-      - type
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-      type: object
-    HeaderTransformationPolicy:
-      description: 'A set of transformations to apply to HTTP headers that pass through the gateway.
-
-        '
-      properties:
-        filterHeaders:
-          $ref: '#/components/schemas/FilterHeaderPolicy'
-        renameHeaders:
-          $ref: '#/components/schemas/RenameHeaderPolicy'
-        setHeaders:
-          $ref: '#/components/schemas/SetHeaderPolicy'
-      type: object
-    ApiSpecificationRoute:
-      description: 'A single route that forwards requests to a particular backend and may contain some additional policies.
-
-        '
-      properties:
-        backend:
-          $ref: '#/components/schemas/ApiSpecificationRouteBackend'
-        loggingPolicies:
-          $ref: '#/components/schemas/ApiSpecificationLoggingPolicies'
-        methods:
-          default:
-          - ANY
-          description: 'A list of allowed methods on this route.
-
-            '
-          items:
-            enum:
-            - ANY
-            - HEAD
-            - GET
-            - POST
-            - PUT
-            - PATCH
-            - DELETE
-            - OPTIONS
-            type: string
-          type: array
-          uniqueItems: true
-        path:
-          description: 'A URL path pattern that must be matched on this route. The path pattern may contain a subset of RFC 6570 identifiers
-
-            to allow wildcard and parameterized matching.
-
-            '
-          example: /todos
-          type: string
-        requestPolicies:
-          $ref: '#/components/schemas/ApiSpecificationRouteRequestPolicies'
-        responsePolicies:
-          $ref: '#/components/schemas/ApiSpecificationRouteResponsePolicies'
-      required:
-      - path
-      - backend
-      type: object
-    ContentValidation:
-      description: Content validation properties.
-      discriminator:
-        propertyName: validationType
-      properties:
-        validationType:
-          default: NONE
-          description: 'Validation type defines the content validation method.
-
-
-            Make the validation to first parse the body as the respective format.
-
-            '
-          enum:
-          - NONE
-          type: string
-      required:
-      - validationType
-      type: object
-    RemoveResourceLockDetails:
-      description: 'Used to remove a resource lock.
-
-        Resource locks are used to prevent certain APIs from being called for the resource.
-
-        A full lock prevents both updating the resource and deleting the resource. A delete
-
-        lock prevents deleting the resource.
-
-        '
-      properties:
-        type:
-          description: Type of the lock.
-          enum:
-          - FULL
-          - DELETE
-          type: string
-      required:
-      - type
+      - name
       type: object
     SetQueryParameterPolicyItem:
       description: 'Set will add a new query parameter if it was not in the original request.  If the parameter already exists on the
@@ -814,19 +748,151 @@ components:
       - name
       - values
       type: object
-    HeaderValidationRequestPolicy:
+    BodyValidationRequestPolicy:
       allOf:
       - $ref: '#/components/schemas/ValidationRequestPolicy'
       - properties:
-          headers:
-            description: The List of Headers
-            items:
-              $ref: '#/components/schemas/HeaderValidationItem'
-            minItems: 1
-            type: array
-            uniqueItems: true
+          content:
+            additionalProperties:
+              $ref: '#/components/schemas/ContentValidation'
+            description: "The content of the request body. The key is a [media type range](https://tools.ietf.org/html/rfc7231#appendix-D)\nsubset restricted to the following schema\n\n    key ::= (\n          / (  \"*\" \"/\" \"*\" )\n          / ( type \"/\" \"*\" )\n          / ( type \"/\" subtype )\n          )\n\nFor requests that match multiple keys, only the most specific key is applicable.\ne.g. `text/plain` overrides `text/*`\n"
+            example:
+              '*/*':
+                validationType: NONE
+              application/*:
+                validationType: NONE
+              application/json:
+                validationType: NONE
+            type: object
+          required:
+            default: false
+            description: Determines if the request body is required in the request.
+            type: boolean
+        required:
+        - content
         type: object
-      description: Validate the HTTP headers on the incoming API requests on a specific route.
+      description: Validate the payload body of the incoming API requests on a specific route.
+    CreateDeploymentDetails:
+      description: Information about a new deployment.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
+
+            resource is created.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a
+
+              namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a
+
+            namespace. For more information, see
+
+            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+
+            Example: `My new resource`
+
+            '
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair
+
+            with no predefined name, type, or namespace. For more information, see
+
+            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        gatewayId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        locks:
+          description: Locks associated with this resource.
+          items:
+            $ref: '#/components/schemas/AddResourceLockDetails'
+          maxItems: 1
+          type: array
+        pathPrefix:
+          description: 'A path on which to deploy all routes contained in the API
+
+            deployment specification. For more information, see
+
+            [Deploying an API on an API Gateway by Creating an API
+
+            Deployment](/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm).
+
+            '
+          type: string
+        specification:
+          $ref: '#/components/schemas/ApiSpecification'
+      required:
+      - gatewayId
+      - compartmentId
+      - pathPrefix
+      - specification
+      type: object
+    MutualTlsDetails:
+      description: 'Properties used to configure client mTLS verification when API Consumer makes connection to the gateway.
+
+        '
+      properties:
+        allowedSans:
+          description: Allowed list of CN or SAN which will be used for verification of certificate.
+          items:
+            minLength: 1
+            type: string
+          type: array
+        isVerifiedCertificateRequired:
+          default: false
+          description: Determines whether to enable client verification when API Consumer makes connection to the gateway.
+          type: boolean
+      type: object
+    ApiSpecificationLoggingPolicies:
+      description: 'Policies controlling the pushing of logs to OCI Public Logging.
+
+        '
+      properties:
+        accessLog:
+          $ref: '#/components/schemas/AccessLogPolicy'
+        executionLog:
+          $ref: '#/components/schemas/ExecutionLogPolicy'
+      type: object
     CorsPolicy:
       description: 'Enable CORS (Cross-Origin-Resource-Sharing) request handling.
 
@@ -917,6 +983,84 @@ components:
       required:
       - allowedOrigins
       type: object
+    RequestBodySizeValidationPolicy:
+      description: Validate the size of the request body.
+      properties:
+        maximumBodySizeInBytes:
+          description: The maximum size of the request body in bytes.
+          format: int64
+          minimum: 0
+          type: integer
+        unsizedBodyPolicy:
+          description: The behavior of the gateway when a request is received without a known content length.
+          enum:
+          - BUFFER_AND_VALIDATE
+          - REQUIRE_CONTENT_LENGTH
+          - STREAM_WITH_VALIDATION
+          type: string
+      type: object
+    AuthenticationPolicy:
+      description: Information on how to authenticate incoming requests.
+      discriminator:
+        propertyName: type
+      properties:
+        isAnonymousAccessAllowed:
+          default: false
+          description: 'Whether an unauthenticated user may access the API. Must be "true" to enable ANONYMOUS
+
+            route authorization.
+
+            '
+          example: true
+          type: boolean
+        type:
+          description: Type of the authentication policy to use.
+          enum:
+          - CUSTOM_AUTHENTICATION
+          - JWT_AUTHENTICATION
+          - TOKEN_AUTHENTICATION
+          type: string
+      required:
+      - type
+      type: object
+    ExecutionLogPolicy:
+      description: 'Configures the logging policies for the execution logs of an API Deployment.
+
+        '
+      properties:
+        isEnabled:
+          default: false
+          description: 'Enables pushing of execution logs to the legacy OCI Object Storage log archival bucket.
+
+
+            Oracle recommends using the OCI Logging service to enable, retrieve, and query execution logs
+
+            for an API Deployment. If there is an active log object for the API Deployment and its
+
+            category is set to ''execution'' in OCI Logging service, the logs will not be uploaded to the legacy
+
+            OCI Object Storage log archival bucket.
+
+
+            Please note that the functionality to push to the legacy OCI Object Storage log
+
+            archival bucket has been deprecated and will be removed in the future.
+
+            '
+          type: boolean
+        logLevel:
+          default: INFO
+          description: 'Specifies the log level used to control logging output of execution logs.
+
+            Enabling logging at a given level also enables logging at all higher levels.
+
+            '
+          enum:
+          - INFO
+          - WARN
+          - ERROR
+          type: string
+      type: object
     UsagePlansPolicy:
       description: Usage plan policies for this deployment
       properties:
@@ -932,32 +1076,63 @@ components:
       required:
       - tokenLocations
       type: object
-    RouteAuthorizationPolicy:
-      description: 'If authentication has been performed, validate whether the request scope (if any) applies to this route.
+    ResponseCacheLookupPolicy:
+      description: 'Base policy for Response Cache lookup.
 
-        If no RouteAuthorizationPolicy is defined for a route, a policy with a type of AUTHENTICATION_ONLY is applied.
+        '
+      discriminator:
+        propertyName: type
+      properties:
+        isEnabled:
+          default: true
+          description: 'Whether this policy is currently enabled.
+
+            '
+          type: boolean
+        isPrivateCachingEnabled:
+          default: false
+          description: "Set true to allow caching responses where the request has an Authorization header. Ensure you have configured your \ncache key additions to get the level of isolation across authenticated requests that you require.\n\nWhen false, any request with an Authorization header will not be stored in the Response Cache.\n\nIf using the CustomAuthenticationPolicy then the tokenHeader/tokenQueryParam are also subject to this check.\n"
+          type: boolean
+        type:
+          description: Type of the Response Cache Store Policy.
+          enum:
+          - SIMPLE_LOOKUP_POLICY
+          type: string
+      required:
+      - type
+    ApiSpecificationRouteBackend:
+      description: 'The backend to forward requests to.
 
         '
       discriminator:
         propertyName: type
       properties:
         type:
-          default: AUTHENTICATION_ONLY
-          description: 'Indicates how authorization should be applied. For a type of ANY_OF, an "allowedScope"
-
-            property must also be specified. Otherwise, only a type is required. For a type of ANONYMOUS, an
-
-            authenticated API must have the "isAnonymousAccessAllowed" property set to "true" in the authentication
-
-            policy.
-
-            '
+          description: Type of the API backend.
           enum:
-          - ANONYMOUS
-          - ANY_OF
-          - AUTHENTICATION_ONLY
+          - ORACLE_FUNCTIONS_BACKEND
+          - HTTP_BACKEND
+          - STOCK_RESPONSE_BACKEND
+          - DYNAMIC_ROUTING_BACKEND
+          - OAUTH2_LOGOUT_BACKEND
+          - OAUTH2_LOGIN_BACKEND
           type: string
+      required:
+      - type
       type: object
+    QueryParameterValidationItem:
+      allOf:
+      - $ref: '#/components/schemas/RequestParameterValidation'
+      - properties:
+          required:
+            default: false
+            description: Determines if the parameter is required in the request.
+            type: boolean
+        type: object
+      description: Query parameter validation properties.
+      example:
+        name: fields
+        required: true
     RenameHeaderPolicyItem:
       description: 'The value will be a copy of the original value of the source header and will not be affected by any other
 
@@ -985,21 +1160,436 @@ components:
       - from
       - to
       type: object
-    MutualTlsDetails:
-      description: 'Properties used to configure client mTLS verification when API Consumer makes connection to the gateway.
+    ResourceLock:
+      description: 'Resource locks are used to prevent certain APIs from being called for the resource.
+
+        A full lock prevents both updating the resource and deleting the resource. A delete
+
+        lock prevents deleting the resource.
 
         '
       properties:
-        allowedSans:
-          description: Allowed list of CN or SAN which will be used for verification of certificate.
+        message:
+          description: 'A message added by the creator of the lock. This is typically used to give an
+
+            indication of why the resource is locked.
+
+            '
+          type: string
+        relatedResourceId:
+          description: 'The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
+
+            '
+          type: string
+        timeCreated:
+          description: When the lock was created.
+          format: date-time
+          type: string
+        type:
+          description: Type of the lock.
+          enum:
+          - FULL
+          - DELETE
+          type: string
+      required:
+      - type
+      type: object
+    SetQueryParameterPolicy:
+      description: 'Set parameters on the query string as they pass through the gateway.
+
+        '
+      properties:
+        items:
+          description: 'The list of query parameters.
+
+            '
           items:
-            minLength: 1
-            type: string
+            $ref: '#/components/schemas/SetQueryParameterPolicyItem'
+          maxItems: 20
+          minItems: 1
           type: array
-        isVerifiedCertificateRequired:
-          default: false
-          description: Determines whether to enable client verification when API Consumer makes connection to the gateway.
-          type: boolean
+      required:
+      - items
+      type: object
+    ApiSpecification:
+      description: The logical configuration of the API exposed by a deployment.
+      properties:
+        loggingPolicies:
+          $ref: '#/components/schemas/ApiSpecificationLoggingPolicies'
+        requestPolicies:
+          $ref: '#/components/schemas/ApiSpecificationRequestPolicies'
+        routes:
+          description: A list of routes that this API exposes.
+          items:
+            $ref: '#/components/schemas/ApiSpecificationRoute'
+          type: array
+      type: object
+    ResponseCacheStorePolicy:
+      description: 'Base policy for how a response from a backend is cached in the Response Cache.
+
+        '
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: Type of the Response Cache Store Policy.
+          enum:
+          - FIXED_TTL_STORE_POLICY
+          type: string
+      required:
+      - type
+    ContentValidation:
+      description: Content validation properties.
+      discriminator:
+        propertyName: validationType
+      properties:
+        validationType:
+          default: NONE
+          description: 'Validation type defines the content validation method.
+
+
+            Make the validation to first parse the body as the respective format.
+
+            '
+          enum:
+          - NONE
+          type: string
+      required:
+      - validationType
+      type: object
+    DeploymentSummary:
+      description: A summary of the deployment.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
+
+            resource is created.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a
+
+              namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a
+
+            namespace. For more information, see
+
+            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+
+            Example: `My new resource`
+
+            '
+          type: string
+        endpoint:
+          description: The endpoint to access this deployment on the gateway.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair
+
+            with no predefined name, type, or namespace. For more information, see
+
+            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        gatewayId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        id:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: 'A message describing the current state in more detail.
+
+            For example, can be used to provide actionable information for a
+
+            resource in a Failed state.
+
+            '
+          type: string
+        lifecycleState:
+          description: The current state of the deployment.
+          type: string
+          x-obmcs-enumref: '#/definitions/Deployment/lifecycleState'
+        locks:
+          description: Locks associated with this resource.
+          items:
+            $ref: '#/components/schemas/ResourceLock'
+          maxItems: 2
+          type: array
+        pathPrefix:
+          description: 'The path on which all routes contained in the API
+
+            deployment specification are deployed. For more information, see
+
+            [Deploying an API on an API Gateway by Creating an API
+
+            Deployment](/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm).
+
+            '
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time this resource was created. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time this resource was last updated. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - id
+      - gatewayId
+      - compartmentId
+      - pathPrefix
+      - endpoint
+      type: object
+    ChangeDeploymentCompartmentDetails:
+      description: The new compartment details for the deployment.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
+
+            resource is created.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    ApiSpecificationRouteRequestPolicies:
+      description: 'Behavior applied to any requests received by the API on this route.
+
+        '
+      properties:
+        authorization:
+          $ref: '#/components/schemas/RouteAuthorizationPolicy'
+        bodyValidation:
+          $ref: '#/components/schemas/BodyValidationRequestPolicy'
+        cors:
+          $ref: '#/components/schemas/CorsPolicy'
+        headerTransformations:
+          $ref: '#/components/schemas/HeaderTransformationPolicy'
+        headerValidations:
+          $ref: '#/components/schemas/HeaderValidationRequestPolicy'
+        queryParameterTransformations:
+          $ref: '#/components/schemas/QueryParameterTransformationPolicy'
+        queryParameterValidations:
+          $ref: '#/components/schemas/QueryParameterValidationRequestPolicy'
+        requestBodySizeValidation:
+          $ref: '#/components/schemas/RequestBodySizeValidationPolicy'
+        responseCacheLookup:
+          $ref: '#/components/schemas/ResponseCacheLookupPolicy'
+      type: object
+    DynamicAuthenticationPolicy:
+      description: Policy on how to authenticate requests when multiple authentication options are configured for a deployment. For an incoming request, the value of selector specified under selectionSource will be matched against the keys specified for each authentication server. The authentication server whose key matches the value of selector will be used for authentication.
+      properties:
+        authenticationServers:
+          description: List of authentication servers to choose from during dynamic authentication.
+          items:
+            $ref: '#/components/schemas/AuthenticationServerPolicy'
+          minItems: 1
+          type: array
+        selectionSource:
+          $ref: '#/components/schemas/SelectionSourcePolicy'
+      required:
+      - selectionSource
+      - authenticationServers
+      type: object
+    FilterQueryParameterPolicyItem:
+      description: 'A query parameter to drop (with BLOCK) or pass through (with ALLOW).
+
+        '
+      properties:
+        name:
+          description: 'The case-sensitive name of the query parameter.
+
+            '
+          example: bookIsbn
+          maxLength: 2048
+          minLength: 1
+          type: string
+      required:
+      - name
+      type: object
+    FilterHeaderPolicyItem:
+      description: 'A header to drop (with BLOCK) or pass through (with ALLOW).
+
+        '
+      properties:
+        name:
+          description: 'The case-insensitive name of the header.  This name must be unique across transformation policies.
+
+            '
+          example: User-Agent
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+      - name
+      type: object
+    RemoveResourceLockDetails:
+      description: 'Used to remove a resource lock.
+
+        Resource locks are used to prevent certain APIs from being called for the resource.
+
+        A full lock prevents both updating the resource and deleting the resource. A delete
+
+        lock prevents deleting the resource.
+
+        '
+      properties:
+        type:
+          description: Type of the lock.
+          enum:
+          - FULL
+          - DELETE
+          type: string
+      required:
+      - type
+      type: object
+    DeploymentCollection:
+      description: Collection of deployment summaries.
+      properties:
+        items:
+          description: Deployment summaries.
+          items:
+            $ref: '#/components/schemas/DeploymentSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ApiSpecificationRequestPolicies:
+      description: Global behavior applied to all requests received by the API.
+      properties:
+        authentication:
+          $ref: '#/components/schemas/AuthenticationPolicy'
+        cors:
+          $ref: '#/components/schemas/CorsPolicy'
+        dynamicAuthentication:
+          $ref: '#/components/schemas/DynamicAuthenticationPolicy'
+        mutualTls:
+          $ref: '#/components/schemas/MutualTlsDetails'
+        rateLimiting:
+          $ref: '#/components/schemas/RateLimitingPolicy'
+        requestBodySizeValidation:
+          $ref: '#/components/schemas/RequestBodySizeValidationPolicy'
+        usagePlans:
+          $ref: '#/components/schemas/UsagePlansPolicy'
+      type: object
+    ValidationRequestPolicy:
+      description: Top-level validation policy mixin (not directly used).
+      properties:
+        validationMode:
+          default: ENFORCING
+          description: 'Validation behavior mode.
+
+
+            In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response
+
+            and not sent to the backend.
+
+
+            In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request
+
+            will follow the normal path.
+
+
+            `DISABLED` type turns the validation off.
+
+            '
+          enum:
+          - ENFORCING
+          - PERMISSIVE
+          - DISABLED
+          type: string
+      type: object
+    RateLimitingPolicy:
+      description: Limit the number of requests that should be handled for the specified window using a specfic key.
+      properties:
+        rateInRequestsPerSecond:
+          description: The maximum number of requests per second to allow.
+          type: integer
+        rateKey:
+          description: The key used to group requests together.
+          enum:
+          - CLIENT_IP
+          - TOTAL
+          type: string
+      required:
+      - rateInRequestsPerSecond
+      - rateKey
+      type: object
+    QueryParameterTransformationPolicy:
+      description: 'A set of transformations to apply to query parameters that pass through the gateway.
+
+        '
+      properties:
+        filterQueryParameters:
+          $ref: '#/components/schemas/FilterQueryParameterPolicy'
+        renameQueryParameters:
+          $ref: '#/components/schemas/RenameQueryParameterPolicy'
+        setQueryParameters:
+          $ref: '#/components/schemas/SetQueryParameterPolicy'
       type: object
     FilterHeaderPolicy:
       description: 'Filter HTTP headers as they pass through the gateway.  The gateway applies filters after other transformations,
@@ -1032,29 +1622,246 @@ components:
       - type
       - items
       type: object
-    ApiSpecificationRouteRequestPolicies:
-      description: 'Behavior applied to any requests received by the API on this route.
+    QueryParameterValidationRequestPolicy:
+      allOf:
+      - $ref: '#/components/schemas/ValidationRequestPolicy'
+      - properties:
+          parameters:
+            description: The List of Query Parameters
+            items:
+              $ref: '#/components/schemas/QueryParameterValidationItem'
+            minItems: 1
+            type: array
+            uniqueItems: true
+        type: object
+      description: Validate the URL query parameters on the incoming API requests on a specific route.
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    SetHeaderPolicyItem:
+      description: 'Set will add a new header if it was not in the original request.  If the header already exists on the
+
+        request, you can choose to override, append, or skip it.
 
         '
       properties:
-        authorization:
-          $ref: '#/components/schemas/RouteAuthorizationPolicy'
-        bodyValidation:
-          $ref: '#/components/schemas/BodyValidationRequestPolicy'
-        cors:
-          $ref: '#/components/schemas/CorsPolicy'
-        headerTransformations:
-          $ref: '#/components/schemas/HeaderTransformationPolicy'
-        headerValidations:
-          $ref: '#/components/schemas/HeaderValidationRequestPolicy'
-        queryParameterTransformations:
-          $ref: '#/components/schemas/QueryParameterTransformationPolicy'
-        queryParameterValidations:
-          $ref: '#/components/schemas/QueryParameterValidationRequestPolicy'
-        requestBodySizeValidation:
-          $ref: '#/components/schemas/RequestBodySizeValidationPolicy'
-        responseCacheLookup:
-          $ref: '#/components/schemas/ResponseCacheLookupPolicy'
+        ifExists:
+          default: OVERWRITE
+          description: 'If a header with the same name already exists in the request, OVERWRITE will overwrite the value,
+
+            APPEND will append to the existing value, or SKIP will keep the existing value.
+
+            '
+          enum:
+          - OVERWRITE
+          - APPEND
+          - SKIP
+          type: string
+        name:
+          description: 'The case-insensitive name of the header.  This name must be unique across transformation policies.
+
+            '
+          example: X-CorrelationID
+          maxLength: 1024
+          minLength: 1
+          type: string
+        values:
+          description: 'A list of new values.  Each value can be a constant or may include one or more expressions enclosed within
+
+            ${} delimiters.
+
+            '
+          items:
+            example: ${request.headers[opc-request-id]}
+            maxLength: 4096
+            minLength: 1
+            type: string
+          maxItems: 10
+          minItems: 1
+          type: array
+      required:
+      - name
+      - values
+      type: object
+    SelectionSourcePolicy:
+      description: The type of selector to use when dynamically routing and dynamically authenticating requests.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          default: SINGLE
+          description: Type of the Selection source to use.
+          enum:
+          - SINGLE
+          type: string
+      required:
+      - type
+      type: object
+    RenameQueryParameterPolicy:
+      description: 'Rename parameters on the query string as they pass through the gateway.
+
+        '
+      properties:
+        items:
+          description: 'The list of query parameters.
+
+            '
+          items:
+            $ref: '#/components/schemas/RenameQueryParameterPolicyItem'
+          maxItems: 20
+          minItems: 1
+          type: array
+      required:
+      - items
+      type: object
+    ApiSpecificationRoute:
+      description: 'A single route that forwards requests to a particular backend and may contain some additional policies.
+
+        '
+      properties:
+        backend:
+          $ref: '#/components/schemas/ApiSpecificationRouteBackend'
+        loggingPolicies:
+          $ref: '#/components/schemas/ApiSpecificationLoggingPolicies'
+        methods:
+          default:
+          - ANY
+          description: 'A list of allowed methods on this route.
+
+            '
+          items:
+            enum:
+            - ANY
+            - HEAD
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+            type: string
+          type: array
+          uniqueItems: true
+        path:
+          description: 'A URL path pattern that must be matched on this route. The path pattern may contain a subset of RFC 6570 identifiers
+
+            to allow wildcard and parameterized matching.
+
+            '
+          example: /todos
+          type: string
+        requestPolicies:
+          $ref: '#/components/schemas/ApiSpecificationRouteRequestPolicies'
+        responsePolicies:
+          $ref: '#/components/schemas/ApiSpecificationRouteResponsePolicies'
+      required:
+      - path
+      - backend
+      type: object
+    HeaderTransformationPolicy:
+      description: 'A set of transformations to apply to HTTP headers that pass through the gateway.
+
+        '
+      properties:
+        filterHeaders:
+          $ref: '#/components/schemas/FilterHeaderPolicy'
+        renameHeaders:
+          $ref: '#/components/schemas/RenameHeaderPolicy'
+        setHeaders:
+          $ref: '#/components/schemas/SetHeaderPolicy'
+      type: object
+    HeaderValidationRequestPolicy:
+      allOf:
+      - $ref: '#/components/schemas/ValidationRequestPolicy'
+      - properties:
+          headers:
+            description: The List of Headers
+            items:
+              $ref: '#/components/schemas/HeaderValidationItem'
+            minItems: 1
+            type: array
+            uniqueItems: true
+        type: object
+      description: Validate the HTTP headers on the incoming API requests on a specific route.
+    HeaderValidationItem:
+      allOf:
+      - $ref: '#/components/schemas/RequestParameterValidation'
+      - properties:
+          required:
+            default: false
+            description: Determines if the header is required in the request.
+            type: boolean
+        type: object
+      description: Header validation properties.
+      example:
+        name: X-Client-Tokens
+        required: true
+    FilterQueryParameterPolicy:
+      description: 'Filter parameters from the query string as they pass through the gateway.  The gateway applies filters after other
+
+        transformations, so any parameters set or renamed must also be listed here when using an ALLOW type policy.
+
+        '
+      properties:
+        items:
+          description: 'The list of query parameters.
+
+            '
+          items:
+            $ref: '#/components/schemas/FilterQueryParameterPolicyItem'
+          maxItems: 20
+          minItems: 0
+          type: array
+        type:
+          default: BLOCK
+          description: 'BLOCK drops any query parameters that are in the list of items, so it acts as an exclusion list.  ALLOW
+
+            permits only the parameters in the list and removes all others, so it acts as an inclusion list.
+
+            '
+          enum:
+          - ALLOW
+          - BLOCK
+          type: string
+      required:
+      - type
+      - items
+      type: object
+    RouteAuthorizationPolicy:
+      description: 'If authentication has been performed, validate whether the request scope (if any) applies to this route.
+
+        If no RouteAuthorizationPolicy is defined for a route, a policy with a type of AUTHENTICATION_ONLY is applied.
+
+        '
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          default: AUTHENTICATION_ONLY
+          description: 'Indicates how authorization should be applied. For a type of ANY_OF, an "allowedScope"
+
+            property must also be specified. Otherwise, only a type is required. For a type of ANONYMOUS, an
+
+            authenticated API must have the "isAnonymousAccessAllowed" property set to "true" in the authentication
+
+            policy.
+
+            '
+          enum:
+          - ANONYMOUS
+          - ANY_OF
+          - AUTHENTICATION_ONLY
+          type: string
       type: object
     Deployment:
       description: 'A deployment deploys an API on a gateway. Avoid entering confidential information.
@@ -1215,110 +2022,25 @@ components:
       - specification
       - endpoint
       type: object
-    DynamicAuthenticationPolicy:
-      description: Policy on how to authenticate requests when multiple authentication options are configured for a deployment. For an incoming request, the value of selector specified under selectionSource will be matched against the keys specified for each authentication server. The authentication server whose key matches the value of selector will be used for authentication.
-      properties:
-        authenticationServers:
-          description: List of authentication servers to choose from during dynamic authentication.
-          items:
-            $ref: '#/components/schemas/AuthenticationServerPolicy'
-          minItems: 1
-          type: array
-        selectionSource:
-          $ref: '#/components/schemas/SelectionSourcePolicy'
-      required:
-      - selectionSource
-      - authenticationServers
-      type: object
-    RenameQueryParameterPolicy:
-      description: 'Rename parameters on the query string as they pass through the gateway.
+    RenameQueryParameterPolicyItem:
+      description: 'The value will be a copy of the original value of the source parameter and will not be affected by any other
+
+        transformation policies applied to that parameter.
 
         '
       properties:
-        items:
-          description: 'The list of query parameters.
+        from:
+          description: 'The original case-sensitive name of the query parameter.  This name must be unique across transformation
+
+            policies.
 
             '
-          items:
-            $ref: '#/components/schemas/RenameQueryParameterPolicyItem'
-          maxItems: 20
-          minItems: 1
-          type: array
-      required:
-      - items
-      type: object
-    ValidationRequestPolicy:
-      description: Top-level validation policy mixin (not directly used).
-      properties:
-        validationMode:
-          default: ENFORCING
-          description: 'Validation behavior mode.
-
-
-            In `ENFORCING` mode, upon a validation failure, the request will be rejected with a 4xx response
-
-            and not sent to the backend.
-
-
-            In `PERMISSIVE` mode, the result of the validation will be exposed as metrics while the request
-
-            will follow the normal path.
-
-
-            `DISABLED` type turns the validation off.
-
-            '
-          enum:
-          - ENFORCING
-          - PERMISSIVE
-          - DISABLED
+          example: bookId
+          maxLength: 2048
+          minLength: 1
           type: string
-      type: object
-    ExecutionLogPolicy:
-      description: 'Configures the logging policies for the execution logs of an API Deployment.
-
-        '
-      properties:
-        isEnabled:
-          default: false
-          description: 'Enables pushing of execution logs to the legacy OCI Object Storage log archival bucket.
-
-
-            Oracle recommends using the OCI Logging service to enable, retrieve, and query execution logs
-
-            for an API Deployment. If there is an active log object for the API Deployment and its
-
-            category is set to ''execution'' in OCI Logging service, the logs will not be uploaded to the legacy
-
-            OCI Object Storage log archival bucket.
-
-
-            Please note that the functionality to push to the legacy OCI Object Storage log
-
-            archival bucket has been deprecated and will be removed in the future.
-
-            '
-          type: boolean
-        logLevel:
-          default: INFO
-          description: 'Specifies the log level used to control logging output of execution logs.
-
-            Enabling logging at a given level also enables logging at all higher levels.
-
-            '
-          enum:
-          - INFO
-          - WARN
-          - ERROR
-          type: string
-      type: object
-    FilterQueryParameterPolicyItem:
-      description: 'A query parameter to drop (with BLOCK) or pass through (with ALLOW).
-
-        '
-      properties:
-        name:
-          description: 'The case-sensitive name of the query parameter.
+        to:
+          description: 'The new name of the query parameter.  This name must be unique across transformation policies.
 
             '
           example: bookIsbn
@@ -1326,270 +2048,8 @@ components:
           minLength: 1
           type: string
       required:
-      - name
-      type: object
-    ResponseCacheLookupPolicy:
-      description: 'Base policy for Response Cache lookup.
-
-        '
-      discriminator:
-        propertyName: type
-      properties:
-        isEnabled:
-          default: true
-          description: 'Whether this policy is currently enabled.
-
-            '
-          type: boolean
-        isPrivateCachingEnabled:
-          default: false
-          description: "Set true to allow caching responses where the request has an Authorization header. Ensure you have configured your \ncache key additions to get the level of isolation across authenticated requests that you require.\n\nWhen false, any request with an Authorization header will not be stored in the Response Cache.\n\nIf using the CustomAuthenticationPolicy then the tokenHeader/tokenQueryParam are also subject to this check.\n"
-          type: boolean
-        type:
-          description: Type of the Response Cache Store Policy.
-          enum:
-          - SIMPLE_LOOKUP_POLICY
-          type: string
-      required:
-      - type
-    DeploymentSummary:
-      description: A summary of the deployment.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
-
-            resource is created.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a
-
-              namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a
-
-            namespace. For more information, see
-
-            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Avoid entering confidential information.
-
-
-            Example: `My new resource`
-
-            '
-          type: string
-        endpoint:
-          description: The endpoint to access this deployment on the gateway.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair
-
-            with no predefined name, type, or namespace. For more information, see
-
-            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        gatewayId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        id:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: 'A message describing the current state in more detail.
-
-            For example, can be used to provide actionable information for a
-
-            resource in a Failed state.
-
-            '
-          type: string
-        lifecycleState:
-          description: The current state of the deployment.
-          type: string
-          x-obmcs-enumref: '#/definitions/Deployment/lifecycleState'
-        locks:
-          description: Locks associated with this resource.
-          items:
-            $ref: '#/components/schemas/ResourceLock'
-          maxItems: 2
-          type: array
-        pathPrefix:
-          description: 'The path on which all routes contained in the API
-
-            deployment specification are deployed. For more information, see
-
-            [Deploying an API on an API Gateway by Creating an API
-
-            Deployment](/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm).
-
-            '
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time this resource was created. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time this resource was last updated. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - id
-      - gatewayId
-      - compartmentId
-      - pathPrefix
-      - endpoint
-      type: object
-    ChangeDeploymentCompartmentDetails:
-      description: The new compartment details for the deployment.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
-
-            resource is created.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    DeploymentCollection:
-      description: Collection of deployment summaries.
-      properties:
-        items:
-          description: Deployment summaries.
-          items:
-            $ref: '#/components/schemas/DeploymentSummary'
-          type: array
-      required:
-      - items
-      type: object
-    RequestBodySizeValidationPolicy:
-      description: Validate the size of the request body.
-      properties:
-        maximumBodySizeInBytes:
-          description: The maximum size of the request body in bytes.
-          format: int64
-          minimum: 0
-          type: integer
-        unsizedBodyPolicy:
-          description: The behavior of the gateway when a request is received without a known content length.
-          enum:
-          - BUFFER_AND_VALIDATE
-          - REQUIRE_CONTENT_LENGTH
-          - STREAM_WITH_VALIDATION
-          type: string
-      type: object
-    RequestParameterValidation:
-      description: Common parameter validation properties.
-      properties:
-        name:
-          description: Parameter name.
-          type: string
-      required:
-      - name
-      type: object
-    BodyValidationRequestPolicy:
-      allOf:
-      - $ref: '#/components/schemas/ValidationRequestPolicy'
-      - properties:
-          content:
-            additionalProperties:
-              $ref: '#/components/schemas/ContentValidation'
-            description: "The content of the request body. The key is a [media type range](https://tools.ietf.org/html/rfc7231#appendix-D)\nsubset restricted to the following schema\n\n    key ::= (\n          / (  \"*\" \"/\" \"*\" )\n          / ( type \"/\" \"*\" )\n          / ( type \"/\" subtype )\n          )\n\nFor requests that match multiple keys, only the most specific key is applicable.\ne.g. `text/plain` overrides `text/*`\n"
-            example:
-              '*/*':
-                validationType: NONE
-              application/*:
-                validationType: NONE
-              application/json:
-                validationType: NONE
-            type: object
-          required:
-            default: false
-            description: Determines if the request body is required in the request.
-            type: boolean
-        required:
-        - content
-        type: object
-      description: Validate the payload body of the incoming API requests on a specific route.
-    ApiSpecificationRouteBackend:
-      description: 'The backend to forward requests to.
-
-        '
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Type of the API backend.
-          enum:
-          - ORACLE_FUNCTIONS_BACKEND
-          - HTTP_BACKEND
-          - STOCK_RESPONSE_BACKEND
-          - DYNAMIC_ROUTING_BACKEND
-          - OAUTH2_LOGOUT_BACKEND
-          - OAUTH2_LOGIN_BACKEND
-          type: string
-      required:
-      - type
+      - from
+      - to
       type: object
     SetHeaderPolicy:
       description: 'Set HTTP headers as they pass through the gateway.
@@ -1605,257 +2065,6 @@ components:
           type: array
       required:
       - items
-      type: object
-    RenameHeaderPolicy:
-      description: 'Rename HTTP headers as they pass through the gateway.
-
-        '
-      properties:
-        items:
-          description: The list of headers.
-          items:
-            $ref: '#/components/schemas/RenameHeaderPolicyItem'
-          maxItems: 20
-          minItems: 1
-          type: array
-      required:
-      - items
-      type: object
-    DynamicSelectionKey:
-      description: Base policy for defining how to match the context variable in an incoming request with selection keys when dynamically routing and dynamically authenticating requests.
-      discriminator:
-        propertyName: type
-      properties:
-        isDefault:
-          default: false
-          description: Specifies whether to use the route or authentication server associated with this selection key as the default. The default is used if the value of a context variable in an incoming request does not match any of the other selection key values when dynamically routing and dynamically authenticating requests.
-          type: boolean
-        name:
-          description: Name assigned to the branch.
-          maxLength: 1024
-          minLength: 1
-          type: string
-        type:
-          default: ANY_OF
-          description: Type of the selection key.
-          enum:
-          - ANY_OF
-          - WILDCARD
-          type: string
-      required:
-      - name
-      type: object
-    QueryParameterValidationItem:
-      allOf:
-      - $ref: '#/components/schemas/RequestParameterValidation'
-      - properties:
-          required:
-            default: false
-            description: Determines if the parameter is required in the request.
-            type: boolean
-        type: object
-      description: Query parameter validation properties.
-      example:
-        name: fields
-        required: true
-    AccessLogPolicy:
-      description: 'Configures the logging policies for the access logs of an API Deployment.
-
-        '
-      properties:
-        isEnabled:
-          default: false
-          description: 'Enables pushing of access logs to the legacy OCI Object Storage log archival bucket.
-
-
-            Oracle recommends using the OCI Logging service to enable, retrieve, and query access logs
-
-            for an API Deployment. If there is an active log object for the API Deployment and its
-
-            category is set to ''access'' in OCI Logging service, the logs will not be uploaded to the
-
-            legacy OCI Object Storage log archival bucket.
-
-
-            Please note that the functionality to push to the legacy OCI Object Storage log
-
-            archival bucket has been deprecated and will be removed in the future.
-
-            '
-          type: boolean
-      type: object
-    SetHeaderPolicyItem:
-      description: 'Set will add a new header if it was not in the original request.  If the header already exists on the
-
-        request, you can choose to override, append, or skip it.
-
-        '
-      properties:
-        ifExists:
-          default: OVERWRITE
-          description: 'If a header with the same name already exists in the request, OVERWRITE will overwrite the value,
-
-            APPEND will append to the existing value, or SKIP will keep the existing value.
-
-            '
-          enum:
-          - OVERWRITE
-          - APPEND
-          - SKIP
-          type: string
-        name:
-          description: 'The case-insensitive name of the header.  This name must be unique across transformation policies.
-
-            '
-          example: X-CorrelationID
-          maxLength: 1024
-          minLength: 1
-          type: string
-        values:
-          description: 'A list of new values.  Each value can be a constant or may include one or more expressions enclosed within
-
-            ${} delimiters.
-
-            '
-          items:
-            example: ${request.headers[opc-request-id]}
-            maxLength: 4096
-            minLength: 1
-            type: string
-          maxItems: 10
-          minItems: 1
-          type: array
-      required:
-      - name
-      - values
-      type: object
-    AuthenticationServerPolicy:
-      description: Policy for the details regarding each authentication server under dynamic authentication. We specify the value of selectors for which this authentication server must be selected for a request under keys. We specify the configuration details of authentication server under authenticationServerDetail.
-      properties:
-        authenticationServerDetail:
-          $ref: '#/components/schemas/AuthenticationPolicy'
-        key:
-          $ref: '#/components/schemas/DynamicSelectionKey'
-      required:
-      - key
-      - authenticationServerDetail
-      type: object
-    ApiSpecification:
-      description: The logical configuration of the API exposed by a deployment.
-      properties:
-        loggingPolicies:
-          $ref: '#/components/schemas/ApiSpecificationLoggingPolicies'
-        requestPolicies:
-          $ref: '#/components/schemas/ApiSpecificationRequestPolicies'
-        routes:
-          description: A list of routes that this API exposes.
-          items:
-            $ref: '#/components/schemas/ApiSpecificationRoute'
-          type: array
-      type: object
-    SelectionSourcePolicy:
-      description: The type of selector to use when dynamically routing and dynamically authenticating requests.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          default: SINGLE
-          description: Type of the Selection source to use.
-          enum:
-          - SINGLE
-          type: string
-      required:
-      - type
-      type: object
-    HeaderValidationItem:
-      allOf:
-      - $ref: '#/components/schemas/RequestParameterValidation'
-      - properties:
-          required:
-            default: false
-            description: Determines if the header is required in the request.
-            type: boolean
-        type: object
-      description: Header validation properties.
-      example:
-        name: X-Client-Tokens
-        required: true
-    AuthenticationPolicy:
-      description: Information on how to authenticate incoming requests.
-      discriminator:
-        propertyName: type
-      properties:
-        isAnonymousAccessAllowed:
-          default: false
-          description: 'Whether an unauthenticated user may access the API. Must be "true" to enable ANONYMOUS
-
-            route authorization.
-
-            '
-          example: true
-          type: boolean
-        type:
-          description: Type of the authentication policy to use.
-          enum:
-          - CUSTOM_AUTHENTICATION
-          - JWT_AUTHENTICATION
-          - TOKEN_AUTHENTICATION
-          type: string
-      required:
-      - type
-      type: object
-    FilterQueryParameterPolicy:
-      description: 'Filter parameters from the query string as they pass through the gateway.  The gateway applies filters after other
-
-        transformations, so any parameters set or renamed must also be listed here when using an ALLOW type policy.
-
-        '
-      properties:
-        items:
-          description: 'The list of query parameters.
-
-            '
-          items:
-            $ref: '#/components/schemas/FilterQueryParameterPolicyItem'
-          maxItems: 20
-          minItems: 0
-          type: array
-        type:
-          default: BLOCK
-          description: 'BLOCK drops any query parameters that are in the list of items, so it acts as an exclusion list.  ALLOW
-
-            permits only the parameters in the list and removes all others, so it acts as an inclusion list.
-
-            '
-          enum:
-          - ALLOW
-          - BLOCK
-          type: string
-      required:
-      - type
-      - items
-      type: object
-    ApiSpecificationRouteResponsePolicies:
-      description: 'Behavior applied to any responses sent by the API for requests on this route.
-
-        '
-      properties:
-        headerTransformations:
-          $ref: '#/components/schemas/HeaderTransformationPolicy'
-        responseCacheStore:
-          $ref: '#/components/schemas/ResponseCacheStorePolicy'
-      type: object
-    QueryParameterTransformationPolicy:
-      description: 'A set of transformations to apply to query parameters that pass through the gateway.
-
-        '
-      properties:
-        filterQueryParameters:
-          $ref: '#/components/schemas/FilterQueryParameterPolicy'
-        renameQueryParameters:
-          $ref: '#/components/schemas/RenameQueryParameterPolicy'
-        setQueryParameters:
-          $ref: '#/components/schemas/SetQueryParameterPolicy'
       type: object
     AddResourceLockDetails:
       description: 'Used to add a resource lock.
@@ -1884,232 +2093,14 @@ components:
       required:
       - type
       type: object
-    UpdateDeploymentDetails:
-      description: The information to be updated.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a
-
-              namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a
-
-            namespace. For more information, see
-
-            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Avoid entering confidential information.
-
-
-            Example: `My new resource`
-
-            '
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair
-
-            with no predefined name, type, or namespace. For more information, see
-
-            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        specification:
-          $ref: '#/components/schemas/ApiSpecification'
-      type: object
-    QueryParameterValidationRequestPolicy:
-      allOf:
-      - $ref: '#/components/schemas/ValidationRequestPolicy'
-      - properties:
-          parameters:
-            description: The List of Query Parameters
-            items:
-              $ref: '#/components/schemas/QueryParameterValidationItem'
-            minItems: 1
-            type: array
-            uniqueItems: true
-        type: object
-      description: Validate the URL query parameters on the incoming API requests on a specific route.
-    FilterHeaderPolicyItem:
-      description: 'A header to drop (with BLOCK) or pass through (with ALLOW).
-
-        '
-      properties:
-        name:
-          description: 'The case-insensitive name of the header.  This name must be unique across transformation policies.
-
-            '
-          example: User-Agent
-          maxLength: 1024
-          minLength: 1
-          type: string
-      required:
-      - name
-      type: object
-    ApiSpecificationRequestPolicies:
-      description: Global behavior applied to all requests received by the API.
-      properties:
-        authentication:
-          $ref: '#/components/schemas/AuthenticationPolicy'
-        cors:
-          $ref: '#/components/schemas/CorsPolicy'
-        dynamicAuthentication:
-          $ref: '#/components/schemas/DynamicAuthenticationPolicy'
-        mutualTls:
-          $ref: '#/components/schemas/MutualTlsDetails'
-        rateLimiting:
-          $ref: '#/components/schemas/RateLimitingPolicy'
-        requestBodySizeValidation:
-          $ref: '#/components/schemas/RequestBodySizeValidationPolicy'
-        usagePlans:
-          $ref: '#/components/schemas/UsagePlansPolicy'
-      type: object
-    CreateDeploymentDetails:
-      description: Information about a new deployment.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
-
-            resource is created.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a
-
-              namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a
-
-            namespace. For more information, see
-
-            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Avoid entering confidential information.
-
-
-            Example: `My new resource`
-
-            '
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair
-
-            with no predefined name, type, or namespace. For more information, see
-
-            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        gatewayId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        locks:
-          description: Locks associated with this resource.
-          items:
-            $ref: '#/components/schemas/AddResourceLockDetails'
-          maxItems: 1
-          type: array
-        pathPrefix:
-          description: 'A path on which to deploy all routes contained in the API
-
-            deployment specification. For more information, see
-
-            [Deploying an API on an API Gateway by Creating an API
-
-            Deployment](/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm).
-
-            '
-          type: string
-        specification:
-          $ref: '#/components/schemas/ApiSpecification'
-      required:
-      - gatewayId
-      - compartmentId
-      - pathPrefix
-      - specification
-      type: object
-    ApiSpecificationLoggingPolicies:
-      description: 'Policies controlling the pushing of logs to OCI Public Logging.
-
-        '
-      properties:
-        accessLog:
-          $ref: '#/components/schemas/AccessLogPolicy'
-        executionLog:
-          $ref: '#/components/schemas/ExecutionLogPolicy'
-      type: object
   parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        default: 'null'
-        maxLength: 1024
-        minLength: 1
-    AddResourceLockDetailsBodyParam:
-      description: AddResourceLockDetails body parameter
-      in: body
-      name: AddResourceLockDetails
+    DeploymentIdentifierPathParam:
+      description: The ocid of the deployment.
+      in: path
+      name: deploymentId
       required: true
       schema:
-        $ref: '#/components/schemas/AddResourceLockDetails'
+        type: string
     SortByQueryParam:
       description: 'The field to sort by. You can provide one sort order (`sortOrder`).
 
@@ -2142,30 +2133,13 @@ components:
       schema:
         type: string
         default: 'null'
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      schema:
-        type: string
-        default: 'null'
-    CompartmentIdQueryParam:
-      description: The ocid of the compartment in which to list resources.
-      in: query
-      name: compartmentId
+    AddResourceLockDetailsBodyParam:
+      description: AddResourceLockDetails body parameter
+      in: body
+      name: AddResourceLockDetails
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/AddResourceLockDetails'
     RemoveResourceLockDetailsBodyParam:
       description: RemoveResourceLockDetails body parameter
       in: body
@@ -2173,29 +2147,6 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/RemoveResourceLockDetails'
-    GatewayIdQueryParam:
-      description: Filter deployments by the gateway ocid.
-      in: query
-      name: gatewayId
-      schema:
-        type: string
-        default: 'null'
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    DeploymentIdentifierPathParam:
-      description: The ocid of the deployment.
-      in: path
-      name: deploymentId
-      required: true
-      schema:
-        type: string
     SortOrderQueryParam:
       description: The sort order to use, either 'asc' or 'desc'. The default order depends on the sortBy value.
       in: query
@@ -2206,6 +2157,66 @@ components:
         - ASC
         - DESC
         default: ASC
+    RequestIdHeader:
+      description: The client request id for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+        default: 'null'
+    GatewayIdQueryParam:
+      description: Filter deployments by the gateway ocid.
+      in: query
+      name: gatewayId
+      schema:
+        type: string
+        default: 'null'
+    OverrideLocksQueryParameter:
+      description: Whether to override locks (if any exist).
+      in: query
+      name: isLockOverride
+      schema:
+        type: boolean
+        default: false
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        default: 'null'
+        maxLength: 1024
+        minLength: 1
+    DisplayNameQueryParam:
+      description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+
+        Example: `My new resource`
+
+        '
+      in: query
+      name: displayName
+      schema:
+        type: string
+        default: 'null'
+        maxLength: 255
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The ocid of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -2225,31 +2236,20 @@ components:
         default: 'null'
         maxLength: 64
         minLength: 1
-    OverrideLocksQueryParameter:
-      description: Whether to override locks (if any exist).
-      in: query
-      name: isLockOverride
-      schema:
-        type: boolean
-        default: false
-    DisplayNameQueryParam:
-      description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
 
+        for a resource, set the `if-match` parameter to the value of the
 
-        Example: `My new resource`
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
 
         '
-      in: query
-      name: displayName
-      schema:
-        type: string
-        default: 'null'
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request id for tracing.
       in: header
-      name: opc-request-id
+      name: if-match
       schema:
         type: string
         default: 'null'

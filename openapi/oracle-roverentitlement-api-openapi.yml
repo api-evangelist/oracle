@@ -317,146 +317,12 @@ paths:
         description: CompartmentId of the destination compartment
         required: true
 components:
-  parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RoverEntitlementIdPathParam:
-      description: ID of the rover node or cluster entitlement
-      in: path
-      name: roverEntitlementId
-      required: true
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The OCID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - DELETING
-        - DELETED
-        - FAILED
   schemas:
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    CreateRoverEntitlementDetails:
-      description: Information required to create a RoverEntitlement.
+    RoverEntitlementSummary:
+      description: Rover entitlement summary.
       properties:
         compartmentId:
-          description: The OCID of the compartment containing the RoverEntitlement.
+          description: The compartment Id.
           type: string
         definedTags:
           additionalProperties:
@@ -474,9 +340,6 @@ components:
         displayName:
           description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
           type: string
-        entitlementDetails:
-          description: Details about the entitlement.
-          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -488,22 +351,18 @@ components:
 
             '
           type: object
-        lifecycleState:
-          description: The current state of the RoverNode.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - DELETING
-          - DELETED
-          - FAILED
+        id:
+          description: Id of the entitlement.
           type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        lifecycleState:
+          description: Lifecyclestate for the entitlement.
+          type: string
+          x-obmcs-enumref: '#/definitions/RoverEntitlement/lifecycleState'
         lifecycleStateDetails:
           description: A property that can contain details on the lifecycle.
           type: string
         requestorEmail:
-          description: Requestor email for the entitlement.
+          description: Email id of the requestor for entitlement.
           type: string
         requestorName:
           description: Requestor name for the entitlement.
@@ -521,94 +380,9 @@ components:
 
             '
           type: object
-        tenantId:
-          description: tenant Id.
-          type: string
       required:
       - compartmentId
-      - requestorName
-      - requestorEmail
-      type: object
-    UpdateRoverEntitlementDetails:
-      description: Information required to update a RoverEntitlement.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
-          type: string
-        entitlementDetails:
-          description: Details about the entitlement.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        lifecycleState:
-          description: The current state of the RoverNode.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        lifecycleStateDetails:
-          description: A property that can contain details on the lifecycle.
-          type: string
-        requestorEmail:
-          description: Requestor email for the entitlement.
-          type: string
-        requestorName:
-          description: Requestor name for the entitlement.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{orcl-cloud: {free-tier-retain: true}}`
-
-            '
-          type: object
-        tenantId:
-          description: tenant Id.
-          type: string
-      type: object
-    RoverEntitlementCollection:
-      description: Results of a roverEntitlement search. Contains RoverEntitlementSummary.
-      properties:
-        items:
-          description: List of RoverEntitlementSummary.
-          items:
-            $ref: '#/components/schemas/RoverEntitlementSummary'
-          type: array
-      required:
-      - items
+      - lifecycleState
       type: object
     RoverEntitlement:
       description: Information about a RoverEntitlement.
@@ -697,11 +471,11 @@ components:
       - requestorEmail
       - id
       type: object
-    RoverEntitlementSummary:
-      description: Rover entitlement summary.
+    CreateRoverEntitlementDetails:
+      description: Information required to create a RoverEntitlement.
       properties:
         compartmentId:
-          description: The compartment Id.
+          description: The OCID of the compartment containing the RoverEntitlement.
           type: string
         definedTags:
           additionalProperties:
@@ -719,6 +493,9 @@ components:
         displayName:
           description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
           type: string
+        entitlementDetails:
+          description: Details about the entitlement.
+          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -730,18 +507,22 @@ components:
 
             '
           type: object
-        id:
-          description: Id of the entitlement.
-          type: string
         lifecycleState:
-          description: Lifecyclestate for the entitlement.
+          description: The current state of the RoverNode.
+          enum:
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
           type: string
-          x-obmcs-enumref: '#/definitions/RoverEntitlement/lifecycleState'
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
         lifecycleStateDetails:
           description: A property that can contain details on the lifecycle.
           type: string
         requestorEmail:
-          description: Email id of the requestor for entitlement.
+          description: Requestor email for the entitlement.
           type: string
         requestorName:
           description: Requestor name for the entitlement.
@@ -759,9 +540,13 @@ components:
 
             '
           type: object
+        tenantId:
+          description: tenant Id.
+          type: string
       required:
       - compartmentId
-      - lifecycleState
+      - requestorName
+      - requestorEmail
       type: object
     ChangeRoverEntitlementCompartmentDetails:
       description: Object for moving an entitlement to a different compartment.
@@ -776,6 +561,221 @@ components:
       required:
       - compartmentId
       type: object
+    UpdateRoverEntitlementDetails:
+      description: Information required to update a RoverEntitlement.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+          type: string
+        entitlementDetails:
+          description: Details about the entitlement.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+
+            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        lifecycleState:
+          description: The current state of the RoverNode.
+          enum:
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        lifecycleStateDetails:
+          description: A property that can contain details on the lifecycle.
+          type: string
+        requestorEmail:
+          description: Requestor email for the entitlement.
+          type: string
+        requestorName:
+          description: Requestor name for the entitlement.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+            '
+          type: object
+        tenantId:
+          description: tenant Id.
+          type: string
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    RoverEntitlementCollection:
+      description: Results of a roverEntitlement search. Contains RoverEntitlementSummary.
+      properties:
+        items:
+          description: List of RoverEntitlementSummary.
+          items:
+            $ref: '#/components/schemas/RoverEntitlementSummary'
+          type: array
+      required:
+      - items
+      type: object
+  parameters:
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    LifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - DELETING
+        - DELETED
+        - FAILED
+    RoverEntitlementIdPathParam:
+      description: ID of the rover node or cluster entitlement
+      in: path
+      name: roverEntitlementId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   responses:
     default:
       description: Unknown Error

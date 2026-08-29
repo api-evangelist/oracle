@@ -1882,115 +1882,20 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   schemas:
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    ApplicationDependencyRecommendationCollection:
-      description: A collection of recommended application dependency changes. Each element consists of an application dependency and its recommendation.
+    VulnerabilityDetailsCollection:
+      description: 'Collection of vulnerability details.
+
+        This resource is defined by a list of vulnerability details that are associated with vulnerabilities.
+
+        '
       properties:
         items:
-          description: List of application recommendation summaries.
+          description: List of vulnerabilities details.
           items:
-            $ref: '#/components/schemas/ApplicationDependencyRecommendationSummary'
+            $ref: '#/components/schemas/VulnerabilityDetails'
           type: array
       required:
       - items
-      type: object
-    RelatedVulnerabilityReference:
-      description: 'A related vulnerability reference is an object with vulnerabilityId and source to identify a related vulnerability.
-
-        '
-      properties:
-        id:
-          description: Unique vulnerability identifier for a source, e.g., CVE-1999-0067.
-          type: string
-        source:
-          description: Source that publishes the vulnerability.
-          type: string
-      required:
-      - id
-      - source
-      type: object
-    RemediationRunStage:
-      description: 'A remediation run stage is one step of an remediation run. Each stage provides output logs and has a specific type.
-
-        The stages are: DETECT, RECOMMEND, VERIFY, and APPLY.
-
-        '
-      discriminator:
-        propertyName: type
-      properties:
-        nextStageType:
-          description: The next type of stage in the remediation run.
-          enum:
-          - DETECT
-          - RECOMMEND
-          - VERIFY
-          - APPLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
-        previousStageType:
-          description: The previous type of stage in the remediation run.
-          enum:
-          - DETECT
-          - RECOMMEND
-          - VERIFY
-          - APPLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
-        remediationRunId:
-          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation run.
-          maxLength: 255
-          minLength: 1
-          type: string
-        status:
-          description: The current status of a remediation run stage.
-          enum:
-          - CREATED
-          - IN_PROGRESS
-          - SUCCEEDED
-          - FAILED
-          - CANCELING
-          - CANCELED
-          type: string
-        summary:
-          description: Information about the current step within the stage.
-          type: string
-        timeCreated:
-          description: The creation date and time of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeFinished:
-          description: The date and time of the finish of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeStarted:
-          description: The date and time of the start of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        type:
-          description: The type of the remediation run stage.
-          enum:
-          - DETECT
-          - RECOMMEND
-          - VERIFY
-          - APPLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
-      required:
-      - timeCreated
-      - type
-      - status
-      - remediationRunId
       type: object
     CreateRemediationRecipeDetails:
       description: Details to create a new Remediation Recipe.
@@ -2058,465 +1963,6 @@ components:
       - networkConfiguration
       - isRunTriggeredOnKbChange
       type: object
-    WorkRequestSummaryCollection:
-      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestSummary objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ScmConfiguration:
-      description: A configuration for the Source Code Management tool/platform used by a remediation recipe.
-      discriminator:
-        propertyName: scmType
-      properties:
-        branch:
-          description: The branch used by ADM to patch vulnerabilities.
-          type: string
-        buildFileLocation:
-          description: 'The location of the build file relative to the root of the repository. Only Maven build files (POM) are currently supported.
-
-            If this property is not specified, ADM will use the build file located at the root of the repository.
-
-            '
-          type: string
-        isAutomergeEnabled:
-          description: "If true, the Pull Request (PR) will be merged after the verify stage completes successfully    \nIf false, the PR with the proposed changes must be reviewed and manually merged.\n"
-          type: boolean
-        scmType:
-          description: The type of Source Code Management.
-          enum:
-          - OCI_CODE_REPOSITORY
-          - EXTERNAL_SCM
-          type: string
-      required:
-      - scmType
-      - branch
-      - isAutomergeEnabled
-      type: object
-    CreateKnowledgeBaseDetails:
-      description: Details to create a new knowledge base.
-      properties:
-        compartmentId:
-          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the knowledge base.
-          format: x-obmcs-ascii-identifier
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      required:
-      - compartmentId
-      type: object
-    WorkRequestSummary:
-      description: A summary of the status of a work request.
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - CREATE_REMEDIATION_RECIPE
-          - DELETE_REMEDIATION_RECIPE
-          - MOVE_REMEDIATION_RECIPE
-          - UPDATE_REMEDIATION_RECIPE
-          - ACTIVATE_REMEDIATION_RECIPE
-          - DEACTIVATE_REMEDIATION_RECIPE
-          - CREATE_KNOWLEDGE_BASE
-          - DELETE_KNOWLEDGE_BASE
-          - MOVE_KNOWLEDGE_BASE
-          - UPDATE_KNOWLEDGE_BASE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-      - freeformTags
-      - definedTags
-    VulnerableArtifactVersionRange:
-      description: Vulnerable artifact version range.
-      properties:
-        versionEndExcluding:
-          description: The version immediately after the last affected version. Versions up to, but not including this version, are vulnerable.
-          type: string
-        versionEndIncluding:
-          description: Marks the latest version that is affected by the vulnerability. This version and all preceding versions, going back to versionStartExcluding or versionStartIncluding, are considered vulnerable.
-          type: string
-        versionStartExcluding:
-          description: The version immediately before the start of affected versions. The specified version is not affected, but versions immediately after are, up to versionStartIncluding or beyond, if not otherwise defined.
-          type: string
-        versionStartIncluding:
-          description: The first version affected by the vulnerability. This version and those following it are considered vulnerable until versionEndExcluding or versionEndIncluding is reached.
-          type: string
-      type: object
-    NetworkConfiguration:
-      description: 'A network configuration defines the required network characteristics for the remediation run of the recipe to access the source repository and/or verify build services.
-
-        '
-      properties:
-        nsgIds:
-          description: The list of Oracle Cloud Identifiers ([OCID](/Content/General/Concepts/identifiers.htm)) corresponding to Network Security Groups.
-          items:
-            type: string
-          maxItems: 5
-          type: array
-        subnetId:
-          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the subnet.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - subnetId
-      type: object
-    VulnerabilityDetailsCollection:
-      description: 'Collection of vulnerability details.
-
-        This resource is defined by a list of vulnerability details that are associated with vulnerabilities.
-
-        '
-      properties:
-        items:
-          description: List of vulnerabilities details.
-          items:
-            $ref: '#/components/schemas/VulnerabilityDetails'
-          type: array
-      required:
-      - items
-      type: object
-    ChangeRemediationRunCompartmentDetails:
-      description: Details for moving remediation run resources.
-      properties:
-        compartmentId:
-          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) to which the resource must be moved.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    VerifyConfiguration:
-      description: 'The Verify stage configuration specifies a build service to run a pipeline for the recommended code changes.
-
-        The build pipeline will be initiated to ensure that there is no breaking change after the dependency versions
-
-        have been updated in source to avoid vulnerabilities.
-
-        '
-      discriminator:
-        propertyName: buildServiceType
-      properties:
-        buildServiceType:
-          description: The type of Build Service.
-          enum:
-          - OCI_DEVOPS_BUILD
-          - GITLAB_PIPELINE
-          - GITHUB_ACTIONS
-          - JENKINS_PIPELINE
-          - NONE
-          type: string
-      required:
-      - buildServiceType
-      type: object
-    UpdateKnowledgeBaseDetails:
-      description: Details to update an existing knowledge base.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the knowledge base.
-          format: x-obmcs-ascii-identifier
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      type: object
-    KnowledgeBaseSummary:
-      description: The summary of a knowledge base.
-      properties:
-        compartmentId:
-          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the knowledge base.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The current lifecycle state of the knowledge base.
-          type: string
-          x-obmcs-enumref: '#/definitions/KnowledgeBase/lifecycleState'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The creation date and time of the knowledge base (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the knowledge base was last updated (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - timeCreated
-      - timeUpdated
-      - compartmentId
-      - lifecycleState
-      - freeformTags
-      - definedTags
-      type: object
-    UpdateRemediationRunDetails:
-      description: Details to update an existing remediation run.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the remediation run.
-          format: x-obmcs-ascii-identifier
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      type: object
     RemediationRunCollection:
       description: Collection of remediation run summaries.
       properties:
@@ -2527,909 +1973,6 @@ components:
           type: array
       required:
       - items
-      type: object
-    ChangeRemediationRecipeCompartmentDetails:
-      description: Details for moving a remediation recipe resource.
-      properties:
-        compartmentId:
-          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) to which the resource must be moved.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    ChangeKnowledgeBaseCompartmentDetails:
-      description: Details for moving a knowledge base.
-      properties:
-        compartmentId:
-          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) to which the resource must be moved.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    VulnerabilityAuditCollection:
-      description: Collection of vulnerability audit summaries.
-      properties:
-        items:
-          description: List of vulnerability audit summaries.
-          items:
-            $ref: '#/components/schemas/VulnerabilityAuditSummary'
-          type: array
-      required:
-      - items
-      type: object
-    VulnerabilityAuditConfiguration:
-      description: 'Configuration for a vulnerability audit.
-
-        A vulnerable application dependency is ignored if its name does match any of the items in `exclusions`, or all of the associated Vulnerabilies have a CVSS v2 score below `maxPermissibleCvssV2Score` and a CVSS v3 score below `maxPermissibleCvssV3Score`.
-
-        type: object
-
-        '
-      properties:
-        exclusions:
-          default: []
-          description: 'A vulnerable application dependency is ignored if its name matches any of the items in `exclusions`.
-
-            An asterisk (*) in the dependency pattern acts as a wildcard and matches zero or more characters.
-
-            '
-          items:
-            type: string
-          type: array
-        maxPermissibleCvssV2Score:
-          default: 0
-          description: A vulnerable application dependency is ignored if the score of its associated Vulnerability is below maxPermissibleCvssV2Score and below maxPermissibleCvssV3Score.
-          format: float
-          maximum: 10
-          minimum: 0
-          type: number
-        maxPermissibleCvssV3Score:
-          default: 0
-          description: A vulnerable application dependency is ignored if the score of its associated Vulnerability is below maxPermissibleCvssV2Score and below maxPermissibleCvssV3Score.
-          format: float
-          maximum: 10
-          minimum: 0
-          type: number
-        maxPermissibleSeverity:
-          description: A vulnerable application dependency is ignored if the score of its associated Vulnerability is below maxPermissibleSeverity.
-          enum:
-          - UNSET
-          - NONE
-          - LOW
-          - MEDIUM
-          - HIGH
-          - CRITICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ConfigSeverity'
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    DetectConfiguration:
-      description: 'A configuration to define the constraints when detecting vulnerable dependencies and recommending remediations.
-
-        '
-      properties:
-        exclusions:
-          description: 'The list of dependencies to be ignored by the recommendation algorithm. The dependency pattern is matched against the ''group:artifact:version'' or the purl of a dependency.
-
-            An asterisk (*) at the end in the dependency pattern acts as a wildcard and matches zero or more characters.
-
-            '
-          items:
-            type: string
-          type: array
-        maxPermissibleCvssV2Score:
-          default: 0
-          description: The maximum Common Vulnerability Scoring System Version 2 (CVSS V2) score. A vulnerability with a CVSS V2 score below this value is not considered for remediation.
-          format: float
-          maximum: 10
-          minimum: 0
-          type: number
-        maxPermissibleCvssV3Score:
-          default: 0
-          description: The maximum Common Vulnerability Scoring System Version 3 (CVSS V3) score. A vulnerability with a CVSS V3 score below this value is not considered for patching.
-          format: float
-          maximum: 10
-          minimum: 0
-          type: number
-        maxPermissibleSeverity:
-          description: The maximum ADM Severity. A vulnerability with an severity below this value is not considered for remediation.
-          enum:
-          - UNSET
-          - NONE
-          - LOW
-          - MEDIUM
-          - HIGH
-          - CRITICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ConfigSeverity'
-        upgradePolicy:
-          description: 'The upgrade policy for recommendations.
-
-            The `Nearest` upgrade policy upgrades a dependency to the oldest version that meets both of the following criteria: it is newer than the current version and it is not affected by a vulnerability.
-
-            '
-          enum:
-          - NEAREST
-          type: string
-      type: object
-      x-example: "{\n  \"exclusions\": [\"pkg:maven/com.google.guava/guava@*\", \"com.fasterxml.jackson.core:jackson-databind:2.12.2\", \"pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.12.3\"],\n  \"upgradePolicy\": \"NEAREST\",\n  \"maxPermissibleSeverity\": \"LOW\"\n}\n"
-    VulnerabilityAuditSummary:
-      description: vulnerability audit summary.
-      properties:
-        buildType:
-          description: The type of the build tool is restricted to only two values MAVEN or UNSET. Use UNSET when the list of application dependencies is not Maven-related or is a mix of Maven and other ecosystems. This option is soon to be deprecated.
-          type: string
-          x-obmcs-enumref: '#/definitions/VulnerabilityAudit/buildType'
-        compartmentId:
-          description: The compartment Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the vulnerability audit.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the vulnerability audit.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the vulnerability audit.
-          maxLength: 255
-          minLength: 1
-          type: string
-        isSuccess:
-          description: Indicates if an audit succeeded according to the configuration. The value is `null` if the audit is in the `CREATING` state.
-          type: boolean
-        knowledgeBaseId:
-          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The current lifecycle state of the vulnerability audit.
-          type: string
-          x-obmcs-enumref: '#/definitions/VulnerabilityAudit/lifecycleState'
-        maxObservedCvssV2Score:
-          description: Maximum Common Vulnerability Scoring System Version 2 score observed for non-ignored vulnerable application dependencies.
-          format: float
-          type: number
-        maxObservedCvssV2ScoreWithIgnored:
-          description: Maximum Common Vulnerability Scoring System Version 2 score observed for vulnerable application dependencies including ignored ones.
-          format: float
-          type: number
-        maxObservedCvssV3Score:
-          description: Maximum Common Vulnerability Scoring System Version 3 score observed for non-ignored vulnerable application dependencies.
-          format: float
-          type: number
-        maxObservedCvssV3ScoreWithIgnored:
-          description: Maximum Common Vulnerability Scoring System Version 3 score observed for vulnerable application dependencies including ignored ones.
-          format: float
-          type: number
-        maxObservedSeverity:
-          description: Maximum ADM Severity observed for non-ignored vulnerable application dependencies.
-          enum:
-          - NONE
-          - LOW
-          - MEDIUM
-          - HIGH
-          - CRITICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VulnerabilitySeverity'
-        maxObservedSeverityWithIgnored:
-          description: Maximum ADM Severity observed for vulnerable application dependencies including ignored ones.
-          enum:
-          - NONE
-          - LOW
-          - MEDIUM
-          - HIGH
-          - CRITICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VulnerabilitySeverity'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The creation date and time of the vulnerability audit (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The update date and time of the vulnerability audit (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        vulnerableArtifactsCount:
-          description: Count of non-ignored vulnerable application dependencies.
-          type: integer
-        vulnerableArtifactsCountWithIgnored:
-          description: Count of all vulnerable application dependencies.
-          type: integer
-      required:
-      - id
-      - knowledgeBaseId
-      - timeCreated
-      - timeUpdated
-      - lifecycleState
-      - vulnerableArtifactsCount
-      - vulnerableArtifactsCountWithIgnored
-      - compartmentId
-      type: object
-    WorkRequest:
-      description: A description of workrequest status
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - CREATE_REMEDIATION_RECIPE
-          - DELETE_REMEDIATION_RECIPE
-          - MOVE_REMEDIATION_RECIPE
-          - UPDATE_REMEDIATION_RECIPE
-          - ACTIVATE_REMEDIATION_RECIPE
-          - DEACTIVATE_REMEDIATION_RECIPE
-          - CREATE_KNOWLEDGE_BASE
-          - DELETE_KNOWLEDGE_BASE
-          - MOVE_KNOWLEDGE_BASE
-          - UPDATE_KNOWLEDGE_BASE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    RemediationRecipeSummary:
-      description: The summary of a Remediation Recipe.
-      properties:
-        compartmentId:
-          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation recipe.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the Remediation Recipe.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation recipe.
-          maxLength: 255
-          minLength: 1
-          type: string
-        isRunTriggeredOnKbChange:
-          description: Boolean indicating if a run should be automatically triggered once the Knowledge Base is updated.
-          type: boolean
-        knowledgeBaseId:
-          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The current lifecycle state of the Remediation Recipe.
-          type: string
-          x-obmcs-enumref: '#/definitions/RemediationRecipe/lifecycleState'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The creation date and time of the Remediation Recipe (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the Remediation Recipe was last updated (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - timeCreated
-      - timeUpdated
-      - compartmentId
-      - knowledgeBaseId
-      - isRunTriggeredOnKbChange
-      - lifecycleState
-      - freeformTags
-      - definedTags
-      type: object
-    KnowledgeBase:
-      description: 'A knowledge base is a component of Application Dependency Management (ADM) service that provides access to vulnerabilities.
-
-        '
-      properties:
-        compartmentId:
-          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the knowledge base.
-          format: x-obmcs-ascii-identifier
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The current lifecycle state of the knowledge base.
-          enum:
-          - CREATING
-          - ACTIVE
-          - UPDATING
-          - FAILED
-          - DELETING
-          - DELETED
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The creation date and time of the knowledge base (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the knowledge base was last updated (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - timeCreated
-      - timeUpdated
-      - lifecycleState
-      - compartmentId
-      - freeformTags
-      - definedTags
-      type: object
-    ApplicationDependencyVulnerabilityCollection:
-      description: 'application dependencies with Vulnerabilities.
-
-        This resource is defined by a list of application dependencies that are associated with eventual Vulnerabilities.
-
-        '
-      properties:
-        items:
-          description: List of vulnerability audit summaries.
-          items:
-            $ref: '#/components/schemas/ApplicationDependencyVulnerabilitySummary'
-          type: array
-      required:
-      - items
-      type: object
-    CreateVulnerabilityAuditDetails:
-      description: Details to create a vulnerability audit.
-      properties:
-        applicationDependencies:
-          description: List of application dependencies (without vulnerabilities).
-          items:
-            $ref: '#/components/schemas/ApplicationDependency'
-          type: array
-        buildType:
-          description: The type of the build tool is restricted to only two values MAVEN or UNSET. Use UNSET when the list of application dependencies is not Maven-related or is a mix of Maven and other ecosystems. This option is soon to be deprecated.
-          type: string
-          x-obmcs-enumref: '#/definitions/VulnerabilityAudit/buildType'
-        compartmentId:
-          description: "The compartment Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the vulnerability audit. \nIf compartment identifier is not provided the compartment of the associated knowledge base will be used instead.\n"
-          maxLength: 255
-          minLength: 1
-          type: string
-        configuration:
-          $ref: '#/components/schemas/VulnerabilityAuditConfiguration'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the vulnerability audit.
-          format: x-obmcs-ascii-identifier
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        knowledgeBaseId:
-          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
-          maxLength: 255
-          minLength: 1
-          type: string
-        source:
-          $ref: '#/components/schemas/VulnerabilityAuditSource'
-        usageData:
-          $ref: '#/components/schemas/UsageDataDetails'
-      required:
-      - knowledgeBaseId
-      type: object
-      x-example: "{\n   \"knowledgeBaseId\":\"<var>&lt;knowledge_base_id&gt;</var>\",\n   \"compartmentId\":\"<var>&lt;compartment_id&gt;</var>\",\n   \"applicationDependencies\":[\n      {\n         \"gav\":\"some.group.id:some-artifact-id:0.1-SNAPSHOT\",\n         \"purl\":\"pkg:maven/some.group.id/some-artifact-id@0.1-SNAPSHOT\",\n         \"nodeId\":\"5\",\n         \"applicationDependencyNodeIds\":[\n            \"2\",\n            \"4\"\n         ]\n      },\n      {\n         \"gav\":\"org.apache.logging.log4j:log4j-core:2.14.0\",\n         \"purl\":\"pkg:maven/org.apache.logging.log4j/log4j-core@2.14.0\",\n         \"nodeId\":\"2\",\n         \"applicationDependencyNodeIds\":[\n            \"1\"\n         ]\n      },\n      {\n         \"gav\":\"org.apache.logging.log4j:log4j-api:2.14.0\",\n         \"purl\":\"pkg:maven/org.apache.logging.log4j/log4j-api@2.14.0\",\n         \"nodeId\":\"1\",\n         \"applicationDependencyNodeIds\":[\n         ]\n      },\n      {\n         \"gav\":\"com.google.guava:guava:28.0-jre\",\n         \"purl\":\"pkg:maven/com.google.guava/guava@28.0-jre\",\n         \"nodeId\":\"4\",\n         \"applicationDependencyNodeIds\":[\n            \"3\"\n         ]\n      },\n      {\n         \"gav\":\"com.google.guava:failureaccess:1.0.1\",\n         \"purl\":\"pkg:maven/com.google.guava/failureaccess@1.0.1\",\n         \"nodeId\":\"3\",\n         \"applicationDependencyNodeIds\":[\n         ]\n      }\n   ],\n   \"buildType\":\"MAVEN\",\n   \"configuration\":{\n      \"maxPermissibleCvssV2Score\":1.0,\n      \"maxPermissibleCvssV3Score\":1.0,\n      \"maxPermissibleSeverity\": \"LOW\",\n      \"exclusions\":[\n      ]\n   },\n   \"displayName\":\"custom-vulnerability-audit\",\n   \"source\":{\n     \"type\": \"OCI_RESOURCE\",\n     \"ociResourceId\":\"ocid1.devopsbuildrun.oc1.iad.amaaaaaa5f5ialya4s4ynatrkcor2y35dbzd4alzayaqmsb7ay4thcr5afia\"\n   }\n}\n"
-    RemediationRunSummary:
-      description: remediation run summary.
-      properties:
-        compartmentId:
-          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation run.
-          maxLength: 255
-          minLength: 1
-          type: string
-        currentStageType:
-          description: The type of the current stage of the remediation run.
-          enum:
-          - DETECT
-          - RECOMMEND
-          - VERIFY
-          - APPLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the remediation run.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation run.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The current lifecycle state of the remediation run.
-          type: string
-          x-obmcs-enumref: '#/definitions/RemediationRun/lifecycleState'
-        remediationRecipeId:
-          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the Remediation Recipe.
-          maxLength: 255
-          minLength: 1
-          type: string
-        remediationRunSource:
-          description: The source from which the remediation run was triggered.
-          type: string
-          x-obmcs-enumref: '#/definitions/RemediationRun/remediationRunSource'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The creation date and time of the remediation run (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeFinished:
-          description: The date and time of the finish of the remediation run (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeStarted:
-          description: The date and time of the start of the remediation run (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the remediation run was last updated (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-      required:
-      - id
-      - remediationRecipeId
-      - timeCreated
-      - timeUpdated
-      - compartmentId
-      - lifecycleState
-      - remediationRunSource
-      - freeformTags
-      - definedTags
-      type: object
-    Vulnerability:
-      description: 'A vulnerability is a weakness or error in an artifact.
-
-        A vulnerability is a generalization of a CVE (every CVE is a vulnerability, but not every vulnerability has a CVE).
-
-        '
-      properties:
-        cvssV2Score:
-          description: 'Common Vulnerability Scoring System (CVSS) Version 2, calculated from the metrics provided in the CVSS vector provided from the vulnerability source.
-
-            This field is deprecated and will be removed in the future. The cvssV2Score can be obtained from the metrics field of the listVulnerabilities endpoint.
-
-            '
-          format: float
-          type: number
-        cvssV3Score:
-          description: 'Common Vulnerability Scoring System (CVSS) Version 3, calculated from the metrics provided in the CVSS vector provided from the vulnerability source.
-
-            This field is deprecated and will be removed in the future. The cvssV3Score can be obtained from the metrics field of the listVulnerabilities endpoint.
-
-            '
-          format: float
-          type: number
-        id:
-          description: Unique vulnerability identifier, e.g. CVE-1999-0067.
-          type: string
-        isFalsePositive:
-          description: Indicates if the vulnerability is a false positive according to the usage data. If no usage data was provided or the service cannot infer usage of the vulnerable code then this property is `null`.
-          type: boolean
-        isIgnored:
-          description: Indicates if the vulnerability was ignored according to the audit configuration.
-          type: boolean
-        matchingVulnerableArtifactVersionRanges:
-          description: List of artifact version ranges affected by a particular vulnerability.
-          items:
-            $ref: '#/components/schemas/VulnerableArtifactVersionRange'
-          type: array
-        metrics:
-          description: List of reported metrics by the source.
-          items:
-            $ref: '#/components/schemas/VulnerabilityMetric'
-          maxItems: 1000
-          type: array
-        severity:
-          description: ADM qualitative severity score. Can be either NONE, LOW, MEDIUM, HIGH or CRITICAL.
-          enum:
-          - NONE
-          - LOW
-          - MEDIUM
-          - HIGH
-          - CRITICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VulnerabilitySeverity'
-        source:
-          description: Source that published the vulnerability
-          type: string
-      required:
-      - id
-      - isIgnored
-      type: object
-    VulnerabilityAuditSource:
-      description: vulnerability audit source.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Source type of the vulnerability audit.
-          enum:
-          - EXTERNAL_RESOURCE
-          - OCI_RESOURCE
-          - UNKNOWN
-          type: string
-      required:
-      - type
-      type: object
-    StageSummary:
-      description: stage summary of a remediation run. A stage is one step of a remediation run.
-      properties:
-        summary:
-          description: Information about the current step within the given stage.
-          type: string
-        timeCreated:
-          description: The creation date and time of the stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeFinished:
-          description: The date and time of the finish of the stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeStarted:
-          description: The date and time of the start of the stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        type:
-          description: The type of stage.
-          enum:
-          - DETECT
-          - RECOMMEND
-          - VERIFY
-          - APPLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
-      required:
-      - timeCreated
-      - type
-      type: object
-    KnowledgeBaseCollection:
-      description: Collection of knowledge base summaries.
-      properties:
-        items:
-          description: List of knowledge base summaries.
-          items:
-            $ref: '#/components/schemas/KnowledgeBaseSummary'
-          type: array
-      required:
-      - items
-      type: object
-    RemediationRunStageSummary:
-      description: The summary of a remediation run stages.
-      properties:
-        remediationRunId:
-          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation run.
-          maxLength: 255
-          minLength: 1
-          type: string
-        status:
-          description: The current status of remediation run stage.
-          type: string
-          x-obmcs-enumref: '#/definitions/RemediationRunStage/status'
-        summary:
-          description: Information about the current step within the stage.
-          type: string
-        timeCreated:
-          description: The creation date and time of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeFinished:
-          description: The date and time of the finish of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        timeStarted:
-          description: The date and time of the start of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
-          format: date-time
-          type: string
-        type:
-          description: The type of the remediation run stage.
-          enum:
-          - DETECT
-          - RECOMMEND
-          - VERIFY
-          - APPLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
-      required:
-      - status
-      - timeCreated
-      - type
-      - remediationRunId
       type: object
     VulnerabilityAudit:
       description: 'A vulnerability audit associates the application dependencies of a project with their associated Vulnerabilities.
@@ -3610,8 +2153,184 @@ components:
       - source
       - compartmentId
       type: object
-    CreateRemediationRunDetails:
-      description: Details to create a new remediation run.
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
+      properties:
+        compartmentId:
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_REMEDIATION_RECIPE
+          - DELETE_REMEDIATION_RECIPE
+          - MOVE_REMEDIATION_RECIPE
+          - UPDATE_REMEDIATION_RECIPE
+          - ACTIVATE_REMEDIATION_RECIPE
+          - DEACTIVATE_REMEDIATION_RECIPE
+          - CREATE_KNOWLEDGE_BASE
+          - DELETE_KNOWLEDGE_BASE
+          - MOVE_KNOWLEDGE_BASE
+          - UPDATE_KNOWLEDGE_BASE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+      - freeformTags
+      - definedTags
+    CreateKnowledgeBaseDetails:
+      description: Details to create a new knowledge base.
+      properties:
+        compartmentId:
+          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the knowledge base.
+          format: x-obmcs-ascii-identifier
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+      required:
+      - compartmentId
+      type: object
+    UpdateRemediationRunDetails:
+      description: Details to update an existing remediation run.
       properties:
         definedTags:
           additionalProperties:
@@ -3646,203 +2365,242 @@ components:
 
             '
           type: object
-        remediationRecipeId:
-          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the Remediation Recipe.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - remediationRecipeId
       type: object
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
+    VerifyConfiguration:
+      description: 'The Verify stage configuration specifies a build service to run a pipeline for the recommended code changes.
+
+        The build pipeline will be initiated to ensure that there is no breaking change after the dependency versions
+
+        have been updated in source to avoid vulnerabilities.
+
+        '
+      discriminator:
+        propertyName: buildServiceType
       properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work tracked in the work request.
-
-            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
-
-            work is complete for that resource at which point it will transition to CREATED, UPDATED,
-
-            or DELETED, respectively.
-
-            '
+        buildServiceType:
+          description: The type of Build Service.
           enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          - FAILED
+          - OCI_DEVOPS_BUILD
+          - GITLAB_PIPELINE
+          - GITHUB_ACTIONS
+          - JENKINS_PIPELINE
+          - NONE
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type the work request affects.
-          type: string
-        entityUri:
-          description: The URI path that the user can do a GET on to access the resource metadata
-          type: string
-        identifier:
-          description: The identifier of the resource the work request affects.
-          type: string
-        metadata:
-          additionalProperties:
-            type: string
-          description: Additional information that helps to explain the resource.
-          enum:
-          - IS_DRY_RUN
-          type: object
-          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
       required:
-      - actionType
-      - entityType
-      - identifier
-    RemediationRunStageCollection:
-      description: Collection of remediation run stage summaries.
+      - buildServiceType
+      type: object
+    KnowledgeBaseCollection:
+      description: Collection of knowledge base summaries.
       properties:
         items:
-          description: List of remediation run stage summaries.
+          description: List of knowledge base summaries.
           items:
-            $ref: '#/components/schemas/RemediationRunStageSummary'
+            $ref: '#/components/schemas/KnowledgeBaseSummary'
           type: array
       required:
       - items
       type: object
-    WorkRequestError:
-      description: An error encountered while executing a work request.
+    VulnerabilityAuditSource:
+      description: vulnerability audit source.
+      discriminator:
+        propertyName: type
       properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed on
-
-            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured. An RFC3339 formatted datetime string.
-          format: date-time
+        type:
+          description: Source type of the vulnerability audit.
+          enum:
+          - EXTERNAL_RESOURCE
+          - OCI_RESOURCE
+          - UNKNOWN
           type: string
       required:
-      - code
-      - message
-      - timestamp
-    ApplicationDependency:
-      description: 'An ApplicationDependency resource is used within the applicationDependencies of a CreateVulnerabilityAuditDetails resource to create a vulnerability audit.
-
-        Each ApplicationDependency resource must provide either Package URL (purl) identifier or a Group Artifact Version (GAV) to identify the application dependency.
-
-        '
-      properties:
-        applicationDependencyNodeIds:
-          description: List of application dependencies on which this application dependency depends, each identified by its nodeId.
-          items:
-            type: string
-          type: array
-        gav:
-          description: 'Group Artifact Version (GAV) identifier (Group:Artifact:Version). Example: org.graalvm.nativeimage:svm:21.1.0.
-
-            "N/A" for non-maven artifacts.
-
-            '
-          type: string
-        nodeId:
-          description: 'Unique identifier of an application dependency, for example nodeId1.
-
-            The nodeId can be generated by assigning a unique id to each application dependency
-
-            in the tree of application dependencies.
-
-            Every node, even those who share the same GAV, should have a different nodeId.
-
-            The preferred way of constructing a nodeId is to assign incremental integers
-
-            during a breadth first or depth first search.
-
-            A nodeId can be reused only it refers to the same subtree of application dependencies.
-
-            (This is not equivalent to referring to the same GAV, that is,
-
-            a GAV can have multiple transitive dependencies.)
-
-            '
-          type: string
-        purl:
-          description: Package URL identifier, e.g. pkg:maven/org.graalvm.nativeimage/svm@21.1.0
-          type: string
-      required:
-      - nodeId
+      - type
       type: object
-    ApplicationDependencyVulnerabilitySummary:
-      description: 'An application dependency Vulnerability represents a single dependency in the application.
+    ApplicationDependencyRecommendationSummary:
+      description: 'An application dependency with the recommended version that does not contain any CVE.
 
-        An application dependency Vulnerability can be associated with eventual Vulnerabilities.
-
-        Each application dependency is uniquely defined by a nodeId and lists eventual dependencies on which it depends.
+        Each application dependency has a property specifying multiple node identifiers on which which this current node depends.
 
         '
       properties:
         applicationDependencyNodeIds:
-          description: List of application dependencies on which this application dependency depends, each identified by its nodeId.
+          description: List of (application dependencies) node identifiers from which this node depends.
           items:
             type: string
           type: array
         gav:
-          description: 'Group Artifact Version (GAV) identifier (Group:Artifact:Version). Example: org.graalvm.nativeimage:svm:21.1.0.
-
-            "N/A" for non-maven artifacts.
-
-            '
+          description: Unique Group Artifact Version (GAV) identifier in the format _Group:Artifact:Version_, e.g. org.graalvm.nativeimage:svm:21.1.0.
           type: string
-        isFoundInKnowledgeBase:
-          description: Indicates if the artifact is found in the knowledge base, this field is deprecated and will be removed in the future.
-          type: boolean
         nodeId:
-          description: Unique identifier of an application dependency, for example nodeId1.
+          description: Unique node identifier of an application dependency with an associated Recommendation, e.g. nodeId1.
           type: string
         purl:
           description: Package URL identifier, e.g. pkg:maven/org.graalvm.nativeimage/svm@21.1.0
           type: string
-        vulnerabilities:
-          description: List of vulnerabilities for the application dependency.
-          items:
-            $ref: '#/components/schemas/Vulnerability'
-          type: array
-        warnings:
-          description: 'Potential issues in the artifact identifiers (purls) provided by the user, that the user is alerted about. ADM supports the following warnings:
-
-            - MISSING_VERSION: Missing version
-
-            - INCORRECT_FORMAT_VERSION: Version can not be parsed according to the ecosystem
-
-            - UNKNOWN_ECOSYSTEM: The purl''s ecosystem is unknown to ADM
-
-            - INCORRECT_FORMAT_EPOCH: Epoch qualifier can not be parsed according to the ecosystem
-
-            - MISSING_DISTRO: The distro qualifier is required for the ecosystem, but was not provided in the purl
-
-            - UNKNOWN_DISTRO: ADM does not have data for the provided distro value for the given ecosystem
-
-            - MISSING_ARCH: The arch qualifier is required for the ecosystem and distro, but was not provided in the purl
-
-            - UNKNOWN_ARCH: ADM does not have data for the provided arch value for the given ecosystem and distro
-
-            - EPOCH_VALUE_MISMATCH: Epoch value in qualifier is not the same as the epoch value in version
-
-            - INVALID_PURL: The provided PURL could not be parsed
-
-            '
-          items:
-            type: string
-          type: array
+        recommendedGav:
+          description: Recommended application dependency in "group:artifact:version" (GAV) format, e.g. org.graalvm.nativeimage:svm:21.2.0.
+          type: string
+        recommendedPurl:
+          description: Recommended application dependency in purl format, e.g. pkg:maven/org.graalvm.nativeimage/svm@21.2.0
+          type: string
       required:
       - gav
       - nodeId
       - applicationDependencyNodeIds
-      - vulnerabilities
-      - isFoundInKnowledgeBase
+      type: object
+    Vulnerability:
+      description: 'A vulnerability is a weakness or error in an artifact.
+
+        A vulnerability is a generalization of a CVE (every CVE is a vulnerability, but not every vulnerability has a CVE).
+
+        '
+      properties:
+        cvssV2Score:
+          description: 'Common Vulnerability Scoring System (CVSS) Version 2, calculated from the metrics provided in the CVSS vector provided from the vulnerability source.
+
+            This field is deprecated and will be removed in the future. The cvssV2Score can be obtained from the metrics field of the listVulnerabilities endpoint.
+
+            '
+          format: float
+          type: number
+        cvssV3Score:
+          description: 'Common Vulnerability Scoring System (CVSS) Version 3, calculated from the metrics provided in the CVSS vector provided from the vulnerability source.
+
+            This field is deprecated and will be removed in the future. The cvssV3Score can be obtained from the metrics field of the listVulnerabilities endpoint.
+
+            '
+          format: float
+          type: number
+        id:
+          description: Unique vulnerability identifier, e.g. CVE-1999-0067.
+          type: string
+        isFalsePositive:
+          description: Indicates if the vulnerability is a false positive according to the usage data. If no usage data was provided or the service cannot infer usage of the vulnerable code then this property is `null`.
+          type: boolean
+        isIgnored:
+          description: Indicates if the vulnerability was ignored according to the audit configuration.
+          type: boolean
+        matchingVulnerableArtifactVersionRanges:
+          description: List of artifact version ranges affected by a particular vulnerability.
+          items:
+            $ref: '#/components/schemas/VulnerableArtifactVersionRange'
+          type: array
+        metrics:
+          description: List of reported metrics by the source.
+          items:
+            $ref: '#/components/schemas/VulnerabilityMetric'
+          maxItems: 1000
+          type: array
+        severity:
+          description: ADM qualitative severity score. Can be either NONE, LOW, MEDIUM, HIGH or CRITICAL.
+          enum:
+          - NONE
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VulnerabilitySeverity'
+        source:
+          description: Source that published the vulnerability
+          type: string
+      required:
+      - id
+      - isIgnored
+      type: object
+    KnowledgeBase:
+      description: 'A knowledge base is a component of Application Dependency Management (ADM) service that provides access to vulnerabilities.
+
+        '
+      properties:
+        compartmentId:
+          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the knowledge base.
+          format: x-obmcs-ascii-identifier
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current lifecycle state of the knowledge base.
+          enum:
+          - CREATING
+          - ACTIVE
+          - UPDATING
+          - FAILED
+          - DELETING
+          - DELETED
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The creation date and time of the knowledge base (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the knowledge base was last updated (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - timeCreated
+      - timeUpdated
+      - lifecycleState
+      - compartmentId
+      - freeformTags
+      - definedTags
       type: object
     RemediationRun:
       description: "A remediation run represents an execution of a Remediation Recipe to detect and fix vulnerabilities based on current state of the \nVulnerabilities curated in the Knowledge Base.\nA Run can be triggered manually or when a new CVE is discovered.\n"
@@ -3973,6 +2731,797 @@ components:
       - freeformTags
       - definedTags
       type: object
+    WorkRequestSummaryCollection:
+      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestSummary objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    CreateVulnerabilityAuditDetails:
+      description: Details to create a vulnerability audit.
+      properties:
+        applicationDependencies:
+          description: List of application dependencies (without vulnerabilities).
+          items:
+            $ref: '#/components/schemas/ApplicationDependency'
+          type: array
+        buildType:
+          description: The type of the build tool is restricted to only two values MAVEN or UNSET. Use UNSET when the list of application dependencies is not Maven-related or is a mix of Maven and other ecosystems. This option is soon to be deprecated.
+          type: string
+          x-obmcs-enumref: '#/definitions/VulnerabilityAudit/buildType'
+        compartmentId:
+          description: "The compartment Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the vulnerability audit. \nIf compartment identifier is not provided the compartment of the associated knowledge base will be used instead.\n"
+          maxLength: 255
+          minLength: 1
+          type: string
+        configuration:
+          $ref: '#/components/schemas/VulnerabilityAuditConfiguration'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the vulnerability audit.
+          format: x-obmcs-ascii-identifier
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        knowledgeBaseId:
+          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
+          maxLength: 255
+          minLength: 1
+          type: string
+        source:
+          $ref: '#/components/schemas/VulnerabilityAuditSource'
+        usageData:
+          $ref: '#/components/schemas/UsageDataDetails'
+      required:
+      - knowledgeBaseId
+      type: object
+      x-example: "{\n   \"knowledgeBaseId\":\"<var>&lt;knowledge_base_id&gt;</var>\",\n   \"compartmentId\":\"<var>&lt;compartment_id&gt;</var>\",\n   \"applicationDependencies\":[\n      {\n         \"gav\":\"some.group.id:some-artifact-id:0.1-SNAPSHOT\",\n         \"purl\":\"pkg:maven/some.group.id/some-artifact-id@0.1-SNAPSHOT\",\n         \"nodeId\":\"5\",\n         \"applicationDependencyNodeIds\":[\n            \"2\",\n            \"4\"\n         ]\n      },\n      {\n         \"gav\":\"org.apache.logging.log4j:log4j-core:2.14.0\",\n         \"purl\":\"pkg:maven/org.apache.logging.log4j/log4j-core@2.14.0\",\n         \"nodeId\":\"2\",\n         \"applicationDependencyNodeIds\":[\n            \"1\"\n         ]\n      },\n      {\n         \"gav\":\"org.apache.logging.log4j:log4j-api:2.14.0\",\n         \"purl\":\"pkg:maven/org.apache.logging.log4j/log4j-api@2.14.0\",\n         \"nodeId\":\"1\",\n         \"applicationDependencyNodeIds\":[\n         ]\n      },\n      {\n         \"gav\":\"com.google.guava:guava:28.0-jre\",\n         \"purl\":\"pkg:maven/com.google.guava/guava@28.0-jre\",\n         \"nodeId\":\"4\",\n         \"applicationDependencyNodeIds\":[\n            \"3\"\n         ]\n      },\n      {\n         \"gav\":\"com.google.guava:failureaccess:1.0.1\",\n         \"purl\":\"pkg:maven/com.google.guava/failureaccess@1.0.1\",\n         \"nodeId\":\"3\",\n         \"applicationDependencyNodeIds\":[\n         ]\n      }\n   ],\n   \"buildType\":\"MAVEN\",\n   \"configuration\":{\n      \"maxPermissibleCvssV2Score\":1.0,\n      \"maxPermissibleCvssV3Score\":1.0,\n      \"maxPermissibleSeverity\": \"LOW\",\n      \"exclusions\":[\n      ]\n   },\n   \"displayName\":\"custom-vulnerability-audit\",\n   \"source\":{\n     \"type\": \"OCI_RESOURCE\",\n     \"ociResourceId\":\"ocid1.devopsbuildrun.oc1.iad.amaaaaaa5f5ialya4s4ynatrkcor2y35dbzd4alzayaqmsb7ay4thcr5afia\"\n   }\n}\n"
+    NetworkConfiguration:
+      description: 'A network configuration defines the required network characteristics for the remediation run of the recipe to access the source repository and/or verify build services.
+
+        '
+      properties:
+        nsgIds:
+          description: The list of Oracle Cloud Identifiers ([OCID](/Content/General/Concepts/identifiers.htm)) corresponding to Network Security Groups.
+          items:
+            type: string
+          maxItems: 5
+          type: array
+        subnetId:
+          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the subnet.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - subnetId
+      type: object
+    VulnerabilityAuditCollection:
+      description: Collection of vulnerability audit summaries.
+      properties:
+        items:
+          description: List of vulnerability audit summaries.
+          items:
+            $ref: '#/components/schemas/VulnerabilityAuditSummary'
+          type: array
+      required:
+      - items
+      type: object
+    RemediationRecipeCollection:
+      description: Collection of remediation recipe summaries.
+      properties:
+        items:
+          description: List of remediation recipe summaries.
+          items:
+            $ref: '#/components/schemas/RemediationRecipeSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. Error codes are listed on
+
+            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+
+            '
+          type: string
+        message:
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    UpdateRemediationRecipeDetails:
+      description: Details to update an existing remediation recipe.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        detectConfiguration:
+          $ref: '#/components/schemas/DetectConfiguration'
+        displayName:
+          description: The name of the remediation recipe.
+          format: x-obmcs-ascii-identifier
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isRunTriggeredOnKbChange:
+          description: Boolean indicating if a run should be automatically triggered once the knowledge base is updated.
+          type: boolean
+        knowledgeBaseId:
+          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
+          maxLength: 255
+          minLength: 1
+          type: string
+        networkConfiguration:
+          $ref: '#/components/schemas/NetworkConfiguration'
+        scmConfiguration:
+          $ref: '#/components/schemas/ScmConfiguration'
+        verifyConfiguration:
+          $ref: '#/components/schemas/VerifyConfiguration'
+      type: object
+    ApplicationDependencyVulnerabilitySummary:
+      description: 'An application dependency Vulnerability represents a single dependency in the application.
+
+        An application dependency Vulnerability can be associated with eventual Vulnerabilities.
+
+        Each application dependency is uniquely defined by a nodeId and lists eventual dependencies on which it depends.
+
+        '
+      properties:
+        applicationDependencyNodeIds:
+          description: List of application dependencies on which this application dependency depends, each identified by its nodeId.
+          items:
+            type: string
+          type: array
+        gav:
+          description: 'Group Artifact Version (GAV) identifier (Group:Artifact:Version). Example: org.graalvm.nativeimage:svm:21.1.0.
+
+            "N/A" for non-maven artifacts.
+
+            '
+          type: string
+        isFoundInKnowledgeBase:
+          description: Indicates if the artifact is found in the knowledge base, this field is deprecated and will be removed in the future.
+          type: boolean
+        nodeId:
+          description: Unique identifier of an application dependency, for example nodeId1.
+          type: string
+        purl:
+          description: Package URL identifier, e.g. pkg:maven/org.graalvm.nativeimage/svm@21.1.0
+          type: string
+        vulnerabilities:
+          description: List of vulnerabilities for the application dependency.
+          items:
+            $ref: '#/components/schemas/Vulnerability'
+          type: array
+        warnings:
+          description: 'Potential issues in the artifact identifiers (purls) provided by the user, that the user is alerted about. ADM supports the following warnings:
+
+            - MISSING_VERSION: Missing version
+
+            - INCORRECT_FORMAT_VERSION: Version can not be parsed according to the ecosystem
+
+            - UNKNOWN_ECOSYSTEM: The purl''s ecosystem is unknown to ADM
+
+            - INCORRECT_FORMAT_EPOCH: Epoch qualifier can not be parsed according to the ecosystem
+
+            - MISSING_DISTRO: The distro qualifier is required for the ecosystem, but was not provided in the purl
+
+            - UNKNOWN_DISTRO: ADM does not have data for the provided distro value for the given ecosystem
+
+            - MISSING_ARCH: The arch qualifier is required for the ecosystem and distro, but was not provided in the purl
+
+            - UNKNOWN_ARCH: ADM does not have data for the provided arch value for the given ecosystem and distro
+
+            - EPOCH_VALUE_MISMATCH: Epoch value in qualifier is not the same as the epoch value in version
+
+            - INVALID_PURL: The provided PURL could not be parsed
+
+            '
+          items:
+            type: string
+          type: array
+      required:
+      - gav
+      - nodeId
+      - applicationDependencyNodeIds
+      - vulnerabilities
+      - isFoundInKnowledgeBase
+      type: object
+    VulnerabilityAuditSummary:
+      description: vulnerability audit summary.
+      properties:
+        buildType:
+          description: The type of the build tool is restricted to only two values MAVEN or UNSET. Use UNSET when the list of application dependencies is not Maven-related or is a mix of Maven and other ecosystems. This option is soon to be deprecated.
+          type: string
+          x-obmcs-enumref: '#/definitions/VulnerabilityAudit/buildType'
+        compartmentId:
+          description: The compartment Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the vulnerability audit.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the vulnerability audit.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the vulnerability audit.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isSuccess:
+          description: Indicates if an audit succeeded according to the configuration. The value is `null` if the audit is in the `CREATING` state.
+          type: boolean
+        knowledgeBaseId:
+          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current lifecycle state of the vulnerability audit.
+          type: string
+          x-obmcs-enumref: '#/definitions/VulnerabilityAudit/lifecycleState'
+        maxObservedCvssV2Score:
+          description: Maximum Common Vulnerability Scoring System Version 2 score observed for non-ignored vulnerable application dependencies.
+          format: float
+          type: number
+        maxObservedCvssV2ScoreWithIgnored:
+          description: Maximum Common Vulnerability Scoring System Version 2 score observed for vulnerable application dependencies including ignored ones.
+          format: float
+          type: number
+        maxObservedCvssV3Score:
+          description: Maximum Common Vulnerability Scoring System Version 3 score observed for non-ignored vulnerable application dependencies.
+          format: float
+          type: number
+        maxObservedCvssV3ScoreWithIgnored:
+          description: Maximum Common Vulnerability Scoring System Version 3 score observed for vulnerable application dependencies including ignored ones.
+          format: float
+          type: number
+        maxObservedSeverity:
+          description: Maximum ADM Severity observed for non-ignored vulnerable application dependencies.
+          enum:
+          - NONE
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VulnerabilitySeverity'
+        maxObservedSeverityWithIgnored:
+          description: Maximum ADM Severity observed for vulnerable application dependencies including ignored ones.
+          enum:
+          - NONE
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VulnerabilitySeverity'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The creation date and time of the vulnerability audit (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The update date and time of the vulnerability audit (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        vulnerableArtifactsCount:
+          description: Count of non-ignored vulnerable application dependencies.
+          type: integer
+        vulnerableArtifactsCountWithIgnored:
+          description: Count of all vulnerable application dependencies.
+          type: integer
+      required:
+      - id
+      - knowledgeBaseId
+      - timeCreated
+      - timeUpdated
+      - lifecycleState
+      - vulnerableArtifactsCount
+      - vulnerableArtifactsCountWithIgnored
+      - compartmentId
+      type: object
+    VulnerabilityMetric:
+      description: 'A quantifiable measure to assess vulnerability potent by various contexts.
+
+        '
+      properties:
+        score:
+          description: Numerical representation of metric (if exists). For example for CVSS vectors, the score is the base score according to the CVSS scoring system.
+          format: float
+          type: number
+        source:
+          description: Source of the vulnerability metric e.g., NVD, CISA-ADP, OSV.
+          type: string
+        type:
+          description: Type of the vulnerability metric e.g., CVSS2, CVSS3, Severity.
+          type: string
+        value:
+          description: Value of the vulnerability metric e.g., a string representation of a severity value or a cvss vector.
+          type: string
+      required:
+      - type
+      - source
+      - value
+      type: object
+      x-example: "{\n\"metrics\": [\n    {\n      \"type\": \"cvssV2\",\n      \"source\": \"NVD\",\n      \"score\": 3.4,\n      \"value\": \"AV:L/AC:M/Au:N/C:N/I:P/A:C\"\n    },\n    {\n      \"type\": \"cvssV2\",\n      \"source\": \"CISA-ADP\",\n      \"score\": 5.4,\n      \"value\": \"AV:H/AC:M/Au:N/C:N/I:P/A:P\"\n    },\n    {\n      \"type\": \"severity\",\n      \"source\": \"OSV\",\n      \"score\": null,\n      \"value\": \"MODERATE\"\n    }\n  ]\n}\n"
+    RemediationRunSummary:
+      description: remediation run summary.
+      properties:
+        compartmentId:
+          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation run.
+          maxLength: 255
+          minLength: 1
+          type: string
+        currentStageType:
+          description: The type of the current stage of the remediation run.
+          enum:
+          - DETECT
+          - RECOMMEND
+          - VERIFY
+          - APPLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the remediation run.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation run.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current lifecycle state of the remediation run.
+          type: string
+          x-obmcs-enumref: '#/definitions/RemediationRun/lifecycleState'
+        remediationRecipeId:
+          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the Remediation Recipe.
+          maxLength: 255
+          minLength: 1
+          type: string
+        remediationRunSource:
+          description: The source from which the remediation run was triggered.
+          type: string
+          x-obmcs-enumref: '#/definitions/RemediationRun/remediationRunSource'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The creation date and time of the remediation run (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeFinished:
+          description: The date and time of the finish of the remediation run (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeStarted:
+          description: The date and time of the start of the remediation run (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the remediation run was last updated (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+      required:
+      - id
+      - remediationRecipeId
+      - timeCreated
+      - timeUpdated
+      - compartmentId
+      - lifecycleState
+      - remediationRunSource
+      - freeformTags
+      - definedTags
+      type: object
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time the log message was written. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    ApplicationDependencyRecommendationCollection:
+      description: A collection of recommended application dependency changes. Each element consists of an application dependency and its recommendation.
+      properties:
+        items:
+          description: List of application recommendation summaries.
+          items:
+            $ref: '#/components/schemas/ApplicationDependencyRecommendationSummary'
+          type: array
+      required:
+      - items
+      type: object
+    RelatedVulnerabilityReference:
+      description: 'A related vulnerability reference is an object with vulnerabilityId and source to identify a related vulnerability.
+
+        '
+      properties:
+        id:
+          description: Unique vulnerability identifier for a source, e.g., CVE-1999-0067.
+          type: string
+        source:
+          description: Source that publishes the vulnerability.
+          type: string
+      required:
+      - id
+      - source
+      type: object
+    CreateRemediationRunDetails:
+      description: Details to create a new remediation run.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the remediation run.
+          format: x-obmcs-ascii-identifier
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        remediationRecipeId:
+          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the Remediation Recipe.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - remediationRecipeId
+      type: object
+    ApplicationDependencyVulnerabilityCollection:
+      description: 'application dependencies with Vulnerabilities.
+
+        This resource is defined by a list of application dependencies that are associated with eventual Vulnerabilities.
+
+        '
+      properties:
+        items:
+          description: List of vulnerability audit summaries.
+          items:
+            $ref: '#/components/schemas/ApplicationDependencyVulnerabilitySummary'
+          type: array
+      required:
+      - items
+      type: object
+    ChangeRemediationRecipeCompartmentDetails:
+      description: Details for moving a remediation recipe resource.
+      properties:
+        compartmentId:
+          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) to which the resource must be moved.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    UpdateVulnerabilityAuditDetails:
+      description: Details to update a vulnerability audit.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the vulnerability audit.
+          format: x-obmcs-ascii-identifier
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+      type: object
+    VulnerableArtifactVersionRange:
+      description: Vulnerable artifact version range.
+      properties:
+        versionEndExcluding:
+          description: The version immediately after the last affected version. Versions up to, but not including this version, are vulnerable.
+          type: string
+        versionEndIncluding:
+          description: Marks the latest version that is affected by the vulnerability. This version and all preceding versions, going back to versionStartExcluding or versionStartIncluding, are considered vulnerable.
+          type: string
+        versionStartExcluding:
+          description: The version immediately before the start of affected versions. The specified version is not affected, but versions immediately after are, up to versionStartIncluding or beyond, if not otherwise defined.
+          type: string
+        versionStartIncluding:
+          description: The first version affected by the vulnerability. This version and those following it are considered vulnerable until versionEndExcluding or versionEndIncluding is reached.
+          type: string
+      type: object
+    WorkRequest:
+      description: A description of workrequest status
+      properties:
+        compartmentId:
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_REMEDIATION_RECIPE
+          - DELETE_REMEDIATION_RECIPE
+          - MOVE_REMEDIATION_RECIPE
+          - UPDATE_REMEDIATION_RECIPE
+          - ACTIVATE_REMEDIATION_RECIPE
+          - DEACTIVATE_REMEDIATION_RECIPE
+          - CREATE_KNOWLEDGE_BASE
+          - DELETE_KNOWLEDGE_BASE
+          - MOVE_KNOWLEDGE_BASE
+          - UPDATE_KNOWLEDGE_BASE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
     VulnerabilityDetails:
       description: 'A vulnerability details contains details for a vulnerability as reported by the source.
 
@@ -4034,8 +3583,80 @@ components:
       - vulnerabilityId
       - source
       type: object
-    UpdateVulnerabilityAuditDetails:
-      description: Details to update a vulnerability audit.
+    RemediationRunStage:
+      description: 'A remediation run stage is one step of an remediation run. Each stage provides output logs and has a specific type.
+
+        The stages are: DETECT, RECOMMEND, VERIFY, and APPLY.
+
+        '
+      discriminator:
+        propertyName: type
+      properties:
+        nextStageType:
+          description: The next type of stage in the remediation run.
+          enum:
+          - DETECT
+          - RECOMMEND
+          - VERIFY
+          - APPLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
+        previousStageType:
+          description: The previous type of stage in the remediation run.
+          enum:
+          - DETECT
+          - RECOMMEND
+          - VERIFY
+          - APPLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
+        remediationRunId:
+          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation run.
+          maxLength: 255
+          minLength: 1
+          type: string
+        status:
+          description: The current status of a remediation run stage.
+          enum:
+          - CREATED
+          - IN_PROGRESS
+          - SUCCEEDED
+          - FAILED
+          - CANCELING
+          - CANCELED
+          type: string
+        summary:
+          description: Information about the current step within the stage.
+          type: string
+        timeCreated:
+          description: The creation date and time of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeFinished:
+          description: The date and time of the finish of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeStarted:
+          description: The date and time of the start of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        type:
+          description: The type of the remediation run stage.
+          enum:
+          - DETECT
+          - RECOMMEND
+          - VERIFY
+          - APPLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
+      required:
+      - timeCreated
+      - type
+      - status
+      - remediationRunId
+      type: object
+    UpdateKnowledgeBaseDetails:
+      description: Details to update an existing knowledge base.
       properties:
         definedTags:
           additionalProperties:
@@ -4057,7 +3678,7 @@ components:
             '
           type: object
         displayName:
-          description: The name of the vulnerability audit.
+          description: The name of the knowledge base.
           format: x-obmcs-ascii-identifier
           pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
           type: string
@@ -4071,49 +3692,193 @@ components:
             '
           type: object
       type: object
-    RemediationRecipeCollection:
-      description: Collection of remediation recipe summaries.
+    ChangeKnowledgeBaseCompartmentDetails:
+      description: Details for moving a knowledge base.
       properties:
-        items:
-          description: List of remediation recipe summaries.
-          items:
-            $ref: '#/components/schemas/RemediationRecipeSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UsageDataDetails:
-      description: 'The source details of the usage data in object storage. The usage data file uploaded to object storage must be a gzip archive
-
-        of the JSON usage data returned from the GraalVM native-image-inspect tool after a native-image build.
-
-        Set `sourceType` to `objectStorageTuple`
-
-        and use [UsageDataViaObjectStorageTupleDetails](#/en/adm/latest/requests/UsageDataViaObjectStorageTupleDetails)
-
-        when specifying the namespace, bucket name, and object name.
-
-        '
-      discriminator:
-        propertyName: sourceType
-      properties:
-        sourceType:
-          description: 'The destination type. Use `objectStorageTuple` when specifying the namespace, bucket name, and object name.
-
-            '
+        compartmentId:
+          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) to which the resource must be moved.
+          maxLength: 255
+          minLength: 1
           type: string
       required:
-      - sourceType
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      - compartmentId
+      type: object
+    RemediationRunStageSummary:
+      description: The summary of a remediation run stages.
       properties:
-        items:
-          description: List of workRequestError objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
+        remediationRunId:
+          description: The Oracle Cloud identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation run.
+          maxLength: 255
+          minLength: 1
+          type: string
+        status:
+          description: The current status of remediation run stage.
+          type: string
+          x-obmcs-enumref: '#/definitions/RemediationRunStage/status'
+        summary:
+          description: Information about the current step within the stage.
+          type: string
+        timeCreated:
+          description: The creation date and time of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeFinished:
+          description: The date and time of the finish of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeStarted:
+          description: The date and time of the start of the remediation run stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        type:
+          description: The type of the remediation run stage.
+          enum:
+          - DETECT
+          - RECOMMEND
+          - VERIFY
+          - APPLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
       required:
-      - items
+      - status
+      - timeCreated
+      - type
+      - remediationRunId
+      type: object
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
+
+            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
+
+            work is complete for that resource at which point it will transition to CREATED, UPDATED,
+
+            or DELETED, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - RELATED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type the work request affects.
+          type: string
+        entityUri:
+          description: The URI path that the user can do a GET on to access the resource metadata
+          type: string
+        identifier:
+          description: The identifier of the resource the work request affects.
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: Additional information that helps to explain the resource.
+          enum:
+          - IS_DRY_RUN
+          type: object
+          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
+      required:
+      - actionType
+      - entityType
+      - identifier
+    DetectConfiguration:
+      description: 'A configuration to define the constraints when detecting vulnerable dependencies and recommending remediations.
+
+        '
+      properties:
+        exclusions:
+          description: 'The list of dependencies to be ignored by the recommendation algorithm. The dependency pattern is matched against the ''group:artifact:version'' or the purl of a dependency.
+
+            An asterisk (*) at the end in the dependency pattern acts as a wildcard and matches zero or more characters.
+
+            '
+          items:
+            type: string
+          type: array
+        maxPermissibleCvssV2Score:
+          default: 0
+          description: The maximum Common Vulnerability Scoring System Version 2 (CVSS V2) score. A vulnerability with a CVSS V2 score below this value is not considered for remediation.
+          format: float
+          maximum: 10
+          minimum: 0
+          type: number
+        maxPermissibleCvssV3Score:
+          default: 0
+          description: The maximum Common Vulnerability Scoring System Version 3 (CVSS V3) score. A vulnerability with a CVSS V3 score below this value is not considered for patching.
+          format: float
+          maximum: 10
+          minimum: 0
+          type: number
+        maxPermissibleSeverity:
+          description: The maximum ADM Severity. A vulnerability with an severity below this value is not considered for remediation.
+          enum:
+          - UNSET
+          - NONE
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ConfigSeverity'
+        upgradePolicy:
+          description: 'The upgrade policy for recommendations.
+
+            The `Nearest` upgrade policy upgrades a dependency to the oldest version that meets both of the following criteria: it is newer than the current version and it is not affected by a vulnerability.
+
+            '
+          enum:
+          - NEAREST
+          type: string
+      type: object
+      x-example: "{\n  \"exclusions\": [\"pkg:maven/com.google.guava/guava@*\", \"com.fasterxml.jackson.core:jackson-databind:2.12.2\", \"pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.12.3\"],\n  \"upgradePolicy\": \"NEAREST\",\n  \"maxPermissibleSeverity\": \"LOW\"\n}\n"
+    StageSummary:
+      description: stage summary of a remediation run. A stage is one step of a remediation run.
+      properties:
+        summary:
+          description: Information about the current step within the given stage.
+          type: string
+        timeCreated:
+          description: The creation date and time of the stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeFinished:
+          description: The date and time of the finish of the stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeStarted:
+          description: The date and time of the start of the stage (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        type:
+          description: The type of stage.
+          enum:
+          - DETECT
+          - RECOMMEND
+          - VERIFY
+          - APPLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
+      required:
+      - timeCreated
+      - type
+      type: object
+    ChangeRemediationRunCompartmentDetails:
+      description: Details for moving remediation run resources.
+      properties:
+        compartmentId:
+          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) to which the resource must be moved.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
       type: object
     RemediationRecipe:
       description: 'An Application Dependency Management (ADM) remediation recipe contains the basic configuration and the
@@ -4236,87 +4001,14 @@ components:
       - freeformTags
       - definedTags
       type: object
-    ChangeVulnerabilityAuditCompartmentDetails:
-      description: Details for moving a vulnerability audit resource.
+    RemediationRecipeSummary:
+      description: The summary of a Remediation Recipe.
       properties:
         compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to which the resource must be moved.
+          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation recipe.
           maxLength: 255
           minLength: 1
           type: string
-      required:
-      - compartmentId
-      type: object
-    ApplicationDependencyRecommendationSummary:
-      description: 'An application dependency with the recommended version that does not contain any CVE.
-
-        Each application dependency has a property specifying multiple node identifiers on which which this current node depends.
-
-        '
-      properties:
-        applicationDependencyNodeIds:
-          description: List of (application dependencies) node identifiers from which this node depends.
-          items:
-            type: string
-          type: array
-        gav:
-          description: Unique Group Artifact Version (GAV) identifier in the format _Group:Artifact:Version_, e.g. org.graalvm.nativeimage:svm:21.1.0.
-          type: string
-        nodeId:
-          description: Unique node identifier of an application dependency with an associated Recommendation, e.g. nodeId1.
-          type: string
-        purl:
-          description: Package URL identifier, e.g. pkg:maven/org.graalvm.nativeimage/svm@21.1.0
-          type: string
-        recommendedGav:
-          description: Recommended application dependency in "group:artifact:version" (GAV) format, e.g. org.graalvm.nativeimage:svm:21.2.0.
-          type: string
-        recommendedPurl:
-          description: Recommended application dependency in purl format, e.g. pkg:maven/org.graalvm.nativeimage/svm@21.2.0
-          type: string
-      required:
-      - gav
-      - nodeId
-      - applicationDependencyNodeIds
-      type: object
-    VulnerabilityMetric:
-      description: 'A quantifiable measure to assess vulnerability potent by various contexts.
-
-        '
-      properties:
-        score:
-          description: Numerical representation of metric (if exists). For example for CVSS vectors, the score is the base score according to the CVSS scoring system.
-          format: float
-          type: number
-        source:
-          description: Source of the vulnerability metric e.g., NVD, CISA-ADP, OSV.
-          type: string
-        type:
-          description: Type of the vulnerability metric e.g., CVSS2, CVSS3, Severity.
-          type: string
-        value:
-          description: Value of the vulnerability metric e.g., a string representation of a severity value or a cvss vector.
-          type: string
-      required:
-      - type
-      - source
-      - value
-      type: object
-      x-example: "{\n\"metrics\": [\n    {\n      \"type\": \"cvssV2\",\n      \"source\": \"NVD\",\n      \"score\": 3.4,\n      \"value\": \"AV:L/AC:M/Au:N/C:N/I:P/A:C\"\n    },\n    {\n      \"type\": \"cvssV2\",\n      \"source\": \"CISA-ADP\",\n      \"score\": 5.4,\n      \"value\": \"AV:H/AC:M/Au:N/C:N/I:P/A:P\"\n    },\n    {\n      \"type\": \"severity\",\n      \"source\": \"OSV\",\n      \"score\": null,\n      \"value\": \"MODERATE\"\n    }\n  ]\n}\n"
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestLogEntries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateRemediationRecipeDetails:
-      description: Details to update an existing remediation recipe.
-      properties:
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -4336,12 +4028,8 @@ components:
 
             '
           type: object
-        detectConfiguration:
-          $ref: '#/components/schemas/DetectConfiguration'
         displayName:
-          description: The name of the remediation recipe.
-          format: x-obmcs-ascii-identifier
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          description: The name of the Remediation Recipe.
           type: string
         freeformTags:
           additionalProperties:
@@ -4352,76 +4040,334 @@ components:
 
             '
           type: object
+        id:
+          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the remediation recipe.
+          maxLength: 255
+          minLength: 1
+          type: string
         isRunTriggeredOnKbChange:
-          description: Boolean indicating if a run should be automatically triggered once the knowledge base is updated.
+          description: Boolean indicating if a run should be automatically triggered once the Knowledge Base is updated.
           type: boolean
         knowledgeBaseId:
           description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
           maxLength: 255
           minLength: 1
           type: string
-        networkConfiguration:
-          $ref: '#/components/schemas/NetworkConfiguration'
-        scmConfiguration:
-          $ref: '#/components/schemas/ScmConfiguration'
-        verifyConfiguration:
-          $ref: '#/components/schemas/VerifyConfiguration'
+        lifecycleState:
+          description: The current lifecycle state of the Remediation Recipe.
+          type: string
+          x-obmcs-enumref: '#/definitions/RemediationRecipe/lifecycleState'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The creation date and time of the Remediation Recipe (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the Remediation Recipe was last updated (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - timeCreated
+      - timeUpdated
+      - compartmentId
+      - knowledgeBaseId
+      - isRunTriggeredOnKbChange
+      - lifecycleState
+      - freeformTags
+      - definedTags
       type: object
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestLogEntries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    ApplicationDependency:
+      description: 'An ApplicationDependency resource is used within the applicationDependencies of a CreateVulnerabilityAuditDetails resource to create a vulnerability audit.
+
+        Each ApplicationDependency resource must provide either Package URL (purl) identifier or a Group Artifact Version (GAV) to identify the application dependency.
+
+        '
+      properties:
+        applicationDependencyNodeIds:
+          description: List of application dependencies on which this application dependency depends, each identified by its nodeId.
+          items:
+            type: string
+          type: array
+        gav:
+          description: 'Group Artifact Version (GAV) identifier (Group:Artifact:Version). Example: org.graalvm.nativeimage:svm:21.1.0.
+
+            "N/A" for non-maven artifacts.
+
+            '
+          type: string
+        nodeId:
+          description: 'Unique identifier of an application dependency, for example nodeId1.
+
+            The nodeId can be generated by assigning a unique id to each application dependency
+
+            in the tree of application dependencies.
+
+            Every node, even those who share the same GAV, should have a different nodeId.
+
+            The preferred way of constructing a nodeId is to assign incremental integers
+
+            during a breadth first or depth first search.
+
+            A nodeId can be reused only it refers to the same subtree of application dependencies.
+
+            (This is not equivalent to referring to the same GAV, that is,
+
+            a GAV can have multiple transitive dependencies.)
+
+            '
+          type: string
+        purl:
+          description: Package URL identifier, e.g. pkg:maven/org.graalvm.nativeimage/svm@21.1.0
+          type: string
+      required:
+      - nodeId
+      type: object
+    ChangeVulnerabilityAuditCompartmentDetails:
+      description: Details for moving a vulnerability audit resource.
+      properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to which the resource must be moved.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    ScmConfiguration:
+      description: A configuration for the Source Code Management tool/platform used by a remediation recipe.
+      discriminator:
+        propertyName: scmType
+      properties:
+        branch:
+          description: The branch used by ADM to patch vulnerabilities.
+          type: string
+        buildFileLocation:
+          description: 'The location of the build file relative to the root of the repository. Only Maven build files (POM) are currently supported.
+
+            If this property is not specified, ADM will use the build file located at the root of the repository.
+
+            '
+          type: string
+        isAutomergeEnabled:
+          description: "If true, the Pull Request (PR) will be merged after the verify stage completes successfully    \nIf false, the PR with the proposed changes must be reviewed and manually merged.\n"
+          type: boolean
+        scmType:
+          description: The type of Source Code Management.
+          enum:
+          - OCI_CODE_REPOSITORY
+          - EXTERNAL_SCM
+          type: string
+      required:
+      - scmType
+      - branch
+      - isAutomergeEnabled
+      type: object
+    RemediationRunStageCollection:
+      description: Collection of remediation run stage summaries.
+      properties:
+        items:
+          description: List of remediation run stage summaries.
+          items:
+            $ref: '#/components/schemas/RemediationRunStageSummary'
+          type: array
+      required:
+      - items
+      type: object
+    KnowledgeBaseSummary:
+      description: The summary of a knowledge base.
+      properties:
+        compartmentId:
+          description: The compartment Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the knowledge base.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the knowledge base.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current lifecycle state of the knowledge base.
+          type: string
+          x-obmcs-enumref: '#/definitions/KnowledgeBase/lifecycleState'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The creation date and time of the knowledge base (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the knowledge base was last updated (formatted according to [RFC3339](https://datatracker.ietf.org/doc/html/rfc3339)).
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - timeCreated
+      - timeUpdated
+      - compartmentId
+      - lifecycleState
+      - freeformTags
+      - definedTags
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    UsageDataDetails:
+      description: 'The source details of the usage data in object storage. The usage data file uploaded to object storage must be a gzip archive
+
+        of the JSON usage data returned from the GraalVM native-image-inspect tool after a native-image build.
+
+        Set `sourceType` to `objectStorageTuple`
+
+        and use [UsageDataViaObjectStorageTupleDetails](#/en/adm/latest/requests/UsageDataViaObjectStorageTupleDetails)
+
+        when specifying the namespace, bucket name, and object name.
+
+        '
+      discriminator:
+        propertyName: sourceType
+      properties:
+        sourceType:
+          description: 'The destination type. Use `objectStorageTuple` when specifying the namespace, bucket name, and object name.
+
+            '
+          type: string
+      required:
+      - sourceType
+    VulnerabilityAuditConfiguration:
+      description: 'Configuration for a vulnerability audit.
+
+        A vulnerable application dependency is ignored if its name does match any of the items in `exclusions`, or all of the associated Vulnerabilies have a CVSS v2 score below `maxPermissibleCvssV2Score` and a CVSS v3 score below `maxPermissibleCvssV3Score`.
+
+        type: object
+
+        '
+      properties:
+        exclusions:
+          default: []
+          description: 'A vulnerable application dependency is ignored if its name matches any of the items in `exclusions`.
+
+            An asterisk (*) in the dependency pattern acts as a wildcard and matches zero or more characters.
+
+            '
+          items:
+            type: string
+          type: array
+        maxPermissibleCvssV2Score:
+          default: 0
+          description: A vulnerable application dependency is ignored if the score of its associated Vulnerability is below maxPermissibleCvssV2Score and below maxPermissibleCvssV3Score.
+          format: float
+          maximum: 10
+          minimum: 0
+          type: number
+        maxPermissibleCvssV3Score:
+          default: 0
+          description: A vulnerable application dependency is ignored if the score of its associated Vulnerability is below maxPermissibleCvssV2Score and below maxPermissibleCvssV3Score.
+          format: float
+          maximum: 10
+          minimum: 0
+          type: number
+        maxPermissibleSeverity:
+          description: A vulnerable application dependency is ignored if the score of its associated Vulnerability is below maxPermissibleSeverity.
+          enum:
+          - UNSET
+          - NONE
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ConfigSeverity'
   parameters:
-    TimeCreatedGreaterThanOrEqualToQueryParam:
-      description: A filter to return only Vulnerability Audits with timeCreated greater or equal to the specified value.
-      in: query
-      name: timeCreatedGreaterThanOrEqualTo
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    StageTypePathParam:
-      description: The type of Remediation Run Stage, as a URL path parameter.
-      in: path
-      name: stageType
-      required: true
-      x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
-      schema:
-        type: string
-        enum:
-        - DETECT
-        - RECOMMEND
-        - VERIFY
-        - APPLY
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
     MaxObservedSeverityGreaterThanOrEqualTo:
       description: 'A filter that returns only Vulnerability Audits that have a maximum observed Severity greater than or equal to the specified value.
 
@@ -4438,139 +4384,6 @@ components:
         - HIGH
         - CRITICAL
         default: NONE
-    KnowledgeBaseSortByQueryParam:
-      description: 'The field used to sort Knowledge Bases. Only one sort order is allowed.
-
-        Default order for _displayName_ is **ascending alphabetical order**.
-
-        Default order for _lifecyleState_ is the following sequence: **CREATING, ACTIVE, UPDATING, FAILED, DELETING, and DELETED**.Default order for _timeCreated_ is **descending**.
-
-        Default order for _timeUpdated_ is **descending**.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - DISPLAY_NAME
-        - LIFECYCLE_STATE
-        - TIME_CREATED
-        - TIME_UPDATED
-        default: timeCreated
-    RemediationRecipeIdQueryParam:
-      description: A filter to return only resources that match the specified Remediation Recipe identifier.
-      in: query
-      name: remediationRecipeId
-      x-default-description: 'null'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    StageTypeQueryParam:
-      description: A filter to return only Stages that match the specified type.
-      in: query
-      name: type
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
-      schema:
-        type: string
-        enum:
-        - DETECT
-        - RECOMMEND
-        - VERIFY
-        - APPLY
-    ApplicationDependencyRootNodeIdQueryParam:
-      description: 'A filter to override the top level root identifier with the new given value. The application dependency tree will only be traversed from the given node.
-
-        Query parameters "cvssV2GreaterThanOrEqual", "cvssV3GreaterThanOrEqual", "gav" and "vulnerabilityId" cannot be used in conjunction with this parameter.
-
-        '
-      in: query
-      name: rootNodeId
-      schema:
-        type: string
-        default: 'null'
-    CvssV2GreaterThanOrEqual:
-      description: 'A filter that returns only Vulnerabilities that have a Common Vulnerability Scoring System Version 2 (CVSS V2) greater than or equal to the specified value.
-
-        '
-      in: query
-      name: cvssV2GreaterThanOrEqual
-      schema:
-        type: number
-        format: float
-        default: 0
-    ResourceIdentifierQueryParam:
-      description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestStatusQueryParam:
-      description: A filter to return only resources that match the specified OperationStatus.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-      schema:
-        type: string
-        enum:
-        - ACCEPTED
-        - IN_PROGRESS
-        - WAITING
-        - FAILED
-        - SUCCEEDED
-        - CANCELING
-        - CANCELED
-    CvssV3GreaterThanOrEqual:
-      description: 'A filter that returns only Vulnerabilities that have a Common Vulnerability Scoring System Version 3 (CVSS V3) greater than or equal to the specified value.
-
-        '
-      in: query
-      name: cvssV3GreaterThanOrEqual
-      schema:
-        type: number
-        format: float
-        default: 0
-    KnowledgeBaseIdPathParam:
-      description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of a Knowledge Base, as a URL path parameter.
-      in: path
-      name: knowledgeBaseId
-      required: true
-      schema:
-        type: string
-    StageSortByQueryParam:
-      description: 'The field used to sort Stages. Only one sort order is allowed.
-
-        Default order for status is the following sequence: **CREATED, IN_PROGRESS, SUCCEEDED, FAILED, CANCELING, and CANCELED**.
-
-        Default order for _timeCreated_ is **descending**.
-
-        Default order for _timeFinished_ is **descending**.
-
-        Default order for _timeStarted_ is **descending**.
-
-        Default order for _type_ is the following sequence: **DETECT, RECOMMEND, VERIFY, and APPLY**.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - status
-        - timeCreated
-        - timeFinished
-        - timeStarted
-        - type
-        default: timeCreated
     GavQueryParam:
       description: A filter to return only resources that match the entire GAV (Group Artifact Version) identifier given.
       in: query
@@ -4578,107 +4391,49 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    WorkRequestIdPathParam:
-      description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    ApplicationDependencyDepthQueryParam:
-      description: 'A filter to limit depth of the application dependencies tree traversal.
+    ApplicationDependencySortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided.
 
-        Additionally query parameters such as "cvssV2GreaterThanOrEqual", "cvssV3GreaterThanOrEqual", "gav" and "vulnerabilityId" can''t be used in conjunction with this latter.
+        If sort order is dfs, the nodes are returned by going through the application dependency tree in a depth-first manner. Children are sorted based on their GAV property alphabetically (either ascending or descending, depending on the order parameter). Default order is ascending.
 
-        '
-      in: query
-      name: depth
-      x-default-description: 'null'
-      schema:
-        type: integer
-    PurlQueryParam:
-      description: A filter to return only resources that match the entire purl given.
-      in: query
-      name: purl
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 512
-        minLength: 0
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    KnowledgeBaseLifecycleStateQueryParam:
-      description: A filter to return only Knowledge Bases that match the specified lifecycleState.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/KnowledgeBase/lifecycleState'
-      schema:
-        type: string
-    TimeCreatedLessThanOrEqualToQueryParam:
-      description: A filter to return only Vulnerability Audits with timeCreated less or equal to the specified value.
-      in: query
-      name: timeCreatedLessThanOrEqualTo
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    RemediationRecipeLifecycleStateQueryParam:
-      description: A filter to return only Remediation Recipes that match the specified lifecycleState.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/RemediationRecipe/lifecycleState'
-      schema:
-        type: string
-    IdQueryParam:
-      description: 'A filter to return only resources that match the specified identifier.
+        If sort order is bfs, the nodes are returned by going through the application dependency tree in a breadth-first manner. Children are sorted based on their GAV property alphabetically (either ascending or descending, depending on the order parameter). Default order is ascending.
 
-        Required only if the compartmentId query parameter is not specified.
+        Default order for gav is ascending where ascending corresponds to alphanumerical order.
+
+        Default order for purl is ascending where ascending corresponds to alphabetical order
+
+        Default order for nodeId is ascending where ascending corresponds to alphanumerical order.
+
+        Sorting by DFS or BFS cannot be used in conjunction with the following query parameters: "gav", "cvssV2GreaterThanOrEqual", "cvssV3GreaterThanOrEqual" and "vulnerabilityId".
 
         '
       in: query
-      name: id
-      x-default-description: 'null'
+      name: sortBy
       schema:
         type: string
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+        enum:
+        - gav
+        - purl
+        - nodeId
+        - dfs
+        - bfs
+        default: gav
+    SeverityGreaterThanOrEqual:
+      description: 'A filter that returns only Vulnerabilities that have a severity greater than or equal to the specified value.
+
+        '
       in: query
-      name: page
-      x-default-description: 'null'
+      name: severityGreaterThanOrEqual
+      x-obmcs-top-level-enum: '#/definitions/VulnerabilitySeverity'
       schema:
         type: string
-        minLength: 1
-    VulnerabilityIdQueryParam:
-      description: A filter to return only Vulnerability Audits that match the specified id.
-      in: query
-      name: vulnerabilityId
-      x-default-description: 'null'
-      schema:
-        type: string
-    KnowledgeBaseIdQueryParam:
-      description: A filter to return only Audits that were created against the specified knowledge base.
-      in: query
-      name: knowledgeBaseId
-      x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestIdQueryParam:
-      description: The identifier of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
+        enum:
+        - NONE
+        - LOW
+        - MEDIUM
+        - HIGH
+        - CRITICAL
+        default: NONE
     VulnerabilityAuditSortByQueryParam:
       description: 'The field used to sort Vulnerability Audits. Only one sort order is allowed.
 
@@ -4719,69 +4474,221 @@ components:
         - vulnerableArtifactsCountWithIgnored
         - displayName
         default: timeCreated
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
+    VulnerabilityAuditLifecycleStateQueryParam:
+      description: A filter to return only Vulnerability Audits that match the specified lifecycleState.
+      in: query
+      name: lifecycleState
       required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/VulnerabilityAudit/lifecycleState'
       schema:
         type: string
-        maxLength: 64
+    PurlQueryParam:
+      description: A filter to return only resources that match the entire purl given.
+      in: query
+      name: purl
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 512
+        minLength: 0
+    RemediationRecipeIdPathParam:
+      description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of a Remediation Recipe, as a URL path parameter.
+      in: path
+      name: remediationRecipeId
+      required: true
+      schema:
+        type: string
+    VulnerabilityAuditIdPathParam:
+      description: Unique Vulnerability Audit identifier path parameter.
+      in: path
+      name: vulnerabilityAuditId
+      required: true
+      schema:
+        type: string
+    StageTypeQueryParam:
+      description: A filter to return only Stages that match the specified type.
+      in: query
+      name: type
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
+      schema:
+        type: string
+        enum:
+        - DETECT
+        - RECOMMEND
+        - VERIFY
+        - APPLY
+    KnowledgeBaseIdPathParam:
+      description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of a Knowledge Base, as a URL path parameter.
+      in: path
+      name: knowledgeBaseId
+      required: true
+      schema:
+        type: string
+    RemediationRecipeIdQueryParam:
+      description: A filter to return only resources that match the specified Remediation Recipe identifier.
+      in: query
+      name: remediationRecipeId
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RemediationRecipeLifecycleStateQueryParam:
+      description: A filter to return only Remediation Recipes that match the specified lifecycleState.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/RemediationRecipe/lifecycleState'
+      schema:
+        type: string
+    RemediationRunIdPathParam:
+      description: Unique Remediation Run identifier path parameter.
+      in: path
+      name: remediationRunId
+      required: true
+      schema:
+        type: string
+    WorkRequestStatusQueryParam:
+      description: A filter to return only resources that match the specified OperationStatus.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - WAITING
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+    VulnerabilityIdQueryParam:
+      description: A filter to return only Vulnerability Audits that match the specified id.
+      in: query
+      name: vulnerabilityId
+      x-default-description: 'null'
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
         minLength: 1
-    ApplicationDependencySortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided.
-
-        If sort order is dfs, the nodes are returned by going through the application dependency tree in a depth-first manner. Children are sorted based on their GAV property alphabetically (either ascending or descending, depending on the order parameter). Default order is ascending.
-
-        If sort order is bfs, the nodes are returned by going through the application dependency tree in a breadth-first manner. Children are sorted based on their GAV property alphabetically (either ascending or descending, depending on the order parameter). Default order is ascending.
-
-        Default order for gav is ascending where ascending corresponds to alphanumerical order.
-
-        Default order for purl is ascending where ascending corresponds to alphabetical order
-
-        Default order for nodeId is ascending where ascending corresponds to alphanumerical order.
-
-        Sorting by DFS or BFS cannot be used in conjunction with the following query parameters: "gav", "cvssV2GreaterThanOrEqual", "cvssV3GreaterThanOrEqual" and "vulnerabilityId".
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - gav
-        - purl
-        - nodeId
-        - dfs
-        - bfs
-        default: gav
-    WorkRequestSortByQueryParam:
-      description: 'The field used to sort WorkRequests. Only one sort order is allowed. Default order for _timeAccepted_ is **descending**.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
     StageStatusQueryParam:
       description: A filter to return only Stages that match the specified status.
       in: query
       name: status
       x-default-description: 'null'
       x-obmcs-enumref: '#/definitions/RemediationRunStage/status'
+      schema:
+        type: string
+    ApplicationDependencyDepthQueryParam:
+      description: 'A filter to limit depth of the application dependencies tree traversal.
+
+        Additionally query parameters such as "cvssV2GreaterThanOrEqual", "cvssV3GreaterThanOrEqual", "gav" and "vulnerabilityId" can''t be used in conjunction with this latter.
+
+        '
+      in: query
+      name: depth
+      x-default-description: 'null'
+      schema:
+        type: integer
+    IsDirectVulnerabilityQueryParam:
+      description: A filter when set returns only vulnerabilities that are immediately(directly) affecting any artifact, when unset all vulnerabilities are returned.
+      in: query
+      name: isDirectVulnerability
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    TimeCreatedGreaterThanOrEqualToQueryParam:
+      description: A filter to return only Vulnerability Audits with timeCreated greater or equal to the specified value.
+      in: query
+      name: timeCreatedGreaterThanOrEqualTo
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    RemediationRecipeSortByQueryParam:
+      description: "The field used to sort Remediation Recipes. Only one sort order is allowed.\nDefault order for _displayName_ is **ascending alphabetical order**.\nDefault order for _lifecyleState_ is the following sequence: **CREATING, ACTIVE, UPDATING, INACTIVE, FAILED, DELETING, and DELETED**.\nDefault order for _timeCreated_ is **descending**.\nDefault order for _timeUpdated_ is **descending**.      \nDefault order for _type_ is the following sequence: **ADM**.\n"
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - DISPLAY_NAME
+        - LIFECYCLE_STATE
+        - TIME_CREATED
+        - TIME_UPDATED
+        - TYPE
+        default: timeCreated
+    AuditSuccessQueryParam:
+      description: A filter to return only successful or failed Vulnerability Audits.
+      in: query
+      name: isSuccess
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    KnowledgeBaseIdQueryParam:
+      description: A filter to return only Audits that were created against the specified knowledge base.
+      in: query
+      name: knowledgeBaseId
+      x-default-description: 'null'
+      schema:
+        type: string
+    TimeCreatedLessThanOrEqualToQueryParam:
+      description: A filter to return only Vulnerability Audits with timeCreated less or equal to the specified value.
+      in: query
+      name: timeCreatedLessThanOrEqualTo
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    CvssV3GreaterThanOrEqual:
+      description: 'A filter that returns only Vulnerabilities that have a Common Vulnerability Scoring System Version 3 (CVSS V3) greater than or equal to the specified value.
+
+        '
+      in: query
+      name: cvssV3GreaterThanOrEqual
+      schema:
+        type: number
+        format: float
+        default: 0
+    RemediationRunLifecycleStateQueryParam:
+      description: A filter to return only Remediation Runs that match the specified lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/RemediationRun/lifecycleState'
       schema:
         type: string
     RemediationRunSortByQueryParam:
@@ -4812,13 +4719,37 @@ components:
         - lifecycleState
         - currentStageType
         default: timeCreated
-    VulnerabilityAuditIdPathParam:
-      description: Unique Vulnerability Audit identifier path parameter.
-      in: path
-      name: vulnerabilityAuditId
-      required: true
+    KnowledgeBaseSortByQueryParam:
+      description: 'The field used to sort Knowledge Bases. Only one sort order is allowed.
+
+        Default order for _displayName_ is **ascending alphabetical order**.
+
+        Default order for _lifecyleState_ is the following sequence: **CREATING, ACTIVE, UPDATING, FAILED, DELETING, and DELETED**.Default order for _timeCreated_ is **descending**.
+
+        Default order for _timeUpdated_ is **descending**.
+
+        '
+      in: query
+      name: sortBy
       schema:
         type: string
+        enum:
+        - DISPLAY_NAME
+        - LIFECYCLE_STATE
+        - TIME_CREATED
+        - TIME_UPDATED
+        default: timeCreated
+    ApplicationDependencyRootNodeIdQueryParam:
+      description: 'A filter to override the top level root identifier with the new given value. The application dependency tree will only be traversed from the given node.
+
+        Query parameters "cvssV2GreaterThanOrEqual", "cvssV3GreaterThanOrEqual", "gav" and "vulnerabilityId" cannot be used in conjunction with this parameter.
+
+        '
+      in: query
+      name: rootNodeId
+      schema:
+        type: string
+        default: 'null'
     CompartmentIdQueryParam:
       description: 'A filter to return only resources that belong to the specified compartment identifier.
 
@@ -4830,22 +4761,150 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    SeverityGreaterThanOrEqual:
-      description: 'A filter that returns only Vulnerabilities that have a severity greater than or equal to the specified value.
+    ResourceIdentifierQueryParam:
+      description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    KnowledgeBaseLifecycleStateQueryParam:
+      description: A filter to return only Knowledge Bases that match the specified lifecycleState.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/KnowledgeBase/lifecycleState'
+      schema:
+        type: string
+    CvssV2GreaterThanOrEqual:
+      description: 'A filter that returns only Vulnerabilities that have a Common Vulnerability Scoring System Version 2 (CVSS V2) greater than or equal to the specified value.
 
         '
       in: query
-      name: severityGreaterThanOrEqual
-      x-obmcs-top-level-enum: '#/definitions/VulnerabilitySeverity'
+      name: cvssV2GreaterThanOrEqual
+      schema:
+        type: number
+        format: float
+        default: 0
+    IdQueryParam:
+      description: 'A filter to return only resources that match the specified identifier.
+
+        Required only if the compartmentId query parameter is not specified.
+
+        '
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    StageTypePathParam:
+      description: The type of Remediation Run Stage, as a URL path parameter.
+      in: path
+      name: stageType
+      required: true
+      x-obmcs-top-level-enum: '#/definitions/RemediationRunStageType'
       schema:
         type: string
         enum:
-        - NONE
-        - LOW
-        - MEDIUM
-        - HIGH
-        - CRITICAL
-        default: NONE
+        - DETECT
+        - RECOMMEND
+        - VERIFY
+        - APPLY
+    StageSortByQueryParam:
+      description: 'The field used to sort Stages. Only one sort order is allowed.
+
+        Default order for status is the following sequence: **CREATED, IN_PROGRESS, SUCCEEDED, FAILED, CANCELING, and CANCELED**.
+
+        Default order for _timeCreated_ is **descending**.
+
+        Default order for _timeFinished_ is **descending**.
+
+        Default order for _timeStarted_ is **descending**.
+
+        Default order for _type_ is the following sequence: **DETECT, RECOMMEND, VERIFY, and APPLY**.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - status
+        - timeCreated
+        - timeFinished
+        - timeStarted
+        - type
+        default: timeCreated
+    WorkRequestSortByQueryParam:
+      description: 'The field used to sort WorkRequests. Only one sort order is allowed. Default order for _timeAccepted_ is **descending**.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    WorkRequestIdPathParam:
+      description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The identifier of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -4855,65 +4914,6 @@ components:
         default: 100
         maximum: 1000
         minimum: 1
-    IsDirectVulnerabilityQueryParam:
-      description: A filter when set returns only vulnerabilities that are immediately(directly) affecting any artifact, when unset all vulnerabilities are returned.
-      in: query
-      name: isDirectVulnerability
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    RemediationRecipeSortByQueryParam:
-      description: "The field used to sort Remediation Recipes. Only one sort order is allowed.\nDefault order for _displayName_ is **ascending alphabetical order**.\nDefault order for _lifecyleState_ is the following sequence: **CREATING, ACTIVE, UPDATING, INACTIVE, FAILED, DELETING, and DELETED**.\nDefault order for _timeCreated_ is **descending**.\nDefault order for _timeUpdated_ is **descending**.      \nDefault order for _type_ is the following sequence: **ADM**.\n"
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - DISPLAY_NAME
-        - LIFECYCLE_STATE
-        - TIME_CREATED
-        - TIME_UPDATED
-        - TYPE
-        default: timeCreated
-    RemediationRunIdPathParam:
-      description: Unique Remediation Run identifier path parameter.
-      in: path
-      name: remediationRunId
-      required: true
-      schema:
-        type: string
-    RemediationRunLifecycleStateQueryParam:
-      description: A filter to return only Remediation Runs that match the specified lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/RemediationRun/lifecycleState'
-      schema:
-        type: string
-    VulnerabilityAuditLifecycleStateQueryParam:
-      description: A filter to return only Vulnerability Audits that match the specified lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/VulnerabilityAudit/lifecycleState'
-      schema:
-        type: string
-    RemediationRecipeIdPathParam:
-      description: The Oracle Cloud Identifier ([OCID](/Content/General/Concepts/identifiers.htm)) of a Remediation Recipe, as a URL path parameter.
-      in: path
-      name: remediationRecipeId
-      required: true
-      schema:
-        type: string
-    AuditSuccessQueryParam:
-      description: A filter to return only successful or failed Vulnerability Audits.
-      in: query
-      name: isSuccess
-      x-default-description: 'null'
-      schema:
-        type: boolean
   responses:
     default:
       description: Unknown Error

@@ -420,251 +420,353 @@ paths:
         '
       x-related-resource: '#/definitions/ScheduledJob'
 components:
-  schemas:
-    SwitchSnapChannelDetails:
-      description: Provides the information used to switch a snap channel.
-      properties:
-        channel:
-          description: The channel to switch to (e.g. stable, edge, beta, candidate, or a custom channel).
-          type: string
-          x-default-description: 'null'
-        name:
-          description: The name of the snap.
-          type: string
-      required:
-      - name
-      type: object
-    ModuleStreamProfileDetails:
-      description: Provides the information used to update a module stream profile.
-      properties:
-        moduleName:
-          description: The name of a module.
-          type: string
-        profileName:
-          description: The name of a profile of the specified module stream.
-          type: string
-        softwareSourceId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source that contains the module stream.
+  parameters:
+    ScheduleTypeQueryParam:
+      description: A filter to return only scheduled jobs of the given scheduling type (one-time or recurring).
+      in: query
+      name: scheduleType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/ScheduleTypes'
+      schema:
+        type: string
+        enum:
+        - ONETIME
+        - RECURRING
+    ScheduledJobSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
 
-            '
-          type: string
-        streamName:
-          description: The name of a stream of the specified module.
-          type: string
-      required:
-      - moduleName
-      - streamName
-      - profileName
-    ScheduledJobSummary:
-      description: Provides summary information for a scheduled job.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the scheduled job.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    ManagedInstanceGroupIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance group. This filter returns resources associated with this group.
+      in: query
+      name: managedInstanceGroupId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ChangeScheduledJobCompartmentDetailsParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the scheduled job to.
+      in: body
+      name: ChangeScheduledJobCompartmentDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/ChangeScheduledJobCompartmentDetails'
+    ManagedCompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed compartment. This filter returns resources associated with this compartment.
+      in: query
+      name: managedCompartmentId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ScheduledJobLifecycleStateQueryParam:
+      description: A filter to return only scheduled jobs currently in the given state.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/ScheduledJob/lifecycleState'
+      schema:
+        type: string
+    OperationTypeQueryParam:
+      description: A filter to return only scheduled jobs with the given operation type.
+      in: query
+      name: operationType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationTypes'
+      schema:
+        type: string
+        enum:
+        - INSTALL_PACKAGES
+        - UPDATE_PACKAGES
+        - REMOVE_PACKAGES
+        - UPDATE_ALL
+        - UPDATE_SECURITY
+        - UPDATE_BUGFIX
+        - UPDATE_ENHANCEMENT
+        - UPDATE_OTHER
+        - UPDATE_KSPLICE_USERSPACE
+        - UPDATE_KSPLICE_KERNEL
+        - MANAGE_MODULE_STREAMS
+        - SWITCH_MODULE_STREAM
+        - ATTACH_SOFTWARE_SOURCES
+        - DETACH_SOFTWARE_SOURCES
+        - SYNC_MANAGEMENT_STATION_MIRROR
+        - PROMOTE_LIFECYCLE
+        - INSTALL_WINDOWS_UPDATES
+        - INSTALL_ALL_WINDOWS_UPDATES
+        - INSTALL_SECURITY_WINDOWS_UPDATES
+        - INSTALL_BUGFIX_WINDOWS_UPDATES
+        - INSTALL_ENHANCEMENT_WINDOWS_UPDATES
+        - INSTALL_OTHER_WINDOWS_UPDATES
+        - REBOOT
+        - RERUN_WORK_REQUEST
+        - INSTALL_SNAPS
+        - REMOVE_SNAPS
+        - SWITCH_SNAP_CHANNEL
+    IsManagedByAutonomousLinuxQueryParam:
+      description: 'Indicates whether to list only resources managed by the Autonomous Linux service.
 
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: User-friendly name for the scheduled job.
-          maxLength: 255
-          minLength: 1
-          type: string
-        dynamicSetIds:
-          description: "The dynamic set [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.\nA scheduled job can only operate on one type of target. therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedInstanceGroupIds, managedCompartmentIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the scheduled job.
-          type: string
-        isManagedByAutonomousLinux:
-          description: Indicates whether this scheduled job is managed by the Autonomous Linux service.
-          type: boolean
-        isRestricted:
-          description: "Indicates if the schedule job has restricted update and deletion capabilities. \nFor restricted scheduled jobs, you can update only the timeNextExecution, recurringRule, and tags.\n"
-          type: boolean
-        lifecycleStageIds:
-          description: "The lifecycle stage [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedInstanceGroupIds, managedCompartmentIds, and dynamicSetIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        lifecycleState:
-          description: The current state of the scheduled job.
-          type: string
-          x-obmcs-enumref: '#/definitions/ScheduledJob/lifecycleState'
-        locations:
-          description: The list of locations this scheduled job should operate on for a job targeting on compartments. (Empty list means apply to all locations). This can only be set when managedCompartmentIds is not empty.
-          items:
-            $ref: '#/components/schemas/ManagedInstanceLocation'
-          maxItems: 10
-          type: array
-        managedCompartmentIds:
-          description: "The compartment [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedInstanceGroupIds, lifecycleStageIds, and dynamicSetIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        managedInstanceGroupIds:
-          description: "The managed instance group [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedCompartmentIds, lifecycleStageIds, and dynamicSetIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        managedInstanceIds:
-          description: "The managed instance [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with \nmanagedInstanceGroupIds, managedCompartmentIds, lifecycleStageIds, and dynamicSetIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        operations:
-          description: 'The list of operations this scheduled job needs to perform.
-
-            A scheduled job supports only one operation type, unless it is one of the following:
-
-            * UPDATE_PACKAGES
-
-            * UPDATE_ALL
-
-            * UPDATE_SECURITY
-
-            * UPDATE_BUGFIX
-
-            * UPDATE_ENHANCEMENT
-
-            * UPDATE_OTHER
-
-            * UPDATE_KSPLICE_USERSPACE
-
-            * UPDATE_KSPLICE_KERNEL
-
-            '
-          items:
-            $ref: '#/components/schemas/ScheduledJobOperation'
-          maxItems: 10
-          type: array
-        retryIntervals:
-          description: "The amount of time in minutes to wait until retrying the scheduled job. If set, the service will automatically \nretry a failed scheduled job after the interval. For example, you could set the interval to [2,5,10]. If the \ninitial execution of the job fails, the service waits 2 minutes and then retries. If that fails, the service waits\n5 minutes and then retries. If that fails, the service waits 10 minutes and then retries.\n"
-          items:
-            format: int32
-            type: integer
-          maxItems: 5
-          type: array
-        scheduleType:
-          description: The type of scheduling this scheduled job follows.
+        '
+      in: query
+      name: isManagedByAutonomousLinux
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    MultiLocationQueryParam:
+      description: A filter to return only resources whose location matches the given value.
+      in: query
+      name: location
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
           enum:
-          - ONETIME
-          - RECURRING
+          - ON_PREMISE
+          - OCI_COMPUTE
+          - AZURE
+          - EC2
+          - GCP
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ScheduleTypes'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
+          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
+        maxItems: 5
+        uniqueItems: true
+    RestrictedQueryParam:
+      description: A filter to return only restricted scheduled jobs.
+      in: query
+      name: isRestricted
+      required: false
+      x-default-description: false
+      schema:
+        type: boolean
+    CompartmentIdInSubTreeQueryParam:
+      description: Indicates whether to include subcompartments in the returned results. Default is false.
+      in: query
+      name: compartmentIdInSubtree
+      required: false
+      x-default-description: false
+      schema:
+        type: boolean
+    StartTimeOptionalQueryParam:
+      description: 'A filter to return only resources with a date on or after the given value, in ISO 8601 format.
 
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
 
-              Example: `{"bar-key": "value"}`
+        Example: 2017-07-14T02:40:00.000Z
 
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+        '
+      in: query
+      name: timeStart
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    DynamicSetIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dynamic set. This filter returns resources associated with this dynamic set.
+      in: query
+      name: dynamicSetId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ScheduledJobIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the scheduled job.
+      in: path
+      name: scheduledJobId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
 
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
 
-            '
-          type: object
-        timeCreated:
-          description: The time this scheduled job was created (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-          format: date-time
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    MultiLocationNotEqualToQueryParam:
+      description: A filter to return only resources whose location does not match the given value.
+      in: query
+      name: locationNotEqualTo
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - ON_PREMISE
+          - OCI_COMPUTE
+          - AZURE
+          - EC2
+          - GCP
           type: string
-        timeLastExecution:
-          description: The time of the last execution of this scheduled job (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).b.
-          format: date-time
-          type: string
-        timeNextExecution:
-          description: The time of the next execution of this scheduled job (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time this scheduled job was updated (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-          format: date-time
-          type: string
-        workRequestId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the work request that will be rerun.
-          type: string
-      required:
-      - id
-      - compartmentId
-      - scheduleType
-      - timeNextExecution
-      - operations
-      - lifecycleState
-      - timeCreated
-      - timeUpdated
-      - displayName
-      - freeformTags
-      - definedTags
-      type: object
-      x-example: "{\n  \"id\": \"ocid1.osmhscheduledjob.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"displayName\": \"Apply updates to 2 instances\",\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"scheduleType\": \"RECURRING\",\n  \"locations\": [],\n  \"timeCreated\": \"2025-03-12T22:52:00.721Z\",\n  \"timeUpdated\": \"2025-04-04T22:50:16.783Z\",\n  \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n  \"timeLastExecution\": \"2025-04-04T22:50:16.783Z\",\n  \"managedInstanceIds\": [\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\",\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n  ],\n  \"managedInstanceGroupIds\": [],\n  \"managedCompartmentIds\": [],\n  \"lifecycleStageIds\": [],\n  \"operations\": [\n    {\n      \"operationType\": \"UPDATE_ALL\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    },\n    {\n      \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    }\n  ],\n  \"lifecycleState\": \"ACTIVE\",\n  \"isManagedByAutonomousLinux\": false,\n  \"isRestricted\": false,\n  \"retryIntervals\": [],\n  \"workRequestId\": null,\n  \"freeformTags\": {},\n  \"definedTags\": {},\n  \"systemTags\": {}\n}\n"
-    Error:
-      description: Provides the information for an error.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    ChangeScheduledJobCompartmentDetails:
-      description: Provides the information used to move a scheduled job to another compartment.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the scheduled job to.
+          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
+        maxItems: 5
+        uniqueItems: true
+    EndTimeOptionalQueryParam:
+      description: 'A filter to return only resources with a date on or before the given value, in ISO 8601 format.
 
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-      x-example: "{\n  \"compartmentId\": \"ocid1.osmhscheduledjob.oc1..<var>&lt;unique_ID&gt;</var>\"\n}\n"
+
+        Example: 2017-07-14T02:40:00.000Z
+
+        '
+      in: query
+      name: timeEnd
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    DisplayNameContainsQueryParam:
+      description: A filter to return resources that may partially match the given display name.
+      in: query
+      name: displayNameContains
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ManagedInstanceIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance. This filter returns resources associated with this managed instance.
+      in: query
+      name: managedInstanceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    RequestIdHeader:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `3`
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return resources that match the given user-friendly name.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ScheduledJobIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the scheduled job. A filter to return the specified job.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    ScheduledJobIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the scheduled job.
+      in: path
+      name: scheduledJobId
+      required: true
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `50`
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    LifecycleStageIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle stage. This resource returns resources associated with this lifecycle stage.
+      in: query
+      name: lifecycleStageId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+  schemas:
     ManageModuleStreamsInScheduledJobDetails:
       description: The set of changes to make to the state of the modules, streams, and profiles on the managed target.
       properties:
@@ -690,400 +792,6 @@ components:
           type: array
       type: object
       x-example: "{\n    \"manageModuleStreamsDetails\": {\n      \"enable\": [\n        {\n          \"moduleName\": \"ant\",\n          \"streamName\": \"1.10\",\n          \"softwareSourceId\": null\n        }\n      ],\n      \"disable\": [ ],\n      \"install\": [\n        {\n          \"moduleName\": \"ant\",\n          \"streamName\": \"1.10\",\n          \"profileName\": \"common\",\n          \"softwareSourceId\": null\n        }\n      ],\n      \"remove\": [ ]\n    }\n}\n"
-    ScheduledJobOperation:
-      description: Defines an operation that is performed by a scheduled job.
-      properties:
-        installSnapDetails:
-          $ref: '#/components/schemas/InstallSnapDetails'
-        manageModuleStreamsDetails:
-          $ref: '#/components/schemas/ManageModuleStreamsInScheduledJobDetails'
-        operationType:
-          description: The type of operation this scheduled job performs.
-          enum:
-          - INSTALL_PACKAGES
-          - UPDATE_PACKAGES
-          - REMOVE_PACKAGES
-          - UPDATE_ALL
-          - UPDATE_SECURITY
-          - UPDATE_BUGFIX
-          - UPDATE_ENHANCEMENT
-          - UPDATE_OTHER
-          - UPDATE_KSPLICE_USERSPACE
-          - UPDATE_KSPLICE_KERNEL
-          - MANAGE_MODULE_STREAMS
-          - SWITCH_MODULE_STREAM
-          - ATTACH_SOFTWARE_SOURCES
-          - DETACH_SOFTWARE_SOURCES
-          - SYNC_MANAGEMENT_STATION_MIRROR
-          - PROMOTE_LIFECYCLE
-          - INSTALL_WINDOWS_UPDATES
-          - INSTALL_ALL_WINDOWS_UPDATES
-          - INSTALL_SECURITY_WINDOWS_UPDATES
-          - INSTALL_BUGFIX_WINDOWS_UPDATES
-          - INSTALL_ENHANCEMENT_WINDOWS_UPDATES
-          - INSTALL_OTHER_WINDOWS_UPDATES
-          - REBOOT
-          - RERUN_WORK_REQUEST
-          - INSTALL_SNAPS
-          - REMOVE_SNAPS
-          - SWITCH_SNAP_CHANNEL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationTypes'
-        packageNames:
-          description: The names of the target packages. This parameter only applies when the scheduled job is for installing, updating, or removing packages.
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        rebootTimeoutInMins:
-          description: "The number of minutes the service waits for the reboot to complete. If the instance doesn't reboot within the \ntimeout, the service marks the reboot job as failed.\n"
-          maximum: 240
-          minimum: 5
-          type: integer
-          x-default-description: When operationType is REBOOT, and this field will be set to a default value of 20 if not specified.
-        removeSnapDetails:
-          $ref: '#/components/schemas/RemoveSnapDetails'
-        softwareSourceIds:
-          description: "The software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm). \nThis parameter only applies when the scheduled job is for attaching or detaching software sources.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        switchModuleStreamsDetails:
-          $ref: '#/components/schemas/ModuleStreamDetails'
-        switchSnapChannelDetails:
-          $ref: '#/components/schemas/SwitchSnapChannelDetails'
-        windowsUpdateNames:
-          description: 'Unique identifier for the Windows update. This parameter only applies if the scheduled job is for installing Windows updates.
-
-            Note that this is not an OCID, but is a unique identifier assigned by Microsoft.
-
-            For example: ''6981d463-cd91-4a26-b7c4-ea4ded9183ed''.
-
-            '
-          example:
-          - 6981d463-cd91-4a26-b7c4-ea4ded9183ed
-          items:
-            type: string
-          maxItems: 255
-          type: array
-      required:
-      - operationType
-      type: object
-      x-example: "{\n  \"operationType\": \"UPDATE_ALL\",\n  \"packageNames\": [],\n  \"windowsUpdateNames\": [],\n  \"manageModuleStreamsDetails\": {\n    \"enable\": [],\n    \"disable\": [],\n    \"install\": [],\n    \"remove\": []\n  },\n  \"switchModuleStreamsDetails\": {\n    \"moduleName\": null,\n    \"streamName\": null,\n    \"softwareSourceId\": null\n  },\n  \"softwareSourceIds\": [],\n  \"rebootTimeoutInMins\": null\n}\n"
-    CreateScheduledJobDetails:
-      description: Provides the information used to create a scheduled job.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the scheduled job.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: User-specified description of the scheduled job. Avoid entering confidential information.
-          maxLength: 400
-          type: string
-        displayName:
-          description: User-friendly name for the scheduled job. Does not have to be unique and you can change the name later. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        dynamicSetIds:
-          description: "The dynamic set [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.\nA scheduled job can only operate on one type of target. therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedInstanceGroupIds, lifecycleStageIds, managedCompartmentIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        isManagedByAutonomousLinux:
-          description: Indicates whether this scheduled job is managed by the Autonomous Linux service.
-          type: boolean
-        isSubcompartmentIncluded:
-          default: false
-          description: "Indicates whether to apply the scheduled job to all compartments in the tenancy when managedCompartmentIds specifies \nthe tenancy [OCID](/iaas/Content/General/Concepts/identifiers.htm) (root compartment).\n"
-          type: boolean
-        lifecycleStageIds:
-          description: "The lifecycle stage [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore you must supply either this or managedInstanceIds, \nor managedInstanceGroupIds, or managedCompartmentIds, or dynamicSetIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        locations:
-          description: The list of locations this scheduled job should operate on for a job targeting on compartments. (Empty list means apply to all locations). This can only be set when managedCompartmentIds is not empty.
-          items:
-            $ref: '#/components/schemas/ManagedInstanceLocation'
-          maxItems: 10
-          type: array
-        managedCompartmentIds:
-          description: "The compartment [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nTo apply the job to all compartments in the tenancy, set this to the tenancy OCID (root compartment) and set \nisSubcompartmentIncluded to true. A scheduled job can only operate on one type of target, therefore you must \nsupply either this or managedInstanceIds, or managedInstanceGroupIds, or lifecycleStageIds, or dynamicSetIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        managedInstanceGroupIds:
-          description: "The managed instance group [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore you must supply either this or managedInstanceIds,\nor managedCompartmentIds, or lifecycleStageIds, or dynamicSetIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        managedInstanceIds:
-          description: "The managed instance [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore you must supply either this or \nmanagedInstanceGroupIds, or managedCompartmentIds, or lifecycleStageIds, or dynamicSetIds.\n"
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        operations:
-          description: 'The list of operations this scheduled job needs to perform.
-
-            A scheduled job supports only one operation type, unless it is one of the following:
-
-            * UPDATE_PACKAGES
-
-            * UPDATE_ALL
-
-            * UPDATE_SECURITY
-
-            * UPDATE_BUGFIX
-
-            * UPDATE_ENHANCEMENT
-
-            * UPDATE_OTHER
-
-            * UPDATE_KSPLICE_USERSPACE
-
-            * UPDATE_KSPLICE_KERNEL
-
-            '
-          items:
-            $ref: '#/components/schemas/ScheduledJobOperation'
-          maxItems: 10
-          type: array
-        recurringRule:
-          description: 'The frequency schedule for a recurring scheduled job in the [RFC5535](https://www.rfc-editor.org/rfc/rfc5535) format.
-
-            Note: Currently, only FREQ/INTERVAL/BYMONTHDAY/BYDAY/BYSETPOS/BYMONTH/BYHOUR/BYMINUTE/BYSECOND rules are supported.
-
-            In FREQ, only YEARLY, MONTHLY, WEEKLY, DAILY", HOURLY are supported.
-
-            '
-          example: FREQ=WEEKLY;BYDAY=MO,TU,WE,TH;BYHOUR=10;INTERVAL=1
-          format: x-obmcs-recurring-time
-          type: string
-        retryIntervals:
-          description: "The amount of time in minutes to wait until retrying the scheduled job. If set, the service will automatically \nretry a failed scheduled job after the interval. For example, you could set the interval to [2,5,10]. If the\ninitial execution of the job fails, the service waits 2 minutes and then retries. If that fails, the service \nwaits 5 minutes and then retries. If that fails, the service waits 10 minutes and then retries.\n"
-          items:
-            format: int32
-            type: integer
-          maxItems: 5
-          type: array
-        scheduleType:
-          description: The type of scheduling frequency for the scheduled job.
-          enum:
-          - ONETIME
-          - RECURRING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ScheduleTypes'
-        timeNextExecution:
-          description: The desired time of the next execution of this scheduled job (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-          format: date-time
-          type: string
-        workRequestId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the work request that will be rerun.
-          type: string
-      required:
-      - compartmentId
-      - scheduleType
-      - timeNextExecution
-      - operations
-      type: object
-      x-example: "{\n  \"displayName\": \"Apply updates to 2 instances\",\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"description\": \"Scheduled job description\",\n  \"scheduleType\": \"RECURRING\",\n  \"locations\": [],\n  \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n  \"recurringRule\": \"FREQ=WEEKLY;INTERVAL=1;BYDAY=FR;BYHOUR=22;BYMINUTE=52\",\n  \"managedInstanceIds\": [\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\",\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n  ],\n  \"managedInstanceGroupIds\": [],\n  \"managedCompartmentIds\": [],\n  \"lifecycleStageIds\": [],\n  \"isSubcompartmentIncluded\": false,\n  \"operations\": [\n    {\n      \"operationType\": \"UPDATE_ALL\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    },\n    {\n      \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    }\n  ],\n  \"isManagedByAutonomousLinux\": false,\n  \"retryIntervals\": [],\n  \"freeformTags\": {},\n  \"definedTags\": {},\n}\n"
-    ManagedInstanceLocation:
-      description: Location of the managed instance.
-      enum:
-      - ON_PREMISE
-      - OCI_COMPUTE
-      - AZURE
-      - EC2
-      - GCP
-      type: string
-    ModuleStreamDetails:
-      description: Provides the information used to update a module stream.
-      properties:
-        moduleName:
-          description: The name of a module.
-          type: string
-        softwareSourceId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source that contains the module stream.
-
-            '
-          type: string
-        streamName:
-          description: The name of a stream of the specified module.
-          type: string
-      required:
-      - moduleName
-      - streamName
-    ScheduledJobCollection:
-      description: The set of scheduled jobs returned for the [ListScheduledJobs](#/en/osmh/latest/ScheduledJob/ListScheduledJobs) operation.
-      properties:
-        items:
-          description: List of scheduled jobs.
-          items:
-            $ref: '#/components/schemas/ScheduledJobSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"id\": \"ocid1.osmhscheduledjob.oc1..<var>&lt;unique_ID&gt;</var>\",\n      \"displayName\": \"Apply updates to 2 instances\",\n      \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n      \"scheduleType\": \"RECURRING\",\n      \"locations\": [],\n      \"timeCreated\": \"2025-03-12T22:52:00.721Z\",\n      \"timeUpdated\": \"2025-04-04T22:50:16.783Z\",\n      \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n      \"timeLastExecution\": \"2025-04-04T22:50:16.783Z\",\n      \"managedInstanceIds\": [\n        \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\",\n        \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n      ],\n      \"managedInstanceGroupIds\": [],\n      \"managedCompartmentIds\": [],\n      \"lifecycleStageIds\": [],\n      \"operations\": [\n        {\n          \"operationType\": \"UPDATE_ALL\",\n          \"packageNames\": [],\n          \"windowsUpdateNames\": [],\n          \"manageModuleStreamsDetails\": {\n            \"enable\": [],\n            \"disable\": [],\n            \"install\": [],\n            \"remove\": []\n          },\n          \"switchModuleStreamsDetails\": {\n            \"moduleName\": null,\n            \"streamName\": null,\n            \"softwareSourceId\": null\n          },\n          \"softwareSourceIds\": [],\n          \"rebootTimeoutInMins\": null\n        },\n        {\n          \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n          \"packageNames\": [],\n          \"windowsUpdateNames\": [],\n          \"manageModuleStreamsDetails\": {\n            \"enable\": [],\n            \"disable\": [],\n            \"install\": [],\n           \"remove\": []\n          },\n          \"switchModuleStreamsDetails\": {\n            \"moduleName\": null,\n            \"streamName\": null,\n            \"softwareSourceId\": null\n          },\n          \"softwareSourceIds\": [],\n          \"rebootTimeoutInMins\": null\n        }\n      ],\n      \"lifecycleState\": \"ACTIVE\",\n      \"isManagedByAutonomousLinux\": false,\n      \"isRestricted\": false,\n      \"retryIntervals\": [],\n      \"workRequestId\": null,\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"systemTags\": {}\n    }\n  ]\n}\n"
-    RemoveSnapDetails:
-      description: Provides the information used to remove a snap.
-      properties:
-        name:
-          description: 'The name of the snap to remove.
-
-            '
-          type: string
-        revision:
-          description: 'The revision to remove. Note: This option cannot be used when removing multiple snaps.
-
-            '
-          type: string
-          x-default-description: 'null'
-      required:
-      - name
-      type: object
-    UpdateScheduledJobDetails:
-      description: Provides the information used to update a scheduled job.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: User-specified description for the scheduled job. Avoid entering confidential information.
-          maxLength: 400
-          type: string
-        displayName:
-          description: User-friendly name for the scheduled job. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        operations:
-          description: 'The list of operations this scheduled job needs to perform.
-
-            A scheduled job supports only one operation type, unless it is one of the following:
-
-            * UPDATE_PACKAGES
-
-            * UPDATE_ALL
-
-            * UPDATE_SECURITY
-
-            * UPDATE_BUGFIX
-
-            * UPDATE_ENHANCEMENT
-
-            * UPDATE_OTHER
-
-            * UPDATE_KSPLICE_USERSPACE
-
-            * UPDATE_KSPLICE_KERNEL
-
-            '
-          items:
-            $ref: '#/components/schemas/ScheduledJobOperation'
-          maxItems: 10
-          type: array
-        recurringRule:
-          description: 'The frequency schedule for a recurring scheduled job in the [RFC5535](https://www.rfc-editor.org/rfc/rfc5535) format.
-
-            Currently, only FREQ/INTERVAL/BYMONTHDAY/BYDAY/BYSETPOS/BYMONTH/BYHOUR/BYMINUTE/BYSECOND rules are supported.
-
-            In FREQ, only YEARLY, MONTHLY, WEEKLY, DAILY", HOURLY are supported.
-
-            '
-          example: FREQ=WEEKLY;BYDAY=MO,TU,WE,TH;BYHOUR=10;INTERVAL=1
-          format: x-obmcs-recurring-time
-          type: string
-        retryIntervals:
-          description: "The amount of time in minutes to wait until retrying the scheduled job. If set, the service will automatically\nretry a failed scheduled job after the interval. For example, you could set the interval to [2,5,10]. If the \ninitial execution of the job fails, the service waits 2 minutes and then retries. If that fails, the service \nwaits 5 minutes and then retries. If that fails, the service waits 10 minutes and then retries.\n"
-          items:
-            format: int32
-            type: integer
-          maxItems: 5
-          type: array
-        scheduleType:
-          description: The type of scheduling frequency for the job.
-          enum:
-          - ONETIME
-          - RECURRING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ScheduleTypes'
-        timeNextExecution:
-          description: The time of the next execution of this scheduled job (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-          format: date-time
-          type: string
-      type: object
-      x-example: "{\n  \"displayName\": \"Apply updates to 2 instances\",\n  \"description\": \"Scheduled job description\",\n  \"scheduleType\": \"RECURRING\",\n  \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n  \"recurringRule\": \"FREQ=WEEKLY;INTERVAL=1;BYDAY=FR;BYHOUR=22;BYMINUTE=52\",\n  \"managedInstanceGroupIds\": [],\n  \"managedCompartmentIds\": [],\n  \"lifecycleStageIds\": [],\n  \"isSubcompartmentIncluded\": false,\n  \"operations\": [\n    {\n      \"operationType\": \"UPDATE_ALL\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    },\n    {\n      \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    }\n  ],\n  \"isManagedByAutonomousLinux\": false,\n  \"retryIntervals\": [],\n  \"freeformTags\": {},\n  \"definedTags\": {},\n}\n"
     InstallSnapDetails:
       description: Provides the information used to install a snap.
       properties:
@@ -1344,352 +1052,644 @@ components:
       - definedTags
       type: object
       x-example: "{\n  \"id\": \"ocid1.osmhscheduledjob.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"displayName\": \"Apply updates to 2 instances\",\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"description\": \"Scheduled job description\",\n  \"scheduleType\": \"RECURRING\",\n  \"locations\": [],\n  \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n  \"timeLastExecution\": \"2025-04-04T22:50:16.783Z\",\n  \"recurringRule\": \"FREQ=WEEKLY;INTERVAL=1;BYDAY=FR;BYHOUR=22;BYMINUTE=52\",\n  \"managedInstanceIds\": [\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\",\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n  ],\n  \"managedInstanceGroupIds\": [],\n  \"managedCompartmentIds\": [],\n  \"lifecycleStageIds\": [],\n  \"isSubcompartmentIncluded\": false,\n  \"operations\": [\n    {\n      \"operationType\": \"UPDATE_ALL\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    },\n    {\n      \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    }\n  ],\n  \"workRequestIds\": [\n    \"ocid1.osmhworkrequest.oc1..<var>&lt;unique_ID&gt;</var>\",\n  ],\n  \"timeCreated\": \"2025-03-12T22:52:00.721Z\",\n  \"timeUpdated\": \"2025-04-04T22:50:16.783Z\",\n  \"lifecycleState\": \"ACTIVE\",\n  \"isManagedByAutonomousLinux\": false,\n  \"isRestricted\": false,\n  \"retryIntervals\": [],\n  \"workRequestId\": null,\n  \"freeformTags\": {},\n  \"definedTags\": {},\n  \"systemTags\": {}\n}\n"
-  parameters:
-    RestrictedQueryParam:
-      description: A filter to return only restricted scheduled jobs.
-      in: query
-      name: isRestricted
-      required: false
-      x-default-description: false
-      schema:
-        type: boolean
-    ScheduledJobIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the scheduled job. A filter to return the specified job.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
+    RemoveSnapDetails:
+      description: Provides the information used to remove a snap.
+      properties:
+        name:
+          description: 'The name of the snap to remove.
 
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `3`
-
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    StartTimeOptionalQueryParam:
-      description: 'A filter to return only resources with a date on or after the given value, in ISO 8601 format.
-
-
-        Example: 2017-07-14T02:40:00.000Z
-
-        '
-      in: query
-      name: timeStart
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    ChangeScheduledJobCompartmentDetailsParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the scheduled job to.
-      in: body
-      name: ChangeScheduledJobCompartmentDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/ChangeScheduledJobCompartmentDetails'
-    DynamicSetIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dynamic set. This filter returns resources associated with this dynamic set.
-      in: query
-      name: dynamicSetId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    ScheduledJobIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the scheduled job.
-      in: path
-      name: scheduledJobId
-      required: true
-      schema:
-        type: string
-    DisplayNameContainsQueryParam:
-      description: A filter to return resources that may partially match the given display name.
-      in: query
-      name: displayNameContains
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ManagedInstanceGroupIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance group. This filter returns resources associated with this group.
-      in: query
-      name: managedInstanceGroupId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    MultiLocationQueryParam:
-      description: A filter to return only resources whose location matches the given value.
-      in: query
-      name: location
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - ON_PREMISE
-          - OCI_COMPUTE
-          - AZURE
-          - EC2
-          - GCP
+            '
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
-        maxItems: 5
-        uniqueItems: true
-    CompartmentIdQueryParam:
-      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    EndTimeOptionalQueryParam:
-      description: 'A filter to return only resources with a date on or before the given value, in ISO 8601 format.
+        revision:
+          description: 'The revision to remove. Note: This option cannot be used when removing multiple snaps.
 
-
-        Example: 2017-07-14T02:40:00.000Z
-
-        '
-      in: query
-      name: timeEnd
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `50`
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
-    LifecycleStageIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle stage. This resource returns resources associated with this lifecycle stage.
-      in: query
-      name: lifecycleStageId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    OperationTypeQueryParam:
-      description: A filter to return only scheduled jobs with the given operation type.
-      in: query
-      name: operationType
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationTypes'
-      schema:
-        type: string
-        enum:
-        - INSTALL_PACKAGES
-        - UPDATE_PACKAGES
-        - REMOVE_PACKAGES
-        - UPDATE_ALL
-        - UPDATE_SECURITY
-        - UPDATE_BUGFIX
-        - UPDATE_ENHANCEMENT
-        - UPDATE_OTHER
-        - UPDATE_KSPLICE_USERSPACE
-        - UPDATE_KSPLICE_KERNEL
-        - MANAGE_MODULE_STREAMS
-        - SWITCH_MODULE_STREAM
-        - ATTACH_SOFTWARE_SOURCES
-        - DETACH_SOFTWARE_SOURCES
-        - SYNC_MANAGEMENT_STATION_MIRROR
-        - PROMOTE_LIFECYCLE
-        - INSTALL_WINDOWS_UPDATES
-        - INSTALL_ALL_WINDOWS_UPDATES
-        - INSTALL_SECURITY_WINDOWS_UPDATES
-        - INSTALL_BUGFIX_WINDOWS_UPDATES
-        - INSTALL_ENHANCEMENT_WINDOWS_UPDATES
-        - INSTALL_OTHER_WINDOWS_UPDATES
-        - REBOOT
-        - RERUN_WORK_REQUEST
-        - INSTALL_SNAPS
-        - REMOVE_SNAPS
-        - SWITCH_SNAP_CHANNEL
-    CompartmentIdInSubTreeQueryParam:
-      description: Indicates whether to include subcompartments in the returned results. Default is false.
-      in: query
-      name: compartmentIdInSubtree
-      required: false
-      x-default-description: false
-      schema:
-        type: boolean
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    ScheduleTypeQueryParam:
-      description: A filter to return only scheduled jobs of the given scheduling type (one-time or recurring).
-      in: query
-      name: scheduleType
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/ScheduleTypes'
-      schema:
-        type: string
-        enum:
-        - ONETIME
-        - RECURRING
-    MultiLocationNotEqualToQueryParam:
-      description: A filter to return only resources whose location does not match the given value.
-      in: query
-      name: locationNotEqualTo
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - ON_PREMISE
-          - OCI_COMPUTE
-          - AZURE
-          - EC2
-          - GCP
+            '
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
-        maxItems: 5
-        uniqueItems: true
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+          x-default-description: 'null'
+      required:
+      - name
+      type: object
+    ScheduledJobSummary:
+      description: Provides summary information for a scheduled job.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the scheduled job.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
 
-        server error without risk of executing that same action again. Retry tokens expire after 24
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
 
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+              Example: `{"CostCenter": "42"}`
 
-        has been deleted and purged from the system, then a retry of the original creation request
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
 
-        might be rejected.
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
 
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    IsManagedByAutonomousLinuxQueryParam:
-      description: 'Indicates whether to list only resources managed by the Autonomous Linux service.
+            Example: `{"Operations": {"CostCenter": "42"}}`
 
-        '
-      in: query
-      name: isManagedByAutonomousLinux
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    ScheduledJobIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the scheduled job.
-      in: path
-      name: scheduledJobId
-      required: true
-      schema:
-        type: string
-    ManagedCompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed compartment. This filter returns resources associated with this compartment.
-      in: query
-      name: managedCompartmentId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return resources that match the given user-friendly name.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ManagedInstanceIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance. This filter returns resources associated with this managed instance.
-      in: query
-      name: managedInstanceId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    ScheduledJobSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+            '
+          type: object
+        displayName:
+          description: User-friendly name for the scheduled job.
+          maxLength: 255
+          minLength: 1
+          type: string
+        dynamicSetIds:
+          description: "The dynamic set [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.\nA scheduled job can only operate on one type of target. therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedInstanceGroupIds, managedCompartmentIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    ScheduledJobLifecycleStateQueryParam:
-      description: A filter to return only scheduled jobs currently in the given state.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/ScheduledJob/lifecycleState'
-      schema:
-        type: string
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the scheduled job.
+          type: string
+        isManagedByAutonomousLinux:
+          description: Indicates whether this scheduled job is managed by the Autonomous Linux service.
+          type: boolean
+        isRestricted:
+          description: "Indicates if the schedule job has restricted update and deletion capabilities. \nFor restricted scheduled jobs, you can update only the timeNextExecution, recurringRule, and tags.\n"
+          type: boolean
+        lifecycleStageIds:
+          description: "The lifecycle stage [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedInstanceGroupIds, managedCompartmentIds, and dynamicSetIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        lifecycleState:
+          description: The current state of the scheduled job.
+          type: string
+          x-obmcs-enumref: '#/definitions/ScheduledJob/lifecycleState'
+        locations:
+          description: The list of locations this scheduled job should operate on for a job targeting on compartments. (Empty list means apply to all locations). This can only be set when managedCompartmentIds is not empty.
+          items:
+            $ref: '#/components/schemas/ManagedInstanceLocation'
+          maxItems: 10
+          type: array
+        managedCompartmentIds:
+          description: "The compartment [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedInstanceGroupIds, lifecycleStageIds, and dynamicSetIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        managedInstanceGroupIds:
+          description: "The managed instance group [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedCompartmentIds, lifecycleStageIds, and dynamicSetIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        managedInstanceIds:
+          description: "The managed instance [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore this parameter is mutually exclusive with \nmanagedInstanceGroupIds, managedCompartmentIds, lifecycleStageIds, and dynamicSetIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        operations:
+          description: 'The list of operations this scheduled job needs to perform.
+
+            A scheduled job supports only one operation type, unless it is one of the following:
+
+            * UPDATE_PACKAGES
+
+            * UPDATE_ALL
+
+            * UPDATE_SECURITY
+
+            * UPDATE_BUGFIX
+
+            * UPDATE_ENHANCEMENT
+
+            * UPDATE_OTHER
+
+            * UPDATE_KSPLICE_USERSPACE
+
+            * UPDATE_KSPLICE_KERNEL
+
+            '
+          items:
+            $ref: '#/components/schemas/ScheduledJobOperation'
+          maxItems: 10
+          type: array
+        retryIntervals:
+          description: "The amount of time in minutes to wait until retrying the scheduled job. If set, the service will automatically \nretry a failed scheduled job after the interval. For example, you could set the interval to [2,5,10]. If the \ninitial execution of the job fails, the service waits 2 minutes and then retries. If that fails, the service waits\n5 minutes and then retries. If that fails, the service waits 10 minutes and then retries.\n"
+          items:
+            format: int32
+            type: integer
+          maxItems: 5
+          type: array
+        scheduleType:
+          description: The type of scheduling this scheduled job follows.
+          enum:
+          - ONETIME
+          - RECURRING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ScheduleTypes'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time this scheduled job was created (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+          format: date-time
+          type: string
+        timeLastExecution:
+          description: The time of the last execution of this scheduled job (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).b.
+          format: date-time
+          type: string
+        timeNextExecution:
+          description: The time of the next execution of this scheduled job (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time this scheduled job was updated (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+          format: date-time
+          type: string
+        workRequestId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the work request that will be rerun.
+          type: string
+      required:
+      - id
+      - compartmentId
+      - scheduleType
+      - timeNextExecution
+      - operations
+      - lifecycleState
+      - timeCreated
+      - timeUpdated
+      - displayName
+      - freeformTags
+      - definedTags
+      type: object
+      x-example: "{\n  \"id\": \"ocid1.osmhscheduledjob.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"displayName\": \"Apply updates to 2 instances\",\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"scheduleType\": \"RECURRING\",\n  \"locations\": [],\n  \"timeCreated\": \"2025-03-12T22:52:00.721Z\",\n  \"timeUpdated\": \"2025-04-04T22:50:16.783Z\",\n  \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n  \"timeLastExecution\": \"2025-04-04T22:50:16.783Z\",\n  \"managedInstanceIds\": [\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\",\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n  ],\n  \"managedInstanceGroupIds\": [],\n  \"managedCompartmentIds\": [],\n  \"lifecycleStageIds\": [],\n  \"operations\": [\n    {\n      \"operationType\": \"UPDATE_ALL\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    },\n    {\n      \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    }\n  ],\n  \"lifecycleState\": \"ACTIVE\",\n  \"isManagedByAutonomousLinux\": false,\n  \"isRestricted\": false,\n  \"retryIntervals\": [],\n  \"workRequestId\": null,\n  \"freeformTags\": {},\n  \"definedTags\": {},\n  \"systemTags\": {}\n}\n"
+    UpdateScheduledJobDetails:
+      description: Provides the information used to update a scheduled job.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: User-specified description for the scheduled job. Avoid entering confidential information.
+          maxLength: 400
+          type: string
+        displayName:
+          description: User-friendly name for the scheduled job. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        operations:
+          description: 'The list of operations this scheduled job needs to perform.
+
+            A scheduled job supports only one operation type, unless it is one of the following:
+
+            * UPDATE_PACKAGES
+
+            * UPDATE_ALL
+
+            * UPDATE_SECURITY
+
+            * UPDATE_BUGFIX
+
+            * UPDATE_ENHANCEMENT
+
+            * UPDATE_OTHER
+
+            * UPDATE_KSPLICE_USERSPACE
+
+            * UPDATE_KSPLICE_KERNEL
+
+            '
+          items:
+            $ref: '#/components/schemas/ScheduledJobOperation'
+          maxItems: 10
+          type: array
+        recurringRule:
+          description: 'The frequency schedule for a recurring scheduled job in the [RFC5535](https://www.rfc-editor.org/rfc/rfc5535) format.
+
+            Currently, only FREQ/INTERVAL/BYMONTHDAY/BYDAY/BYSETPOS/BYMONTH/BYHOUR/BYMINUTE/BYSECOND rules are supported.
+
+            In FREQ, only YEARLY, MONTHLY, WEEKLY, DAILY", HOURLY are supported.
+
+            '
+          example: FREQ=WEEKLY;BYDAY=MO,TU,WE,TH;BYHOUR=10;INTERVAL=1
+          format: x-obmcs-recurring-time
+          type: string
+        retryIntervals:
+          description: "The amount of time in minutes to wait until retrying the scheduled job. If set, the service will automatically\nretry a failed scheduled job after the interval. For example, you could set the interval to [2,5,10]. If the \ninitial execution of the job fails, the service waits 2 minutes and then retries. If that fails, the service \nwaits 5 minutes and then retries. If that fails, the service waits 10 minutes and then retries.\n"
+          items:
+            format: int32
+            type: integer
+          maxItems: 5
+          type: array
+        scheduleType:
+          description: The type of scheduling frequency for the job.
+          enum:
+          - ONETIME
+          - RECURRING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ScheduleTypes'
+        timeNextExecution:
+          description: The time of the next execution of this scheduled job (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+          format: date-time
+          type: string
+      type: object
+      x-example: "{\n  \"displayName\": \"Apply updates to 2 instances\",\n  \"description\": \"Scheduled job description\",\n  \"scheduleType\": \"RECURRING\",\n  \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n  \"recurringRule\": \"FREQ=WEEKLY;INTERVAL=1;BYDAY=FR;BYHOUR=22;BYMINUTE=52\",\n  \"managedInstanceGroupIds\": [],\n  \"managedCompartmentIds\": [],\n  \"lifecycleStageIds\": [],\n  \"isSubcompartmentIncluded\": false,\n  \"operations\": [\n    {\n      \"operationType\": \"UPDATE_ALL\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    },\n    {\n      \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    }\n  ],\n  \"isManagedByAutonomousLinux\": false,\n  \"retryIntervals\": [],\n  \"freeformTags\": {},\n  \"definedTags\": {},\n}\n"
+    ManagedInstanceLocation:
+      description: Location of the managed instance.
+      enum:
+      - ON_PREMISE
+      - OCI_COMPUTE
+      - AZURE
+      - EC2
+      - GCP
+      type: string
+    Error:
+      description: Provides the information for an error.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ScheduledJobOperation:
+      description: Defines an operation that is performed by a scheduled job.
+      properties:
+        installSnapDetails:
+          $ref: '#/components/schemas/InstallSnapDetails'
+        manageModuleStreamsDetails:
+          $ref: '#/components/schemas/ManageModuleStreamsInScheduledJobDetails'
+        operationType:
+          description: The type of operation this scheduled job performs.
+          enum:
+          - INSTALL_PACKAGES
+          - UPDATE_PACKAGES
+          - REMOVE_PACKAGES
+          - UPDATE_ALL
+          - UPDATE_SECURITY
+          - UPDATE_BUGFIX
+          - UPDATE_ENHANCEMENT
+          - UPDATE_OTHER
+          - UPDATE_KSPLICE_USERSPACE
+          - UPDATE_KSPLICE_KERNEL
+          - MANAGE_MODULE_STREAMS
+          - SWITCH_MODULE_STREAM
+          - ATTACH_SOFTWARE_SOURCES
+          - DETACH_SOFTWARE_SOURCES
+          - SYNC_MANAGEMENT_STATION_MIRROR
+          - PROMOTE_LIFECYCLE
+          - INSTALL_WINDOWS_UPDATES
+          - INSTALL_ALL_WINDOWS_UPDATES
+          - INSTALL_SECURITY_WINDOWS_UPDATES
+          - INSTALL_BUGFIX_WINDOWS_UPDATES
+          - INSTALL_ENHANCEMENT_WINDOWS_UPDATES
+          - INSTALL_OTHER_WINDOWS_UPDATES
+          - REBOOT
+          - RERUN_WORK_REQUEST
+          - INSTALL_SNAPS
+          - REMOVE_SNAPS
+          - SWITCH_SNAP_CHANNEL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationTypes'
+        packageNames:
+          description: The names of the target packages. This parameter only applies when the scheduled job is for installing, updating, or removing packages.
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        rebootTimeoutInMins:
+          description: "The number of minutes the service waits for the reboot to complete. If the instance doesn't reboot within the \ntimeout, the service marks the reboot job as failed.\n"
+          maximum: 240
+          minimum: 5
+          type: integer
+          x-default-description: When operationType is REBOOT, and this field will be set to a default value of 20 if not specified.
+        removeSnapDetails:
+          $ref: '#/components/schemas/RemoveSnapDetails'
+        softwareSourceIds:
+          description: "The software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm). \nThis parameter only applies when the scheduled job is for attaching or detaching software sources.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        switchModuleStreamsDetails:
+          $ref: '#/components/schemas/ModuleStreamDetails'
+        switchSnapChannelDetails:
+          $ref: '#/components/schemas/SwitchSnapChannelDetails'
+        windowsUpdateNames:
+          description: 'Unique identifier for the Windows update. This parameter only applies if the scheduled job is for installing Windows updates.
+
+            Note that this is not an OCID, but is a unique identifier assigned by Microsoft.
+
+            For example: ''6981d463-cd91-4a26-b7c4-ea4ded9183ed''.
+
+            '
+          example:
+          - 6981d463-cd91-4a26-b7c4-ea4ded9183ed
+          items:
+            type: string
+          maxItems: 255
+          type: array
+      required:
+      - operationType
+      type: object
+      x-example: "{\n  \"operationType\": \"UPDATE_ALL\",\n  \"packageNames\": [],\n  \"windowsUpdateNames\": [],\n  \"manageModuleStreamsDetails\": {\n    \"enable\": [],\n    \"disable\": [],\n    \"install\": [],\n    \"remove\": []\n  },\n  \"switchModuleStreamsDetails\": {\n    \"moduleName\": null,\n    \"streamName\": null,\n    \"softwareSourceId\": null\n  },\n  \"softwareSourceIds\": [],\n  \"rebootTimeoutInMins\": null\n}\n"
+    SwitchSnapChannelDetails:
+      description: Provides the information used to switch a snap channel.
+      properties:
+        channel:
+          description: The channel to switch to (e.g. stable, edge, beta, candidate, or a custom channel).
+          type: string
+          x-default-description: 'null'
+        name:
+          description: The name of the snap.
+          type: string
+      required:
+      - name
+      type: object
+    ModuleStreamProfileDetails:
+      description: Provides the information used to update a module stream profile.
+      properties:
+        moduleName:
+          description: The name of a module.
+          type: string
+        profileName:
+          description: The name of a profile of the specified module stream.
+          type: string
+        softwareSourceId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source that contains the module stream.
+
+            '
+          type: string
+        streamName:
+          description: The name of a stream of the specified module.
+          type: string
+      required:
+      - moduleName
+      - streamName
+      - profileName
+    CreateScheduledJobDetails:
+      description: Provides the information used to create a scheduled job.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the scheduled job.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: User-specified description of the scheduled job. Avoid entering confidential information.
+          maxLength: 400
+          type: string
+        displayName:
+          description: User-friendly name for the scheduled job. Does not have to be unique and you can change the name later. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        dynamicSetIds:
+          description: "The dynamic set [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on.\nA scheduled job can only operate on one type of target. therefore this parameter is mutually exclusive with \nmanagedInstanceIds, managedInstanceGroupIds, lifecycleStageIds, managedCompartmentIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        isManagedByAutonomousLinux:
+          description: Indicates whether this scheduled job is managed by the Autonomous Linux service.
+          type: boolean
+        isSubcompartmentIncluded:
+          default: false
+          description: "Indicates whether to apply the scheduled job to all compartments in the tenancy when managedCompartmentIds specifies \nthe tenancy [OCID](/iaas/Content/General/Concepts/identifiers.htm) (root compartment).\n"
+          type: boolean
+        lifecycleStageIds:
+          description: "The lifecycle stage [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore you must supply either this or managedInstanceIds, \nor managedInstanceGroupIds, or managedCompartmentIds, or dynamicSetIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        locations:
+          description: The list of locations this scheduled job should operate on for a job targeting on compartments. (Empty list means apply to all locations). This can only be set when managedCompartmentIds is not empty.
+          items:
+            $ref: '#/components/schemas/ManagedInstanceLocation'
+          maxItems: 10
+          type: array
+        managedCompartmentIds:
+          description: "The compartment [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nTo apply the job to all compartments in the tenancy, set this to the tenancy OCID (root compartment) and set \nisSubcompartmentIncluded to true. A scheduled job can only operate on one type of target, therefore you must \nsupply either this or managedInstanceIds, or managedInstanceGroupIds, or lifecycleStageIds, or dynamicSetIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        managedInstanceGroupIds:
+          description: "The managed instance group [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore you must supply either this or managedInstanceIds,\nor managedCompartmentIds, or lifecycleStageIds, or dynamicSetIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        managedInstanceIds:
+          description: "The managed instance [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) that this scheduled job operates on. \nA scheduled job can only operate on one type of target, therefore you must supply either this or \nmanagedInstanceGroupIds, or managedCompartmentIds, or lifecycleStageIds, or dynamicSetIds.\n"
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        operations:
+          description: 'The list of operations this scheduled job needs to perform.
+
+            A scheduled job supports only one operation type, unless it is one of the following:
+
+            * UPDATE_PACKAGES
+
+            * UPDATE_ALL
+
+            * UPDATE_SECURITY
+
+            * UPDATE_BUGFIX
+
+            * UPDATE_ENHANCEMENT
+
+            * UPDATE_OTHER
+
+            * UPDATE_KSPLICE_USERSPACE
+
+            * UPDATE_KSPLICE_KERNEL
+
+            '
+          items:
+            $ref: '#/components/schemas/ScheduledJobOperation'
+          maxItems: 10
+          type: array
+        recurringRule:
+          description: 'The frequency schedule for a recurring scheduled job in the [RFC5535](https://www.rfc-editor.org/rfc/rfc5535) format.
+
+            Note: Currently, only FREQ/INTERVAL/BYMONTHDAY/BYDAY/BYSETPOS/BYMONTH/BYHOUR/BYMINUTE/BYSECOND rules are supported.
+
+            In FREQ, only YEARLY, MONTHLY, WEEKLY, DAILY", HOURLY are supported.
+
+            '
+          example: FREQ=WEEKLY;BYDAY=MO,TU,WE,TH;BYHOUR=10;INTERVAL=1
+          format: x-obmcs-recurring-time
+          type: string
+        retryIntervals:
+          description: "The amount of time in minutes to wait until retrying the scheduled job. If set, the service will automatically \nretry a failed scheduled job after the interval. For example, you could set the interval to [2,5,10]. If the\ninitial execution of the job fails, the service waits 2 minutes and then retries. If that fails, the service \nwaits 5 minutes and then retries. If that fails, the service waits 10 minutes and then retries.\n"
+          items:
+            format: int32
+            type: integer
+          maxItems: 5
+          type: array
+        scheduleType:
+          description: The type of scheduling frequency for the scheduled job.
+          enum:
+          - ONETIME
+          - RECURRING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ScheduleTypes'
+        timeNextExecution:
+          description: The desired time of the next execution of this scheduled job (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+          format: date-time
+          type: string
+        workRequestId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the work request that will be rerun.
+          type: string
+      required:
+      - compartmentId
+      - scheduleType
+      - timeNextExecution
+      - operations
+      type: object
+      x-example: "{\n  \"displayName\": \"Apply updates to 2 instances\",\n  \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"description\": \"Scheduled job description\",\n  \"scheduleType\": \"RECURRING\",\n  \"locations\": [],\n  \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n  \"recurringRule\": \"FREQ=WEEKLY;INTERVAL=1;BYDAY=FR;BYHOUR=22;BYMINUTE=52\",\n  \"managedInstanceIds\": [\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\",\n    \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n  ],\n  \"managedInstanceGroupIds\": [],\n  \"managedCompartmentIds\": [],\n  \"lifecycleStageIds\": [],\n  \"isSubcompartmentIncluded\": false,\n  \"operations\": [\n    {\n      \"operationType\": \"UPDATE_ALL\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    },\n    {\n      \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n      \"packageNames\": [],\n      \"windowsUpdateNames\": [],\n      \"manageModuleStreamsDetails\": {\n        \"enable\": [],\n        \"disable\": [],\n        \"install\": [],\n        \"remove\": []\n      },\n      \"switchModuleStreamsDetails\": {\n        \"moduleName\": null,\n        \"streamName\": null,\n        \"softwareSourceId\": null\n      },\n      \"softwareSourceIds\": [],\n      \"rebootTimeoutInMins\": null\n    }\n  ],\n  \"isManagedByAutonomousLinux\": false,\n  \"retryIntervals\": [],\n  \"freeformTags\": {},\n  \"definedTags\": {},\n}\n"
+    ScheduledJobCollection:
+      description: The set of scheduled jobs returned for the [ListScheduledJobs](#/en/osmh/latest/ScheduledJob/ListScheduledJobs) operation.
+      properties:
+        items:
+          description: List of scheduled jobs.
+          items:
+            $ref: '#/components/schemas/ScheduledJobSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"id\": \"ocid1.osmhscheduledjob.oc1..<var>&lt;unique_ID&gt;</var>\",\n      \"displayName\": \"Apply updates to 2 instances\",\n      \"compartmentId\": \"ocid1.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n      \"scheduleType\": \"RECURRING\",\n      \"locations\": [],\n      \"timeCreated\": \"2025-03-12T22:52:00.721Z\",\n      \"timeUpdated\": \"2025-04-04T22:50:16.783Z\",\n      \"timeNextExecution\": \"2025-04-11T22:52:00.000Z\",\n      \"timeLastExecution\": \"2025-04-04T22:50:16.783Z\",\n      \"managedInstanceIds\": [\n        \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\",\n        \"ocid1.instance.oc1..<var>&lt;unique_ID&gt;</var>\"\n      ],\n      \"managedInstanceGroupIds\": [],\n      \"managedCompartmentIds\": [],\n      \"lifecycleStageIds\": [],\n      \"operations\": [\n        {\n          \"operationType\": \"UPDATE_ALL\",\n          \"packageNames\": [],\n          \"windowsUpdateNames\": [],\n          \"manageModuleStreamsDetails\": {\n            \"enable\": [],\n            \"disable\": [],\n            \"install\": [],\n            \"remove\": []\n          },\n          \"switchModuleStreamsDetails\": {\n            \"moduleName\": null,\n            \"streamName\": null,\n            \"softwareSourceId\": null\n          },\n          \"softwareSourceIds\": [],\n          \"rebootTimeoutInMins\": null\n        },\n        {\n          \"operationType\": \"INSTALL_ALL_WINDOWS_UPDATES\",\n          \"packageNames\": [],\n          \"windowsUpdateNames\": [],\n          \"manageModuleStreamsDetails\": {\n            \"enable\": [],\n            \"disable\": [],\n            \"install\": [],\n           \"remove\": []\n          },\n          \"switchModuleStreamsDetails\": {\n            \"moduleName\": null,\n            \"streamName\": null,\n            \"softwareSourceId\": null\n          },\n          \"softwareSourceIds\": [],\n          \"rebootTimeoutInMins\": null\n        }\n      ],\n      \"lifecycleState\": \"ACTIVE\",\n      \"isManagedByAutonomousLinux\": false,\n      \"isRestricted\": false,\n      \"retryIntervals\": [],\n      \"workRequestId\": null,\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"systemTags\": {}\n    }\n  ]\n}\n"
+    ChangeScheduledJobCompartmentDetails:
+      description: Provides the information used to move a scheduled job to another compartment.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the scheduled job to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid1.osmhscheduledjob.oc1..<var>&lt;unique_ID&gt;</var>\"\n}\n"
+    ModuleStreamDetails:
+      description: Provides the information used to update a module stream.
+      properties:
+        moduleName:
+          description: The name of a module.
+          type: string
+        softwareSourceId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source that contains the module stream.
+
+            '
+          type: string
+        streamName:
+          description: The name of a stream of the specified module.
+          type: string
+      required:
+      - moduleName
+      - streamName
   responses:
     default:
       description: Unknown Error

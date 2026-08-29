@@ -933,120 +933,6 @@ components:
       - displayName
       - action
       type: object
-    Error:
-      description: Error information
-      properties:
-        code:
-          description: This is a short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A message is a human-readable error message.
-          type: string
-      required:
-      - code
-      - message
-    Resource:
-      description: 'This is the schedule resource entity.
-
-        '
-      properties:
-        id:
-          description: This is the resource OCID.
-          type: string
-        metadata:
-          additionalProperties:
-            type: string
-          description: "This is additional information that helps to identity the resource for the schedule.\n\n    {\n      \"id\": \"<OCID_of_bucket>\"\n      \"metadata\":\n      {\n        \"namespaceName\": \"sampleNamespace\",\n        \"bucketName\": \"sampleBucket\"\n      }\n    }\n"
-          type: object
-        parameters:
-          description: "This is the user input parameters to use when acting on the resource.\n\n{\n    \"parameters\": [\n        {\n            \"parameterType\": \"BODY\",\n            \"value\": {\n                \"ip\": \"192.168.44.44\",\n                \"memory\": \"1024\",\n                \"synced_folders\": [\n                    {\n                        \"host_path\": \"data/\",\n                        \"guest_path\": \"/var/www\",\n                        \"type\": \"default\"\n                    }\n                ],\n                \"forwarded_ports\": []\n            }\n        },\n        {\n            \"parameterType\": \"PATH\",\n            \"value\": {\n                \"compartmentId\": \"ocid1.compartment.oc1..xxxxx\",\n                \"instanceId\": \"ocid1.vcn.oc1..yyyy\"\n            }\n        },\n        {\n            \"parameterType\": \"QUERY\",\n            \"value\": {\n                \"limit\": \"10\",\n                \"tenantId\": \"ocid1.tenant.oc1..zzzz\"\n            }\n        },\n        {\n            \"parameterType\": \"HEADER\",\n            \"value\": {\n              \"token\": \"xxxx\"\n            }\n        }\n    ]\n}\n"
-          items:
-            $ref: '#/components/schemas/Parameter'
-          maxItems: 4
-          type: array
-      required:
-      - id
-    Parameter:
-      description: 'This is a generic input parameter to use when acting on the resource.
-
-        '
-      discriminator:
-        propertyName: parameterType
-      properties:
-        parameterType:
-          description: This is the parameter type on which the input parameter is defined
-          enum:
-          - HEADER
-          - BODY
-          - PATH
-          - QUERY
-          type: string
-      required:
-      - parameterType
-      type: object
-    WorkRequestResource:
-      description: This is a resource created or operated on by a work request.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the operation tracked in the work request.
-
-            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
-
-            work is complete for that resource, at which point it transitions to CREATED, UPDATED,
-
-            or DELETED, respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: This is the resource type that the work request affects.
-          type: string
-        entityUri:
-          description: This is the URI path that you can use for a GET request to access the resource metadata.
-          type: string
-        identifier:
-          description: This is an [OCID](/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource.
-          type: string
-      required:
-      - actionType
-      - entityType
-      - identifier
-    WorkRequestSummaryCollection:
-      description: This is a list of work requests. Can contain both work requests and other information, such as metadata.
-      properties:
-        items:
-          description: This is a list of work requests.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ResourceFilter:
-      description: This is a generic filter used to decide which resources that the schedule be applied to.
-      discriminator:
-        propertyName: attribute
-      properties:
-        attribute:
-          description: This is the resource attribute on which the threshold is defined.
-          enum:
-          - COMPARTMENT_ID
-          - RESOURCE_TYPE
-          - DEFINED_TAGS
-          - TIME_CREATED
-          - LIFECYCLE_STATE
-          type: string
-      required:
-      - attribute
-      type: object
     ResourceTypeCollection:
       description: 'This is the collection of resource types supported by resource scheduler.
 
@@ -1071,124 +957,71 @@ components:
       required:
       - items
       type: object
-    ResourceType:
-      description: 'This is a resource type supported by resource scheduler.
-
-        '
+    ScheduleCollection:
+      description: This is the list of schedule items.
       properties:
-        name:
-          description: 'This is a resource type supported by resource scheduler.
-
-            '
-          maxLength: 255
-          minLength: 1
+        items:
+          description: This is the list of schedule items.
+          items:
+            $ref: '#/components/schemas/ScheduleSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ResourceFilter:
+      description: This is a generic filter used to decide which resources that the schedule be applied to.
+      discriminator:
+        propertyName: attribute
+      properties:
+        attribute:
+          description: This is the resource attribute on which the threshold is defined.
+          enum:
+          - COMPARTMENT_ID
+          - RESOURCE_TYPE
+          - DEFINED_TAGS
+          - TIME_CREATED
+          - LIFECYCLE_STATE
           type: string
       required:
-      - name
+      - attribute
       type: object
-    CreateScheduleDetails:
-      description: This is the data to create a schedule.
+    WorkRequestError:
+      description: This is an error encountered while performing an operation that is tracked by a work request.
       properties:
-        action:
-          description: This is the action that will be executed by the schedule.
-          enum:
-          - START_RESOURCE
-          - STOP_RESOURCE
+        code:
+          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
+
+            [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+            '
           type: string
+        message:
+          description: This is a human-readable error message.
+          type: string
+        timestamp:
+          description: 'This is the date and time the error occurred, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    ChangeScheduleCompartmentDetails:
+      description: This is the configuration details for the move operation.
+      properties:
         compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the schedule is created
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the schedule to.
+
+            '
           maxLength: 255
           minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'This is a key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'These are defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: This is the description of the schedule.
-          type: string
-        displayName:
-          description: This is a user-friendly name for the schedule. It does not have to be unique, and it's changeable.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'These are free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        recurrenceDetails:
-          description: 'This is the frequency of recurrence of a schedule. The frequency field can either conform to RFC-5545 formatting
-
-            or UNIX cron formatting for recurrences, based on the value specified by the recurrenceType field.
-
-            '
-          example: FREQ=WEEKLY;BYDAY=MO,TU,WE,TH;BYHOUR=10;INTERVAL=1
-          type: string
-        recurrenceType:
-          description: Type of recurrence of a schedule
-          enum:
-          - CRON
-          - ICAL
-          type: string
-        resourceFilters:
-          description: This is a list of resources filters.  The schedule will be applied to resources matching all of them.
-          items:
-            $ref: '#/components/schemas/ResourceFilter'
-          maxItems: 5
-          type: array
-        resources:
-          description: This is the list of resources to which the scheduled operation is applied.
-          items:
-            $ref: '#/components/schemas/Resource'
-          type: array
-        timeEnds:
-          description: 'This is the date and time the schedule ends, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeStarts:
-          description: 'This is the date and time the schedule starts, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
           type: string
       required:
       - compartmentId
-      - action
-      - recurrenceDetails
-      - recurrenceType
       type: object
     WorkRequestSummary:
       description: This is the summary information about an asynchronous work request.
@@ -1276,149 +1109,99 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    WorkRequestError:
-      description: This is an error encountered while performing an operation that is tracked by a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
+    WorkRequest:
+      description: 'This is an asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
 
-            [API Errors](/iaas/Content/API/References/apierrors.htm).
+        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
+
+        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
 
             '
           type: string
-        message:
-          description: This is a human-readable error message.
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
           type: string
-        timestamp:
-          description: 'This is the date and time the error occurred, in the format defined by
+        operationType:
+          description: The asynchronous operation tracked by this work request.
+          enum:
+          - START_RESOURCE
+          - STOP_RESOURCE
+          - CHANGE_SCHEDULE_COMPARTMENT
+          - CREATE_SCHEDULE
+          - UPDATE_SCHEDULE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
+
+            that must be performed.
+
+            '
+          format: float
+          type: number
+        resources:
+          description: This is the resources that are affected by the work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: This is the status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'This is the date and time the work request was created, in the format defined by
 
             [RFC 3339](https://tools.ietf.org/html/rfc3339).
 
             '
           format: date-time
           type: string
-      required:
-      - code
-      - message
-      - timestamp
-    ChangeScheduleCompartmentDetails:
-      description: This is the configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the schedule to.
+        timeFinished:
+          description: 'This is the date and time the work request was finished, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
 
             '
-          maxLength: 255
-          minLength: 1
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'This is the date and time the work request was started, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'This is the date and time the work request was updated, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
           type: string
       required:
+      - operationType
+      - status
+      - id
       - compartmentId
-      type: object
-    UpdateScheduleDetails:
-      description: This is the data to update a schedule.
-      properties:
-        action:
-          description: This is the action that will be executed by the schedule.
-          enum:
-          - START_RESOURCE
-          - STOP_RESOURCE
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'This is a key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'These are defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: This is the description of the schedule.
-          type: string
-        displayName:
-          description: This is a user-friendly name for the schedule. It does not have to be unique, and it's changeable.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'These are free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        recurrenceDetails:
-          description: 'This is the frequency of recurrence of a schedule. The frequency field can either conform to RFC-5545 formatting
-
-            or UNIX cron formatting for recurrences, based on the value specified by the recurrenceType field.
-
-            '
-          example: FREQ=WEEKLY;BYDAY=MO,TU,WE,TH;BYHOUR=10;INTERVAL=1
-          type: string
-        recurrenceType:
-          description: Type of recurrence of a schedule
-          enum:
-          - CRON
-          - ICAL
-          type: string
-        resourceFilters:
-          description: This is a list of resources filters.  The schedule will be applied to resources matching all of them.
-          items:
-            $ref: '#/components/schemas/ResourceFilter'
-          maxItems: 5
-          type: array
-        resources:
-          description: This is the list of resources to which the scheduled operation is applied.
-          items:
-            $ref: '#/components/schemas/Resource'
-          type: array
-        timeEnds:
-          description: 'This is the date and time the schedule ends, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeStarts:
-          description: 'This is the date and time the schedule starts, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-      type: object
-    ScheduleCollection:
-      description: This is the list of schedule items.
-      properties:
-        items:
-          description: This is the list of schedule items.
-          items:
-            $ref: '#/components/schemas/ScheduleSummary'
-          type: array
-      required:
-      - items
-      type: object
+      - resources
+      - percentComplete
+      - timeAccepted
     Schedule:
       description: "A Schedule describes the date and time when an operation will be or has been applied to a set of resources. You must specify either \nthe resources directly or provide a set of resource filters to select the resources.\n\nTo use any of the API operations, you must be authorized in an IAM policy. If you're not authorized, contact your\nadministrator. If you're an administrator who needs to write policies to give users access, see\n[Getting Started with Policies](/iaas/Content/Identity/policiesgs/get-started-with-policies.htm).\n"
       properties:
@@ -1613,6 +1396,159 @@ components:
       - freeformTags
       - definedTags
       type: object
+    WorkRequestLogEntryCollection:
+      description: This is a list of work request logs. Can contain both logs and other information, such as metadata.
+      properties:
+        items:
+          description: This is a list of work request log entries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    Resource:
+      description: 'This is the schedule resource entity.
+
+        '
+      properties:
+        id:
+          description: This is the resource OCID.
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: "This is additional information that helps to identity the resource for the schedule.\n\n    {\n      \"id\": \"<OCID_of_bucket>\"\n      \"metadata\":\n      {\n        \"namespaceName\": \"sampleNamespace\",\n        \"bucketName\": \"sampleBucket\"\n      }\n    }\n"
+          type: object
+        parameters:
+          description: "This is the user input parameters to use when acting on the resource.\n\n{\n    \"parameters\": [\n        {\n            \"parameterType\": \"BODY\",\n            \"value\": {\n                \"ip\": \"192.168.44.44\",\n                \"memory\": \"1024\",\n                \"synced_folders\": [\n                    {\n                        \"host_path\": \"data/\",\n                        \"guest_path\": \"/var/www\",\n                        \"type\": \"default\"\n                    }\n                ],\n                \"forwarded_ports\": []\n            }\n        },\n        {\n            \"parameterType\": \"PATH\",\n            \"value\": {\n                \"compartmentId\": \"ocid1.compartment.oc1..xxxxx\",\n                \"instanceId\": \"ocid1.vcn.oc1..yyyy\"\n            }\n        },\n        {\n            \"parameterType\": \"QUERY\",\n            \"value\": {\n                \"limit\": \"10\",\n                \"tenantId\": \"ocid1.tenant.oc1..zzzz\"\n            }\n        },\n        {\n            \"parameterType\": \"HEADER\",\n            \"value\": {\n              \"token\": \"xxxx\"\n            }\n        }\n    ]\n}\n"
+          items:
+            $ref: '#/components/schemas/Parameter'
+          maxItems: 4
+          type: array
+      required:
+      - id
+    ResourceType:
+      description: 'This is a resource type supported by resource scheduler.
+
+        '
+      properties:
+        name:
+          description: 'This is a resource type supported by resource scheduler.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      type: object
+    UpdateScheduleDetails:
+      description: This is the data to update a schedule.
+      properties:
+        action:
+          description: This is the action that will be executed by the schedule.
+          enum:
+          - START_RESOURCE
+          - STOP_RESOURCE
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'This is a key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'These are defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: This is the description of the schedule.
+          type: string
+        displayName:
+          description: This is a user-friendly name for the schedule. It does not have to be unique, and it's changeable.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'These are free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        recurrenceDetails:
+          description: 'This is the frequency of recurrence of a schedule. The frequency field can either conform to RFC-5545 formatting
+
+            or UNIX cron formatting for recurrences, based on the value specified by the recurrenceType field.
+
+            '
+          example: FREQ=WEEKLY;BYDAY=MO,TU,WE,TH;BYHOUR=10;INTERVAL=1
+          type: string
+        recurrenceType:
+          description: Type of recurrence of a schedule
+          enum:
+          - CRON
+          - ICAL
+          type: string
+        resourceFilters:
+          description: This is a list of resources filters.  The schedule will be applied to resources matching all of them.
+          items:
+            $ref: '#/components/schemas/ResourceFilter'
+          maxItems: 5
+          type: array
+        resources:
+          description: This is the list of resources to which the scheduled operation is applied.
+          items:
+            $ref: '#/components/schemas/Resource'
+          type: array
+        timeEnds:
+          description: 'This is the date and time the schedule ends, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeStarts:
+          description: 'This is the date and time the schedule starts, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+      type: object
+    Error:
+      description: Error information
+      properties:
+        code:
+          description: This is a short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A message is a human-readable error message.
+          type: string
+      required:
+      - code
+      - message
     WorkRequestLogEntry:
       description: This is a log message from performing an operation that is tracked by a work request.
       properties:
@@ -1630,124 +1566,175 @@ components:
       required:
       - message
       - timestamp
-    WorkRequestLogEntryCollection:
-      description: This is a list of work request logs. Can contain both logs and other information, such as metadata.
+    WorkRequestSummaryCollection:
+      description: This is a list of work requests. Can contain both work requests and other information, such as metadata.
       properties:
         items:
-          description: This is a list of work request log entries.
+          description: This is a list of work requests.
           items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
+            $ref: '#/components/schemas/WorkRequestSummary'
           type: array
       required:
       - items
       type: object
-    WorkRequest:
-      description: 'This is an asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
-
-        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
-
-        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
-
-        '
+    CreateScheduleDetails:
+      description: This is the data to create a schedule.
       properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
-
-            '
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
-          type: string
-        operationType:
-          description: The asynchronous operation tracked by this work request.
+        action:
+          description: This is the action that will be executed by the schedule.
           enum:
           - START_RESOURCE
           - STOP_RESOURCE
-          - CHANGE_SCHEDULE_COMPARTMENT
-          - CREATE_SCHEDULE
-          - UPDATE_SCHEDULE
           type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which the schedule is created
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
 
-            that must be performed.
+                '
+              type: object
+            description: 'This is a key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'These are defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
 
             '
-          format: float
-          type: number
-        resources:
-          description: This is the resources that are affected by the work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: This is the status of the work request.
+          type: object
+        description:
+          description: This is the description of the schedule.
+          type: string
+        displayName:
+          description: This is a user-friendly name for the schedule. It does not have to be unique, and it's changeable.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'These are free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        recurrenceDetails:
+          description: 'This is the frequency of recurrence of a schedule. The frequency field can either conform to RFC-5545 formatting
+
+            or UNIX cron formatting for recurrences, based on the value specified by the recurrenceType field.
+
+            '
+          example: FREQ=WEEKLY;BYDAY=MO,TU,WE,TH;BYHOUR=10;INTERVAL=1
+          type: string
+        recurrenceType:
+          description: Type of recurrence of a schedule
           enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - NEEDS_ATTENTION
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
+          - CRON
+          - ICAL
           type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'This is the date and time the work request was created, in the format defined by
+        resourceFilters:
+          description: This is a list of resources filters.  The schedule will be applied to resources matching all of them.
+          items:
+            $ref: '#/components/schemas/ResourceFilter'
+          maxItems: 5
+          type: array
+        resources:
+          description: This is the list of resources to which the scheduled operation is applied.
+          items:
+            $ref: '#/components/schemas/Resource'
+          type: array
+        timeEnds:
+          description: 'This is the date and time the schedule ends, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
 
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            Example: `2016-08-25T21:10:29.600Z`
 
             '
           format: date-time
           type: string
-        timeFinished:
-          description: 'This is the date and time the work request was finished, in the format defined by
+        timeStarts:
+          description: 'This is the date and time the schedule starts, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339)
 
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
 
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'This is the date and time the work request was started, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'This is the date and time the work request was updated, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+            Example: `2016-08-25T21:10:29.600Z`
 
             '
           format: date-time
           type: string
       required:
-      - operationType
-      - status
-      - id
       - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-  parameters:
-    PaginationTokenQueryParam:
-      description: 'This used for list pagination. The value of the opc-next-page response header from the previous
+      - action
+      - recurrenceDetails
+      - recurrenceType
+      type: object
+    WorkRequestResource:
+      description: This is a resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the operation tracked in the work request.
 
-        "List" call. For important details about how pagination works, see
+            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
 
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+            work is complete for that resource, at which point it transitions to CREATED, UPDATED,
+
+            or DELETED, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - RELATED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: This is the resource type that the work request affects.
+          type: string
+        entityUri:
+          description: This is the URI path that you can use for a GET request to access the resource metadata.
+          type: string
+        identifier:
+          description: This is an [OCID](/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource.
+          type: string
+      required:
+      - actionType
+      - entityType
+      - identifier
+    Parameter:
+      description: 'This is a generic input parameter to use when acting on the resource.
 
         '
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
+      discriminator:
+        propertyName: parameterType
+      properties:
+        parameterType:
+          description: This is the parameter type on which the input parameter is defined
+          enum:
+          - HEADER
+          - BODY
+          - PATH
+          - QUERY
+          type: string
+      required:
+      - parameterType
+      type: object
+  parameters:
     SortByQueryParam:
       description: 'This is the field to sort by. You can provide only one sort order. The default order for `timeCreated`
 
@@ -1764,11 +1751,17 @@ components:
         - lifecycleState
         - state
         default: timeCreated
-    ScheduleIdentifierQueryParam:
-      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the schedule.
+    LifecycleStateQueryParam:
+      description: 'This is a filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
       in: query
-      name: scheduleId
+      name: lifecycleState
+      required: false
       x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/Schedule/lifecycleState'
       schema:
         type: string
     ScheduleIdentifierPathParam:
@@ -1778,33 +1771,44 @@ components:
       required: true
       schema:
         type: string
-    ResourceIdentifierQueryParam:
-      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
+    ScheduleIdentifierQueryParam:
+      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the schedule.
       in: query
-      name: resourceId
+      name: scheduleId
       x-default-description: 'null'
       schema:
         type: string
-    CompartmentIdQueryParam:
-      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'This is used for optimistic concurrency control. In the PUT or DELETE call for a resource, set the
-
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
+    WorkRequestSortByQueryParam:
+      description: 'This is the field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
 
         '
-      in: header
-      name: if-match
-      required: false
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    SortOrderQueryParam:
+      description: This is the sort order to use, either ascending (`ASC`) or descending (`DESC`).
+      in: query
+      name: sortOrder
+      x-default-description: 'This is the default value depends upon `sortBy`, and
+
+        in general is `DESC` when sorting by time and `ASC` otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestIdPathParam:
+      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: path
+      name: workRequestId
+      required: true
       schema:
         type: string
     WorkRequestStatusQueryParam:
@@ -1825,63 +1829,6 @@ components:
         - SUCCEEDED
         - CANCELING
         - CANCELED
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    LifecycleStateQueryParam:
-      description: 'This is a filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/Schedule/lifecycleState'
-      schema:
-        type: string
-    WorkRequestIdPathParam:
-      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: This is the sort order to use, either ascending (`ASC`) or descending (`DESC`).
-      in: query
-      name: sortOrder
-      x-default-description: 'This is the default value depends upon `sortBy`, and
-
-        in general is `DESC` when sorting by time and `ASC` otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    WorkRequestIdQueryParam:
-      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
     WorkRequestLogAndErrorSortByQueryParam:
       description: 'This is the field to sort by. Only one sort order may be provided. Default order for `timestamp` is descending.
 
@@ -1893,6 +1840,49 @@ components:
         enum:
         - timestamp
         default: timestamp
+    RequestIdHeader:
+      description: 'This is a unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'This used for list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: This is a filter to return only resources that match the given display name exactly.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
     RetryTokenHeader:
       description: 'This is a token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1912,38 +1902,48 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    DisplayNameQueryParam:
-      description: This is a filter to return only resources that match the given display name exactly.
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+        paginated "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
       in: query
-      name: displayName
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
-    WorkRequestSortByQueryParam:
-      description: 'This is the field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
-
-        '
+    ResourceIdentifierQueryParam:
+      description: This is the [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
       in: query
-      name: sortBy
+      name: resourceId
+      x-default-description: 'null'
       schema:
         type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    RequestIdHeader:
-      description: 'This is a unique Oracle-assigned identifier for the request. If you need to contact
+    IfMatchHeader:
+      description: 'This is used for optimistic concurrency control. In the PUT or DELETE call for a resource, set the
 
-        Oracle about a particular request, please provide the request ID.
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
 
-        The only valid characters for request IDs are letters, numbers,
+        that resource. The resource will be updated or deleted only if the etag you provide
 
-        underscore, and dash.
+        matches the resource''s current etag value.
 
         '
       in: header
-      name: opc-request-id
+      name: if-match
+      required: false
       schema:
         type: string
   responses:

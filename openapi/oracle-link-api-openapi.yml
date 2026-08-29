@@ -1,11 +1,16 @@
 openapi: 3.2.0
 info:
   title: Oracle Link API
+  x-refined-note:
+  - x-evidence differs across the merged source definitions and was not carried
+  - x-provenance differs across the merged source definitions and was not carried
   version: '1.0'
   description: 'Operations tagged link across 2 of this provider''s published API definitions: oci-organizations-1-openapi.yaml, oci-organizations-openapi.yaml. Each path carries the servers of the definition it was published in.'
 servers:
-- url: http://127.0.0.1/20220518
-- url: https://127.0.0.1/20220518
+- url: http://127.0.0.1/20230401
+- url: https://127.0.0.1/20230401
+- url: http://127.0.0.1/20200801
+- url: https://127.0.0.1/20200801
 tags:
 - name: link
 paths:
@@ -64,6 +69,9 @@ paths:
       tags:
       - link
       x-related-resource: '#/definitions/Link'
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
   /links/{linkId}:
     delete:
       description: Starts the link termination workflow.
@@ -163,6 +171,9 @@ paths:
       summary: Gets information about the link.
       tags:
       - link
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
   /links/{linkId}/tenancyNames:
     get:
       description: Gets information about the link along with the parent and child tenancy names.
@@ -215,64 +226,105 @@ paths:
       - link
       x-obmcs-client-retries-enabled: true
       x-related-resource: '#/definitions/LinkWithTenancyNames'
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
 components:
+  parameters:
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    ParentTenancyIdQueryParam:
+      description: The ID of the parent tenancy this link is associated with.
+      in: query
+      name: parentTenancyId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    SortOrderQueryParam:
+      description: The sort order to use, whether 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-default-description: The default order depends on what parameter is being sorted by.
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    ChildTenancyIdQueryParam:
+      description: The ID of the child tenancy this link is associated with.
+      in: query
+      name: childTenancyId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    FeatureQueryParam:
+      description: The feature associated with this link.
+      in: query
+      name: feature
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 64
+    LifecycleStateQueryParam:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - ACTIVE
+        - INACTIVE
+        - UPDATING
+        - FAILED
+        - TERMINATED
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   schemas:
-    Link:
-      description: A link between a parent tenancy and a child tenancy.
-      properties:
-        childTenancyId:
-          description: OCID of the child tenancy.
-          maxLength: 255
-          minLength: 1
-          type: string
-        feature:
-          description: The feature associated with this link. Default value is CORE.
-          example: CORE
-          maxLength: 64
-          minLength: 1
-          type: string
-        id:
-          description: OCID of the link.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: Lifecycle state of the link.
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - FAILED
-          - TERMINATED
-          example: ACTIVE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        parentTenancyId:
-          description: OCID of the parent tenancy.
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeCreated:
-          description: Date-time when this link was created.
-          example: 2016-08-29 09:12:33.001000+00:00
-          format: date-time
-          type: string
-        timeTerminated:
-          description: Date-time when this link was terminated.
-          example: 2016-08-29 09:12:33.001000+00:00
-          format: date-time
-          type: string
-        timeUpdated:
-          description: Date-time when this link was last updated.
-          example: 2016-08-29 09:12:33.001000+00:00
-          format: date-time
-          type: string
-      required:
-      - id
-      - parentTenancyId
-      - childTenancyId
-      - timeCreated
     LinkCollection:
       description: Result of a query request for a list of links. Contains Link items.
       properties:
@@ -284,18 +336,6 @@ components:
       required:
       - items
       type: object
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     LinkWithTenancyNames:
       allOf:
       - $ref: '#/components/schemas/Link'
@@ -389,100 +429,204 @@ components:
       - parentTenancyId
       - childTenancyId
       - timeCreated
-  parameters:
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, whether 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-default-description: The default order depends on what parameter is being sorted by.
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    FeatureQueryParam:
-      description: The feature associated with this link.
-      in: query
-      name: feature
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 64
-    ChildTenancyIdQueryParam:
-      description: The ID of the child tenancy this link is associated with.
-      in: query
-      name: childTenancyId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    ParentTenancyIdQueryParam:
-      description: The ID of the parent tenancy this link is associated with.
-      in: query
-      name: parentTenancyId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    LifecycleStateQueryParam:
-      description: The lifecycle state of the resource.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - ACTIVE
-        - INACTIVE
-        - UPDATING
-        - FAILED
-        - TERMINATED
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    Link:
+      description: A link between a parent tenancy and a child tenancy.
+      properties:
+        childTenancyId:
+          description: OCID of the child tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+        feature:
+          description: The feature associated with this link. Default value is CORE.
+          example: CORE
+          maxLength: 64
+          minLength: 1
+          type: string
+        id:
+          description: OCID of the link.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: Lifecycle state of the link.
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - FAILED
+          - TERMINATED
+          example: ACTIVE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        parentTenancyId:
+          description: OCID of the parent tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: Date-time when this link was created.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeTerminated:
+          description: Date-time when this link was terminated.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeUpdated:
+          description: Date-time when this link was last updated.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+      required:
+      - id
+      - parentTenancyId
+      - childTenancyId
+      - timeCreated
+    LinkWithTenancyNames_2:
+      allOf:
+      - $ref: '#/components/schemas/Link_2'
+      - properties:
+          childTenancyName:
+            description: Name of the child tenancy.
+            maxLength: 255
+            minLength: 1
+            type: string
+          parentTenancyName:
+            description: Name of the parent tenancy.
+            maxLength: 255
+            minLength: 1
+            type: string
+        required:
+        - parentTenancyName
+        - childTenancyName
+      description: A link between a parent tenancy and a child tenancy with tenancy names.
+    LinkSummary_2:
+      description: The summary of a link between a parent tenancy and a child tenancy.
+      properties:
+        childTenancyId:
+          description: OCID of the child tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+        feature:
+          description: Type of the feature that the link is supporting. Default value is CORE.
+          example: CORE
+          maxLength: 64
+          minLength: 1
+          type: string
+        id:
+          description: OCID of the link.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: Lifecycle state of the link.
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - FAILED
+          - TERMINATED
+          example: ACTIVE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        parentTenancyId:
+          description: OCID of the parent tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: Date-time when this link was created
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeTerminated:
+          description: Date-time when this link was terminated.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeUpdated:
+          description: Date-time when this link was last updated.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+      required:
+      - id
+      - parentTenancyId
+      - childTenancyId
+      - timeCreated
+    Link_2:
+      description: A link between a parent tenancy and a child tenancy.
+      properties:
+        childTenancyId:
+          description: OCID of the child tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+        feature:
+          description: Type of the feature that the link is supporting. Default value is CORE.
+          example: CORE
+          maxLength: 64
+          minLength: 1
+          type: string
+        id:
+          description: OCID of the link.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: Lifecycle state of the link.
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - FAILED
+          - TERMINATED
+          example: ACTIVE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        parentTenancyId:
+          description: OCID of the parent tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: Date-time when this link was created.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeTerminated:
+          description: Date-time when this link was terminated.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeUpdated:
+          description: Date-time when this link was last updated.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+      required:
+      - id
+      - parentTenancyId
+      - childTenancyId
+      - timeCreated
   responses:
     default:
       description: Unknown Error

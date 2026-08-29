@@ -104,13 +104,59 @@ paths:
       x-related-resource: '#/definitions/MulticloudResourceCollection'
 components:
   parameters:
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RequiredSubscriptionServiceNameQueryParam:
+      description: The cloud service provider.
       in: query
-      name: compartmentId
+      name: subscriptionServiceName
+      required: true
+      x-obmcs-top-level-enum: '#/definitions/SubscriptionType'
+      schema:
+        type: string
+        enum:
+        - ORACLEDBATAZURE
+        - ORACLEDBATGOOGLE
+        - ORACLEDBATAWS
+    ExternalLocationNameQueryParam:
+      description: The cloud service provider region.
+      in: query
+      name: externalLocation
+      required: false
       x-default-description: 'null'
       schema:
         type: string
+        maxLength: 255
+        minLength: 1
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+
+        In general, the sort order is `DESC` when sorting by time and `ASC` otherwise.
+
+        '
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends on `sortBy`.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
     SortByQueryParam:
       description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
 
@@ -138,18 +184,11 @@ components:
       schema:
         type: string
         minLength: 1
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
+    RequiredSubscriptionIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
+      in: query
+      name: subscriptionId
+      required: true
       schema:
         type: string
     PaginationLimitQueryParam:
@@ -167,52 +206,13 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
-    RequiredSubscriptionServiceNameQueryParam:
-      description: The cloud service provider.
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
       in: query
-      name: subscriptionServiceName
-      required: true
-      x-obmcs-top-level-enum: '#/definitions/SubscriptionType'
-      schema:
-        type: string
-        enum:
-        - ORACLEDBATAZURE
-        - ORACLEDBATGOOGLE
-        - ORACLEDBATAWS
-    ExternalLocationNameQueryParam:
-      description: The cloud service provider region.
-      in: query
-      name: externalLocation
-      required: false
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
-    RequiredSubscriptionIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
-      in: query
-      name: subscriptionId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`).
-
-        In general, the sort order is `DESC` when sorting by time and `ASC` otherwise.
-
-        '
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends on `sortBy`.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
     ResourceAnchorIdQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource anchor.
       in: query
@@ -221,23 +221,6 @@ components:
       schema:
         type: string
   schemas:
-    MulticloudResourceCollection:
-      description: 'Multicloud resources in the indicated Multicloud subscription.
-
-        For more information, see
-
-        [Multicloud Resources](/iaas/Content/multicloud-hub/list-resources.htm).
-
-        '
-      properties:
-        items:
-          description: List of MulticloudResourceSummary.
-          items:
-            $ref: '#/components/schemas/MulticloudResourceSummary'
-          type: array
-      required:
-      - items
-      type: object
     MulticloudResourceSummary:
       description: 'The properties that define the Multicloud resource.
 
@@ -365,6 +348,23 @@ components:
       required:
       - resourceId
       - timeCreated
+      type: object
+    MulticloudResourceCollection:
+      description: 'Multicloud resources in the indicated Multicloud subscription.
+
+        For more information, see
+
+        [Multicloud Resources](/iaas/Content/multicloud-hub/list-resources.htm).
+
+        '
+      properties:
+        items:
+          description: List of MulticloudResourceSummary.
+          items:
+            $ref: '#/components/schemas/MulticloudResourceSummary'
+          type: array
+      required:
+      - items
       type: object
     Error:
       description: Error response information.

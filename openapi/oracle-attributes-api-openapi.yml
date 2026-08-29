@@ -460,26 +460,68 @@ paths:
       x-related-resource: '#/definitions/AutoActivateStatus'
 components:
   schemas:
-    BulkUpdateAttributeMetadata:
-      description: 'Metadata about the bulk attribute update operation.  The bulk attribute update operation is atomic and binary.  If the processing of any of the attributes
+    BulkActivationMetadata:
+      description: 'Metadata about the bulk activation operation.  The bulk activation operation is atomic and binary.  If the processing of any of the attributes in the bulk
 
-        in the bulk attribute update request results in a processing or validation error, then none of the attributes updated.
+        activation request results in a processing or validation error, then none of the attributes in the request are activated.  The bulk activation request succeeds
+
+        only when all the attributes in the bulk activation request are processed and they get a successful attributeStatus back.
 
         '
       properties:
-        attributesUpdated:
-          description: 'Total number attributes (both string and numeric) in TRACES namespace for which properties were updated.
+        availableNumericAttributes:
+          description: 'Total number of free slots available to activate numeric attributes in the TRACES namespace in the APM Domain.  Note that if a bulk request has succeeded, this
+
+            number reflects the total number of free slots available for activation of additional numeric attributes in the TRACES namespace in the APM Domain.
+
+            '
+          type: integer
+        availableStringAttributes:
+          description: 'Total number of free slots available to activate string attributes in the TRACES namespace in the APM Domain.  Note that if a bulk request has succeeded, this
+
+            number reflects the total number of free slots available for activation of additional string attributes in the TRACES namespace in the APM Domain.
+
+            '
+          type: integer
+        availableSyntheticNumericAttributes:
+          description: 'Total number of free slots available to activate numeric attributes in the SYNTHETIC namespace in the APM Domain.  Note that if a bulk request has succeeded, this
+
+            number reflects the total number of free synthetic slots available for activation of additional numeric attributes in the SYNTHETIC namespace in the APM Domain.
+
+            '
+          type: integer
+        availableSyntheticStringAttributes:
+          description: 'Total number of free slots available to activate string attributes in the SYNTHETIC namespace in the APM Domain.  Note that if a bulk request has succeeded, this
+
+            number reflects the total number of free synthetic slots available for activation of additional string attributes in the SYNTHETIC namespace in the APM Domain.
+
+            '
+          type: integer
+        numericAttributesActivated:
+          description: 'Total number of numeric attributes in TRACES namespace that were activated.
 
             '
           type: integer
         operationStatus:
-          description: 'Operation status of the bulk update attribute operation.
+          description: 'Operation status of the bulk activation operation.  The bulk  activation operation could have either a success or an error status as defined below.
 
-            SUCCESS - The bulk attribute update request has succeeded and all the attributes in the request have been updated.
+            The following is a success status for the bulk activation operation.
 
-            The following are error statuses for the bulk update attributes operation.
+            SUCCESS - The bulk activation operation has succeeded and all the attributes in the bulk activation request have been activated by this operation or activated earlier.
 
-            EMPTY_ATTRIBUTE_LIST - The bulk update attributes request object was empty and did not contain any attributes for which properties had to be updated.
+            The following are error statuses for the bulk activation operation.  Note that none of the attributes (string or numeric) in the bulk request have been activated by this bulk
+
+            activation operation if any of the below statuses.
+
+            EMPTY_ATTRIBUTE_LIST - The bulk activation request object was empty and did not contain any attributes to be activated.
+
+            NUMERIC_ATTRIBUTE_LIMIT_EXCEEDED - The number of numeric attributes in the bulk request exceeded the maximum limit (100) of numeric attributes that could be activated in the APM Domain.
+
+            STRING_ATTRIBUTE_LIMIT_EXCEEDED - The number of string attributes in the bulk request exceeded the maximum limit (700) of string attributes that could be activated in the APM Domain.
+
+            INSUFFICIENT_STRING_SPACE - There are not enough free slots available in the APM Domain to activate the string attributes present in the bulk request.
+
+            INSUFFICIENT_NUMERIC_SPACE - There are not enough free slots available in the APM Domain to activate the numeric attributes present in the bulk request.
 
             INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
 
@@ -489,6 +531,10 @@ components:
           enum:
           - SUCCESS
           - EMPTY_ATTRIBUTE_LIST
+          - NUMERIC_ATTRIBUTE_LIMIT_EXCEEDED
+          - STRING_ATTRIBUTE_LIMIT_EXCEEDED
+          - INSUFFICIENT_STRING_SPACE
+          - INSUFFICIENT_NUMERIC_SPACE
           - INVALID_BULK_REQUEST
           type: string
         operationType:
@@ -496,54 +542,355 @@ components:
 
             '
           enum:
-          - UPDATE_ATTRIBUTE_PROPERTIES
+          - ACTIVATE
           type: string
-        syntheticAttributesUpdated:
-          description: 'Total number attributes (both string and numeric) in SYNTHETIC namespace for which properties were updated.
+        stringAttributesActivated:
+          description: 'Total number of string attributes in TRACES namespace that were activated.
+
+            '
+          type: integer
+        syntheticNumericAttributesActivated:
+          description: 'Total number of numeric attributes in SYNTHETIC namespace that were activated.
+
+            '
+          type: integer
+        syntheticStringAttributesActivated:
+          description: 'Total number of string attributes in SYNTHETIC namespace that were activated.
 
             '
           type: integer
       required:
       - operationType
       - operationStatus
-      - attributesUpdated
       type: object
-    BulkPinStatus:
-      description: 'Response of a bulk attribute pin operation.
+    BulkActivateAttributeDetails:
+      description: 'Bulk request object containing the details of the attributes to be activated.
+
+        '
+      properties:
+        attributeDetails:
+          description: 'Collection of objects containing the details about individual attribute to be activated.
+
+            '
+          items:
+            $ref: '#/components/schemas/BulkActivateAttributeDetail'
+          type: array
+      type: object
+    AutoActivateStatus:
+      description: 'Status of autoactivation for the given data key in the APM Domain.
+
+        '
+      properties:
+        dataKey:
+          description: 'Data key type for which auto-activate needs needs to be turned on or off.
+
+            '
+          enum:
+          - PRIVATE_DATA_KEY
+          - PUBLIC_DATA_KEY
+          type: string
+        state:
+          description: 'State of autoactivation in this APM Domain.  If "ON" auto-activate is set to true, if "OFF" auto-activate is set to false.
+
+            '
+          enum:
+          - true
+          - false
+          type: string
+      required:
+      - state
+      - dataKey
+      type: object
+    BulkUpdateNotesStatus:
+      description: 'Response of a bulk update notes operation.
 
         '
       properties:
         attributeStatuses:
-          description: 'We preserve the order of the attribute items from the bulk pin request in this collection.  The ith object in this collection represents the
+          description: 'We preserve the order of the attribute items from the bulk update notes request in this collection.  The ith object in this collection represents the
 
-            bulk pin operation status of the ith object in the BulkPinAttributeDetails object in the Bulk pin request.  If the
+            bulk update notes operation status of the ith object in the BulkUpdateAttributeNotesDetails object in the Bulk update notes request.  If the
 
-            bulk pin operation results in a processing error or a validation error, the operationStatus property in the  BulkPinMetadata object will
+            bulk update notes operation results in a processing error or a validation error, the operationStatus property in the  BulkUpdateNotesMetadata object will
 
             contain the appropriate bulk error status for the bulk operation.
 
             '
           items:
-            $ref: '#/components/schemas/AttributePinResponse'
+            $ref: '#/components/schemas/AttributeUpdateNotesResponse'
           type: array
-        bulkPinMetadata:
-          $ref: '#/components/schemas/BulkPinMetadata'
+        bulkUpdateNotesMetadata:
+          $ref: '#/components/schemas/BulkUpdateNotesMetadata'
       required:
       - attributeStatuses
-      - bulkPinMetadata
+      - bulkUpdateNotesMetadata
       type: object
-    BulkUpdateAttributeDetails:
-      description: 'Bulk request object containing the details of the attributes for which properties are to be updated.
+    BulkUpdateAttributeNotesDetails:
+      description: 'Bulk request object containing the details of the attributes for which notes are to be updated.
 
         '
       properties:
         attributeDetails:
-          description: 'Collection of objects containing the details about individual attribute for which properties are to be updated.
+          description: 'Collection of objects containing the details about individual attribute for which notes are to be updated.
 
             '
           items:
-            $ref: '#/components/schemas/BulkUpdateAttributeDetail'
+            $ref: '#/components/schemas/BulkUpdateAttributeNotesDetail'
           type: array
+      type: object
+    BulkUnpinStatus:
+      description: 'Response of a bulk attribute unpin operation.
+
+        '
+      properties:
+        attributeStatuses:
+          description: 'We preserve the order of the attribute items from the bulk unpin request in this collection.  The ith object in this collection represents the
+
+            bulk unpin operation status of the ith object in the BulkUnpinAttributeDetails object in the Bulk unpin request.  If the
+
+            bulk unpin operation results in a processing error or a validation error, the operationStatus property in the  BulkUnpinMetadata object will
+
+            contain the appropriate bulk error status for the bulk operation.
+
+            '
+          items:
+            $ref: '#/components/schemas/AttributeUnpinResponse'
+          type: array
+        bulkUnpinMetadata:
+          $ref: '#/components/schemas/BulkUnpinMetadata'
+      required:
+      - attributeStatuses
+      - bulkUnpinMetadata
+      type: object
+    BulkDeActivateAttributeDetail:
+      description: 'Object that contains the details about a single attribute to be deactivated.
+
+        '
+      properties:
+        attributeName:
+          description: 'Name of the attribute to be deactivated.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        attributeNameSpace:
+          default: TRACES
+          description: "Namespace of the attribute to be deactivated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
+          enum:
+          - TRACES
+          - SYNTHETIC
+          type: string
+      required:
+      - attributeName
+      type: object
+    BulkUnpinAttributeDetail:
+      description: 'Object that contains the details about a single attribute in the bulk request to be unpinned.
+
+        '
+      properties:
+        attributeName:
+          description: 'Name of the attribute to be unpinned.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        attributeNameSpace:
+          default: TRACES
+          description: "Namespace of the attribute to be unpinned.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
+          enum:
+          - TRACES
+          - SYNTHETIC
+          type: string
+      required:
+      - attributeName
+      type: object
+    BulkUpdateAttributeStatus:
+      description: 'Response of a bulk update attribute operation.
+
+        '
+      properties:
+        attributeStatuses:
+          description: 'We preserve the order of the attribute items from the bulk update attribute request in this collection.  The ith object in this collection represents the
+
+            bulk update attribute operation status of the ith object in the BulkUpdateAttributeDetails object in the Bulk update attribute request.  If the
+
+            bulk update attribute operation results in a processing error or a validation error, the operationStatus property in the  BulkUpdateAttributeMetadata object will
+
+            contain the appropriate bulk error status for the bulk operation.
+
+            '
+          items:
+            $ref: '#/components/schemas/AttributeUpdateResponse'
+          type: array
+        bulkUpdateAttributeMetadata:
+          $ref: '#/components/schemas/BulkUpdateAttributeMetadata'
+      required:
+      - attributeStatuses
+      - bulkUpdateAttributeMetadata
+      type: object
+    AttributePinResponse:
+      description: 'Response of an individual attribute item in the bulk pin operation.
+
+        '
+      properties:
+        attributeName:
+          description: 'Attribute that was pinned by this bulk operation.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        attributeNameSpace:
+          default: TRACES
+          description: "Namespace of the attribute whose properties were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
+          enum:
+          - TRACES
+          - SYNTHETIC
+          type: string
+        attributeStatus:
+          description: 'Status of the attribute after this operation.  The attribute can have one of the following statuses after the pin operation.  The attribute
+
+            can have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata
+
+            object.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.
+
+            The following are successful status values of individual attribute items in a bulk attribute pin operation.
+
+            ATTRIBUTE_PINNED - The attribute is marked pinned and associated notes have been added.
+
+            ATTRIBUTE_ALREADY_PINNED - The caller is trying to pin an attribute that has already been pinned.
+
+            DUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,
+
+            and call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.
+
+            The following values are error statuses and the bulk processing is stopped when the first error is encountered.
+
+            PIN_NOT_ALLOWED - The caller has asked to pin an active attribute which is not allowed.
+
+            INVALID_ATTRIBUTE - The attribute is invalid.
+
+            ATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.
+
+            '
+          enum:
+          - ATTRIBUTE_ALREADY_PINNED
+          - ATTRIBUTE_PINNED
+          - PIN_NOT_ALLOWED
+          - DUPLICATE_ATTRIBUTE
+          - INVALID_ATTRIBUTE
+          - ATTRIBUTE_NOT_PROCESSED
+          type: string
+        notes:
+          description: 'Notes added to this attribute.
+
+            '
+          type: string
+        operationType:
+          description: 'Type of operation - pin.
+
+            '
+          enum:
+          - PIN
+          type: string
+        timeUpdated:
+          description: 'Time when the attribute was activated or deactivated.  Note that ingest might not have picked up the changes even if this time has elapsed.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - attributeName
+      - notes
+      - operationType
+      - attributeStatus
+      - timeUpdated
+      - attributeNameSpace
+      type: object
+    BulkActivateAttributeDetail:
+      description: 'Object that contains the details about a single attribute in the bulk request to be activated.  The attributeNameSpace and
+
+        unit are optional parameters, and the attributeNameSpace will default to TRACES if it is not passed in.
+
+        '
+      properties:
+        attributeName:
+          description: 'Name of the attribute to be activated.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        attributeNameSpace:
+          default: TRACES
+          description: "Namespace of the attribute to be activated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
+          enum:
+          - TRACES
+          - SYNTHETIC
+          type: string
+        attributeType:
+          description: 'Type of the attribute to be activated.
+
+            '
+          enum:
+          - NUMERIC
+          - STRING
+          type: string
+        unit:
+          description: 'Unit of the attribute to be updated.  If unit is not specified, it defaults to NONE.
+
+            '
+          enum:
+          - NONE
+          - EPOCH_TIME_MS
+          - BYTES
+          - COUNT
+          - DURATION_MS
+          - TRACE_STATUS
+          - PERCENTAGE
+          type: string
+      required:
+      - attributeName
+      - attributeType
+      type: object
+    BulkUpdateAttributeDetail:
+      description: 'Object that contains the details about a single attribute in the bulk request for which properties are to be updated.
+
+        '
+      properties:
+        attributeName:
+          description: 'Name of the attribute for which notes are to be updated.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        attributeNameSpace:
+          default: TRACES
+          description: 'Namespace of the attribute for which the properties are to be updated.
+
+            '
+          enum:
+          - TRACES
+          - SYNTHETIC
+          type: string
+        unit:
+          description: 'Unit of the attribute to be updated.  If unit is not specified, it defaults to NONE.
+
+            '
+          enum:
+          - NONE
+          - EPOCH_TIME_MS
+          - BYTES
+          - COUNT
+          - DURATION_MS
+          - TRACE_STATUS
+          - PERCENTAGE
+          type: string
+      required:
+      - attributeName
       type: object
     BulkDeActivationMetadata:
       description: 'Metadata about the bulk deactivation operation.  The bulk deactivation operation is atomic and binary.  If the processing of any of the attributes
@@ -626,6 +973,257 @@ components:
       - operationType
       - operationStatus
       type: object
+    BulkPinAttributeDetails:
+      description: 'Bulk request object containing the details of the attributes to be pinned.
+
+        '
+      properties:
+        attributeDetails:
+          description: 'Collection of objects containing the details about individual attribute to be pinned.
+
+            '
+          items:
+            $ref: '#/components/schemas/BulkPinAttributeDetail'
+          type: array
+      type: object
+    BulkUpdateNotesMetadata:
+      description: 'Metadata about the bulk update notes operation.  The bulk update notes operation is atomic and binary.  If the processing of any of the attributes
+
+        in the bulk update notes request results in a processing or validation error, then none of the notes in the update notes request are updated.
+
+        '
+      properties:
+        attributesNotesUpdated:
+          description: 'Total number attributes (both string and numeric) in TRACES namespace for which notes were updated.
+
+            '
+          type: integer
+        operationStatus:
+          description: 'Operation status of the bulk update notes operation.
+
+            SUCCESS - The bulk updates notes request has succeeded and all the attributes in the bulk update notes request have been updated with the provided notes.
+
+            The following are error statuses for the bulk update notes operation.
+
+            EMPTY_ATTRIBUTE_LIST - The bulk update notes request object was empty and did not contain any attributes for which notes had to be updated.
+
+            INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
+
+            in a processing error.
+
+            '
+          enum:
+          - SUCCESS
+          - EMPTY_ATTRIBUTE_LIST
+          - INVALID_BULK_REQUEST
+          type: string
+        operationType:
+          description: 'Type of operation.
+
+            '
+          enum:
+          - UPDATE_NOTES
+          type: string
+        syntheticAttributesPinned:
+          description: 'Total number attributes (both string and numeric) in SYNTHETIC namespace that were pinned.
+
+            '
+          type: integer
+      required:
+      - operationType
+      - operationStatus
+      - attributesNotesUpdated
+      type: object
+    BulkUpdateAttributeDetails:
+      description: 'Bulk request object containing the details of the attributes for which properties are to be updated.
+
+        '
+      properties:
+        attributeDetails:
+          description: 'Collection of objects containing the details about individual attribute for which properties are to be updated.
+
+            '
+          items:
+            $ref: '#/components/schemas/BulkUpdateAttributeDetail'
+          type: array
+      type: object
+    BulkPinMetadata:
+      description: 'Metadata about the bulk pin operation.  The bulk pin operation is atomic and binary.  If the processing of any of the attributes
+
+        in the bulk pin request results in a processing or validation error, then none of the attributes in the request are pinned.
+
+        '
+      properties:
+        attributesPinned:
+          description: 'Total number attributes (both string and numeric) in TRACES namespace that were pinned.
+
+            '
+          type: integer
+        operationStatus:
+          description: 'Operation status of the bulk pin operation.
+
+            SUCCESS - The bulk pin operation has succeeded and all the attributes in the bulk pin request have been pinned by this operation or pinned earlier.
+
+            The following are error statuses for the bulk pin operation.
+
+            EMPTY_ATTRIBUTE_LIST - The bulk pin request object was empty and did not contain any attributes to be pinned.
+
+            INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
+
+            in a processing error.
+
+            '
+          enum:
+          - SUCCESS
+          - EMPTY_ATTRIBUTE_LIST
+          - INVALID_BULK_REQUEST
+          type: string
+        operationType:
+          description: 'Type of operation.
+
+            '
+          enum:
+          - PIN
+          type: string
+        syntheticAttributesPinned:
+          description: 'Total number attributes (both string and numeric) in SYNTHETIC namespace that were pinned.
+
+            '
+          type: integer
+      required:
+      - operationType
+      - operationStatus
+      - attributesPinned
+      type: object
+    BulkPinStatus:
+      description: 'Response of a bulk attribute pin operation.
+
+        '
+      properties:
+        attributeStatuses:
+          description: 'We preserve the order of the attribute items from the bulk pin request in this collection.  The ith object in this collection represents the
+
+            bulk pin operation status of the ith object in the BulkPinAttributeDetails object in the Bulk pin request.  If the
+
+            bulk pin operation results in a processing error or a validation error, the operationStatus property in the  BulkPinMetadata object will
+
+            contain the appropriate bulk error status for the bulk operation.
+
+            '
+          items:
+            $ref: '#/components/schemas/AttributePinResponse'
+          type: array
+        bulkPinMetadata:
+          $ref: '#/components/schemas/BulkPinMetadata'
+      required:
+      - attributeStatuses
+      - bulkPinMetadata
+      type: object
+    AttributeUpdateNotesResponse:
+      description: 'Response of an individual attribute item in the bulk update notes operation.
+
+        '
+      properties:
+        attributeName:
+          description: 'Attribute for which notes were added to or edited in this bulk operation.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        attributeNameSpace:
+          default: TRACES
+          description: "Namespace of the attribute whose notes were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
+          enum:
+          - TRACES
+          - SYNTHETIC
+          type: string
+        attributeStatus:
+          description: 'Status of the attribute after this operation.  The attribute can have one of the following statuses after the update notes operation.  The attribute
+
+            can have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata
+
+            object.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.
+
+            The following are successful status values of individual attribute items in a bulk update notes operation.
+
+            ATTRIBUTE_NOTES_UPDATED - The attribute''s notes have been updated with the given notes.
+
+            DUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,
+
+            and call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.
+
+            The following values are error statuses and the bulk processing is stopped when the first error is encountered.
+
+            INVALID_ATTRIBUTE - The attribute is invalid.  The length of the notes is more than a 1000 characters.
+
+            ATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.
+
+            ATTRIBUTE_DOES_NOT_EXIST - Attribute was neither active nor pinned inactive.
+
+            NOTES_TOO_LONG - Attribute notes were too long (more than 1000 chars).
+
+            '
+          enum:
+          - ATTRIBUTE_NOTES_UPDATED
+          - DUPLICATE_ATTRIBUTE
+          - INVALID_ATTRIBUTE
+          - ATTRIBUTE_NOT_PROCESSED
+          - ATTRIBUTE_DOES_NOT_EXIST
+          - NOTES_TOO_LONG
+          type: string
+        notes:
+          description: 'Notes added to or edited for this attribute.
+
+            '
+          type: string
+        operationType:
+          description: 'Type of operation - UPDATE_NOTES.
+
+            '
+          enum:
+          - UPDATE_NOTES
+          type: string
+        timeUpdated:
+          description: 'Time when the attribute''s notes were updated.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - attributeName
+      - notes
+      - operationType
+      - attributeStatus
+      - timeUpdated
+      - attributeNameSpace
+      type: object
+    BulkDeActivateAttributeDetails:
+      description: 'Bulk request object containing the details of the attributes to be deactivated.
+
+        '
+      properties:
+        attributeDetails:
+          description: 'Collection of objects containing the details about individual attribute to be deactivated.
+
+            '
+          items:
+            $ref: '#/components/schemas/BulkDeActivateAttributeDetail'
+          type: array
+      type: object
+    BulkUnpinAttributeDetails:
+      description: 'Bulk request object containing the details of the attributes to be unpinned.
+
+        '
+      properties:
+        attributeDetails:
+          description: 'Collection of objects containing the details about individual attribute to be unpinned.
+
+            '
+          items:
+            $ref: '#/components/schemas/BulkUnpinAttributeDetail'
+          type: array
+      type: object
     Error:
       description: 'Details of an error that occurred.
 
@@ -644,6 +1242,199 @@ components:
       required:
       - code
       - message
+      type: object
+    AttributeUpdateResponse:
+      description: 'Response of an individual attribute item in the bulk update attribute operation.
+
+        '
+      properties:
+        attributeName:
+          description: 'Attribute for which properties were updated in this bulk operation.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        attributeNameSpace:
+          default: TRACES
+          description: "Namespace of the attribute whose properties were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
+          enum:
+          - TRACES
+          - SYNTHETIC
+          type: string
+        attributeStatus:
+          description: 'Status of the attribute after this operation.  The attribute can have one of the following statuses after the update operation.  The attribute
+
+            can have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata
+
+            object.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.
+
+            The following are successful status values of individual attribute items in a bulk update attribute operation.
+
+            ATTRIBUTE_UPDATED - The attribute''s properites have been updated with the given properties.
+
+            DUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,
+
+            and call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.
+
+            The following values are error statuses and the bulk processing is stopped when the first error is encountered.
+
+            INVALID_ATTRIBUTE - The attribute is invalid.
+
+            ATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.
+
+            ATTRIBUTE_DOES_NOT_EXIST - Attribute was neither active nor pinned inactive.
+
+            ATTRIBUTE_UPDATE_NOT_ALLOWED - Attribute update is not allowed as it is an in-built system attribute.
+
+            '
+          enum:
+          - ATTRIBUTE_UPDATED
+          - DUPLICATE_ATTRIBUTE
+          - INVALID_ATTRIBUTE
+          - ATTRIBUTE_NOT_PROCESSED
+          - ATTRIBUTE_DOES_NOT_EXIST
+          - ATTRIBUTE_UPDATE_NOT_ALLOWED
+          type: string
+        attributeType:
+          description: 'Type of the attribute.
+
+            '
+          enum:
+          - NUMERIC
+          - STRING
+          type: string
+        notes:
+          description: 'Notes for the attribute.
+
+            '
+          type: string
+        operationType:
+          description: 'Type of operation - UPDATE_ATTRIBUTE_PROPERTIES.
+
+            '
+          enum:
+          - UPDATE_ATTRIBUTE_PROPERTIES
+          type: string
+        timeUpdated:
+          description: 'Time when the attribute''s properties were updated.
+
+            '
+          format: date-time
+          type: string
+        unit:
+          description: 'Unit updated for this attribute.  If unit is not specified, it defaults to NONE.
+
+            '
+          enum:
+          - NONE
+          - EPOCH_TIME_MS
+          - BYTES
+          - COUNT
+          - DURATION_MS
+          - TRACE_STATUS
+          - PERCENTAGE
+          type: string
+      required:
+      - attributeName
+      - attributeNameSpace
+      - timeUpdated
+      type: object
+    BulkUpdateAttributeMetadata:
+      description: 'Metadata about the bulk attribute update operation.  The bulk attribute update operation is atomic and binary.  If the processing of any of the attributes
+
+        in the bulk attribute update request results in a processing or validation error, then none of the attributes updated.
+
+        '
+      properties:
+        attributesUpdated:
+          description: 'Total number attributes (both string and numeric) in TRACES namespace for which properties were updated.
+
+            '
+          type: integer
+        operationStatus:
+          description: 'Operation status of the bulk update attribute operation.
+
+            SUCCESS - The bulk attribute update request has succeeded and all the attributes in the request have been updated.
+
+            The following are error statuses for the bulk update attributes operation.
+
+            EMPTY_ATTRIBUTE_LIST - The bulk update attributes request object was empty and did not contain any attributes for which properties had to be updated.
+
+            INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
+
+            in a processing error.
+
+            '
+          enum:
+          - SUCCESS
+          - EMPTY_ATTRIBUTE_LIST
+          - INVALID_BULK_REQUEST
+          type: string
+        operationType:
+          description: 'Type of operation.
+
+            '
+          enum:
+          - UPDATE_ATTRIBUTE_PROPERTIES
+          type: string
+        syntheticAttributesUpdated:
+          description: 'Total number attributes (both string and numeric) in SYNTHETIC namespace for which properties were updated.
+
+            '
+          type: integer
+      required:
+      - operationType
+      - operationStatus
+      - attributesUpdated
+      type: object
+    BulkUnpinMetadata:
+      description: 'Metadata about the bulk unpin operation.  The bulk unpin operation is atomic and binary.  If the processing of any of the attributes
+
+        in the bulk unpin request results in a processing or validation error, then none of the attributes in the request are unpinned.
+
+        '
+      properties:
+        attributesUnpinned:
+          description: 'Total number attributes (both string and numeric) in TRACES namespace that were unpinned.
+
+            '
+          type: integer
+        operationStatus:
+          description: 'Operation status of the bulk unpin operation.
+
+            SUCCESS - The bulk unpin operation has succeeded and all the attributes in the bulk unpin request have been unpinned by this operation.
+
+            The following are error statuses for the bulk unpin operation.
+
+            EMPTY_ATTRIBUTE_LIST - The bulk unpin request object was empty and did not contain any attributes to be unpinned.
+
+            INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
+
+            in a processing error.
+
+            '
+          enum:
+          - SUCCESS
+          - EMPTY_ATTRIBUTE_LIST
+          - INVALID_BULK_REQUEST
+          type: string
+        operationType:
+          description: 'Type of operation.
+
+            '
+          enum:
+          - UNPIN
+          type: string
+        syntheticAttributesUnpinned:
+          description: 'Total number attributes (both string and numeric) in SYNTHETIC namespace that were unpinned.
+
+            '
+          type: integer
+      required:
+      - operationType
+      - operationStatus
+      - attributesUnpinned
       type: object
     AttributeResponse:
       description: 'Response of an individual attribute item in the bulk activate or deactivate operation.
@@ -767,98 +1558,6 @@ components:
       - timeUpdated
       - attributeNameSpace
       type: object
-    BulkUpdateAttributeNotesDetails:
-      description: 'Bulk request object containing the details of the attributes for which notes are to be updated.
-
-        '
-      properties:
-        attributeDetails:
-          description: 'Collection of objects containing the details about individual attribute for which notes are to be updated.
-
-            '
-          items:
-            $ref: '#/components/schemas/BulkUpdateAttributeNotesDetail'
-          type: array
-      type: object
-    AttributeUpdateNotesResponse:
-      description: 'Response of an individual attribute item in the bulk update notes operation.
-
-        '
-      properties:
-        attributeName:
-          description: 'Attribute for which notes were added to or edited in this bulk operation.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        attributeNameSpace:
-          default: TRACES
-          description: "Namespace of the attribute whose notes were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
-          enum:
-          - TRACES
-          - SYNTHETIC
-          type: string
-        attributeStatus:
-          description: 'Status of the attribute after this operation.  The attribute can have one of the following statuses after the update notes operation.  The attribute
-
-            can have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata
-
-            object.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.
-
-            The following are successful status values of individual attribute items in a bulk update notes operation.
-
-            ATTRIBUTE_NOTES_UPDATED - The attribute''s notes have been updated with the given notes.
-
-            DUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,
-
-            and call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.
-
-            The following values are error statuses and the bulk processing is stopped when the first error is encountered.
-
-            INVALID_ATTRIBUTE - The attribute is invalid.  The length of the notes is more than a 1000 characters.
-
-            ATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.
-
-            ATTRIBUTE_DOES_NOT_EXIST - Attribute was neither active nor pinned inactive.
-
-            NOTES_TOO_LONG - Attribute notes were too long (more than 1000 chars).
-
-            '
-          enum:
-          - ATTRIBUTE_NOTES_UPDATED
-          - DUPLICATE_ATTRIBUTE
-          - INVALID_ATTRIBUTE
-          - ATTRIBUTE_NOT_PROCESSED
-          - ATTRIBUTE_DOES_NOT_EXIST
-          - NOTES_TOO_LONG
-          type: string
-        notes:
-          description: 'Notes added to or edited for this attribute.
-
-            '
-          type: string
-        operationType:
-          description: 'Type of operation - UPDATE_NOTES.
-
-            '
-          enum:
-          - UPDATE_NOTES
-          type: string
-        timeUpdated:
-          description: 'Time when the attribute''s notes were updated.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - attributeName
-      - notes
-      - operationType
-      - attributeStatus
-      - timeUpdated
-      - attributeNameSpace
-      type: object
     BulkUpdateAttributeNotesDetail:
       description: 'Object that contains the details about a single attribute in the bulk request for which notes are to be updated.
 
@@ -888,6 +1587,39 @@ components:
       - attributeName
       - notes
       type: object
+    AutoActivateToggleStatus:
+      description: 'Response of a auto-activate toggle operation.
+
+        '
+      properties:
+        dataKey:
+          description: 'Data key type for which auto-activate needs needs to be turned on or off.
+
+            '
+          enum:
+          - PRIVATE_DATA_KEY
+          - PUBLIC_DATA_KEY
+          type: string
+        state:
+          description: 'State of autoactivation in this APM Domain.  If "ON" auto-activate is set to true, if "OFF" auto-activate is set to false.
+
+            '
+          enum:
+          - true
+          - false
+          type: string
+        status:
+          description: 'Status of this operation.
+
+            '
+          enum:
+          - SUCCESS
+          type: string
+      required:
+      - status
+      - state
+      - dataKey
+      type: object
     BulkActivationStatus:
       description: 'Response of a bulk attribute activation operation.
 
@@ -911,381 +1643,6 @@ components:
       required:
       - attributeStatuses
       - bulkActivationMetadata
-      type: object
-    AttributePinResponse:
-      description: 'Response of an individual attribute item in the bulk pin operation.
-
-        '
-      properties:
-        attributeName:
-          description: 'Attribute that was pinned by this bulk operation.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        attributeNameSpace:
-          default: TRACES
-          description: "Namespace of the attribute whose properties were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
-          enum:
-          - TRACES
-          - SYNTHETIC
-          type: string
-        attributeStatus:
-          description: 'Status of the attribute after this operation.  The attribute can have one of the following statuses after the pin operation.  The attribute
-
-            can have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata
-
-            object.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.
-
-            The following are successful status values of individual attribute items in a bulk attribute pin operation.
-
-            ATTRIBUTE_PINNED - The attribute is marked pinned and associated notes have been added.
-
-            ATTRIBUTE_ALREADY_PINNED - The caller is trying to pin an attribute that has already been pinned.
-
-            DUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,
-
-            and call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.
-
-            The following values are error statuses and the bulk processing is stopped when the first error is encountered.
-
-            PIN_NOT_ALLOWED - The caller has asked to pin an active attribute which is not allowed.
-
-            INVALID_ATTRIBUTE - The attribute is invalid.
-
-            ATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.
-
-            '
-          enum:
-          - ATTRIBUTE_ALREADY_PINNED
-          - ATTRIBUTE_PINNED
-          - PIN_NOT_ALLOWED
-          - DUPLICATE_ATTRIBUTE
-          - INVALID_ATTRIBUTE
-          - ATTRIBUTE_NOT_PROCESSED
-          type: string
-        notes:
-          description: 'Notes added to this attribute.
-
-            '
-          type: string
-        operationType:
-          description: 'Type of operation - pin.
-
-            '
-          enum:
-          - PIN
-          type: string
-        timeUpdated:
-          description: 'Time when the attribute was activated or deactivated.  Note that ingest might not have picked up the changes even if this time has elapsed.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - attributeName
-      - notes
-      - operationType
-      - attributeStatus
-      - timeUpdated
-      - attributeNameSpace
-      type: object
-    BulkDeActivateAttributeDetails:
-      description: 'Bulk request object containing the details of the attributes to be deactivated.
-
-        '
-      properties:
-        attributeDetails:
-          description: 'Collection of objects containing the details about individual attribute to be deactivated.
-
-            '
-          items:
-            $ref: '#/components/schemas/BulkDeActivateAttributeDetail'
-          type: array
-      type: object
-    BulkUpdateAttributeStatus:
-      description: 'Response of a bulk update attribute operation.
-
-        '
-      properties:
-        attributeStatuses:
-          description: 'We preserve the order of the attribute items from the bulk update attribute request in this collection.  The ith object in this collection represents the
-
-            bulk update attribute operation status of the ith object in the BulkUpdateAttributeDetails object in the Bulk update attribute request.  If the
-
-            bulk update attribute operation results in a processing error or a validation error, the operationStatus property in the  BulkUpdateAttributeMetadata object will
-
-            contain the appropriate bulk error status for the bulk operation.
-
-            '
-          items:
-            $ref: '#/components/schemas/AttributeUpdateResponse'
-          type: array
-        bulkUpdateAttributeMetadata:
-          $ref: '#/components/schemas/BulkUpdateAttributeMetadata'
-      required:
-      - attributeStatuses
-      - bulkUpdateAttributeMetadata
-      type: object
-    BulkUpdateNotesStatus:
-      description: 'Response of a bulk update notes operation.
-
-        '
-      properties:
-        attributeStatuses:
-          description: 'We preserve the order of the attribute items from the bulk update notes request in this collection.  The ith object in this collection represents the
-
-            bulk update notes operation status of the ith object in the BulkUpdateAttributeNotesDetails object in the Bulk update notes request.  If the
-
-            bulk update notes operation results in a processing error or a validation error, the operationStatus property in the  BulkUpdateNotesMetadata object will
-
-            contain the appropriate bulk error status for the bulk operation.
-
-            '
-          items:
-            $ref: '#/components/schemas/AttributeUpdateNotesResponse'
-          type: array
-        bulkUpdateNotesMetadata:
-          $ref: '#/components/schemas/BulkUpdateNotesMetadata'
-      required:
-      - attributeStatuses
-      - bulkUpdateNotesMetadata
-      type: object
-    AttributeUpdateResponse:
-      description: 'Response of an individual attribute item in the bulk update attribute operation.
-
-        '
-      properties:
-        attributeName:
-          description: 'Attribute for which properties were updated in this bulk operation.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        attributeNameSpace:
-          default: TRACES
-          description: "Namespace of the attribute whose properties were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
-          enum:
-          - TRACES
-          - SYNTHETIC
-          type: string
-        attributeStatus:
-          description: 'Status of the attribute after this operation.  The attribute can have one of the following statuses after the update operation.  The attribute
-
-            can have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata
-
-            object.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.
-
-            The following are successful status values of individual attribute items in a bulk update attribute operation.
-
-            ATTRIBUTE_UPDATED - The attribute''s properites have been updated with the given properties.
-
-            DUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,
-
-            and call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.
-
-            The following values are error statuses and the bulk processing is stopped when the first error is encountered.
-
-            INVALID_ATTRIBUTE - The attribute is invalid.
-
-            ATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.
-
-            ATTRIBUTE_DOES_NOT_EXIST - Attribute was neither active nor pinned inactive.
-
-            ATTRIBUTE_UPDATE_NOT_ALLOWED - Attribute update is not allowed as it is an in-built system attribute.
-
-            '
-          enum:
-          - ATTRIBUTE_UPDATED
-          - DUPLICATE_ATTRIBUTE
-          - INVALID_ATTRIBUTE
-          - ATTRIBUTE_NOT_PROCESSED
-          - ATTRIBUTE_DOES_NOT_EXIST
-          - ATTRIBUTE_UPDATE_NOT_ALLOWED
-          type: string
-        attributeType:
-          description: 'Type of the attribute.
-
-            '
-          enum:
-          - NUMERIC
-          - STRING
-          type: string
-        notes:
-          description: 'Notes for the attribute.
-
-            '
-          type: string
-        operationType:
-          description: 'Type of operation - UPDATE_ATTRIBUTE_PROPERTIES.
-
-            '
-          enum:
-          - UPDATE_ATTRIBUTE_PROPERTIES
-          type: string
-        timeUpdated:
-          description: 'Time when the attribute''s properties were updated.
-
-            '
-          format: date-time
-          type: string
-        unit:
-          description: 'Unit updated for this attribute.  If unit is not specified, it defaults to NONE.
-
-            '
-          enum:
-          - NONE
-          - EPOCH_TIME_MS
-          - BYTES
-          - COUNT
-          - DURATION_MS
-          - TRACE_STATUS
-          - PERCENTAGE
-          type: string
-      required:
-      - attributeName
-      - attributeNameSpace
-      - timeUpdated
-      type: object
-    BulkActivationMetadata:
-      description: 'Metadata about the bulk activation operation.  The bulk activation operation is atomic and binary.  If the processing of any of the attributes in the bulk
-
-        activation request results in a processing or validation error, then none of the attributes in the request are activated.  The bulk activation request succeeds
-
-        only when all the attributes in the bulk activation request are processed and they get a successful attributeStatus back.
-
-        '
-      properties:
-        availableNumericAttributes:
-          description: 'Total number of free slots available to activate numeric attributes in the TRACES namespace in the APM Domain.  Note that if a bulk request has succeeded, this
-
-            number reflects the total number of free slots available for activation of additional numeric attributes in the TRACES namespace in the APM Domain.
-
-            '
-          type: integer
-        availableStringAttributes:
-          description: 'Total number of free slots available to activate string attributes in the TRACES namespace in the APM Domain.  Note that if a bulk request has succeeded, this
-
-            number reflects the total number of free slots available for activation of additional string attributes in the TRACES namespace in the APM Domain.
-
-            '
-          type: integer
-        availableSyntheticNumericAttributes:
-          description: 'Total number of free slots available to activate numeric attributes in the SYNTHETIC namespace in the APM Domain.  Note that if a bulk request has succeeded, this
-
-            number reflects the total number of free synthetic slots available for activation of additional numeric attributes in the SYNTHETIC namespace in the APM Domain.
-
-            '
-          type: integer
-        availableSyntheticStringAttributes:
-          description: 'Total number of free slots available to activate string attributes in the SYNTHETIC namespace in the APM Domain.  Note that if a bulk request has succeeded, this
-
-            number reflects the total number of free synthetic slots available for activation of additional string attributes in the SYNTHETIC namespace in the APM Domain.
-
-            '
-          type: integer
-        numericAttributesActivated:
-          description: 'Total number of numeric attributes in TRACES namespace that were activated.
-
-            '
-          type: integer
-        operationStatus:
-          description: 'Operation status of the bulk activation operation.  The bulk  activation operation could have either a success or an error status as defined below.
-
-            The following is a success status for the bulk activation operation.
-
-            SUCCESS - The bulk activation operation has succeeded and all the attributes in the bulk activation request have been activated by this operation or activated earlier.
-
-            The following are error statuses for the bulk activation operation.  Note that none of the attributes (string or numeric) in the bulk request have been activated by this bulk
-
-            activation operation if any of the below statuses.
-
-            EMPTY_ATTRIBUTE_LIST - The bulk activation request object was empty and did not contain any attributes to be activated.
-
-            NUMERIC_ATTRIBUTE_LIMIT_EXCEEDED - The number of numeric attributes in the bulk request exceeded the maximum limit (100) of numeric attributes that could be activated in the APM Domain.
-
-            STRING_ATTRIBUTE_LIMIT_EXCEEDED - The number of string attributes in the bulk request exceeded the maximum limit (700) of string attributes that could be activated in the APM Domain.
-
-            INSUFFICIENT_STRING_SPACE - There are not enough free slots available in the APM Domain to activate the string attributes present in the bulk request.
-
-            INSUFFICIENT_NUMERIC_SPACE - There are not enough free slots available in the APM Domain to activate the numeric attributes present in the bulk request.
-
-            INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
-
-            in a processing error.
-
-            '
-          enum:
-          - SUCCESS
-          - EMPTY_ATTRIBUTE_LIST
-          - NUMERIC_ATTRIBUTE_LIMIT_EXCEEDED
-          - STRING_ATTRIBUTE_LIMIT_EXCEEDED
-          - INSUFFICIENT_STRING_SPACE
-          - INSUFFICIENT_NUMERIC_SPACE
-          - INVALID_BULK_REQUEST
-          type: string
-        operationType:
-          description: 'Type of operation.
-
-            '
-          enum:
-          - ACTIVATE
-          type: string
-        stringAttributesActivated:
-          description: 'Total number of string attributes in TRACES namespace that were activated.
-
-            '
-          type: integer
-        syntheticNumericAttributesActivated:
-          description: 'Total number of numeric attributes in SYNTHETIC namespace that were activated.
-
-            '
-          type: integer
-        syntheticStringAttributesActivated:
-          description: 'Total number of string attributes in SYNTHETIC namespace that were activated.
-
-            '
-          type: integer
-      required:
-      - operationType
-      - operationStatus
-      type: object
-    BulkPinAttributeDetail:
-      description: 'Object that contains the details about a single attribute in the bulk request to be pinned.
-
-        '
-      properties:
-        attributeName:
-          description: 'Name of the attribute to be pinned.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        attributeNameSpace:
-          default: TRACES
-          description: "Namespace of the attribute to be pinned.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
-          enum:
-          - TRACES
-          - SYNTHETIC
-          type: string
-      required:
-      - attributeName
-      type: object
-    BulkUnpinAttributeDetails:
-      description: 'Bulk request object containing the details of the attributes to be unpinned.
-
-        '
-      properties:
-        attributeDetails:
-          description: 'Collection of objects containing the details about individual attribute to be unpinned.
-
-            '
-          items:
-            $ref: '#/components/schemas/BulkUnpinAttributeDetail'
-          type: array
       type: object
     AttributeUnpinResponse:
       description: 'Response of an individual attribute item in the bulk unpin operation.
@@ -1357,385 +1714,6 @@ components:
       - timeUpdated
       - attributeNameSpace
       type: object
-    AutoActivateStatus:
-      description: 'Status of autoactivation for the given data key in the APM Domain.
-
-        '
-      properties:
-        dataKey:
-          description: 'Data key type for which auto-activate needs needs to be turned on or off.
-
-            '
-          enum:
-          - PRIVATE_DATA_KEY
-          - PUBLIC_DATA_KEY
-          type: string
-        state:
-          description: 'State of autoactivation in this APM Domain.  If "ON" auto-activate is set to true, if "OFF" auto-activate is set to false.
-
-            '
-          enum:
-          - true
-          - false
-          type: string
-      required:
-      - state
-      - dataKey
-      type: object
-    BulkActivateAttributeDetail:
-      description: 'Object that contains the details about a single attribute in the bulk request to be activated.  The attributeNameSpace and
-
-        unit are optional parameters, and the attributeNameSpace will default to TRACES if it is not passed in.
-
-        '
-      properties:
-        attributeName:
-          description: 'Name of the attribute to be activated.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        attributeNameSpace:
-          default: TRACES
-          description: "Namespace of the attribute to be activated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
-          enum:
-          - TRACES
-          - SYNTHETIC
-          type: string
-        attributeType:
-          description: 'Type of the attribute to be activated.
-
-            '
-          enum:
-          - NUMERIC
-          - STRING
-          type: string
-        unit:
-          description: 'Unit of the attribute to be updated.  If unit is not specified, it defaults to NONE.
-
-            '
-          enum:
-          - NONE
-          - EPOCH_TIME_MS
-          - BYTES
-          - COUNT
-          - DURATION_MS
-          - TRACE_STATUS
-          - PERCENTAGE
-          type: string
-      required:
-      - attributeName
-      - attributeType
-      type: object
-    BulkUnpinMetadata:
-      description: 'Metadata about the bulk unpin operation.  The bulk unpin operation is atomic and binary.  If the processing of any of the attributes
-
-        in the bulk unpin request results in a processing or validation error, then none of the attributes in the request are unpinned.
-
-        '
-      properties:
-        attributesUnpinned:
-          description: 'Total number attributes (both string and numeric) in TRACES namespace that were unpinned.
-
-            '
-          type: integer
-        operationStatus:
-          description: 'Operation status of the bulk unpin operation.
-
-            SUCCESS - The bulk unpin operation has succeeded and all the attributes in the bulk unpin request have been unpinned by this operation.
-
-            The following are error statuses for the bulk unpin operation.
-
-            EMPTY_ATTRIBUTE_LIST - The bulk unpin request object was empty and did not contain any attributes to be unpinned.
-
-            INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
-
-            in a processing error.
-
-            '
-          enum:
-          - SUCCESS
-          - EMPTY_ATTRIBUTE_LIST
-          - INVALID_BULK_REQUEST
-          type: string
-        operationType:
-          description: 'Type of operation.
-
-            '
-          enum:
-          - UNPIN
-          type: string
-        syntheticAttributesUnpinned:
-          description: 'Total number attributes (both string and numeric) in SYNTHETIC namespace that were unpinned.
-
-            '
-          type: integer
-      required:
-      - operationType
-      - operationStatus
-      - attributesUnpinned
-      type: object
-    BulkActivateAttributeDetails:
-      description: 'Bulk request object containing the details of the attributes to be activated.
-
-        '
-      properties:
-        attributeDetails:
-          description: 'Collection of objects containing the details about individual attribute to be activated.
-
-            '
-          items:
-            $ref: '#/components/schemas/BulkActivateAttributeDetail'
-          type: array
-      type: object
-    BulkUpdateNotesMetadata:
-      description: 'Metadata about the bulk update notes operation.  The bulk update notes operation is atomic and binary.  If the processing of any of the attributes
-
-        in the bulk update notes request results in a processing or validation error, then none of the notes in the update notes request are updated.
-
-        '
-      properties:
-        attributesNotesUpdated:
-          description: 'Total number attributes (both string and numeric) in TRACES namespace for which notes were updated.
-
-            '
-          type: integer
-        operationStatus:
-          description: 'Operation status of the bulk update notes operation.
-
-            SUCCESS - The bulk updates notes request has succeeded and all the attributes in the bulk update notes request have been updated with the provided notes.
-
-            The following are error statuses for the bulk update notes operation.
-
-            EMPTY_ATTRIBUTE_LIST - The bulk update notes request object was empty and did not contain any attributes for which notes had to be updated.
-
-            INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
-
-            in a processing error.
-
-            '
-          enum:
-          - SUCCESS
-          - EMPTY_ATTRIBUTE_LIST
-          - INVALID_BULK_REQUEST
-          type: string
-        operationType:
-          description: 'Type of operation.
-
-            '
-          enum:
-          - UPDATE_NOTES
-          type: string
-        syntheticAttributesPinned:
-          description: 'Total number attributes (both string and numeric) in SYNTHETIC namespace that were pinned.
-
-            '
-          type: integer
-      required:
-      - operationType
-      - operationStatus
-      - attributesNotesUpdated
-      type: object
-    BulkUnpinAttributeDetail:
-      description: 'Object that contains the details about a single attribute in the bulk request to be unpinned.
-
-        '
-      properties:
-        attributeName:
-          description: 'Name of the attribute to be unpinned.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        attributeNameSpace:
-          default: TRACES
-          description: "Namespace of the attribute to be unpinned.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
-          enum:
-          - TRACES
-          - SYNTHETIC
-          type: string
-      required:
-      - attributeName
-      type: object
-    BulkPinMetadata:
-      description: 'Metadata about the bulk pin operation.  The bulk pin operation is atomic and binary.  If the processing of any of the attributes
-
-        in the bulk pin request results in a processing or validation error, then none of the attributes in the request are pinned.
-
-        '
-      properties:
-        attributesPinned:
-          description: 'Total number attributes (both string and numeric) in TRACES namespace that were pinned.
-
-            '
-          type: integer
-        operationStatus:
-          description: 'Operation status of the bulk pin operation.
-
-            SUCCESS - The bulk pin operation has succeeded and all the attributes in the bulk pin request have been pinned by this operation or pinned earlier.
-
-            The following are error statuses for the bulk pin operation.
-
-            EMPTY_ATTRIBUTE_LIST - The bulk pin request object was empty and did not contain any attributes to be pinned.
-
-            INVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted
-
-            in a processing error.
-
-            '
-          enum:
-          - SUCCESS
-          - EMPTY_ATTRIBUTE_LIST
-          - INVALID_BULK_REQUEST
-          type: string
-        operationType:
-          description: 'Type of operation.
-
-            '
-          enum:
-          - PIN
-          type: string
-        syntheticAttributesPinned:
-          description: 'Total number attributes (both string and numeric) in SYNTHETIC namespace that were pinned.
-
-            '
-          type: integer
-      required:
-      - operationType
-      - operationStatus
-      - attributesPinned
-      type: object
-    AutoActivateToggleStatus:
-      description: 'Response of a auto-activate toggle operation.
-
-        '
-      properties:
-        dataKey:
-          description: 'Data key type for which auto-activate needs needs to be turned on or off.
-
-            '
-          enum:
-          - PRIVATE_DATA_KEY
-          - PUBLIC_DATA_KEY
-          type: string
-        state:
-          description: 'State of autoactivation in this APM Domain.  If "ON" auto-activate is set to true, if "OFF" auto-activate is set to false.
-
-            '
-          enum:
-          - true
-          - false
-          type: string
-        status:
-          description: 'Status of this operation.
-
-            '
-          enum:
-          - SUCCESS
-          type: string
-      required:
-      - status
-      - state
-      - dataKey
-      type: object
-    BulkDeActivateAttributeDetail:
-      description: 'Object that contains the details about a single attribute to be deactivated.
-
-        '
-      properties:
-        attributeName:
-          description: 'Name of the attribute to be deactivated.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        attributeNameSpace:
-          default: TRACES
-          description: "Namespace of the attribute to be deactivated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
-          enum:
-          - TRACES
-          - SYNTHETIC
-          type: string
-      required:
-      - attributeName
-      type: object
-    BulkUnpinStatus:
-      description: 'Response of a bulk attribute unpin operation.
-
-        '
-      properties:
-        attributeStatuses:
-          description: 'We preserve the order of the attribute items from the bulk unpin request in this collection.  The ith object in this collection represents the
-
-            bulk unpin operation status of the ith object in the BulkUnpinAttributeDetails object in the Bulk unpin request.  If the
-
-            bulk unpin operation results in a processing error or a validation error, the operationStatus property in the  BulkUnpinMetadata object will
-
-            contain the appropriate bulk error status for the bulk operation.
-
-            '
-          items:
-            $ref: '#/components/schemas/AttributeUnpinResponse'
-          type: array
-        bulkUnpinMetadata:
-          $ref: '#/components/schemas/BulkUnpinMetadata'
-      required:
-      - attributeStatuses
-      - bulkUnpinMetadata
-      type: object
-    BulkUpdateAttributeDetail:
-      description: 'Object that contains the details about a single attribute in the bulk request for which properties are to be updated.
-
-        '
-      properties:
-        attributeName:
-          description: 'Name of the attribute for which notes are to be updated.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        attributeNameSpace:
-          default: TRACES
-          description: 'Namespace of the attribute for which the properties are to be updated.
-
-            '
-          enum:
-          - TRACES
-          - SYNTHETIC
-          type: string
-        unit:
-          description: 'Unit of the attribute to be updated.  If unit is not specified, it defaults to NONE.
-
-            '
-          enum:
-          - NONE
-          - EPOCH_TIME_MS
-          - BYTES
-          - COUNT
-          - DURATION_MS
-          - TRACE_STATUS
-          - PERCENTAGE
-          type: string
-      required:
-      - attributeName
-      type: object
-    BulkPinAttributeDetails:
-      description: 'Bulk request object containing the details of the attributes to be pinned.
-
-        '
-      properties:
-        attributeDetails:
-          description: 'Collection of objects containing the details about individual attribute to be pinned.
-
-            '
-          items:
-            $ref: '#/components/schemas/BulkPinAttributeDetail'
-          type: array
-      type: object
     BulkDeActivationStatus:
       description: 'Response of a bulk attribute deactivation operation.
 
@@ -1760,16 +1738,29 @@ components:
       - attributeStatuses
       - bulkDeActivationMetadata
       type: object
-  parameters:
-    ApmDomainIdQueryParam:
-      description: 'The APM Domain ID for the intended request.
+    BulkPinAttributeDetail:
+      description: 'Object that contains the details about a single attribute in the bulk request to be pinned.
 
         '
-      in: query
-      name: apmDomainId
-      required: true
-      schema:
-        type: string
+      properties:
+        attributeName:
+          description: 'Name of the attribute to be pinned.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        attributeNameSpace:
+          default: TRACES
+          description: "Namespace of the attribute to be pinned.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n"
+          enum:
+          - TRACES
+          - SYNTHETIC
+          type: string
+      required:
+      - attributeName
+      type: object
+  parameters:
     AutoActivateToggleOperationQueryParam:
       description: 'Autoactivate toggle switch.  Set to true to turn on auto-activate.  Set to false to turn off auto-activate.
 
@@ -1779,6 +1770,25 @@ components:
       required: true
       schema:
         type: boolean
+    ApmDomainIdQueryParam:
+      description: 'The APM Domain ID for the intended request.
+
+        '
+      in: query
+      name: apmDomainId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request.  If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
     DataKeyTypeQueryParam:
       description: 'Data key type for which auto-activate needs to be turned on or off.
 
@@ -1791,16 +1801,6 @@ components:
         enum:
         - PRIVATE_DATA_KEY
         - PUBLIC_DATA_KEY
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request.  If you need to contact Oracle about a
-
-        particular request, please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   responses:
     DefaultError:
       description: 'Unknown Error

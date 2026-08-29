@@ -1922,52 +1922,6 @@ paths:
       x-related-resource: '#/definitions/SoftwareSource'
 components:
   schemas:
-    ModuleSummary:
-      description: Provides summary information about a module which is provided by a software source.
-      properties:
-        name:
-          description: 'The name of the module.
-
-            '
-          type: string
-        softwareSourceId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
-
-            '
-          type: string
-        streams:
-          description: List of stream names.
-          items:
-            type: string
-          type: array
-      required:
-      - name
-      - softwareSourceId
-      type: object
-    SoftwarePackageCollection:
-      description: A set of software packages returned for the [ListSoftwarePackages](#/en/osmh/latest/SoftwareSource/ListSoftwarePackages) operation or [ListAllSoftwarePackages](#/en/osmh/latest/SoftwareSource/ListAllSoftwarePackages) operation.
-      properties:
-        items:
-          description: List of software packages.
-          items:
-            $ref: '#/components/schemas/SoftwarePackageSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"displayName\": \"acl\",\n      \"name\": \"acl-2.2.53-3.el8.x86_64.rpm\",\n      \"type\": \"RPM\",\n      \"version\": \"2.2.53-3.el8\",\n      \"architecture\": \"X86_64\",\n      \"checksum\": \"&lt;check_sum&gt\",\n      \"checksumType\": \"sha256\",\n      \"isLatest\": true,\n      \"softwareSources\": [\n        {\n          \"id\": \"ocid1.osmhsoftwaresource.oc1.iad..exampleuniqueID\",\n          \"displayName\": \"ol8_baseos_latest-x86_64\",\n          \"description\": \"Oracle Linux 8 BaseOS Latest  (x86_64)\",\n          \"softwareSourceType\": \"VENDOR\",\n          \"isMandatoryForAutonomousLinux\": true\n        },\n        {\n          \"id\": \"ocid1.osmhsoftwaresource.oc1.iad.exampleuniqueID2\",\n          \"displayName\": \"ol8_u10_baseos_base-x86_64\",\n          \"description\": \"Oracle Linux 8.10 BaseOS (x86_64)\",\n          \"softwareSourceType\": \"VENDOR\",\n          \"isMandatoryForAutonomousLinux\": false\n        }\n      ],\n      \"osFamilies\": [\n        \"ORACLE_LINUX_8\"\n      ]\n    }\n  ]\n}\n"
-    Error:
-      description: Provides the information for an error.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     SoftwareSourceAvailability:
       description: An object that defines the [OCID](/iaas/Content/General/Concepts/identifiers.htm) and the availability of a vendor software source.
       properties:
@@ -1995,17 +1949,427 @@ components:
       required:
       - softwareSourceId
       type: object
-    SoftwareSourceRepoCollection:
-      description: A set of software sources returned for the ListAvailableSoftwareSourcesToAddInCompartment operation.
+    SoftwarePackageDependency:
+      description: Identifies the dependency for a software package.
+      properties:
+        dependency:
+          description: The software package's dependency.
+          type: string
+        dependencyModifier:
+          description: The modifier for the dependency.
+          type: string
+        dependencyType:
+          description: The type of the dependency.
+          type: string
+    PackageGroupSummary:
+      description: The yum or DNF package group that is associated with a software source.
+      properties:
+        description:
+          description: Description of the package group.
+          type: string
+        displayOrder:
+          description: Indicates the order to display category or environment.
+          type: integer
+        groupType:
+          description: Indicates if this is a group, category or environment.
+          type: string
+          x-obmcs-enumref: '#/definitions/PackageGroup/groupType'
+        id:
+          description: Package group identifier.
+          type: string
+        isDefault:
+          description: Indicates if this package group is the default.
+          type: boolean
+        isUserVisible:
+          description: Indicates if this package group is visible to users.
+          type: boolean
+        name:
+          description: Package group name.
+          type: string
+        repositories:
+          description: The repository IDs of the package group.
+          items:
+            type: string
+          maxItems: 255
+          type: array
+      required:
+      - id
+      - name
+    SoftwarePackage:
+      description: An object that defines a software package.
+      properties:
+        architecture:
+          description: The architecture for which this software was built
+          enum:
+          - I386
+          - I686
+          - AARCH64
+          - X86_64
+          - SRC
+          - NOARCH
+          - OTHER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SoftwarePackageArchitecture'
+        checksum:
+          description: Checksum of the package.
+          type: string
+        checksumType:
+          description: Type of the checksum.
+          type: string
+        dependencies:
+          description: List of dependencies for the software package.
+          items:
+            $ref: '#/components/schemas/SoftwarePackageDependency'
+          type: array
+        description:
+          description: Description of the package.
+          type: string
+        displayName:
+          description: Package name.
+          type: string
+        files:
+          description: List of files for the software package.
+          items:
+            $ref: '#/components/schemas/SoftwarePackageFile'
+          type: array
+        isLatest:
+          description: Indicates whether this package is the latest version.
+          type: boolean
+        lastModifiedDate:
+          description: The date and time the package was last modified (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+          type: string
+        name:
+          description: Unique identifier for the package. Note that this is not an OCID.
+          type: string
+        osFamilies:
+          description: The OS families the package belongs to.
+          items:
+            $ref: '#/components/schemas/OsFamily'
+          maxItems: 100
+          type: array
+        sizeInBytes:
+          description: Size of the package in bytes.
+          format: int64
+          type: integer
+        softwareSources:
+          description: List of software sources that provide the software package. This property is deprecated and it will be removed in a future API release.
+          items:
+            $ref: '#/components/schemas/SoftwareSourceDetails'
+          maxItems: 255
+          type: array
+        type:
+          description: Type of the package.
+          type: string
+        version:
+          description: Version of the package.
+          type: string
+      required:
+      - displayName
+      - type
+      - version
+      - name
+      x-example: "{\n  \"displayName\": \"audit-libs\",\n  \"name\": \"audit-libs-3.1.2-1.0.1.el8.x86_64.rpm\",\n  \"type\": \"RPM\",\n  \"version\": \"3.1.2-1.0.1.el8\",\n  \"architecture\": \"X86_64\",\n  \"lastModifiedDate\": \"Thu Sep 12 20:52:25 UTC 2024\",\n  \"checksum\": \"&lt;check_sum&gt\",\n  \"checksumType\": \"sha256\",\n  \"description\": \"The audit-libs package contains the dynamic libraries needed for\\napplications to use the audit framework.\",\n  \"sizeInBytes\": 310696,\n  \"dependencies\": [\n    {\n      \"dependency\": \"&lt;dependency_name&gt;\",\n      \"dependencyType\": \"provide\",\n      \"dependencyModifier\": \"EQ 0-3.1.2-1.0.1.el8\"\n    }\n  ],\n  \"files\": [\n    {\n      \"path\": \"&lt;path_for_file&gt;\",\n      \"type\": \"file\",\n      \"timeModified\": null,\n      \"checksum\": null,\n      \"checksumType\": null,\n      \"sizeInBytes\": null\n    }\n  ],\n  \"softwareSources\": [\n    {\n      \"id\": \"ocid1.osmhsoftwaresource.oc1.iad..exampleuniqueID\",\n      \"displayName\": \"ol8_baseos_latest-x86_64\",\n      \"description\": \"Oracle Linux 8 BaseOS Latest  (x86_64)\",\n      \"softwareSourceType\": \"VENDOR\",\n      \"isMandatoryForAutonomousLinux\": true\n    },\n    {\n      \"id\": \"ocid1.osmhsoftwaresource.oc1.iad.exampleuniqueID2\",\n      \"displayName\": \"ol8_u10_baseos_patch-x86_64\",\n      \"description\": \"Oracle Linux 8.10 BaseOS Patch (x86_64)\",\n      \"softwareSourceType\": \"VENDOR\",\n      \"isMandatoryForAutonomousLinux\": false\n    }\n  ],\n  \"isLatest\": false,\n  \"osFamilies\": null\n}\n"
+    ErratumCollection:
+      description: The set of errata returned for the [ListErrata](#/en/osmh/latest/Erratum/ListErrata) operation.
       properties:
         items:
-          description: List of software sources that are available for specified compartment
+          description: List of errata.
           items:
-            $ref: '#/components/schemas/SoftwareSourceRepoSummary'
+            $ref: '#/components/schemas/ErratumSummary'
           type: array
       required:
       - items
       type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"name\": \"ELSA-2025-31356\",\n      \"synopsis\": \"terraform-provider-oci-fips security update\",\n      \"timeIssued\": \"2025-02-12T00:00:00.000Z\",\n      \"timeUpdated\": \"2025-02-12T00:00:00.000Z\",\n      \"classificationType\": \"SECURITY\",\n      \"relatedCves\": [\n        \"CVE-2024-24790\"\n      ],\n      \"osFamilies\": [\n        \"ORACLE_LINUX_8\",\n        \"ORACLE_LINUX_9\"\n      ],\n      \"advisorySeverity\": \"MODERATE\",\n      \"advisoryType\": null\n    }\n  ]\n}\n"
+    UpdateSoftwareSourceDetails:
+      description: Provides the information used to update a software source.
+      discriminator:
+        propertyName: softwareSourceType
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the software source.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: User-specified description of the software source.
+          maxLength: 400
+          type: string
+        displayName:
+          description: User-friendly name for the software source.
+          format: x-obmcs-ascii-identifier
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9.])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        softwareSourceType:
+          description: Type of the software source.
+          enum:
+          - VENDOR
+          - CUSTOM
+          - VERSIONED
+          - PRIVATE
+          - THIRD_PARTY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
+      type: object
+    ModuleStreamProfileSummary:
+      description: Provides the summary information for a module stream profile contained within a software source.
+      properties:
+        isDefault:
+          description: Indicates if this profile is the default for the module stream.
+          type: boolean
+        moduleName:
+          description: The name of the module that contains the stream profile.
+          type: string
+        name:
+          description: The name of the profile.
+          type: string
+        streamName:
+          description: The name of the stream that contains the profile.
+          type: string
+      required:
+      - moduleName
+      - streamName
+      - name
+      type: object
+    RemovePackagesFromSoftwareSourceDetails:
+      description: Provides a list of packages to be removed from the software source.
+      properties:
+        packages:
+          description: List of packages specified by the name of the package (N) or the full package name (NVRA or NEVRA).
+          items:
+            type: string
+          maxItems: 524288
+          type: array
+      required:
+      - packages
+      type: object
+    EntitlementSummary:
+      description: Provides summary information for an entitlement.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenancy containing the entitlement.
+          type: string
+        csi:
+          description: The Customer Support Identifier (CSI) which unlocks the software sources. The CSI is is a unique key given to a customer and it uniquely identifies the entitlement.
+          type: string
+        vendorName:
+          description: The vendor for the entitlement.
+          type: string
+      required:
+      - compartmentId
+      - csi
+      - vendorName
+      type: object
+    SoftwareSourceCollection:
+      description: A set of software sources returned for the [ListSoftwareSources](#/en/osmh/latest/SoftwareSource/ListSoftwareSources) operation.
+      properties:
+        items:
+          description: List of software sources.
+          items:
+            $ref: '#/components/schemas/SoftwareSourceSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n\"items\": [\n  {\n    \"softwareSourceType\": \"VENDOR\",\n    \"id\": \"ocid1.osmhsoftwaresource.oc1.iad.&lt;unique_id&gt;\",\n    \"compartmentId\": \"ocid1.compartment.oc1..exampleuniqueID\",\n    \"displayName\": \"ol8_appstream-x86_64\",\n    \"repoId\": \"ol8_appstream\",\n    \"url\": \"https://yum-iad.oracle.com/repo/OracleLinux/OL8/appstream/x86_64/\",\n    \"timeCreated\": \"2024-11-18T13:57:49.000Z\",\n    \"timeUpdated\": \"2024-11-18T13:57:49.000Z\",\n    \"description\": \"Oracle Linux 8 Application Stream Packages  (x86_64)\",\n    \"availability\": \"SELECTED\",\n    \"availabilityAtOci\": \"SELECTED\",\n    \"osFamily\": \"ORACLE_LINUX_8\",\n    \"archType\": \"X86_64\",\n    \"packageCount\": 53342,\n    \"lifecycleState\": \"ACTIVE\",\n    \"size\": 1.48467434929E11,\n    \"freeformTags\": null,\n    \"definedTags\": null,\n    \"systemTags\": null,\n    \"vendorName\": \"ORACLE\",\n    \"isMandatoryForAutonomousLinux\": true\n      }\n    ]\n}\n"
+    SearchSoftwareSourceModuleStreamsDetails:
+      description: Provides the information used to search for a set of module streams from a list software sources.
+      properties:
+        moduleName:
+          description: 'The name of a module.
+
+            '
+          type: string
+        softwareSourceIds:
+          description: List of software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        sortBy:
+          description: The field to sort by.
+          enum:
+          - MODULENAME
+          type: string
+        sortOrder:
+          description: The sort order.
+          enum:
+          - ASC
+          - DESC
+          type: string
+      required:
+      - softwareSourceIds
+      type: object
+    ModuleStreamProfile:
+      description: An object that defines a module stream profile provide by a software source.
+      properties:
+        description:
+          description: A description of the contents of the module stream profile.
+          type: string
+        isDefault:
+          description: Indicates if this profile is the default for its module stream.
+          type: boolean
+        moduleName:
+          description: The name of the module that contains the stream profile.
+          type: string
+        name:
+          description: The name of the profile.
+          type: string
+        packages:
+          description: 'A list of packages that constitute the profile.  Each element
+
+            in the list is the name of a package.  The name is suitable to
+
+            use as an argument to other OS Management Hub APIs that interact
+
+            directly with packages.
+
+            '
+          items:
+            type: string
+          type: array
+        streamName:
+          description: The name of the stream that contains the profile.
+          type: string
+      required:
+      - moduleName
+      - streamName
+      - name
+      - packages
+      type: object
+      x-example: "{\n  \"moduleName\": \"module_name\",\n  \"streamName\": \"stream_name\",\n  \"name\": \"resource_Name\",\n  \"isDefault\": false,\n  \"description\": null,\n  \"packages\": [\n    \"nodejs\"\n  ]\n}\n"
+    ChangeAvailabilityOfSoftwareSourcesDetails:
+      description: Provides the information used to update the availability of a list of software sources.
+      properties:
+        softwareSourceAvailabilities:
+          description: List of vendor software sources and their availability statuses.
+          items:
+            $ref: '#/components/schemas/SoftwareSourceAvailability'
+          maxItems: 255
+          type: array
+      required:
+      - softwareSourceAvailabilities
+      type: object
+    SearchSoftwareSourceModulesDetails:
+      description: Provides the information used to search for a set of modules from a list software sources.
+      properties:
+        name:
+          description: 'The name of a module.
+
+            '
+          type: string
+        nameContains:
+          description: A filter to return modules with a name that contains the given string.
+          type: string
+        softwareSourceIds:
+          description: List of sofware source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        sortBy:
+          description: The field to sort by.
+          enum:
+          - NAME
+          type: string
+        sortOrder:
+          description: The sort order.
+          enum:
+          - ASC
+          - DESC
+          type: string
+      required:
+      - softwareSourceIds
+      type: object
+    SoftwarePackageSummary:
+      description: Provides summary information for a software package.
+      properties:
+        architecture:
+          description: The architecture for which this software was built.
+          enum:
+          - I386
+          - I686
+          - AARCH64
+          - X86_64
+          - SRC
+          - NOARCH
+          - OTHER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SoftwarePackageArchitecture'
+        checksum:
+          description: Checksum of the package.
+          type: string
+        checksumType:
+          description: Type of the checksum.
+          type: string
+        displayName:
+          description: Package name.
+          type: string
+        isLatest:
+          description: Indicates whether this package is the latest version.
+          type: boolean
+        lastModifiedDate:
+          description: The date and time the package was last modified (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+          type: string
+        name:
+          description: Unique identifier for the package. Note that this is not an OCID.
+          type: string
+        osFamilies:
+          description: The OS families the package belongs to.
+          items:
+            $ref: '#/components/schemas/OsFamily'
+          maxItems: 100
+          type: array
+        softwareSources:
+          description: List of software sources that provide the software package. This property is deprecated and it will be removed in a future API release.
+          items:
+            $ref: '#/components/schemas/SoftwareSourceDetails'
+          type: array
+        type:
+          description: Type of the package.
+          type: string
+        version:
+          description: Version of the package.
+          type: string
+      required:
+      - displayName
+      - type
+      - version
+      - name
     SoftwareSourceSummary:
       description: Provides summary information for a software source. A software source contains a collection of packages. For more information, see [Managing Software Sources](/iaas/osmh/doc/software-sources.htm).
       discriminator:
@@ -2183,8 +2547,63 @@ components:
       - availabilityAtOci
       - repoId
       - url
-    RemovePackagesFromSoftwareSourceDetails:
-      description: Provides a list of packages to be removed from the software source.
+    ModuleCollection:
+      description: The set of modules returned for the [SearchSoftwareSourceModules](#/en/osmh/latest/SoftwareSource/SearchSoftwareSourceModules) operation.
+      properties:
+        items:
+          description: List of modules.
+          items:
+            $ref: '#/components/schemas/ModuleSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"name\": \"module-name\",\n      \"streams\": [\n        \"1.0\",\n        \"2.0\",\n        \"3.0\",\n        \"4.0\",\n        \"ol8\"\n      ],\n      \"ocid1.osmhsoftwaresource.oc1..&lt;unique_id&gt;\"\n    }\n  ]\n}\n"
+    ChangeSoftwareSourceCompartmentDetails:
+      description: Provides the information used to move the software source to another compartment.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the software source to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    SearchSoftwareSourcePackageGroupsDetails:
+      description: Provides the software sources and search parameters to get a list of associated package groups.
+      properties:
+        groupType:
+          description: Indicates if this is a group, category or environment.
+          type: string
+          x-obmcs-enumref: '#/definitions/PackageGroup/groupType'
+        nameContains:
+          description: A filter that returns package groups with a name that contains the given string.
+          type: string
+        softwareSourceIds:
+          description: List of software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        sortBy:
+          description: The field to sort by.
+          enum:
+          - NAME
+          type: string
+        sortOrder:
+          description: The sort order.
+          enum:
+          - ASC
+          - DESC
+          type: string
+      required:
+      - softwareSourceIds
+      type: object
+    ReplacePackagesInSoftwareSourceDetails:
+      description: Provides a list of packages that will replace the existing packages in the software source.
       properties:
         packages:
           description: List of packages specified by the name of the package (N) or the full package name (NVRA or NEVRA).
@@ -2195,35 +2614,83 @@ components:
       required:
       - packages
       type: object
-    SoftwareSourceVendorCollection:
-      description: Th set of software source vendors returned for the [ListSoftwareSourceVendors](#/en/osmh/latest/SoftwareSource/ListSoftwareSourceVendors) operation.
+    ModuleSummary:
+      description: Provides summary information about a module which is provided by a software source.
       properties:
-        items:
-          description: List of software source vendors.
+        name:
+          description: 'The name of the module.
+
+            '
+          type: string
+        softwareSourceId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
+
+            '
+          type: string
+        streams:
+          description: List of stream names.
           items:
-            $ref: '#/components/schemas/SoftwareSourceVendorSummary'
+            type: string
           type: array
       required:
-      - items
+      - name
+      - softwareSourceId
       type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"name\": \"ORACLE\",\n      \"osFamilies\": [\n        \"ORACLE_LINUX_9\",\n        \"ORACLE_LINUX_8\",\n        \"ORACLE_LINUX_7\",\n        \"ORACLE_LINUX_6\"\n      ],\n      \"archTypes\": [\n        \"X86_64\",\n        \"AARCH64\"\n      ]\n    }\n  ]\n}\n"
-    SoftwareSourceDetails:
-      description: Provides identifying information for the specified software source.
+    CreateSoftwareSourceDetails:
+      description: Provides the information used to create a software source.
+      discriminator:
+        propertyName: softwareSourceType
       properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the software source.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
         description:
-          description: Software source description.
+          description: User-specified description for the software source. Avoid entering confidential information.
+          maxLength: 400
           type: string
         displayName:
-          description: Software source name.
+          description: User-friendly name for the software source. Does not have to be unique and you can change the name later. Avoid entering confidential information.
+          format: x-obmcs-ascii-identifier
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9.])*$
           type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
-          type: string
-        isMandatoryForAutonomousLinux:
-          description: Indicates whether this is a required software source for Autonomous Linux instances. If true, the user can't unselect it.
-          type: boolean
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
         softwareSourceType:
-          description: Type of the software source.
+          description: Type of software source.
           enum:
           - VENDOR
           - CUSTOM
@@ -2233,7 +2700,8 @@ components:
           type: string
           x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
       required:
-      - id
+      - compartmentId
+      - softwareSourceType
       type: object
     SoftwareSourceRepoSummary:
       description: Provides summary information for available repos to add directly to compartments. A software source contains a collection of packages. For more information, see [Managing Software Sources](/iaas/osmh/doc/software-sources.htm).
@@ -2299,92 +2767,208 @@ components:
       - osFamily
       - archType
       - repoId
-    ChangeAvailabilityOfSoftwareSourcesDetails:
-      description: Provides the information used to update the availability of a list of software sources.
+    ErratumSummary:
+      description: Provides summary information for an erratum. An erratum is an important software change which can include security advisories, bug fixes, or enhancements.
       properties:
-        softwareSourceAvailabilities:
-          description: List of vendor software sources and their availability statuses.
-          items:
-            $ref: '#/components/schemas/SoftwareSourceAvailability'
-          maxItems: 255
-          type: array
-      required:
-      - softwareSourceAvailabilities
-      type: object
-    SoftwarePackage:
-      description: An object that defines a software package.
-      properties:
-        architecture:
-          description: The architecture for which this software was built
+        advisorySeverity:
+          description: The severity advisory. Only valid for security type advisories.
           enum:
-          - I386
-          - I686
-          - AARCH64
-          - X86_64
-          - SRC
-          - NOARCH
+          - LOW
+          - MODERATE
+          - IMPORTANT
+          - CRITICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
+        advisoryType:
+          description: The advisory type of the erratum.
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AdvisoryTypes'
+        classificationType:
+          description: Type of the erratum. This property is deprecated and it will be removed in a future API release. Please refer to the advisoryType property instead.
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
           - OTHER
           type: string
-          x-obmcs-top-level-enum: '#/definitions/SoftwarePackageArchitecture'
-        checksum:
-          description: Checksum of the package.
-          type: string
-        checksumType:
-          description: Type of the checksum.
-          type: string
-        dependencies:
-          description: List of dependencies for the software package.
-          items:
-            $ref: '#/components/schemas/SoftwarePackageDependency'
-          type: array
-        description:
-          description: Description of the package.
-          type: string
-        displayName:
-          description: Package name.
-          type: string
-        files:
-          description: List of files for the software package.
-          items:
-            $ref: '#/components/schemas/SoftwarePackageFile'
-          type: array
-        isLatest:
-          description: Indicates whether this package is the latest version.
-          type: boolean
-        lastModifiedDate:
-          description: The date and time the package was last modified (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-          type: string
+          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
         name:
-          description: Unique identifier for the package. Note that this is not an OCID.
+          description: Advisory name.
+          maxLength: 255
+          minLength: 1
           type: string
         osFamilies:
-          description: The OS families the package belongs to.
+          description: List of affected OS families.
           items:
             $ref: '#/components/schemas/OsFamily'
           maxItems: 100
           type: array
-        sizeInBytes:
-          description: Size of the package in bytes.
-          format: int64
-          type: integer
-        softwareSources:
-          description: List of software sources that provide the software package. This property is deprecated and it will be removed in a future API release.
+        relatedCves:
+          description: List of CVEs applicable to this erratum.
           items:
-            $ref: '#/components/schemas/SoftwareSourceDetails'
+            type: string
           maxItems: 255
           type: array
-        type:
-          description: Type of the package.
+        synopsis:
+          description: Summary description of the erratum.
+          maxLength: 255
+          minLength: 1
           type: string
-        version:
-          description: Version of the package.
+        timeIssued:
+          description: 'The date and time the erratum was issued (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the erratum was updated (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+
+            '
+          format: date-time
           type: string
       required:
-      - displayName
-      - type
-      - version
       - name
-      x-example: "{\n  \"displayName\": \"audit-libs\",\n  \"name\": \"audit-libs-3.1.2-1.0.1.el8.x86_64.rpm\",\n  \"type\": \"RPM\",\n  \"version\": \"3.1.2-1.0.1.el8\",\n  \"architecture\": \"X86_64\",\n  \"lastModifiedDate\": \"Thu Sep 12 20:52:25 UTC 2024\",\n  \"checksum\": \"&lt;check_sum&gt\",\n  \"checksumType\": \"sha256\",\n  \"description\": \"The audit-libs package contains the dynamic libraries needed for\\napplications to use the audit framework.\",\n  \"sizeInBytes\": 310696,\n  \"dependencies\": [\n    {\n      \"dependency\": \"&lt;dependency_name&gt;\",\n      \"dependencyType\": \"provide\",\n      \"dependencyModifier\": \"EQ 0-3.1.2-1.0.1.el8\"\n    }\n  ],\n  \"files\": [\n    {\n      \"path\": \"&lt;path_for_file&gt;\",\n      \"type\": \"file\",\n      \"timeModified\": null,\n      \"checksum\": null,\n      \"checksumType\": null,\n      \"sizeInBytes\": null\n    }\n  ],\n  \"softwareSources\": [\n    {\n      \"id\": \"ocid1.osmhsoftwaresource.oc1.iad..exampleuniqueID\",\n      \"displayName\": \"ol8_baseos_latest-x86_64\",\n      \"description\": \"Oracle Linux 8 BaseOS Latest  (x86_64)\",\n      \"softwareSourceType\": \"VENDOR\",\n      \"isMandatoryForAutonomousLinux\": true\n    },\n    {\n      \"id\": \"ocid1.osmhsoftwaresource.oc1.iad.exampleuniqueID2\",\n      \"displayName\": \"ol8_u10_baseos_patch-x86_64\",\n      \"description\": \"Oracle Linux 8.10 BaseOS Patch (x86_64)\",\n      \"softwareSourceType\": \"VENDOR\",\n      \"isMandatoryForAutonomousLinux\": false\n    }\n  ],\n  \"isLatest\": false,\n  \"osFamilies\": null\n}\n"
+      type: object
+    ModuleStreamProfileCollection:
+      description: The set of module stream profiles returned for the [ListModuleStreamProfiles](#/en/osmh/latest/SoftwareSource/ListModuleStreamProfiles) operation.
+      properties:
+        items:
+          description: List of module stream profiles.
+          items:
+            $ref: '#/components/schemas/ModuleStreamProfileSummary'
+          type: array
+      required:
+      - items
+      type: object
+    SoftwareSourceRepoCollection:
+      description: A set of software sources returned for the ListAvailableSoftwareSourcesToAddInCompartment operation.
+      properties:
+        items:
+          description: List of software sources that are available for specified compartment
+          items:
+            $ref: '#/components/schemas/SoftwareSourceRepoSummary'
+          type: array
+      required:
+      - items
+      type: object
+    SoftwareSourceVendorCollection:
+      description: Th set of software source vendors returned for the [ListSoftwareSourceVendors](#/en/osmh/latest/SoftwareSource/ListSoftwareSourceVendors) operation.
+      properties:
+        items:
+          description: List of software source vendors.
+          items:
+            $ref: '#/components/schemas/SoftwareSourceVendorSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"name\": \"ORACLE\",\n      \"osFamilies\": [\n        \"ORACLE_LINUX_9\",\n        \"ORACLE_LINUX_8\",\n        \"ORACLE_LINUX_7\",\n        \"ORACLE_LINUX_6\"\n      ],\n      \"archTypes\": [\n        \"X86_64\",\n        \"AARCH64\"\n      ]\n    }\n  ]\n}\n"
+    OsFamily:
+      description: Type of operating system.
+      enum:
+      - ORACLE_LINUX_10
+      - ORACLE_LINUX_9
+      - ORACLE_LINUX_8
+      - ORACLE_LINUX_7
+      - ORACLE_LINUX_6
+      - WINDOWS_SERVER_2016
+      - WINDOWS_SERVER_2019
+      - WINDOWS_SERVER_2022
+      - WINDOWS_SERVER_2025
+      - WINDOWS_11
+      - ALL
+      - UBUNTU_20_04
+      - UBUNTU_22_04
+      - UBUNTU_24_04
+      type: string
+    Erratum:
+      description: An object that defines an erratum..
+      properties:
+        advisorySeverity:
+          description: The severity for a security advisory, otherwise, null.
+          enum:
+          - LOW
+          - MODERATE
+          - IMPORTANT
+          - CRITICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
+        advisoryType:
+          description: The advisory type of the erratum.
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AdvisoryTypes'
+        classificationType:
+          description: Type of the erratum. This property is deprecated and it will be removed in a future API release. Please refer to the advisoryType property instead.
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          - OTHER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
+        description:
+          description: Details describing the erratum.
+          type: string
+        from:
+          description: Information specifying from where the erratum was release.
+          type: string
+        name:
+          description: Advisory name.
+          type: string
+        osFamilies:
+          description: List of affected OS families.
+          items:
+            $ref: '#/components/schemas/OsFamily'
+          maxItems: 100
+          type: array
+        packages:
+          description: List of packages affected by this erratum.
+          items:
+            $ref: '#/components/schemas/SoftwarePackageSummary'
+          type: array
+        references:
+          description: Information describing how to find more information about. the erratum.
+          type: string
+        relatedCves:
+          description: List of CVEs applicable to this erratum.
+          items:
+            type: string
+          type: array
+        repositories:
+          description: List of repository identifiers.
+          items:
+            type: string
+          type: array
+        solution:
+          description: Information describing how the erratum can be resolved.
+          type: string
+        synopsis:
+          description: Summary description of the erratum.
+          type: string
+        timeIssued:
+          description: 'The date and time the erratum was issued (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the erratum was updated (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - name
+      type: object
+      x-example: "{\n  \"name\": \"ELSA-2025-31356\",\n  \"synopsis\": \"terraform-provider-oci-fips security update\",\n  \"timeIssued\": \"2025-02-12T00:00:00.000Z\",\n  \"description\": \"[6.25.0-2.el9]\\n- Rebuild on golang-boringcrypto 1.22.11 to fix CVE-2024-24790 (Alex Burmashev){CVE-2024-24790}\",\n  \"timeUpdated\": \"2025-02-12T00:00:00.000Z\",\n  \"classificationType\": \"SECURITY\",\n  \"advisoryType\": null,\n  \"from\": \"el-errata@oss.oracle.com\",\n  \"solution\": \"This update is available via the Unbreakable Linux Network (ULN) and the Oracle Public Yum Server. \",\n  \"references\": \"https://linux.oracle.com/errata/ELSA-2025-31356.html\",\n  \"relatedCves\": [\n    \"CVE-2024-24790\"\n  ],\n  \"repositories\": [\n    \"ol8_developer-aarch64\",\n    \"ol8_developer-x86_64\",\n    \"ol9_developer-x86_64\"\n  ],\n  \"packages\": [\n    {\n      \"displayName\": \"terraform-provider-oci-fips\",\n      \"name\": \"terraform-provider-oci-fips-6.25.0-2.el9.aarch64.rpm\",\n      \"type\": \"RPM\",\n      \"version\": \"6.25.0-2.el9\",\n      \"architecture\": \"AARCH64\",\n      \"checksum\": \"&lt;check_sum&gt\",\n      \"checksumType\": \"sha256\",\n      \"isLatest\": true,\n      \"softwareSources\": null,\n      \"osFamilies\": null\n    }\n  ],\n  \"osFamilies\": [\n    \"ORACLE_LINUX_8\",\n    \"ORACLE_LINUX_9\"\n  ],\n  \"advisorySeverity\": \"MODERATE\"\n}\n"
     EntitlementCollection:
       description: The set of entitlements returned for the [ListEntitlements](#/en/osmh/latest/SoftwareSource/ListEntitlements).
       properties:
@@ -2397,99 +2981,6 @@ components:
       - items
       type: object
       x-example: "{\n  \"items\": [\n    {\n      \"compartmentId\": \"ocid1.compartment.oc1..&lt;unique_id&gt;\",\n      \"csi\": \"&lt;unique_csi&gt;\",\n      \"vendorName\": \"Oracle\"\n    }\n  ]\n}\n"
-    SoftwarePackageSummary:
-      description: Provides summary information for a software package.
-      properties:
-        architecture:
-          description: The architecture for which this software was built.
-          enum:
-          - I386
-          - I686
-          - AARCH64
-          - X86_64
-          - SRC
-          - NOARCH
-          - OTHER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SoftwarePackageArchitecture'
-        checksum:
-          description: Checksum of the package.
-          type: string
-        checksumType:
-          description: Type of the checksum.
-          type: string
-        displayName:
-          description: Package name.
-          type: string
-        isLatest:
-          description: Indicates whether this package is the latest version.
-          type: boolean
-        lastModifiedDate:
-          description: The date and time the package was last modified (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-          type: string
-        name:
-          description: Unique identifier for the package. Note that this is not an OCID.
-          type: string
-        osFamilies:
-          description: The OS families the package belongs to.
-          items:
-            $ref: '#/components/schemas/OsFamily'
-          maxItems: 100
-          type: array
-        softwareSources:
-          description: List of software sources that provide the software package. This property is deprecated and it will be removed in a future API release.
-          items:
-            $ref: '#/components/schemas/SoftwareSourceDetails'
-          type: array
-        type:
-          description: Type of the package.
-          type: string
-        version:
-          description: Version of the package.
-          type: string
-      required:
-      - displayName
-      - type
-      - version
-      - name
-    ModuleStreamProfile:
-      description: An object that defines a module stream profile provide by a software source.
-      properties:
-        description:
-          description: A description of the contents of the module stream profile.
-          type: string
-        isDefault:
-          description: Indicates if this profile is the default for its module stream.
-          type: boolean
-        moduleName:
-          description: The name of the module that contains the stream profile.
-          type: string
-        name:
-          description: The name of the profile.
-          type: string
-        packages:
-          description: 'A list of packages that constitute the profile.  Each element
-
-            in the list is the name of a package.  The name is suitable to
-
-            use as an argument to other OS Management Hub APIs that interact
-
-            directly with packages.
-
-            '
-          items:
-            type: string
-          type: array
-        streamName:
-          description: The name of the stream that contains the profile.
-          type: string
-      required:
-      - moduleName
-      - streamName
-      - name
-      - packages
-      type: object
-      x-example: "{\n  \"moduleName\": \"module_name\",\n  \"streamName\": \"stream_name\",\n  \"name\": \"resource_Name\",\n  \"isDefault\": false,\n  \"description\": null,\n  \"packages\": [\n    \"nodejs\"\n  ]\n}\n"
     ModuleStream:
       description: An object that defines a module stream provided by a software source.
       properties:
@@ -2568,6 +3059,72 @@ components:
       required:
       - compartmentId
       - csi
+    SoftwareSourceVendorSummary:
+      description: Provides summary information about a software source vendor, including name, operating system family, and architecture type.
+      properties:
+        archTypes:
+          description: List of corresponding architecture types.
+          items:
+            enum:
+            - X86_64
+            - AARCH64
+            - I686
+            - NOARCH
+            - SRC
+            - I386
+            - AMD64
+            - ARM64
+            - ALL
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/ArchType'
+          maxItems: 100
+          type: array
+        name:
+          description: Name of the vendor providing the software source.
+          enum:
+          - ORACLE
+          - MICROSOFT
+          - CANONICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VendorName'
+        osFamilies:
+          description: List of corresponding operating system families.
+          items:
+            enum:
+            - ORACLE_LINUX_10
+            - ORACLE_LINUX_9
+            - ORACLE_LINUX_8
+            - ORACLE_LINUX_7
+            - ORACLE_LINUX_6
+            - WINDOWS_SERVER_2016
+            - WINDOWS_SERVER_2019
+            - WINDOWS_SERVER_2022
+            - WINDOWS_SERVER_2025
+            - WINDOWS_11
+            - ALL
+            - UBUNTU_20_04
+            - UBUNTU_22_04
+            - UBUNTU_24_04
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/OsFamily'
+          maxItems: 100
+          type: array
+      required:
+      - name
+      - osFamilies
+      - archTypes
+    PackageGroupCollection:
+      description: The set of package groups returned for the [ListPackageGroups](#/en/osmh/latest/SoftwareSource/ListPackageGroups) [SearchSoftwareSourcePackageGroups](#/en/osmh/latest/SoftwareSource/SearchSoftwareSourcePackageGroups) operation.
+      properties:
+        items:
+          description: List of package groups.
+          items:
+            $ref: '#/components/schemas/PackageGroupSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"id\": \"dotnet-core\",\n      \"name\": \".NET Core Development\",\n      \"description\": \"Tools to develop .NET and .NET Core applications\",\n      \"isUserVisible\": true,\n      \"isDefault\": true,\n      \"repositories\": [\n        \"ol8_appstream-x86_64\"\n      ],\n      \"groupType\": \"GROUP\",\n      \"displayOrder\": 0\n    }\n  ]\n}\n"
     SoftwareSource:
       description: The object that defines a software source. A software source contains a collection of packages. For more information, see [Managing Software Sources](/iaas/osmh/doc/software-sources.htm).
       discriminator:
@@ -2767,431 +3324,6 @@ components:
       - url
       type: object
       x-example: "{\n  \"softwareSourceType\": \"CUSTOM\",\n  \"id\": \"ocid1.osmhsoftwaresource.oc1.iad.&lt;unique_id&gt;\",\n  \"compartmentId\": \"ocid1.compartment.oc1..exampleuniqueID\",\n  \"displayName\": \"TestSoftwareSource\",\n  \"timeCreated\": \"2025-02-13T09:43:54.715Z\",\n  \"description\": \"Creating a new software source for testing OSMH SS.\",\n  \"availability\": \"SELECTED\",\n  \"availabilityAtOci\": \"SELECTED\",\n  \"repoId\": \"custom.TestSoftwareSource.20250213094354715\",\n  \"osFamily\": \"ORACLE_LINUX_8\",\n  \"archType\": \"X86_64\",\n  \"lifecycleState\": \"CREATING\",\n  \"packageCount\": 0,\n  \"url\": \"custom/custom.TestSoftwareSource.20250213094354715\",\n  \"checksumType\": \"SHA256\",\n  \"gpgKeyUrl\": \"file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle\",\n  \"gpgKeyId\": \"AD86DA3\",\n  \"gpgKeyFingerprint\": \"8346 3DB1 3AB6 6754 B89D 9824 8256 2EA9 ADBC 6DA3\",\n  \"size\": null,\n  \"vendorSoftwareSources\": [\n    {\n      \"id\": \"ocid1.osmhsoftwaresource.oc1.iad..exampleuniqueID1\",\n      \"displayName\": \"ol8_baseos_latest-x86_64\"\n    },\n    {\n      \"id\": \"ocid1.osmhsoftwaresource.oc1.iad..exampleuniqueID2\",\n      \"displayName\": \"ol8_addons-x86_64\"\n    },\n    {\n      \"id\": \"ocid1.osmhsoftwaresource.oc1.iad..exampleuniqueID3\",\n      \"displayName\": \"ol8_appstream-x86_64\"\n    }\n  ],\n  \"customSoftwareSourceFilter\": {\n    \"packageFilters\": [],\n    \"moduleStreamProfileFilters\": [],\n    \"packageGroupFilters\": []\n  },\n  \"isAutomaticallyUpdated\": false,\n  \"isAutoResolveDependencies\": true,\n  \"isCreatedFromPackageList\": false,\n  \"isLatestContentOnly\": true,\n  \"packages\": [],\n  \"softwareSourceSubType\": \"FILTER\",\n  \"timeMetadataUpdated\": null,\n  \"freeformTags\": {},\n  \"definedTags\": {\n    \"Oracle-Tags\": {\n      \"CreatedBy\": \"user\",\n      \"CreatedOn\": \"2025-02-13T09:43:54.523Z\"\n    }\n  },\n  \"systemTags\": {}\n}\n"
-    ModuleStreamProfileSummary:
-      description: Provides the summary information for a module stream profile contained within a software source.
-      properties:
-        isDefault:
-          description: Indicates if this profile is the default for the module stream.
-          type: boolean
-        moduleName:
-          description: The name of the module that contains the stream profile.
-          type: string
-        name:
-          description: The name of the profile.
-          type: string
-        streamName:
-          description: The name of the stream that contains the profile.
-          type: string
-      required:
-      - moduleName
-      - streamName
-      - name
-      type: object
-    SoftwareSourceVendorSummary:
-      description: Provides summary information about a software source vendor, including name, operating system family, and architecture type.
-      properties:
-        archTypes:
-          description: List of corresponding architecture types.
-          items:
-            enum:
-            - X86_64
-            - AARCH64
-            - I686
-            - NOARCH
-            - SRC
-            - I386
-            - AMD64
-            - ARM64
-            - ALL
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/ArchType'
-          maxItems: 100
-          type: array
-        name:
-          description: Name of the vendor providing the software source.
-          enum:
-          - ORACLE
-          - MICROSOFT
-          - CANONICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VendorName'
-        osFamilies:
-          description: List of corresponding operating system families.
-          items:
-            enum:
-            - ORACLE_LINUX_10
-            - ORACLE_LINUX_9
-            - ORACLE_LINUX_8
-            - ORACLE_LINUX_7
-            - ORACLE_LINUX_6
-            - WINDOWS_SERVER_2016
-            - WINDOWS_SERVER_2019
-            - WINDOWS_SERVER_2022
-            - WINDOWS_SERVER_2025
-            - WINDOWS_11
-            - ALL
-            - UBUNTU_20_04
-            - UBUNTU_22_04
-            - UBUNTU_24_04
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/OsFamily'
-          maxItems: 100
-          type: array
-      required:
-      - name
-      - osFamilies
-      - archTypes
-    Erratum:
-      description: An object that defines an erratum..
-      properties:
-        advisorySeverity:
-          description: The severity for a security advisory, otherwise, null.
-          enum:
-          - LOW
-          - MODERATE
-          - IMPORTANT
-          - CRITICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
-        advisoryType:
-          description: The advisory type of the erratum.
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/AdvisoryTypes'
-        classificationType:
-          description: Type of the erratum. This property is deprecated and it will be removed in a future API release. Please refer to the advisoryType property instead.
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          - OTHER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
-        description:
-          description: Details describing the erratum.
-          type: string
-        from:
-          description: Information specifying from where the erratum was release.
-          type: string
-        name:
-          description: Advisory name.
-          type: string
-        osFamilies:
-          description: List of affected OS families.
-          items:
-            $ref: '#/components/schemas/OsFamily'
-          maxItems: 100
-          type: array
-        packages:
-          description: List of packages affected by this erratum.
-          items:
-            $ref: '#/components/schemas/SoftwarePackageSummary'
-          type: array
-        references:
-          description: Information describing how to find more information about. the erratum.
-          type: string
-        relatedCves:
-          description: List of CVEs applicable to this erratum.
-          items:
-            type: string
-          type: array
-        repositories:
-          description: List of repository identifiers.
-          items:
-            type: string
-          type: array
-        solution:
-          description: Information describing how the erratum can be resolved.
-          type: string
-        synopsis:
-          description: Summary description of the erratum.
-          type: string
-        timeIssued:
-          description: 'The date and time the erratum was issued (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the erratum was updated (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - name
-      type: object
-      x-example: "{\n  \"name\": \"ELSA-2025-31356\",\n  \"synopsis\": \"terraform-provider-oci-fips security update\",\n  \"timeIssued\": \"2025-02-12T00:00:00.000Z\",\n  \"description\": \"[6.25.0-2.el9]\\n- Rebuild on golang-boringcrypto 1.22.11 to fix CVE-2024-24790 (Alex Burmashev){CVE-2024-24790}\",\n  \"timeUpdated\": \"2025-02-12T00:00:00.000Z\",\n  \"classificationType\": \"SECURITY\",\n  \"advisoryType\": null,\n  \"from\": \"el-errata@oss.oracle.com\",\n  \"solution\": \"This update is available via the Unbreakable Linux Network (ULN) and the Oracle Public Yum Server. \",\n  \"references\": \"https://linux.oracle.com/errata/ELSA-2025-31356.html\",\n  \"relatedCves\": [\n    \"CVE-2024-24790\"\n  ],\n  \"repositories\": [\n    \"ol8_developer-aarch64\",\n    \"ol8_developer-x86_64\",\n    \"ol9_developer-x86_64\"\n  ],\n  \"packages\": [\n    {\n      \"displayName\": \"terraform-provider-oci-fips\",\n      \"name\": \"terraform-provider-oci-fips-6.25.0-2.el9.aarch64.rpm\",\n      \"type\": \"RPM\",\n      \"version\": \"6.25.0-2.el9\",\n      \"architecture\": \"AARCH64\",\n      \"checksum\": \"&lt;check_sum&gt\",\n      \"checksumType\": \"sha256\",\n      \"isLatest\": true,\n      \"softwareSources\": null,\n      \"osFamilies\": null\n    }\n  ],\n  \"osFamilies\": [\n    \"ORACLE_LINUX_8\",\n    \"ORACLE_LINUX_9\"\n  ],\n  \"advisorySeverity\": \"MODERATE\"\n}\n"
-    ErratumCollection:
-      description: The set of errata returned for the [ListErrata](#/en/osmh/latest/Erratum/ListErrata) operation.
-      properties:
-        items:
-          description: List of errata.
-          items:
-            $ref: '#/components/schemas/ErratumSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"name\": \"ELSA-2025-31356\",\n      \"synopsis\": \"terraform-provider-oci-fips security update\",\n      \"timeIssued\": \"2025-02-12T00:00:00.000Z\",\n      \"timeUpdated\": \"2025-02-12T00:00:00.000Z\",\n      \"classificationType\": \"SECURITY\",\n      \"relatedCves\": [\n        \"CVE-2024-24790\"\n      ],\n      \"osFamilies\": [\n        \"ORACLE_LINUX_8\",\n        \"ORACLE_LINUX_9\"\n      ],\n      \"advisorySeverity\": \"MODERATE\",\n      \"advisoryType\": null\n    }\n  ]\n}\n"
-    SoftwarePackageDependency:
-      description: Identifies the dependency for a software package.
-      properties:
-        dependency:
-          description: The software package's dependency.
-          type: string
-        dependencyModifier:
-          description: The modifier for the dependency.
-          type: string
-        dependencyType:
-          description: The type of the dependency.
-          type: string
-    SearchSoftwareSourceModuleStreamsDetails:
-      description: Provides the information used to search for a set of module streams from a list software sources.
-      properties:
-        moduleName:
-          description: 'The name of a module.
-
-            '
-          type: string
-        softwareSourceIds:
-          description: List of software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        sortBy:
-          description: The field to sort by.
-          enum:
-          - MODULENAME
-          type: string
-        sortOrder:
-          description: The sort order.
-          enum:
-          - ASC
-          - DESC
-          type: string
-      required:
-      - softwareSourceIds
-      type: object
-    ModuleStreamProfileCollection:
-      description: The set of module stream profiles returned for the [ListModuleStreamProfiles](#/en/osmh/latest/SoftwareSource/ListModuleStreamProfiles) operation.
-      properties:
-        items:
-          description: List of module stream profiles.
-          items:
-            $ref: '#/components/schemas/ModuleStreamProfileSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ErratumSummary:
-      description: Provides summary information for an erratum. An erratum is an important software change which can include security advisories, bug fixes, or enhancements.
-      properties:
-        advisorySeverity:
-          description: The severity advisory. Only valid for security type advisories.
-          enum:
-          - LOW
-          - MODERATE
-          - IMPORTANT
-          - CRITICAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
-        advisoryType:
-          description: The advisory type of the erratum.
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/AdvisoryTypes'
-        classificationType:
-          description: Type of the erratum. This property is deprecated and it will be removed in a future API release. Please refer to the advisoryType property instead.
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          - OTHER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
-        name:
-          description: Advisory name.
-          maxLength: 255
-          minLength: 1
-          type: string
-        osFamilies:
-          description: List of affected OS families.
-          items:
-            $ref: '#/components/schemas/OsFamily'
-          maxItems: 100
-          type: array
-        relatedCves:
-          description: List of CVEs applicable to this erratum.
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        synopsis:
-          description: Summary description of the erratum.
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeIssued:
-          description: 'The date and time the erratum was issued (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the erratum was updated (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - name
-      type: object
-    SearchSoftwareSourcePackageGroupsDetails:
-      description: Provides the software sources and search parameters to get a list of associated package groups.
-      properties:
-        groupType:
-          description: Indicates if this is a group, category or environment.
-          type: string
-          x-obmcs-enumref: '#/definitions/PackageGroup/groupType'
-        nameContains:
-          description: A filter that returns package groups with a name that contains the given string.
-          type: string
-        softwareSourceIds:
-          description: List of software source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        sortBy:
-          description: The field to sort by.
-          enum:
-          - NAME
-          type: string
-        sortOrder:
-          description: The sort order.
-          enum:
-          - ASC
-          - DESC
-          type: string
-      required:
-      - softwareSourceIds
-      type: object
-    PackageGroupCollection:
-      description: The set of package groups returned for the [ListPackageGroups](#/en/osmh/latest/SoftwareSource/ListPackageGroups) [SearchSoftwareSourcePackageGroups](#/en/osmh/latest/SoftwareSource/SearchSoftwareSourcePackageGroups) operation.
-      properties:
-        items:
-          description: List of package groups.
-          items:
-            $ref: '#/components/schemas/PackageGroupSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"id\": \"dotnet-core\",\n      \"name\": \".NET Core Development\",\n      \"description\": \"Tools to develop .NET and .NET Core applications\",\n      \"isUserVisible\": true,\n      \"isDefault\": true,\n      \"repositories\": [\n        \"ol8_appstream-x86_64\"\n      ],\n      \"groupType\": \"GROUP\",\n      \"displayOrder\": 0\n    }\n  ]\n}\n"
-    OsFamily:
-      description: Type of operating system.
-      enum:
-      - ORACLE_LINUX_10
-      - ORACLE_LINUX_9
-      - ORACLE_LINUX_8
-      - ORACLE_LINUX_7
-      - ORACLE_LINUX_6
-      - WINDOWS_SERVER_2016
-      - WINDOWS_SERVER_2019
-      - WINDOWS_SERVER_2022
-      - WINDOWS_SERVER_2025
-      - WINDOWS_11
-      - ALL
-      - UBUNTU_20_04
-      - UBUNTU_22_04
-      - UBUNTU_24_04
-      type: string
-    SoftwareSourceCollection:
-      description: A set of software sources returned for the [ListSoftwareSources](#/en/osmh/latest/SoftwareSource/ListSoftwareSources) operation.
-      properties:
-        items:
-          description: List of software sources.
-          items:
-            $ref: '#/components/schemas/SoftwareSourceSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n\"items\": [\n  {\n    \"softwareSourceType\": \"VENDOR\",\n    \"id\": \"ocid1.osmhsoftwaresource.oc1.iad.&lt;unique_id&gt;\",\n    \"compartmentId\": \"ocid1.compartment.oc1..exampleuniqueID\",\n    \"displayName\": \"ol8_appstream-x86_64\",\n    \"repoId\": \"ol8_appstream\",\n    \"url\": \"https://yum-iad.oracle.com/repo/OracleLinux/OL8/appstream/x86_64/\",\n    \"timeCreated\": \"2024-11-18T13:57:49.000Z\",\n    \"timeUpdated\": \"2024-11-18T13:57:49.000Z\",\n    \"description\": \"Oracle Linux 8 Application Stream Packages  (x86_64)\",\n    \"availability\": \"SELECTED\",\n    \"availabilityAtOci\": \"SELECTED\",\n    \"osFamily\": \"ORACLE_LINUX_8\",\n    \"archType\": \"X86_64\",\n    \"packageCount\": 53342,\n    \"lifecycleState\": \"ACTIVE\",\n    \"size\": 1.48467434929E11,\n    \"freeformTags\": null,\n    \"definedTags\": null,\n    \"systemTags\": null,\n    \"vendorName\": \"ORACLE\",\n    \"isMandatoryForAutonomousLinux\": true\n      }\n    ]\n}\n"
-    ModuleCollection:
-      description: The set of modules returned for the [SearchSoftwareSourceModules](#/en/osmh/latest/SoftwareSource/SearchSoftwareSourceModules) operation.
-      properties:
-        items:
-          description: List of modules.
-          items:
-            $ref: '#/components/schemas/ModuleSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"name\": \"module-name\",\n      \"streams\": [\n        \"1.0\",\n        \"2.0\",\n        \"3.0\",\n        \"4.0\",\n        \"ol8\"\n      ],\n      \"ocid1.osmhsoftwaresource.oc1..&lt;unique_id&gt;\"\n    }\n  ]\n}\n"
-    ReplacePackagesInSoftwareSourceDetails:
-      description: Provides a list of packages that will replace the existing packages in the software source.
-      properties:
-        packages:
-          description: List of packages specified by the name of the package (N) or the full package name (NVRA or NEVRA).
-          items:
-            type: string
-          maxItems: 524288
-          type: array
-      required:
-      - packages
-      type: object
-    EntitlementSummary:
-      description: Provides summary information for an entitlement.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenancy containing the entitlement.
-          type: string
-        csi:
-          description: The Customer Support Identifier (CSI) which unlocks the software sources. The CSI is is a unique key given to a customer and it uniquely identifies the entitlement.
-          type: string
-        vendorName:
-          description: The vendor for the entitlement.
-          type: string
-      required:
-      - compartmentId
-      - csi
-      - vendorName
-      type: object
-    SoftwarePackageFile:
-      description: A file associated with a package.
-      properties:
-        checksum:
-          description: Checksum of the file.
-          type: string
-        checksumType:
-          description: Type of the checksum.
-          type: string
-        path:
-          description: File path.
-          type: string
-        sizeInBytes:
-          description: Size of the file in bytes.
-          format: int64
-          type: integer
-        timeModified:
-          description: 'The date and time the file was last modified (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-            '
-          format: date-time
-          type: string
-        type:
-          description: Type of the file.
-          type: string
     AddPackagesToSoftwareSourceDetails:
       description: Provides the list of packages to add to a software source.
       properties:
@@ -3208,59 +3340,33 @@ components:
       required:
       - packages
       type: object
-    UpdateSoftwareSourceDetails:
-      description: Provides the information used to update a software source.
-      discriminator:
-        propertyName: softwareSourceType
+    Error:
+      description: Provides the information for an error.
       properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the software source.
-          maxLength: 255
-          minLength: 1
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    SoftwareSourceDetails:
+      description: Provides identifying information for the specified software source.
+      properties:
         description:
-          description: User-specified description of the software source.
-          maxLength: 400
+          description: Software source description.
           type: string
         displayName:
-          description: User-friendly name for the software source.
-          format: x-obmcs-ascii-identifier
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9.])*$
+          description: Software source name.
           type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
+          type: string
+        isMandatoryForAutonomousLinux:
+          description: Indicates whether this is a required software source for Autonomous Linux instances. If true, the user can't unselect it.
+          type: boolean
         softwareSourceType:
           description: Type of the software source.
           enum:
@@ -3271,7 +3377,21 @@ components:
           - THIRD_PARTY
           type: string
           x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
+      required:
+      - id
       type: object
+    SoftwarePackageCollection:
+      description: A set of software packages returned for the [ListSoftwarePackages](#/en/osmh/latest/SoftwareSource/ListSoftwarePackages) operation or [ListAllSoftwarePackages](#/en/osmh/latest/SoftwareSource/ListAllSoftwarePackages) operation.
+      properties:
+        items:
+          description: List of software packages.
+          items:
+            $ref: '#/components/schemas/SoftwarePackageSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"displayName\": \"acl\",\n      \"name\": \"acl-2.2.53-3.el8.x86_64.rpm\",\n      \"type\": \"RPM\",\n      \"version\": \"2.2.53-3.el8\",\n      \"architecture\": \"X86_64\",\n      \"checksum\": \"&lt;check_sum&gt\",\n      \"checksumType\": \"sha256\",\n      \"isLatest\": true,\n      \"softwareSources\": [\n        {\n          \"id\": \"ocid1.osmhsoftwaresource.oc1.iad..exampleuniqueID\",\n          \"displayName\": \"ol8_baseos_latest-x86_64\",\n          \"description\": \"Oracle Linux 8 BaseOS Latest  (x86_64)\",\n          \"softwareSourceType\": \"VENDOR\",\n          \"isMandatoryForAutonomousLinux\": true\n        },\n        {\n          \"id\": \"ocid1.osmhsoftwaresource.oc1.iad.exampleuniqueID2\",\n          \"displayName\": \"ol8_u10_baseos_base-x86_64\",\n          \"description\": \"Oracle Linux 8.10 BaseOS (x86_64)\",\n          \"softwareSourceType\": \"VENDOR\",\n          \"isMandatoryForAutonomousLinux\": false\n        }\n      ],\n      \"osFamilies\": [\n        \"ORACLE_LINUX_8\"\n      ]\n    }\n  ]\n}\n"
     ModuleStreamSummary:
       description: Provides the summary information for a module stream contained within a software source.
       properties:
@@ -3302,19 +3422,6 @@ components:
       - name
       - moduleName
       - profiles
-      type: object
-    ChangeSoftwareSourceCompartmentDetails:
-      description: Provides the information used to move the software source to another compartment.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the software source to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
       type: object
     PackageGroup:
       description: Yum or DNF package group, category, or environment.
@@ -3360,73 +3467,6 @@ components:
       - name
       - packages
       x-example: "{\n  \"id\": \"dotnet-core\",\n  \"name\": \".NET Core Development\",\n  \"repositories\": [\n    \"ol8_appstream-x86_64\"\n  ],\n  \"description\": \"Tools to develop .NET and .NET Core applications\",\n  \"isUserVisible\": true,\n  \"isDefault\": true,\n  \"groupType\": \"GROUP\",\n  \"displayOrder\": null,\n  \"packages\": [\n    \"dotnet-sdk-6.0\",\n    \"dotnet-sdk-3.1\"\n  ]\n}\n"
-    CreateSoftwareSourceDetails:
-      description: Provides the information used to create a software source.
-      discriminator:
-        propertyName: softwareSourceType
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the software source.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: User-specified description for the software source. Avoid entering confidential information.
-          maxLength: 400
-          type: string
-        displayName:
-          description: User-friendly name for the software source. Does not have to be unique and you can change the name later. Avoid entering confidential information.
-          format: x-obmcs-ascii-identifier
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9.])*$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        softwareSourceType:
-          description: Type of software source.
-          enum:
-          - VENDOR
-          - CUSTOM
-          - VERSIONED
-          - PRIVATE
-          - THIRD_PARTY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
-      required:
-      - compartmentId
-      - softwareSourceType
-      type: object
     ModuleStreamCollection:
       description: The set of module streams returned for [ListModuleStreams](#/en/osmh/latest/SoftwareSource/ListModuleStreamProfiles) operation.
       properties:
@@ -3439,82 +3479,162 @@ components:
       - items
       type: object
       x-example: "{\n  \"items\": [\n    {\n      \"name\": \"1.4\",\n      \"moduleName\": \"389-ds\",\n      \"profiles\": [],\n      \"isLatest\": true,\n      \"softwareSourceId\": \"ol8_appstream-x86_64\"\n    }\n  ]\n}\n"
-    PackageGroupSummary:
-      description: The yum or DNF package group that is associated with a software source.
+    SoftwarePackageFile:
+      description: A file associated with a package.
       properties:
-        description:
-          description: Description of the package group.
+        checksum:
+          description: Checksum of the file.
           type: string
-        displayOrder:
-          description: Indicates the order to display category or environment.
+        checksumType:
+          description: Type of the checksum.
+          type: string
+        path:
+          description: File path.
+          type: string
+        sizeInBytes:
+          description: Size of the file in bytes.
+          format: int64
           type: integer
-        groupType:
-          description: Indicates if this is a group, category or environment.
-          type: string
-          x-obmcs-enumref: '#/definitions/PackageGroup/groupType'
-        id:
-          description: Package group identifier.
-          type: string
-        isDefault:
-          description: Indicates if this package group is the default.
-          type: boolean
-        isUserVisible:
-          description: Indicates if this package group is visible to users.
-          type: boolean
-        name:
-          description: Package group name.
-          type: string
-        repositories:
-          description: The repository IDs of the package group.
-          items:
-            type: string
-          maxItems: 255
-          type: array
-      required:
-      - id
-      - name
-    SearchSoftwareSourceModulesDetails:
-      description: Provides the information used to search for a set of modules from a list software sources.
-      properties:
-        name:
-          description: 'The name of a module.
+        timeModified:
+          description: 'The date and time the file was last modified (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
 
             '
+          format: date-time
           type: string
-        nameContains:
-          description: A filter to return modules with a name that contains the given string.
+        type:
+          description: Type of the file.
           type: string
-        softwareSourceIds:
-          description: List of sofware source [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        sortBy:
-          description: The field to sort by.
-          enum:
-          - NAME
-          type: string
-        sortOrder:
-          description: The sort order.
-          enum:
-          - ASC
-          - DESC
-          type: string
-      required:
-      - softwareSourceIds
-      type: object
   parameters:
-    NameQueryParam:
-      description: The name of the entity to be queried.
+    IsMandatoryForAutonomousLinuxQueryParam:
+      description: Indicates whether the software source is mandatory for the Autonomous Linux service.
       in: query
-      name: name
+      name: isMandatoryForAutonomousLinux
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    SoftwareSourceSortByQueryParamErrata:
+      description: 'The field to sort errata by. Only one sort order may be provided. Default order for timeIssued is descending. Default order for name is ascending. If no value is specified timeIssued is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeIssued
+        - name
+        default: timeIssued
+    CsiQueryParam:
+      description: A filter to return entitlements that match the given customer support identifier (CSI).
+      in: query
+      name: csi
       required: false
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 255
+    MultiClassificationTypeQueryParam:
+      description: A filter to return only packages that match the given update classification type.
+      in: query
+      name: classificationType
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          - OTHER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
+        maxItems: 5
+        uniqueItems: true
+    IsMirrorSyncAllowedQueryParam:
+      description: A filter to return software sources which can be synced to a management station.
+      in: query
+      name: isMirrorSyncAllowed
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    PaginationTokenDefaultQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `3`
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
         minLength: 1
+    MultiAdvisoryTypeQueryParam:
+      description: A filter to return only errata that match the given advisory types.
+      in: query
+      name: advisoryType
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AdvisoryTypes'
+        maxItems: 5
+        uniqueItems: true
+    PackageGroupIdPathParam:
+      description: The unique package group identifier.
+      in: path
+      name: packageGroupId
+      required: true
+      schema:
+        type: string
+    ErratumNameQueryParam:
+      description: 'The assigned erratum name. It''s unique and not changeable.
+
+
+        Example: `ELSA-2020-5804`
+
+        '
+      in: query
+      name: name
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        maxItems: 51
+    ModuleStreamProfileNamePathParam:
+      description: The name of the module stream profile.
+      in: path
+      name: profileName
+      required: true
+      schema:
+        type: string
+    RequiredModuleNameQueryParam:
+      description: 'The name of a module.
+
+        '
+      in: query
+      name: moduleName
+      required: true
+      x-default-description: 'null'
+      schema:
+        type: string
     OsFamilyQueryParam:
       description: A filter to return only resources that match the given operating system family.
       in: query
@@ -3538,71 +3658,6 @@ components:
         - UBUNTU_20_04
         - UBUNTU_22_04
         - UBUNTU_24_04
-    RequiredCompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment. This parameter is required and returns only resources contained within the specified compartment.
-      in: query
-      name: compartmentId
-      required: true
-      x-default-description: 'null'
-      schema:
-        type: string
-    AvailabilityQueryParam:
-      description: The availability of the software source in a non-OCI environment for a tenancy.
-      in: query
-      name: availability
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - AVAILABLE
-          - SELECTED
-          - RESTRICTED
-          - UNAVAILABLE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/Availability'
-    EndIssueDateQueryParam:
-      description: 'The issue date before which to list all errata, in ISO 8601 format
-
-
-        Example: 2017-07-14T02:40:00.000Z
-
-        '
-      in: query
-      name: timeIssueDateEnd
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    CsiQueryParam:
-      description: A filter to return entitlements that match the given customer support identifier (CSI).
-      in: query
-      name: csi
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
     MultiOsFamilyQueryParam:
       description: A filter to return only resources that match the given operating system family.
       in: query
@@ -3633,6 +3688,116 @@ components:
           x-obmcs-top-level-enum: '#/definitions/OsFamily'
         maxItems: 5
         uniqueItems: true
+    SoftwareSourceSortByQueryParamVendor:
+      description: 'The field to sort software source vendors by. Only one sort order may be provided. Default order for name is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - name
+        default: name
+    ErratumNamePathParam:
+      description: The erratum name (such as ELSA-2023-34678).
+      in: path
+      name: name
+      required: true
+      schema:
+        type: string
+    SoftwareSourceSortByQueryParamPackage:
+      description: 'The field to sort packages by. Only one sort order may be provided. Default order for displayName is ascending. If no value is specified displayName is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - displayName
+        default: displayName
+    SoftwarePackageArchitectureQueryParam:
+      description: A filter to return software packages that match the given architecture.
+      in: query
+      name: architecture
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/SoftwarePackageArchitecture'
+      schema:
+        type: string
+        enum:
+        - I386
+        - I686
+        - AARCH64
+        - X86_64
+        - SRC
+        - NOARCH
+        - OTHER
+    AvailabilityAnywhereQueryParam:
+      description: The availability of the software source. Use this query parameter to filter across availabilities in different environments.
+      in: query
+      name: availabilityAnywhere
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - AVAILABLE
+          - SELECTED
+          - RESTRICTED
+          - UNAVAILABLE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/Availability'
+    MultiSoftwareSourceLifecycleStateQueryParam:
+      description: A filter to return only software sources whose state matches the given state.
+      in: query
+      name: lifecycleState
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          x-default-description: 'null'
+          x-obmcs-enumref: '#/definitions/SoftwareSource/lifecycleState'
+        uniqueItems: true
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    ErratumNameContainsQueryParam:
+      description: A filter to return resources that may partially match the erratum name given.
+      in: query
+      name: nameContains
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    DisplayNameContainsQueryParam:
+      description: A filter to return resources that may partially match the given display name.
+      in: query
+      name: displayNameContains
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     AdvisorySeverityQueryParam:
       description: 'The advisory severity.
 
@@ -3654,49 +3819,27 @@ components:
           type: string
           x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
         maxItems: 10
-    ModuleNameParam:
-      description: 'The name of a module. This parameter is required if a
+    RequestIdHeader:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
 
-        streamName is specified.
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `3`
 
         '
       in: query
-      name: moduleName
-      required: false
+      name: page
       x-default-description: 'null'
       schema:
         type: string
-    isLatestQueryParam:
-      description: Indicates whether to list only the latest versions of packages, module streams, and stream profiles.
-      in: query
-      name: isLatest
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    ModuleStreamNameParam:
-      description: The name of the module stream. This parameter is required if a profile name is specified.
-      in: query
-      name: streamName
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
+        minLength: 1
     AvailabilityAtOciQueryParam:
       description: The availability of the software source in an OCI environment for a tenancy.
       in: query
@@ -3715,59 +3858,23 @@ components:
           - UNAVAILABLE
           type: string
           x-obmcs-top-level-enum: '#/definitions/Availability'
-    SoftwareSourceSortByQueryParamErrata:
-      description: 'The field to sort errata by. Only one sort order may be provided. Default order for timeIssued is descending. Default order for name is ascending. If no value is specified timeIssued is default.
-
-        '
+    NameQueryParam:
+      description: The name of the entity to be queried.
       in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeIssued
-        - name
-        default: timeIssued
-    RequestIdHeader:
-      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    MultiAdvisoryTypeQueryParam:
-      description: A filter to return only errata that match the given advisory types.
-      in: query
-      name: advisoryType
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/AdvisoryTypes'
-        maxItems: 5
-        uniqueItems: true
-    RequiredModuleNameQueryParam:
-      description: 'The name of a module.
-
-        '
-      in: query
-      name: moduleName
-      required: true
+      name: name
+      required: false
       x-default-description: 'null'
       schema:
         type: string
-    SoftwarePackageNamePathParam:
-      description: The name of the software package.
-      in: path
-      name: softwarePackageName
+        maxLength: 255
+        minLength: 1
+    AddPackagesToSoftwareSourceDetailsParam:
+      description: A list of packages to be added to the software source.
+      in: body
+      name: AddPackagesToSoftwareSourceDetails
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/AddPackagesToSoftwareSourceDetails'
     ModuleNameSortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for moduleName is ascending.
 
@@ -3779,140 +3886,6 @@ components:
         enum:
         - moduleName
         default: moduleName
-    PaginationTokenDefaultQueryParam:
-      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `3`
-
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    SoftwarePackageVersionQueryParam:
-      description: A filter to return software packages that match the given version.
-      in: query
-      name: version
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    RequiredModuleStreamNameQueryParam:
-      description: 'The name of the stream of the containing module.
-
-        '
-      in: query
-      name: streamName
-      required: true
-      x-default-description: 'null'
-      schema:
-        type: string
-    MultiPackageGroupTypeQueryParam:
-      description: A filter to return only package groups of the specified type.
-      in: query
-      name: groupType
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-          x-obmcs-enumref: '#/definitions/PackageGroup/groupType'
-        uniqueItems: true
-    IsMirrorSyncAllowedQueryParam:
-      description: A filter to return software sources which can be synced to a management station.
-      in: query
-      name: isMirrorSyncAllowed
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    DisplayNameContainsQueryParam:
-      description: A filter to return resources that may partially match the given display name.
-      in: query
-      name: displayNameContains
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ModuleNamePathParam:
-      description: The name of the module.
-      in: path
-      name: moduleName
-      required: true
-      schema:
-        type: string
-    SoftwareSourceSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    ChangeSoftwareSourceCompartmentDetailsParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the compartment to move the software source to.
-      in: body
-      name: ChangeSoftwareSourceCompartmentDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/ChangeSoftwareSourceCompartmentDetails'
-    IsMandatoryForAutonomousLinuxQueryParam:
-      description: Indicates whether the software source is mandatory for the Autonomous Linux service.
-      in: query
-      name: isMandatoryForAutonomousLinux
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    StartIssueDateQueryParam:
-      description: 'The issue date after which to list all errata, in ISO 8601 format
-
-
-        Example: 2017-07-14T02:40:00.000Z
-
-        '
-      in: query
-      name: timeIssueDateStart
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    NameContainsQueryParam:
-      description: A filter to return resources that may partially match the name given.
-      in: query
-      name: nameContains
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    ErratumNamePathParam:
-      description: The erratum name (such as ELSA-2023-34678).
-      in: path
-      name: name
-      required: true
-      schema:
-        type: string
-    ModuleStreamProfileNamePathParam:
-      description: The name of the module stream profile.
-      in: path
-      name: profileName
-      required: true
-      schema:
-        type: string
     ModuleNameContainsQueryParam:
       description: A filter to return resources that may partially match the module name given.
       in: query
@@ -3922,61 +3895,115 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return resources that match the given user-friendly name.
+    SoftwareSourceTypeQueryParam:
+      description: The type of the software source.
       in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SoftwarePackageArchitectureQueryParam:
-      description: A filter to return software packages that match the given architecture.
-      in: query
-      name: architecture
+      name: softwareSourceType
       required: false
       x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/SoftwarePackageArchitecture'
+      style: form
+      explode: true
       schema:
-        type: string
-        enum:
-        - I386
-        - I686
-        - AARCH64
-        - X86_64
-        - SRC
-        - NOARCH
-        - OTHER
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
+        type: array
+        items:
+          enum:
+          - VENDOR
+          - CUSTOM
+          - VERSIONED
+          - PRIVATE
+          - THIRD_PARTY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
+        maxItems: 10
+    isLatestQueryParam:
+      description: Indicates whether to list only the latest versions of packages, module streams, and stream profiles.
+      in: query
+      name: isLatest
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    ModuleNameParam:
+      description: 'The name of a module. This parameter is required if a
 
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `3`
+        streamName is specified.
 
         '
       in: query
-      name: page
+      name: moduleName
+      required: false
       x-default-description: 'null'
       schema:
         type: string
-        minLength: 1
-    PackageGroupIdPathParam:
-      description: The unique package group identifier.
-      in: path
-      name: packageGroupId
-      required: true
+    VendorNameQueryParam:
+      description: A filter to return only resources that match the given vendor name.
+      in: query
+      name: vendorName
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/VendorName'
       schema:
         type: string
-    ReplacePackagesInSoftwareSourceDetailsParam:
-      description: A list of packages that will replace the existing packages in the software source.
+        enum:
+        - ORACLE
+        - MICROSOFT
+        - CANONICAL
+    RemovePackagesFromSoftwareSourceDetailsParam:
+      description: A list of packages to be removed from the software source.
       in: body
-      name: ReplacePackagesInSoftwareSourceDetails
+      name: RemovePackagesFromSoftwareSourceDetails
       required: true
       schema:
-        $ref: '#/components/schemas/ReplacePackagesInSoftwareSourceDetails'
+        $ref: '#/components/schemas/RemovePackagesFromSoftwareSourceDetails'
+    EndIssueDateQueryParam:
+      description: 'The issue date before which to list all errata, in ISO 8601 format
+
+
+        Example: 2017-07-14T02:40:00.000Z
+
+        '
+      in: query
+      name: timeIssueDateEnd
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    SoftwareSourceSortByQueryParamEntitlements:
+      description: 'The field to sort entitlements by. Only one sort order may be provided.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - csi
+        - vendorName
+        default: vendorName
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
     MultiDisplayNameNotEqualToQueryParam:
       description: A multi filter to return resources that do not contains the given display names.
       in: query
@@ -3993,10 +4020,10 @@ components:
           type: string
         maxItems: 5
         uniqueItems: true
-    AvailabilityAnywhereQueryParam:
-      description: The availability of the software source. Use this query parameter to filter across availabilities in different environments.
+    AvailabilityQueryParam:
+      description: The availability of the software source in a non-OCI environment for a tenancy.
       in: query
-      name: availabilityAnywhere
+      name: availability
       required: false
       x-default-description: 'null'
       style: form
@@ -4011,37 +4038,33 @@ components:
           - UNAVAILABLE
           type: string
           x-obmcs-top-level-enum: '#/definitions/Availability'
-    VendorNameQueryParam:
-      description: A filter to return only resources that match the given vendor name.
+    SoftwarePackageVersionQueryParam:
+      description: A filter to return software packages that match the given version.
       in: query
-      name: vendorName
+      name: version
+      required: false
       x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/VendorName'
+      schema:
+        type: string
+    SoftwareSourceSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+
+        '
+      in: query
+      name: sortBy
       schema:
         type: string
         enum:
-        - ORACLE
-        - MICROSOFT
-        - CANONICAL
-    MultiClassificationTypeQueryParam:
-      description: A filter to return only packages that match the given update classification type.
-      in: query
-      name: classificationType
-      x-default-description: 'null'
-      style: form
-      explode: true
+        - timeCreated
+        - displayName
+        default: timeCreated
+    ReplacePackagesInSoftwareSourceDetailsParam:
+      description: A list of packages that will replace the existing packages in the software source.
+      in: body
+      name: ReplacePackagesInSoftwareSourceDetails
+      required: true
       schema:
-        type: array
-        items:
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          - OTHER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
-        maxItems: 5
-        uniqueItems: true
+        $ref: '#/components/schemas/ReplacePackagesInSoftwareSourceDetails'
     MultiArchTypeQueryParam:
       description: A filter to return only instances whose architecture type matches the given architecture.
       in: query
@@ -4067,13 +4090,120 @@ components:
           x-obmcs-top-level-enum: '#/definitions/ArchType'
         maxItems: 5
         uniqueItems: true
-    RemovePackagesFromSoftwareSourceDetailsParam:
-      description: A list of packages to be removed from the software source.
-      in: body
-      name: RemovePackagesFromSoftwareSourceDetails
+    StartIssueDateQueryParam:
+      description: 'The issue date after which to list all errata, in ISO 8601 format
+
+
+        Example: 2017-07-14T02:40:00.000Z
+
+        '
+      in: query
+      name: timeIssueDateStart
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    OptionalSoftwareSourceIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the software source.
+      in: query
+      name: softwareSourceId
+      required: false
+      schema:
+        type: string
+    RequiredModuleStreamNameQueryParam:
+      description: 'The name of the stream of the containing module.
+
+        '
+      in: query
+      name: streamName
+      required: true
+      x-default-description: 'null'
+      schema:
+        type: string
+    SoftwareSourceIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
+      in: path
+      name: softwareSourceId
       required: true
       schema:
-        $ref: '#/components/schemas/RemovePackagesFromSoftwareSourceDetails'
+        type: string
+    ChangeSoftwareSourceCompartmentDetailsParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the compartment to move the software source to.
+      in: body
+      name: ChangeSoftwareSourceCompartmentDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/ChangeSoftwareSourceCompartmentDetails'
+    ModuleStreamNameParam:
+      description: The name of the module stream. This parameter is required if a profile name is specified.
+      in: query
+      name: streamName
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ModuleNamePathParam:
+      description: The name of the module.
+      in: path
+      name: moduleName
+      required: true
+      schema:
+        type: string
+    NameContainsQueryParam:
+      description: A filter to return resources that may partially match the name given.
+      in: query
+      name: nameContains
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    MultiPackageGroupTypeQueryParam:
+      description: A filter to return only package groups of the specified type.
+      in: query
+      name: groupType
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          x-obmcs-enumref: '#/definitions/PackageGroup/groupType'
+        uniqueItems: true
+    DisplayNameQueryParam:
+      description: A filter to return resources that match the given user-friendly name.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `50`
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    SoftwarePackageNamePathParam:
+      description: The name of the software package.
+      in: path
+      name: softwarePackageName
+      required: true
+      schema:
+        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -4093,144 +4223,14 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    SoftwareSourceSortByQueryParamVendor:
-      description: 'The field to sort software source vendors by. Only one sort order may be provided. Default order for name is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - name
-        default: name
-    SoftwareSourceIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
-      in: path
-      name: softwareSourceId
-      required: true
-      schema:
-        type: string
-    SoftwareSourceSortByQueryParamPackage:
-      description: 'The field to sort packages by. Only one sort order may be provided. Default order for displayName is ascending. If no value is specified displayName is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - displayName
-        default: displayName
-    OptionalSoftwareSourceIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the software source.
-      in: query
-      name: softwareSourceId
-      required: false
-      schema:
-        type: string
-    ErratumNameQueryParam:
-      description: 'The assigned erratum name. It''s unique and not changeable.
-
-
-        Example: `ELSA-2020-5804`
-
-        '
-      in: query
-      name: name
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        maxItems: 51
-    MultiSoftwareSourceLifecycleStateQueryParam:
-      description: A filter to return only software sources whose state matches the given state.
-      in: query
-      name: lifecycleState
-      required: false
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-          x-default-description: 'null'
-          x-obmcs-enumref: '#/definitions/SoftwareSource/lifecycleState'
-        uniqueItems: true
-    CompartmentIdQueryParam:
-      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
+    RequiredCompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment. This parameter is required and returns only resources contained within the specified compartment.
       in: query
       name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    SoftwareSourceSortByQueryParamEntitlements:
-      description: 'The field to sort entitlements by. Only one sort order may be provided.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - csi
-        - vendorName
-        default: vendorName
-    SoftwareSourceTypeQueryParam:
-      description: The type of the software source.
-      in: query
-      name: softwareSourceType
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - VENDOR
-          - CUSTOM
-          - VERSIONED
-          - PRIVATE
-          - THIRD_PARTY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
-        maxItems: 10
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `50`
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
-    ErratumNameContainsQueryParam:
-      description: A filter to return resources that may partially match the erratum name given.
-      in: query
-      name: nameContains
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    AddPackagesToSoftwareSourceDetailsParam:
-      description: A list of packages to be added to the software source.
-      in: body
-      name: AddPackagesToSoftwareSourceDetails
       required: true
+      x-default-description: 'null'
       schema:
-        $ref: '#/components/schemas/AddPackagesToSoftwareSourceDetails'
+        type: string
   responses:
     default:
       description: Unknown Error

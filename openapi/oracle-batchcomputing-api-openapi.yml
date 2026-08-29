@@ -1,7 +1,7 @@
 openapi: 3.2.0
 info:
   description: Use the Batch Control Plane API to encapsulate and manage all aspects of computationally intensive jobs.
-  title: Batch Batch Computing API
+  title: Batch Computing API
   version: '20251031'
   x-provenance:
     method: harvested
@@ -2314,11 +2314,380 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   schemas:
-    BatchJobPoolSummary:
-      description: Summary information about a batch job pool.
+    ShapeMemoryOptions:
+      description: The amount of memory available for container instances that use this shape.
+      properties:
+        defaultPerOcpuInGBs:
+          description: The default amount of memory per OCPU available for this shape (GB).
+          format: float
+          minimum: 0
+          type: number
+        maxInGBs:
+          description: The maximum amount of memory (GB).
+          format: float
+          minimum: 0
+          type: number
+        maxPerOcpuInGBs:
+          description: For a flexible shape, the maximum amount of memory per OCPU available for this shape (GB).
+          format: float
+          minimum: 0
+          type: number
+        minInGBs:
+          description: The minimum amount of memory (GB).
+          format: float
+          minimum: 0
+          type: number
+        minPerOcpuInGBs:
+          description: The minimum amount of memory per OCPU available for this shape (GB).
+          format: float
+          minimum: 0
+          type: number
+      required:
+      - defaultPerOcpuInGBs
+      - maxInGBs
+      - maxPerOcpuInGBs
+      - minInGBs
+      - minPerOcpuInGBs
+      type: object
+    WorkRequestSummary:
+      description: Summary information about an asynchronous work request.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
+
+            '
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
+          type: string
+        operationType:
+          description: The asynchronous operation tracked by this work request.
+          enum:
+          - CREATE_BATCH_CONTEXT
+          - UPDATE_BATCH_CONTEXT
+          - DELETE_BATCH_CONTEXT
+          - START_BATCH_CONTEXT
+          - STOP_BATCH_CONTEXT
+          - MOVE_BATCH_CONTEXT
+          - CREATE_BATCH_JOB
+          - UPDATE_BATCH_JOB
+          - DELETE_BATCH_JOB
+          - MOVE_BATCH_JOB
+          - PAUSE_BATCH_JOB
+          - UNPAUSE_BATCH_JOB
+          - MOVE_BATCH_JOB_POOL
+          - UPDATE_BATCH_JOB_POOL
+          - START_BATCH_JOB_POOL
+          - STOP_BATCH_JOB_POOL
+          - MOVE_BATCH_TASK_ENVIRONMENT
+          - MOVE_BATCH_TASK_PROFILE
+          - INTERNAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
+
+            that must be performed.
+
+            '
+          format: float
+          type: number
+        resources:
+          description: The resources that are affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the work request was created, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the work request was finished, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the work request was started, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the work request was updated, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    ShapeOcpuOptions:
+      description: For a flexible shape, the number of OCPUs available for container instances that use this shape.
+      properties:
+        maxOcpus:
+          description: The maximum number of OCPUs.
+          format: float
+          minimum: 0
+          type: number
+        minOcpus:
+          description: The minimum number of OCPUs.
+          format: float
+          minimum: 0
+          type: number
+      required:
+      - maxOcpus
+      - minOcpus
+      type: object
+    UpdateBatchContextDetails:
+      description: 'The data to update a batch context.
+
+        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: Summarized information about the batch context.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Can''t be set to null.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        entitlements:
+          additionalProperties:
+            description: Value of the limit.
+            minimum: 0
+            type: integer
+          description: Mapping of concurrent/shared resources used in job tasks to their limits.
+          maxProperties: 100
+          type: object
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        jobPriorityConfigurations:
+          description: List of job priority configurations related to the batch context.
+          items:
+            $ref: '#/components/schemas/JobPriorityConfiguration'
+          maxItems: 10
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10)'
+        loggingConfiguration:
+          $ref: '#/components/schemas/UpdateLoggingConfigurationDetails'
+      type: object
+    Network:
+      description: Network configuration of the batch context.
+      properties:
+        nsgIds:
+          description: 'A list of [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) of associated network security groups.
+
+            '
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 10
+          type: array
+          uniqueItems: true
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10) @io.micronaut.validation.annotation.UniqueElements'
+        subnetId:
+          description: '[OCID](/iaas/Content/General/Concepts/identifiers.htm) of associated subnet.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        vnics:
+          description: 'A list of private endpoint''s VNICs.
+
+            '
+          items:
+            $ref: '#/components/schemas/Vnic'
+          maxItems: 10
+          type: array
+      required:
+      - subnetId
+      - nsgIds
+      - vnics
+      type: object
+    CreateBatchTaskEnvironmentDetails:
+      description: 'The data to create a batch task environment.
+
+        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: The batch task environment description.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            If not specified or provided as null or empty string, it be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchtaskenvironment20250914115623.
+
+            '
+          maxLength: 255
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        imageUrl:
+          description: The URL of the ocir image.
+          maxLength: 255
+          minLength: 1
+          type: string
+        securityContext:
+          $ref: '#/components/schemas/SecurityContext'
+        volumes:
+          description: 'List of volumes attached to the image.
+
+            The use cases of the volumes are but not limited to: read the input of the task and write the output.
+
+            '
+          items:
+            $ref: '#/components/schemas/BatchTaskEnvironmentVolume'
+          maxItems: 10
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10)'
+        workingDirectory:
+          description: Container's working directory.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      - imageUrl
+      type: object
+    StopBatchContextDetails:
+      description: Information needed to stop the batch context.
+      type: object
+    WorkRequestSummaryCollection:
+      description: A list of work requests. Can contain both work requests and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work requests.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    BatchJobSummary:
+      description: Summary information about a batch job.
       properties:
         batchContextId:
-          description: The OCID of batch context.
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the parent batch context of the parent job pool.
+          maxLength: 255
+          minLength: 1
+          type: string
+        batchJobPoolId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the parent batch job pool.
           maxLength: 255
           minLength: 1
           type: string
@@ -2352,7 +2721,7 @@ components:
             '
           type: object
         description:
-          description: Summarized information about the batch job pool.
+          description: An optional description that provides additional context next to the displayName.
           maxLength: 400
           type: string
         displayName:
@@ -2373,16 +2742,37 @@ components:
             '
           type: object
         id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job pool.
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job.
           maxLength: 255
           minLength: 1
           type: string
+        lifecycleDetails:
+          description: 'A message that describes the current state of the batch job in more detail. For example,
+
+            can be used to provide actionable information for a resource in the Failed state.
+
+            '
+          maxLength: 255
+          type: string
         lifecycleState:
-          description: 'The current state of the batch job pool.
+          description: 'The current state of the batch job.
 
             '
           type: string
-          x-obmcs-enumref: '#/definitions/BatchJobPool/lifecycleState'
+          x-obmcs-enumref: '#/definitions/BatchJob/lifecycleState'
+        priority:
+          description: A value calculated by the system based on the priority tags.
+          minimum: 0
+          type: integer
+        progressDetails:
+          description: A more detailed textual representation of the job completion.
+          maxLength: 255
+          type: string
+        progressPercentage:
+          description: A percentage value (0..100) of the job completion.
+          maximum: 100
+          minimum: 0
+          type: integer
         systemTags:
           additionalProperties:
             additionalProperties:
@@ -2405,7 +2795,7 @@ components:
             '
           type: object
         timeCreated:
-          description: 'The date and time the batch job pool was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+          description: 'The date and time the batch job was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
 
 
             Example: `2016-08-25T21:10:29.600Z`
@@ -2414,7 +2804,7 @@ components:
           format: date-time
           type: string
         timeUpdated:
-          description: 'The date and time the batch job pool was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+          description: 'The date and time the batch job was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
 
 
             Example: `2016-08-25T21:10:29.600Z`
@@ -2425,58 +2815,37 @@ components:
       required:
       - id
       - compartmentId
+      - batchJobPoolId
       - batchContextId
       - displayName
-      - lifecycleState
       - timeCreated
+      - lifecycleState
       - freeformTags
       - definedTags
       - systemTags
       type: object
-    Error:
-      description: Error information.
+    PauseBatchJobDetails:
+      description: Information needed to pause the batch job.
+      type: object
+    ChangeBatchJobPoolCompartmentDetails:
+      description: The configuration details for the move operation.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
           type: string
-        message:
-          description: A human-readable error message.
+      required:
+      - compartmentId
+      type: object
+    BatchTaskEnvironmentSummary:
+      description: Summary information about a batch task environment.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
           type: string
-      required:
-      - code
-      - message
-    StopBatchJobPoolDetails:
-      description: Information needed to stop the batch job pool.
-      type: object
-    BatchJobCollection:
-      description: Results of a batch job search. Contains both batch job summary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of batch jobs.
-          items:
-            $ref: '#/components/schemas/BatchJobSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestSummaryCollection:
-      description: A list of work requests. Can contain both work requests and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work requests.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateBatchJobDetails:
-      description: 'The data to update a batch job.
-
-        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -2502,13 +2871,13 @@ components:
             '
           type: object
         description:
-          description: An optional description that provides additional context next to the displayName.
+          description: The batch task environment description.
           maxLength: 400
           type: string
         displayName:
           description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
 
-            Can''t be set to null.
+            If not specified or provided as null or empty string, it be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchtaskenvironment20250914115623.
 
             '
           maxLength: 255
@@ -2526,9 +2895,124 @@ components:
 
             '
           type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task environment.
+          type: string
+        imageUrl:
+          description: The URL of the ocir image.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: 'The current state of the batch task environment.
+
+            '
+          type: string
+          x-obmcs-enumref: '#/definitions/BatchTaskEnvironment/lifecycleState'
+        securityContext:
+          $ref: '#/components/schemas/SecurityContext'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
+
+
+              Example: `{"free-tier-retained": "true"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the batch task environment was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the batch task environment was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        workingDirectory:
+          description: Container's working directory.
+          maxLength: 1024
+          minLength: 1
+          type: string
+      required:
+      - id
+      - compartmentId
+      - displayName
+      - imageUrl
+      - lifecycleState
+      - timeCreated
+      - freeformTags
+      - definedTags
+      - systemTags
       type: object
-    PauseBatchJobDetails:
-      description: Information needed to pause the batch job.
+    BatchContextShapeSummary:
+      description: Details about a shape for a container instance.
+      properties:
+        memoryOptions:
+          $ref: '#/components/schemas/ShapeMemoryOptions'
+        name:
+          description: The name identifying the shape.
+          maxLength: 255
+          minLength: 1
+          type: string
+        networkingBandwidthOptions:
+          $ref: '#/components/schemas/ShapeNetworkingBandwidthOptions'
+        ocpuOptions:
+          $ref: '#/components/schemas/ShapeOcpuOptions'
+        processorDescription:
+          description: A short description of the container instance's processor (CPU).
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      - processorDescription
+      type: object
+    BatchJobCollection:
+      description: Results of a batch job search. Contains both batch job summary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of batch jobs.
+          items:
+            $ref: '#/components/schemas/BatchJobSummary'
+          type: array
+      required:
+      - items
+      type: object
+    StartBatchContextDetails:
+      description: Information needed to start the batch context.
+      type: object
+    BatchTaskEnvironmentCollection:
+      description: Results of a batch task environment search. Contains both batch task environment summary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of batch task environments.
+          items:
+            $ref: '#/components/schemas/BatchTaskEnvironmentSummary'
+          type: array
+      required:
+      - items
       type: object
     BatchJobPool:
       description: 'A batch job pool represents an abstract group for jobs.
@@ -2663,8 +3147,532 @@ components:
       - definedTags
       - systemTags
       type: object
-    StopBatchContextDetails:
-      description: Information needed to stop the batch context.
+    UpdateBatchJobPoolDetails:
+      description: 'The data to update a batch job pool.
+
+        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: Summarized information about the batch job pool.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Can''t be set to null.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      type: object
+    BatchTaskProfile:
+      description: 'A batch task profile resource describes the minimum hardware requirements requested for a task.
+
+
+        To use any of the API operations, you must be authorized in an IAM policy. If you''re not authorized, talk to
+
+        an administrator. If you''re an administrator who needs to write policies to give users access, see
+
+        [Getting Started with Policies](/iaas/Content/Identity/policiesgs/get-started-with-policies.htm).
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: The batch task profile description.
+          maxLength: 400
+          type: string
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable.
+          maxLength: 255
+          minLength: 1
+          type: string
+        extendedInformation:
+          $ref: '#/components/schemas/BatchTaskProfileExtendedInformation'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task profile.
+          type: string
+        lifecycleState:
+          description: 'The current state of the batch task profile.
+
+            '
+          enum:
+          - ACTIVE
+          - DELETED
+          type: string
+        minMemoryInGBs:
+          default: 0
+          description: The minimum required memory.
+          minimum: 0
+          type: integer
+        minOcpus:
+          default: 0
+          description: The minimum required OCPUs.
+          minimum: 0
+          type: integer
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
+
+
+              Example: `{"free-tier-retained": "true"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the batch task profile was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the batch task profile was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - displayName
+      - minOcpus
+      - minMemoryInGBs
+      - lifecycleState
+      - timeCreated
+      - freeformTags
+      - definedTags
+      - systemTags
+      type: object
+    StartBatchJobPoolDetails:
+      description: Information needed to start the batch job pool.
+      type: object
+    WorkRequestErrorCollection:
+      description: A list of work request errors. Can contain both errors and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work request errors.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestError:
+      description: An error encountered while performing an operation that is tracked by a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
+
+            [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+        timestamp:
+          description: 'The date and time the error occurred, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    ChangeBatchJobCompartmentDetails:
+      description: The configuration details for the move operation.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    BatchTaskSummary:
+      description: Summary information about a batch task.
+      discriminator:
+        propertyName: type
+      properties:
+        description:
+          description: An optional description that provides additional context next to the displayName.
+          maxLength: 255
+          type: string
+        groupTaskName:
+          description: The hierarchical name of the group task. Null for top-level tasks.
+          type: string
+        hierarchicalName:
+          description: 'The hierarchical name of the task, which incorporates names of all parent group tasks, separated by "." (dot symbol). Maximum nesting depth is 4 levels. Example: groupTaskA.nestedGroupTaskB.thisTaskName'
+          example: groupTaskA.nestedGroupTaskB.thisTaskName
+          type: string
+        id:
+          description: The UUID of batch task.
+          maxLength: 255
+          minLength: 1
+          type: string
+        jobId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job to which this task belongs.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: 'A message that describes the current state of the batch task in more detail. For example, can be used to provide actionable information for a resource in the Failed state.
+
+            '
+          maxLength: 255
+          type: string
+        lifecycleState:
+          description: The current state of the batch task.
+          type: string
+          x-obmcs-enumref: '#/definitions/BatchTask/lifecycleState'
+        name:
+          description: The name of the batch task. It must be unique within its parent batch job.
+          format: x-obmcs-ascii-identifier
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        type:
+          description: Type of the batch task. Also serves as a discriminator for sub-entities.
+          type: string
+          x-obmcs-enumref: '#/definitions/BatchTask/type'
+      required:
+      - id
+      - jobId
+      - name
+      - type
+    BatchContextShapeCollection:
+      description: A collection of container instance shapes.
+      properties:
+        items:
+          description: List of shapes.
+          items:
+            $ref: '#/components/schemas/BatchContextShapeSummary'
+          type: array
+      required:
+      - items
+      type: object
+    BatchJobPoolSummary:
+      description: Summary information about a batch job pool.
+      properties:
+        batchContextId:
+          description: The OCID of batch context.
+          maxLength: 255
+          minLength: 1
+          type: string
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: Summarized information about the batch job pool.
+          maxLength: 400
+          type: string
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job pool.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: 'The current state of the batch job pool.
+
+            '
+          type: string
+          x-obmcs-enumref: '#/definitions/BatchJobPool/lifecycleState'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
+
+
+              Example: `{"free-tier-retained": "true"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the batch job pool was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the batch job pool was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - batchContextId
+      - displayName
+      - lifecycleState
+      - timeCreated
+      - freeformTags
+      - definedTags
+      - systemTags
+      type: object
+    ChangeBatchContextCompartmentDetails:
+      description: The configuration details for the move operation.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the batch context to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    CreateBatchJobDetails:
+      description: 'The data to create a batch job.
+
+        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        batchJobPoolId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the parent batch job pool.
+          maxLength: 255
+          minLength: 1
+          type: string
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: An optional description that provides additional context next to the displayName.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            If not specified or provided as null or empty string, it will be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchjob20250914115623.
+
+            '
+          maxLength: 255
+          type: string
+        environmentVariables:
+          description: An environment variables to use for the job's tasks (can be overridden by task's environment variables).
+          items:
+            $ref: '#/components/schemas/EnvironmentVariable'
+          maxItems: 100
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        tasks:
+          description: 'A list of tasks to be executed within this job.
+
+            Maximum number of tasks a job can have in total, across all nested levels, is 1000.
+
+            '
+          items:
+            $ref: '#/components/schemas/CreateBatchTaskDetails'
+          maxItems: 1000
+          minItems: 1
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(min = 1, max = 1000)'
+      required:
+      - compartmentId
+      - batchJobPoolId
+      - tasks
       type: object
     BatchTaskProfileExtendedInformation:
       description: Extended information for the task profile.
@@ -2680,8 +3688,425 @@ components:
           type: string
       required:
       - type
-    WorkRequestSummary:
-      description: Summary information about an asynchronous work request.
+    JobPriorityConfiguration:
+      description: Job priority configuration to instruct the service on how to use priority tags.
+      example:
+        tagKey: StudioPriority
+        tagNamespace: PrioritizationTags
+        values:
+          HIGH: 5
+          LOW: 0
+          MED: 2
+          POSTPONE: -10
+        weight: 100
+      properties:
+        tagKey:
+          description: Name of the tag key.
+          maxLength: 100
+          minLength: 1
+          type: string
+        tagNamespace:
+          description: Name of the corresponding tag namespace.
+          maxLength: 100
+          minLength: 1
+          type: string
+        values:
+          additionalProperties:
+            description: Priority value as an integer.
+            type: integer
+          description: Mapping of tag value to its priority.
+          maxProperties: 10
+          minProperties: 1
+          type: object
+          x-extra-annotations: '@jakarta.validation.constraints.Size(min = 1, max = 10)'
+        weight:
+          description: Weight associated with the tag key. Percentage point is the unit of measurement.
+          example: 33
+          maximum: 100
+          minimum: -100
+          type: integer
+      required:
+      - tagNamespace
+      - tagKey
+      - weight
+      - values
+      type: object
+    WorkRequestLogEntry:
+      description: A log message from performing an operation that is tracked by a work request.
+      properties:
+        message:
+          description: A human-readable log message.
+          type: string
+        timestamp:
+          description: 'The date and time the log message was written, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    CreateNetworkDetails:
+      description: Network configuration of the batch context.
+      properties:
+        nsgIds:
+          description: 'A list of [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) of associated network security groups.
+
+            '
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 10
+          type: array
+          uniqueItems: true
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10) @io.micronaut.validation.annotation.UniqueElements'
+        subnetId:
+          description: '[OCID](/iaas/Content/General/Concepts/identifiers.htm) of associated subnet.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - subnetId
+      type: object
+    CreateBatchTaskProfileExtendedInformationDetails:
+      description: Extended information for the task profile.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: Type of extended information.
+          enum:
+          - CPU_ARCHITECTURE_TASK_PROFILE_EXTENDED_INFORMATION
+          - CPU_SHAPE_TASK_PROFILE_EXTENDED_INFORMATION
+          - GPU_SHAPE_TASK_PROFILE_EXTENDED_INFORMATION
+          type: string
+      required:
+      - type
+    CreateBatchTaskProfileDetails:
+      description: 'The data to create a batch task profile.
+
+        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: The batch task profile description.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            If not specified or provided as null or empty string, it be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchtaskprofile20250914115623.
+
+            '
+          maxLength: 255
+          type: string
+        extendedInformation:
+          $ref: '#/components/schemas/CreateBatchTaskProfileExtendedInformationDetails'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        minMemoryInGBs:
+          default: 0
+          description: The minimum required memory.
+          minimum: 0
+          type: integer
+        minOcpus:
+          default: 0
+          description: The minimum required OCPUs.
+          minimum: 0
+          type: integer
+      required:
+      - compartmentId
+      type: object
+    ChangeBatchTaskEnvironmentCompartmentDetails:
+      description: The configuration details for the move operation.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the batch task environment to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    UpdateBatchTaskEnvironmentDetails:
+      description: 'The data to update a batch task environment.
+
+        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: The batch task environment description.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Can''t be set to null.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      type: object
+    CreateBatchJobPoolDetails:
+      description: 'The data to create a batch job pool.
+
+        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        batchContextId:
+          description: The OCID of batch context.
+          maxLength: 255
+          minLength: 1
+          type: string
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: Summarized information about the batch job pool.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            If not specified or provided as null or empty string, it be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchjobpool20250914115623.
+
+            '
+          maxLength: 255
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      required:
+      - compartmentId
+      - batchContextId
+      type: object
+    SecurityContext:
+      description: 'Security context for container runtime configuration.
+
+
+        See also [docs](https://docs.oracle.com/en-us/iaas/api/#/en/container-instances/20210415/datatypes/LinuxSecurityContext).
+
+        '
+      properties:
+        fsGroup:
+          description: A special supplemental group ID that applies to all containers in a pod.
+          type: integer
+        runAsGroup:
+          description: Group ID for running processes inside the container.
+          type: integer
+        runAsUser:
+          description: User ID for running processes inside the container.
+          type: integer
+    ChangeBatchTaskProfileCompartmentDetails:
+      description: The configuration details for the move operation.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the batch task profile to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    BatchTaskProfileCollection:
+      description: Results of a batch task profile search. Contains both batch task profile summary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of batch task profiles.
+          items:
+            $ref: '#/components/schemas/BatchTaskProfileSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateBatchTaskProfileDetails:
+      description: 'The data to update a batch task profile.
+
+        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: The batch task profile description.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Can''t be set to null.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      type: object
+    WorkRequest:
+      description: 'An asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
+
+        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
+
+        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
+
+        '
       properties:
         compartmentId:
           description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
@@ -2724,7 +4149,7 @@ components:
           format: float
           type: number
         resources:
-          description: The resources that are affected by this work request.
+          description: The resources that are affected by the work request.
           items:
             $ref: '#/components/schemas/WorkRequestResource'
           type: array
@@ -2781,241 +4206,6 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    ShapeMemoryOptions:
-      description: The amount of memory available for container instances that use this shape.
-      properties:
-        defaultPerOcpuInGBs:
-          description: The default amount of memory per OCPU available for this shape (GB).
-          format: float
-          minimum: 0
-          type: number
-        maxInGBs:
-          description: The maximum amount of memory (GB).
-          format: float
-          minimum: 0
-          type: number
-        maxPerOcpuInGBs:
-          description: For a flexible shape, the maximum amount of memory per OCPU available for this shape (GB).
-          format: float
-          minimum: 0
-          type: number
-        minInGBs:
-          description: The minimum amount of memory (GB).
-          format: float
-          minimum: 0
-          type: number
-        minPerOcpuInGBs:
-          description: The minimum amount of memory per OCPU available for this shape (GB).
-          format: float
-          minimum: 0
-          type: number
-      required:
-      - defaultPerOcpuInGBs
-      - maxInGBs
-      - maxPerOcpuInGBs
-      - minInGBs
-      - minPerOcpuInGBs
-      type: object
-    JobPriorityConfiguration:
-      description: Job priority configuration to instruct the service on how to use priority tags.
-      example:
-        tagKey: StudioPriority
-        tagNamespace: PrioritizationTags
-        values:
-          HIGH: 5
-          LOW: 0
-          MED: 2
-          POSTPONE: -10
-        weight: 100
-      properties:
-        tagKey:
-          description: Name of the tag key.
-          maxLength: 100
-          minLength: 1
-          type: string
-        tagNamespace:
-          description: Name of the corresponding tag namespace.
-          maxLength: 100
-          minLength: 1
-          type: string
-        values:
-          additionalProperties:
-            description: Priority value as an integer.
-            type: integer
-          description: Mapping of tag value to its priority.
-          maxProperties: 10
-          minProperties: 1
-          type: object
-          x-extra-annotations: '@jakarta.validation.constraints.Size(min = 1, max = 10)'
-        weight:
-          description: Weight associated with the tag key. Percentage point is the unit of measurement.
-          example: 33
-          maximum: 100
-          minimum: -100
-          type: integer
-      required:
-      - tagNamespace
-      - tagKey
-      - weight
-      - values
-      type: object
-    StartBatchContextDetails:
-      description: Information needed to start the batch context.
-      type: object
-    BatchContextSummary:
-      description: Summary information about a batch context.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: Summarized information about the batch context.
-          maxLength: 400
-          type: string
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: 'A message that describes the current state in more detail. For example, can be used to provide actionable information for a resource in the Failed state.
-
-            '
-          maxLength: 255
-          type: string
-        lifecycleState:
-          description: 'The current state of the batch context.
-
-            '
-          type: string
-          x-obmcs-enumref: '#/definitions/BatchContext/lifecycleState'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
-
-
-              Example: `{"free-tier-retained": "true"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The date and time the batch context was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the batch context was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - displayName
-      - lifecycleState
-      - timeCreated
-      - freeformTags
-      - definedTags
-      - systemTags
-      type: object
-    Network:
-      description: Network configuration of the batch context.
-      properties:
-        nsgIds:
-          description: 'A list of [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) of associated network security groups.
-
-            '
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 10
-          type: array
-          uniqueItems: true
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10) @io.micronaut.validation.annotation.UniqueElements'
-        subnetId:
-          description: '[OCID](/iaas/Content/General/Concepts/identifiers.htm) of associated subnet.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        vnics:
-          description: 'A list of private endpoint''s VNICs.
-
-            '
-          items:
-            $ref: '#/components/schemas/Vnic'
-          maxItems: 10
-          type: array
-      required:
-      - subnetId
-      - nsgIds
-      - vnics
-      type: object
     BatchTaskProfileSummary:
       description: Summary information about a batch task profile.
       properties:
@@ -3139,6 +4329,772 @@ components:
       - definedTags
       - systemTags
       type: object
+    UpdateBatchJobDetails:
+      description: 'The data to update a batch job.
+
+        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: An optional description that provides additional context next to the displayName.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Can''t be set to null.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      type: object
+    Vnic:
+      description: Private endpoint's VNIC.
+      properties:
+        id:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the private endpoint''s VNIC,
+
+            which resides in the customer''s VCN.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        sourceIps:
+          description: 'A list of private IP addresses (in the customer''s VCN) that represent access points for the service.
+
+            '
+          items:
+            maxLength: 46
+            minLength: 1
+            type: string
+          maxItems: 10
+          type: array
+      required:
+      - id
+      - sourceIps
+      type: object
+    BatchContext:
+      description: 'Representation of a batch context and its configurations.
+
+
+        To use any of the API operations, you must be authorized in an IAM policy. If you''re not authorized, talk to
+
+        an administrator. If you''re an administrator who needs to write policies to give users access, see
+
+        [Getting Started with Policies](/iaas/Content/Identity/policiesgs/get-started-with-policies.htm).
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: Summarized information about the batch context.
+          maxLength: 400
+          type: string
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable.
+          maxLength: 255
+          minLength: 1
+          type: string
+        entitlements:
+          additionalProperties:
+            description: Value of the limit.
+            minimum: 0
+            type: integer
+          description: Mapping of concurrent/shared resources used in job tasks to their limits.
+          maxProperties: 100
+          type: object
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        fleets:
+          description: List of fleet configurations related to the batch context.
+          items:
+            $ref: '#/components/schemas/Fleet'
+          maxItems: 5
+          minItems: 1
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
+          maxLength: 255
+          minLength: 1
+          type: string
+        jobPriorityConfigurations:
+          description: List of job priority configurations related to the batch context.
+          items:
+            $ref: '#/components/schemas/JobPriorityConfiguration'
+          maxItems: 10
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10)'
+        lifecycleDetails:
+          description: 'A message that describes the current state in more detail. For example, can be used to provide actionable information for a resource in the Failed state.
+
+            '
+          maxLength: 255
+          type: string
+        lifecycleState:
+          description: 'The current state of the batch context.
+
+            '
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - NEEDS_ATTENTION
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+        loggingConfiguration:
+          $ref: '#/components/schemas/LoggingConfiguration'
+        network:
+          $ref: '#/components/schemas/Network'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
+
+
+              Example: `{"free-tier-retained": "true"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the batch context was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the batch context was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - displayName
+      - lifecycleState
+      - timeCreated
+      - freeformTags
+      - definedTags
+      - systemTags
+      - network
+      - fleets
+      - jobPriorityConfigurations
+      - entitlements
+      type: object
+    ShapeNetworkingBandwidthOptions:
+      description: For a flexible shape, the amount of networking bandwidth available for container instances that use this shape.
+      properties:
+        defaultPerOcpuInGbps:
+          description: The default amount of networking bandwidth per OCPU, in gigabits per second.
+          format: float
+          minimum: 0
+          type: number
+        maxInGbps:
+          description: The maximum amount of networking bandwidth, in gigabits per second.
+          format: float
+          minimum: 0
+          type: number
+        minInGbps:
+          description: The minimum amount of networking bandwidth, in gigabits per second.
+          format: float
+          minimum: 0
+          type: number
+      required:
+      - defaultPerOcpuInGbps
+      - maxInGbps
+      - minInGbps
+      type: object
+    Fleet:
+      description: Fleet configuration of the batch context.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: Type of the fleet. Also serves as a discriminator for sub-entities.
+          enum:
+          - SERVICE_MANAGED_FLEET
+          - SERVICE_MANAGED_GPU_FLEET
+          type: string
+      required:
+      - type
+      type: object
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the operation tracked in the work request.
+
+            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
+
+            work is complete for that resource, at which point it transitions to CREATED, UPDATED,
+
+            or DELETED, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - RELATED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type that the work request affects.
+          type: string
+        entityUri:
+          description: The URI path that you can use for a GET request to access the resource metadata.
+          type: string
+        identifier:
+          description: An [OCID](/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource.
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: Additional information that helps to explain the resource.
+          enum:
+          - IS_DRY_RUN
+          type: object
+          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
+      required:
+      - actionType
+      - entityType
+      - identifier
+    CreateFleetDetails:
+      description: Fleet configuration of the batch context.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: Type of the fleet. Also serves as a discriminator for sub-entities.
+          enum:
+          - SERVICE_MANAGED_FLEET
+          - SERVICE_MANAGED_GPU_FLEET
+          type: string
+      required:
+      - type
+      type: object
+    CreateBatchContextDetails:
+      description: 'The data to create a batch context.
+
+        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: Summarized information about the batch context.
+          maxLength: 400
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            If not specified or provided as null or empty string, it will be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchcontext20250914115623.
+
+            '
+          maxLength: 255
+          type: string
+        entitlements:
+          additionalProperties:
+            description: Value of the limit.
+            minimum: 0
+            type: integer
+          description: Mapping of concurrent/shared resources used in job tasks to their limits.
+          maxProperties: 100
+          type: object
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        fleets:
+          description: List of fleet configurations related to the batch context.
+          items:
+            $ref: '#/components/schemas/CreateFleetDetails'
+          maxItems: 5
+          minItems: 1
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(min = 0, max = 5)'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        jobPriorityConfigurations:
+          description: List of job priority configurations related to the batch context.
+          items:
+            $ref: '#/components/schemas/JobPriorityConfiguration'
+          maxItems: 10
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10)'
+        loggingConfiguration:
+          $ref: '#/components/schemas/LoggingConfiguration'
+        network:
+          $ref: '#/components/schemas/CreateNetworkDetails'
+      required:
+      - compartmentId
+      - fleets
+      - network
+      type: object
+    BatchContextCollection:
+      description: Results of a batch context search. Contains both batch context summary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of batch contexts.
+          items:
+            $ref: '#/components/schemas/BatchContextSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestLogEntryCollection:
+      description: A list of work request logs. Can contain both logs and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work request log entries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    CreateBatchTaskDetails:
+      description: A batch task contains common properties for all types of job tasks.
+      discriminator:
+        propertyName: type
+      properties:
+        dependencies:
+          description: A list of tasks on which this tasks depends, referenced by name. Dependencies must be within the same parent (job or group task). For tasks within a group task, all dependencies must also be within that same group task.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        description:
+          description: An optional description that provides additional context next to the displayName.
+          maxLength: 255
+          type: string
+        entitlementClaims:
+          description: A list of resources (for example licences) this task needs for its execution.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        environmentVariables:
+          description: Environment variables to use for the task execution.
+          items:
+            $ref: '#/components/schemas/EnvironmentVariable'
+          maxItems: 100
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        name:
+          description: The name of the batch task. It must be unique within its parent batch job.
+          format: x-obmcs-ascii-identifier
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        type:
+          description: Type of the batch task. Also serves as a discriminator for sub-entities.
+          enum:
+          - COMPUTE
+          - GROUP
+          type: string
+      required:
+      - name
+      - type
+      type: object
+    UnpauseBatchJobDetails:
+      description: Information needed to unpause the batch job.
+      type: object
+    StopBatchJobPoolDetails:
+      description: Information needed to stop the batch job pool.
+      type: object
+    BatchJobPoolCollection:
+      description: Results of a batch job pool search. Contains both batch job pool summary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of batch job pools.
+          items:
+            $ref: '#/components/schemas/BatchJobPoolSummary'
+          type: array
+      required:
+      - items
+      type: object
+    BatchContextSummary:
+      description: Summary information about a batch context.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              example: string
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: Summarized information about the batch context.
+          maxLength: 400
+          type: string
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: 'A message that describes the current state in more detail. For example, can be used to provide actionable information for a resource in the Failed state.
+
+            '
+          maxLength: 255
+          type: string
+        lifecycleState:
+          description: 'The current state of the batch context.
+
+            '
+          type: string
+          x-obmcs-enumref: '#/definitions/BatchContext/lifecycleState'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
+
+
+              Example: `{"free-tier-retained": "true"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The date and time the batch context was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the batch context was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - displayName
+      - lifecycleState
+      - timeCreated
+      - freeformTags
+      - definedTags
+      - systemTags
+      type: object
+    LoggingConfiguration:
+      description: Logging configuration of the batch context.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: Type of the logging configuration. Discriminator for sub-entities.
+          enum:
+          - OCI_LOGGING
+          type: string
+      required:
+      - type
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+      required:
+      - code
+      - message
+    BatchTaskEnvironmentVolume:
+      description: A base type for volume for batch task environment.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: Discriminator for sub-entities.
+          enum:
+          - NFS
+          type: string
+      required:
+      - type
+      type: object
+    BatchTask:
+      description: A batch task contains common properties for all types of job tasks.
+      discriminator:
+        propertyName: type
+      properties:
+        dependencies:
+          description: A list of tasks on which this tasks depends, referenced by name. Dependencies must be within the same parent (job or group task). For tasks within a group task, all dependencies must also be within that same group task.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        description:
+          description: An optional description that provides additional context next to the displayName.
+          maxLength: 255
+          type: string
+        entitlementClaims:
+          description: A list of resources (for example licences) this task needs for its execution.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        environmentVariables:
+          description: Environment variables to use for the task execution.
+          items:
+            $ref: '#/components/schemas/EnvironmentVariable'
+          maxItems: 100
+          type: array
+          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
+        groupTaskName:
+          description: The hierarchical name of the group task. Null for top-level tasks.
+          type: string
+        hierarchicalName:
+          description: 'The hierarchical name of the task, which incorporates names of all parent group tasks, separated by "." (dot symbol). Maximum nesting depth is 4 levels. Example: groupTaskA.nestedGroupTaskB.thisTaskName'
+          example: groupTaskA.nestedGroupTaskB.thisTaskName
+          type: string
+        id:
+          description: The UUID of batch task.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: 'A message that describes the current state of the batch task in more detail. For example, can be used to provide actionable information for a resource in the Failed state.
+
+            '
+          maxLength: 255
+          type: string
+        lifecycleState:
+          description: The current state of the batch task.
+          enum:
+          - ACCEPTED
+          - WAITING
+          - IN_PROGRESS
+          - SUCCEEDED
+          - FAILED
+          - CANCELING
+          - CANCELED
+          type: string
+        name:
+          description: The name of the batch task. It must be unique within its parent batch job.
+          format: x-obmcs-ascii-identifier
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        type:
+          description: Type of the batch task. Also serves as a discriminator for sub-entities.
+          enum:
+          - COMPUTE
+          - GROUP
+          type: string
+      required:
+      - id
+      - name
+      - type
+      - entitlementClaims
+      - dependencies
+      - environmentVariables
     BatchJob:
       description: 'A batch job represents the execution unit that is invoked on a batch''s pools of compute resources.
 
@@ -3311,568 +5267,17 @@ components:
       - definedTags
       - systemTags
       type: object
-    BatchContextShapeSummary:
-      description: Details about a shape for a container instance.
-      properties:
-        memoryOptions:
-          $ref: '#/components/schemas/ShapeMemoryOptions'
-        name:
-          description: The name identifying the shape.
-          maxLength: 255
-          minLength: 1
-          type: string
-        networkingBandwidthOptions:
-          $ref: '#/components/schemas/ShapeNetworkingBandwidthOptions'
-        ocpuOptions:
-          $ref: '#/components/schemas/ShapeOcpuOptions'
-        processorDescription:
-          description: A short description of the container instance's processor (CPU).
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - name
-      - processorDescription
-      type: object
-    Fleet:
-      description: Fleet configuration of the batch context.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Type of the fleet. Also serves as a discriminator for sub-entities.
-          enum:
-          - SERVICE_MANAGED_FLEET
-          - SERVICE_MANAGED_GPU_FLEET
-          type: string
-      required:
-      - type
-      type: object
-    CreateBatchTaskProfileDetails:
-      description: 'The data to create a batch task profile.
-
-        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: The batch task profile description.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            If not specified or provided as null or empty string, it be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchtaskprofile20250914115623.
-
-            '
-          maxLength: 255
-          type: string
-        extendedInformation:
-          $ref: '#/components/schemas/CreateBatchTaskProfileExtendedInformationDetails'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        minMemoryInGBs:
-          default: 0
-          description: The minimum required memory.
-          minimum: 0
-          type: integer
-        minOcpus:
-          default: 0
-          description: The minimum required OCPUs.
-          minimum: 0
-          type: integer
-      required:
-      - compartmentId
-      type: object
-    BatchTaskEnvironmentCollection:
-      description: Results of a batch task environment search. Contains both batch task environment summary items and other information, such as metadata.
+    BatchTaskCollection:
+      description: Results of a batch task search. Contains both batch task summary items and other information, such as metadata.
       properties:
         items:
-          description: List of batch task environments.
+          description: List of batch task summaries.
           items:
-            $ref: '#/components/schemas/BatchTaskEnvironmentSummary'
+            $ref: '#/components/schemas/BatchTaskSummary'
           type: array
       required:
       - items
       type: object
-    CreateBatchJobDetails:
-      description: 'The data to create a batch job.
-
-        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        batchJobPoolId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the parent batch job pool.
-          maxLength: 255
-          minLength: 1
-          type: string
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: An optional description that provides additional context next to the displayName.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            If not specified or provided as null or empty string, it will be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchjob20250914115623.
-
-            '
-          maxLength: 255
-          type: string
-        environmentVariables:
-          description: An environment variables to use for the job's tasks (can be overridden by task's environment variables).
-          items:
-            $ref: '#/components/schemas/EnvironmentVariable'
-          maxItems: 100
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        tasks:
-          description: 'A list of tasks to be executed within this job.
-
-            Maximum number of tasks a job can have in total, across all nested levels, is 1000.
-
-            '
-          items:
-            $ref: '#/components/schemas/CreateBatchTaskDetails'
-          maxItems: 1000
-          minItems: 1
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(min = 1, max = 1000)'
-      required:
-      - compartmentId
-      - batchJobPoolId
-      - tasks
-      type: object
-    UpdateBatchJobPoolDetails:
-      description: 'The data to update a batch job pool.
-
-        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: Summarized information about the batch job pool.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Can''t be set to null.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-      type: object
-    UpdateBatchTaskProfileDetails:
-      description: 'The data to update a batch task profile.
-
-        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: The batch task profile description.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Can''t be set to null.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-      type: object
-    BatchTaskProfile:
-      description: 'A batch task profile resource describes the minimum hardware requirements requested for a task.
-
-
-        To use any of the API operations, you must be authorized in an IAM policy. If you''re not authorized, talk to
-
-        an administrator. If you''re an administrator who needs to write policies to give users access, see
-
-        [Getting Started with Policies](/iaas/Content/Identity/policiesgs/get-started-with-policies.htm).
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: The batch task profile description.
-          maxLength: 400
-          type: string
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable.
-          maxLength: 255
-          minLength: 1
-          type: string
-        extendedInformation:
-          $ref: '#/components/schemas/BatchTaskProfileExtendedInformation'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task profile.
-          type: string
-        lifecycleState:
-          description: 'The current state of the batch task profile.
-
-            '
-          enum:
-          - ACTIVE
-          - DELETED
-          type: string
-        minMemoryInGBs:
-          default: 0
-          description: The minimum required memory.
-          minimum: 0
-          type: integer
-        minOcpus:
-          default: 0
-          description: The minimum required OCPUs.
-          minimum: 0
-          type: integer
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
-
-
-              Example: `{"free-tier-retained": "true"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The date and time the batch task profile was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the batch task profile was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - displayName
-      - minOcpus
-      - minMemoryInGBs
-      - lifecycleState
-      - timeCreated
-      - freeformTags
-      - definedTags
-      - systemTags
-      type: object
-    BatchContextCollection:
-      description: Results of a batch context search. Contains both batch context summary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of batch contexts.
-          items:
-            $ref: '#/components/schemas/BatchContextSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ShapeNetworkingBandwidthOptions:
-      description: For a flexible shape, the amount of networking bandwidth available for container instances that use this shape.
-      properties:
-        defaultPerOcpuInGbps:
-          description: The default amount of networking bandwidth per OCPU, in gigabits per second.
-          format: float
-          minimum: 0
-          type: number
-        maxInGbps:
-          description: The maximum amount of networking bandwidth, in gigabits per second.
-          format: float
-          minimum: 0
-          type: number
-        minInGbps:
-          description: The minimum amount of networking bandwidth, in gigabits per second.
-          format: float
-          minimum: 0
-          type: number
-      required:
-      - defaultPerOcpuInGbps
-      - maxInGbps
-      - minInGbps
-      type: object
-    CreateFleetDetails:
-      description: Fleet configuration of the batch context.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Type of the fleet. Also serves as a discriminator for sub-entities.
-          enum:
-          - SERVICE_MANAGED_FLEET
-          - SERVICE_MANAGED_GPU_FLEET
-          type: string
-      required:
-      - type
-      type: object
-    BatchTaskSummary:
-      description: Summary information about a batch task.
-      discriminator:
-        propertyName: type
-      properties:
-        description:
-          description: An optional description that provides additional context next to the displayName.
-          maxLength: 255
-          type: string
-        groupTaskName:
-          description: The hierarchical name of the group task. Null for top-level tasks.
-          type: string
-        hierarchicalName:
-          description: 'The hierarchical name of the task, which incorporates names of all parent group tasks, separated by "." (dot symbol). Maximum nesting depth is 4 levels. Example: groupTaskA.nestedGroupTaskB.thisTaskName'
-          example: groupTaskA.nestedGroupTaskB.thisTaskName
-          type: string
-        id:
-          description: The UUID of batch task.
-          maxLength: 255
-          minLength: 1
-          type: string
-        jobId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job to which this task belongs.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: 'A message that describes the current state of the batch task in more detail. For example, can be used to provide actionable information for a resource in the Failed state.
-
-            '
-          maxLength: 255
-          type: string
-        lifecycleState:
-          description: The current state of the batch task.
-          type: string
-          x-obmcs-enumref: '#/definitions/BatchTask/lifecycleState'
-        name:
-          description: The name of the batch task. It must be unique within its parent batch job.
-          format: x-obmcs-ascii-identifier
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        type:
-          description: Type of the batch task. Also serves as a discriminator for sub-entities.
-          type: string
-          x-obmcs-enumref: '#/definitions/BatchTask/type'
-      required:
-      - id
-      - jobId
-      - name
-      - type
     BatchTaskEnvironment:
       description: 'A batch task environment resource defines the software that is used to execute tasks.
 
@@ -4026,477 +5431,8 @@ components:
       - definedTags
       - systemTags
       type: object
-    BatchTaskEnvironmentSummary:
-      description: Summary information about a batch task environment.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: The batch task environment description.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            If not specified or provided as null or empty string, it be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchtaskenvironment20250914115623.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task environment.
-          type: string
-        imageUrl:
-          description: The URL of the ocir image.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: 'The current state of the batch task environment.
-
-            '
-          type: string
-          x-obmcs-enumref: '#/definitions/BatchTaskEnvironment/lifecycleState'
-        securityContext:
-          $ref: '#/components/schemas/SecurityContext'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
-
-
-              Example: `{"free-tier-retained": "true"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The date and time the batch task environment was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the batch task environment was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        workingDirectory:
-          description: Container's working directory.
-          maxLength: 1024
-          minLength: 1
-          type: string
-      required:
-      - id
-      - compartmentId
-      - displayName
-      - imageUrl
-      - lifecycleState
-      - timeCreated
-      - freeformTags
-      - definedTags
-      - systemTags
-      type: object
-    BatchTaskCollection:
-      description: Results of a batch task search. Contains both batch task summary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of batch task summaries.
-          items:
-            $ref: '#/components/schemas/BatchTaskSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestLogEntry:
-      description: A log message from performing an operation that is tracked by a work request.
-      properties:
-        message:
-          description: A human-readable log message.
-          type: string
-        timestamp:
-          description: 'The date and time the log message was written, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    ChangeBatchTaskEnvironmentCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the batch task environment to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    WorkRequest:
-      description: 'An asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
-
-        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
-
-        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
-
-            '
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
-          type: string
-        operationType:
-          description: The asynchronous operation tracked by this work request.
-          enum:
-          - CREATE_BATCH_CONTEXT
-          - UPDATE_BATCH_CONTEXT
-          - DELETE_BATCH_CONTEXT
-          - START_BATCH_CONTEXT
-          - STOP_BATCH_CONTEXT
-          - MOVE_BATCH_CONTEXT
-          - CREATE_BATCH_JOB
-          - UPDATE_BATCH_JOB
-          - DELETE_BATCH_JOB
-          - MOVE_BATCH_JOB
-          - PAUSE_BATCH_JOB
-          - UNPAUSE_BATCH_JOB
-          - MOVE_BATCH_JOB_POOL
-          - UPDATE_BATCH_JOB_POOL
-          - START_BATCH_JOB_POOL
-          - STOP_BATCH_JOB_POOL
-          - MOVE_BATCH_TASK_ENVIRONMENT
-          - MOVE_BATCH_TASK_PROFILE
-          - INTERNAL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
-
-            that must be performed.
-
-            '
-          format: float
-          type: number
-        resources:
-          description: The resources that are affected by the work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: The status of the work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - NEEDS_ATTENTION
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the work request was created, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the work request was finished, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the work request was started, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the work request was updated, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    CreateBatchTaskDetails:
-      description: A batch task contains common properties for all types of job tasks.
-      discriminator:
-        propertyName: type
-      properties:
-        dependencies:
-          description: A list of tasks on which this tasks depends, referenced by name. Dependencies must be within the same parent (job or group task). For tasks within a group task, all dependencies must also be within that same group task.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 100
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        description:
-          description: An optional description that provides additional context next to the displayName.
-          maxLength: 255
-          type: string
-        entitlementClaims:
-          description: A list of resources (for example licences) this task needs for its execution.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 100
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        environmentVariables:
-          description: Environment variables to use for the task execution.
-          items:
-            $ref: '#/components/schemas/EnvironmentVariable'
-          maxItems: 100
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        name:
-          description: The name of the batch task. It must be unique within its parent batch job.
-          format: x-obmcs-ascii-identifier
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        type:
-          description: Type of the batch task. Also serves as a discriminator for sub-entities.
-          enum:
-          - COMPUTE
-          - GROUP
-          type: string
-      required:
-      - name
-      - type
-      type: object
-    CreateBatchTaskEnvironmentDetails:
-      description: 'The data to create a batch task environment.
-
-        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: The batch task environment description.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            If not specified or provided as null or empty string, it be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchtaskenvironment20250914115623.
-
-            '
-          maxLength: 255
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        imageUrl:
-          description: The URL of the ocir image.
-          maxLength: 255
-          minLength: 1
-          type: string
-        securityContext:
-          $ref: '#/components/schemas/SecurityContext'
-        volumes:
-          description: 'List of volumes attached to the image.
-
-            The use cases of the volumes are but not limited to: read the input of the task and write the output.
-
-            '
-          items:
-            $ref: '#/components/schemas/BatchTaskEnvironmentVolume'
-          maxItems: 10
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10)'
-        workingDirectory:
-          description: Container's working directory.
-          maxLength: 1024
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      - imageUrl
-      type: object
-    CreateNetworkDetails:
-      description: Network configuration of the batch context.
-      properties:
-        nsgIds:
-          description: 'A list of [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) of associated network security groups.
-
-            '
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 10
-          type: array
-          uniqueItems: true
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10) @io.micronaut.validation.annotation.UniqueElements'
-        subnetId:
-          description: '[OCID](/iaas/Content/General/Concepts/identifiers.htm) of associated subnet.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - subnetId
-      type: object
-    ChangeBatchContextCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the batch context to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    SecurityContext:
-      description: 'Security context for container runtime configuration.
-
-
-        See also [docs](https://docs.oracle.com/en-us/iaas/api/#/en/container-instances/20210415/datatypes/LinuxSecurityContext).
-
-        '
-      properties:
-        fsGroup:
-          description: A special supplemental group ID that applies to all containers in a pod.
-          type: integer
-        runAsGroup:
-          description: Group ID for running processes inside the container.
-          type: integer
-        runAsUser:
-          description: User ID for running processes inside the container.
-          type: integer
-    LoggingConfiguration:
-      description: Logging configuration of the batch context.
+    UpdateLoggingConfigurationDetails:
+      description: The data to update logging configuration of the batch context.
       discriminator:
         propertyName: type
       properties:
@@ -4507,186 +5443,6 @@ components:
           type: string
       required:
       - type
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the operation tracked in the work request.
-
-            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
-
-            work is complete for that resource, at which point it transitions to CREATED, UPDATED,
-
-            or DELETED, respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type that the work request affects.
-          type: string
-        entityUri:
-          description: The URI path that you can use for a GET request to access the resource metadata.
-          type: string
-        identifier:
-          description: An [OCID](/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource.
-          type: string
-        metadata:
-          additionalProperties:
-            type: string
-          description: Additional information that helps to explain the resource.
-          enum:
-          - IS_DRY_RUN
-          type: object
-          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
-      required:
-      - actionType
-      - entityType
-      - identifier
-    Vnic:
-      description: Private endpoint's VNIC.
-      properties:
-        id:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the private endpoint''s VNIC,
-
-            which resides in the customer''s VCN.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        sourceIps:
-          description: 'A list of private IP addresses (in the customer''s VCN) that represent access points for the service.
-
-            '
-          items:
-            maxLength: 46
-            minLength: 1
-            type: string
-          maxItems: 10
-          type: array
-      required:
-      - id
-      - sourceIps
-      type: object
-    StartBatchJobPoolDetails:
-      description: Information needed to start the batch job pool.
-      type: object
-    BatchTask:
-      description: A batch task contains common properties for all types of job tasks.
-      discriminator:
-        propertyName: type
-      properties:
-        dependencies:
-          description: A list of tasks on which this tasks depends, referenced by name. Dependencies must be within the same parent (job or group task). For tasks within a group task, all dependencies must also be within that same group task.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 100
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        description:
-          description: An optional description that provides additional context next to the displayName.
-          maxLength: 255
-          type: string
-        entitlementClaims:
-          description: A list of resources (for example licences) this task needs for its execution.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 100
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        environmentVariables:
-          description: Environment variables to use for the task execution.
-          items:
-            $ref: '#/components/schemas/EnvironmentVariable'
-          maxItems: 100
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        groupTaskName:
-          description: The hierarchical name of the group task. Null for top-level tasks.
-          type: string
-        hierarchicalName:
-          description: 'The hierarchical name of the task, which incorporates names of all parent group tasks, separated by "." (dot symbol). Maximum nesting depth is 4 levels. Example: groupTaskA.nestedGroupTaskB.thisTaskName'
-          example: groupTaskA.nestedGroupTaskB.thisTaskName
-          type: string
-        id:
-          description: The UUID of batch task.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: 'A message that describes the current state of the batch task in more detail. For example, can be used to provide actionable information for a resource in the Failed state.
-
-            '
-          maxLength: 255
-          type: string
-        lifecycleState:
-          description: The current state of the batch task.
-          enum:
-          - ACCEPTED
-          - WAITING
-          - IN_PROGRESS
-          - SUCCEEDED
-          - FAILED
-          - CANCELING
-          - CANCELED
-          type: string
-        name:
-          description: The name of the batch task. It must be unique within its parent batch job.
-          format: x-obmcs-ascii-identifier
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        type:
-          description: Type of the batch task. Also serves as a discriminator for sub-entities.
-          enum:
-          - COMPUTE
-          - GROUP
-          type: string
-      required:
-      - id
-      - name
-      - type
-      - entitlementClaims
-      - dependencies
-      - environmentVariables
-    WorkRequestError:
-      description: An error encountered while performing an operation that is tracked by a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
-
-            [API Errors](/iaas/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error message.
-          type: string
-        timestamp:
-          description: 'The date and time the error occurred, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
     EnvironmentVariable:
       description: OS environment variable.
       properties:
@@ -4705,792 +5461,68 @@ components:
       - name
       - value
       type: object
-    CreateBatchJobPoolDetails:
-      description: 'The data to create a batch job pool.
-
-        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        batchContextId:
-          description: The OCID of batch context.
-          maxLength: 255
-          minLength: 1
-          type: string
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: Summarized information about the batch job pool.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            If not specified or provided as null or empty string, it be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchjobpool20250914115623.
-
-            '
-          maxLength: 255
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-      required:
-      - compartmentId
-      - batchContextId
-      type: object
-    CreateBatchTaskProfileExtendedInformationDetails:
-      description: Extended information for the task profile.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Type of extended information.
-          enum:
-          - CPU_ARCHITECTURE_TASK_PROFILE_EXTENDED_INFORMATION
-          - CPU_SHAPE_TASK_PROFILE_EXTENDED_INFORMATION
-          - GPU_SHAPE_TASK_PROFILE_EXTENDED_INFORMATION
-          type: string
-      required:
-      - type
-    ChangeBatchJobCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    CreateBatchContextDetails:
-      description: 'The data to create a batch context.
-
-        If the value for a collection is absent or is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: Summarized information about the batch context.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            If not specified or provided as null or empty string, it will be generated as "<resourceType><timeCreated>", where timeCreated corresponds with the resource creation time in ISO 8601 basic format, i.e. omitting separating punctuation, at second-level precision and no UTC offset. Example: batchcontext20250914115623.
-
-            '
-          maxLength: 255
-          type: string
-        entitlements:
-          additionalProperties:
-            description: Value of the limit.
-            minimum: 0
-            type: integer
-          description: Mapping of concurrent/shared resources used in job tasks to their limits.
-          maxProperties: 100
-          type: object
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        fleets:
-          description: List of fleet configurations related to the batch context.
-          items:
-            $ref: '#/components/schemas/CreateFleetDetails'
-          maxItems: 5
-          minItems: 1
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(min = 0, max = 5)'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        jobPriorityConfigurations:
-          description: List of job priority configurations related to the batch context.
-          items:
-            $ref: '#/components/schemas/JobPriorityConfiguration'
-          maxItems: 10
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10)'
-        loggingConfiguration:
-          $ref: '#/components/schemas/LoggingConfiguration'
-        network:
-          $ref: '#/components/schemas/CreateNetworkDetails'
-      required:
-      - compartmentId
-      - fleets
-      - network
-      type: object
-    BatchContextShapeCollection:
-      description: A collection of container instance shapes.
-      properties:
-        items:
-          description: List of shapes.
-          items:
-            $ref: '#/components/schemas/BatchContextShapeSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateBatchContextDetails:
-      description: 'The data to update a batch context.
-
-        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: Summarized information about the batch context.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Can''t be set to null.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        entitlements:
-          additionalProperties:
-            description: Value of the limit.
-            minimum: 0
-            type: integer
-          description: Mapping of concurrent/shared resources used in job tasks to their limits.
-          maxProperties: 100
-          type: object
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        jobPriorityConfigurations:
-          description: List of job priority configurations related to the batch context.
-          items:
-            $ref: '#/components/schemas/JobPriorityConfiguration'
-          maxItems: 10
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10)'
-        loggingConfiguration:
-          $ref: '#/components/schemas/UpdateLoggingConfigurationDetails'
-      type: object
-    UnpauseBatchJobDetails:
-      description: Information needed to unpause the batch job.
-      type: object
-    UpdateBatchTaskEnvironmentDetails:
-      description: 'The data to update a batch task environment.
-
-        If the value of a collection is explicitly provided as null, it will be converted to an empty value, i.e. "[]" or "{}" in json notation. This applies to nested collections as well.
-
-        '
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: The batch task environment description.
-          maxLength: 400
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Can''t be set to null.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-      type: object
-    BatchJobSummary:
-      description: Summary information about a batch job.
-      properties:
-        batchContextId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the parent batch context of the parent job pool.
-          maxLength: 255
-          minLength: 1
-          type: string
-        batchJobPoolId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the parent batch job pool.
-          maxLength: 255
-          minLength: 1
-          type: string
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: An optional description that provides additional context next to the displayName.
-          maxLength: 400
-          type: string
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: 'A message that describes the current state of the batch job in more detail. For example,
-
-            can be used to provide actionable information for a resource in the Failed state.
-
-            '
-          maxLength: 255
-          type: string
-        lifecycleState:
-          description: 'The current state of the batch job.
-
-            '
-          type: string
-          x-obmcs-enumref: '#/definitions/BatchJob/lifecycleState'
-        priority:
-          description: A value calculated by the system based on the priority tags.
-          minimum: 0
-          type: integer
-        progressDetails:
-          description: A more detailed textual representation of the job completion.
-          maxLength: 255
-          type: string
-        progressPercentage:
-          description: A percentage value (0..100) of the job completion.
-          maximum: 100
-          minimum: 0
-          type: integer
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
-
-
-              Example: `{"free-tier-retained": "true"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The date and time the batch job was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the batch job was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - batchJobPoolId
-      - batchContextId
-      - displayName
-      - timeCreated
-      - lifecycleState
-      - freeformTags
-      - definedTags
-      - systemTags
-      type: object
-    BatchJobPoolCollection:
-      description: Results of a batch job pool search. Contains both batch job pool summary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of batch job pools.
-          items:
-            $ref: '#/components/schemas/BatchJobPoolSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestErrorCollection:
-      description: A list of work request errors. Can contain both errors and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work request errors.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
-    ChangeBatchJobPoolCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    UpdateLoggingConfigurationDetails:
-      description: The data to update logging configuration of the batch context.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Type of the logging configuration. Discriminator for sub-entities.
-          enum:
-          - OCI_LOGGING
-          type: string
-      required:
-      - type
-    BatchContext:
-      description: 'Representation of a batch context and its configurations.
-
-
-        To use any of the API operations, you must be authorized in an IAM policy. If you''re not authorized, talk to
-
-        an administrator. If you''re an administrator who needs to write policies to give users access, see
-
-        [Getting Started with Policies](/iaas/Content/Identity/policiesgs/get-started-with-policies.htm).
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              example: string
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: Summarized information about the batch context.
-          maxLength: 400
-          type: string
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable.
-          maxLength: 255
-          minLength: 1
-          type: string
-        entitlements:
-          additionalProperties:
-            description: Value of the limit.
-            minimum: 0
-            type: integer
-          description: Mapping of concurrent/shared resources used in job tasks to their limits.
-          maxProperties: 100
-          type: object
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 100)'
-        fleets:
-          description: List of fleet configurations related to the batch context.
-          items:
-            $ref: '#/components/schemas/Fleet'
-          maxItems: 5
-          minItems: 1
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
-          maxLength: 255
-          minLength: 1
-          type: string
-        jobPriorityConfigurations:
-          description: List of job priority configurations related to the batch context.
-          items:
-            $ref: '#/components/schemas/JobPriorityConfiguration'
-          maxItems: 10
-          type: array
-          x-extra-annotations: '@jakarta.validation.constraints.Size(max = 10)'
-        lifecycleDetails:
-          description: 'A message that describes the current state in more detail. For example, can be used to provide actionable information for a resource in the Failed state.
-
-            '
-          maxLength: 255
-          type: string
-        lifecycleState:
-          description: 'The current state of the batch context.
-
-            '
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - NEEDS_ATTENTION
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-        loggingConfiguration:
-          $ref: '#/components/schemas/LoggingConfiguration'
-        network:
-          $ref: '#/components/schemas/Network'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
-
-
-              Example: `{"free-tier-retained": "true"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The date and time the batch context was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the batch context was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - displayName
-      - lifecycleState
-      - timeCreated
-      - freeformTags
-      - definedTags
-      - systemTags
-      - network
-      - fleets
-      - jobPriorityConfigurations
-      - entitlements
-      type: object
-    ShapeOcpuOptions:
-      description: For a flexible shape, the number of OCPUs available for container instances that use this shape.
-      properties:
-        maxOcpus:
-          description: The maximum number of OCPUs.
-          format: float
-          minimum: 0
-          type: number
-        minOcpus:
-          description: The minimum number of OCPUs.
-          format: float
-          minimum: 0
-          type: number
-      required:
-      - maxOcpus
-      - minOcpus
-      type: object
-    BatchTaskProfileCollection:
-      description: Results of a batch task profile search. Contains both batch task profile summary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of batch task profiles.
-          items:
-            $ref: '#/components/schemas/BatchTaskProfileSummary'
-          type: array
-      required:
-      - items
-      type: object
-    BatchTaskEnvironmentVolume:
-      description: A base type for volume for batch task environment.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Discriminator for sub-entities.
-          enum:
-          - NFS
-          type: string
-      required:
-      - type
-      type: object
-    ChangeBatchTaskProfileCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the batch task profile to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    WorkRequestLogEntryCollection:
-      description: A list of work request logs. Can contain both logs and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work request log entries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
   parameters:
-    AvailabilityDomainQueryParam:
-      description: The name of the availability domain.
-      in: query
-      name: availabilityDomain
-      x-default-description: 'null'
-      schema:
-        type: string
-    BatchTaskTypeQueryParam:
-      description: 'Filter tasks by type. Valid values are: COMPUTE, GROUP.'
-      in: query
-      name: type
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/BatchTask/type'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+    BatchTaskProfileLifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
 
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
+        state value is case-insensitive.
 
         '
-      in: header
-      name: if-match
+      in: query
+      name: lifecycleState
       required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/BatchTaskProfile/lifecycleState'
+      schema:
+        type: string
+    BatchJobIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    BatchContextLifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/BatchContext/lifecycleState'
+      schema:
+        type: string
+    BatchTaskEnvironmentSortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+
+        is descending. Default order for `displayName` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/SortBy'
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    BatchContextIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
+      in: path
+      name: batchContextId
+      required: true
+      schema:
+        type: string
+    BatchTaskNameQueryParam:
+      description: 'The hierarchical name of the batch task. Mutually exclusive with the task id query parameter: you can''t pass both.'
+      in: query
+      name: name
+      required: false
+      x-default-description: 'null'
       schema:
         type: string
     BatchJobLifecycleStateQueryParam:
@@ -5506,17 +5538,11 @@ components:
       x-obmcs-enumref: '#/definitions/BatchJob/lifecycleState'
       schema:
         type: string
-    BatchJobPoolLifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
+    BatchTaskEnvironmentIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task environment.
       in: query
-      name: lifecycleState
-      required: false
+      name: id
       x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/BatchJobPool/lifecycleState'
       schema:
         type: string
     SortOrderQueryParam:
@@ -5534,74 +5560,30 @@ components:
         enum:
         - ASC
         - DESC
-    BatchJobPoolSortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+    BatchTaskLifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
 
-        is descending. Default order for `displayName` is ascending.
+        state value is case-insensitive.
 
         '
       in: query
-      name: sortBy
-      x-obmcs-top-level-enum: '#/definitions/SortBy'
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    BatchTaskNameQueryParam:
-      description: 'The hierarchical name of the batch task. Mutually exclusive with the task id query parameter: you can''t pass both.'
-      in: query
-      name: name
+      name: lifecycleState
       required: false
       x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/BatchTask/lifecycleState'
       schema:
         type: string
-    BatchJobPoolIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job pool.
-      in: path
-      name: batchJobPoolId
-      required: true
-      schema:
-        type: string
-    BatchTaskSortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `name` is ascending.
+    BatchJobPoolLifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
 
         '
       in: query
-      name: sortBy
-      x-obmcs-top-level-enum: '#/definitions/BatchTaskSortBy'
-      schema:
-        type: string
-        enum:
-        - name
-        default: name
-    BatchJobPoolQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job pool.
-      in: query
-      name: batchJobPoolId
+      name: lifecycleState
+      required: false
       x-default-description: 'null'
-      schema:
-        type: string
-    ResourceIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/BatchJobPool/lifecycleState'
       schema:
         type: string
     WorkRequestStatusQueryParam:
@@ -5622,13 +5604,48 @@ components:
         - SUCCEEDED
         - CANCELING
         - CANCELED
-    WorkRequestIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: path
-      name: workRequestId
-      required: true
+    BatchTaskIdentifierQueryParam:
+      description: 'The UUID of the batch task. Mutually exclusive with the task name and group task name query parameters: you can''t pass both.'
+      in: query
+      name: taskId
+      required: false
+      x-default-description: 'null'
       schema:
         type: string
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    BatchJobPoolQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job pool.
+      in: query
+      name: batchJobPoolId
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
     BatchTaskProfileIdentifierQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task profile.
       in: query
@@ -5651,6 +5668,133 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    CompartmentIdRequiredQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    BatchGroupTaskNameQueryParam:
+      description: 'Hierarchical name of the group task. A filter to return only tasks contained within the selected group task. Omit to return top-level tasks only. Can be combined with task name query parameter, in which case task name becomes a hierarchical name relative to the selected group task, e.g. ?groupTaskName=A.B&taskName=C.D is equal to ?taskName=A.B.C.D. Mutually exclusive with the task id query parameter: you can''t pass both.'
+      in: query
+      name: groupTaskName
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    BatchTaskTypeQueryParam:
+      description: 'Filter tasks by type. Valid values are: COMPUTE, GROUP.'
+      in: query
+      name: type
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/BatchTask/type'
+      schema:
+        type: string
+    BatchJobIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job.
+      in: path
+      name: batchJobId
+      required: true
+      schema:
+        type: string
+    BatchContextIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    BatchTaskEnvironmentLifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/BatchTaskEnvironment/lifecycleState'
+      schema:
+        type: string
+    BatchTaskSortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `name` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/BatchTaskSortBy'
+      schema:
+        type: string
+        enum:
+        - name
+        default: name
+    BatchTaskNamePathParam:
+      description: 'The hierarchical name of the batch task. Mutually exclusive with the task id query parameter: you can''t pass both.'
+      in: path
+      name: taskName
+      required: true
+      schema:
+        type: string
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    ResourceIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+        that resource. The resource will be updated or deleted only if the etag you provide
+
+        matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    BatchTaskProfileIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task profile.
+      in: path
+      name: batchTaskProfileId
+      required: true
+      schema:
+        type: string
+    BatchTaskEnvironmentIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task environment.
+      in: path
+      name: batchTaskEnvironmentId
+      required: true
+      schema:
+        type: string
+    AvailabilityDomainQueryParam:
+      description: The name of the availability domain.
+      in: query
+      name: availabilityDomain
+      x-default-description: 'null'
+      schema:
+        type: string
+    BatchJobPoolIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job pool.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
     BatchTaskHierarchyViewQueryParam:
       description: Defines the hierarchical scope of the tasks to be returned. When set to SHALLOW, which is default, only tasks contained directly (non-recursively) within current hierarchy entry are returned. When set to DEEP, tasks contained within current hierarchy entry and all its descendants recursively are returned. The default hierarchy entry is root, i.e. batch job itself. To use a different hierarchy entry, provide the group task name as a query parameter.  The specified group task becomes the entry point instead of the batch job.
       in: query
@@ -5663,6 +5807,62 @@ components:
         - SHALLOW
         - DEEP
         default: SHALLOW
+    BatchContextSortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+
+        is descending. Default order for `displayName` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/SortBy'
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
+
+        '
+      in: query
+      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/WorkRequestSortBy'
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    BatchContextIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
+      in: query
+      name: batchContextId
+      x-default-description: 'null'
+      schema:
+        type: string
+    BatchJobPoolSortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+
+        is descending. Default order for `displayName` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/SortBy'
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    WorkRequestIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
     BatchTaskProfileSortByQueryParam:
       description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
 
@@ -5678,88 +5878,17 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
-    BatchJobIdentifierQueryParam:
+    BatchJobPoolIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job pool.
+      in: path
+      name: batchJobPoolId
+      required: true
+      schema:
+        type: string
+    BatchJobIdentifierExplicitQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job.
       in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the given display name exactly.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    BatchTaskEnvironmentLifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/BatchTaskEnvironment/lifecycleState'
-      schema:
-        type: string
-    BatchTaskNamePathParam:
-      description: 'The hierarchical name of the batch task. Mutually exclusive with the task id query parameter: you can''t pass both.'
-      in: path
-      name: taskName
-      required: true
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    BatchTaskEnvironmentIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task environment.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    BatchTaskIdentifierQueryParam:
-      description: 'The UUID of the batch task. Mutually exclusive with the task name and group task name query parameters: you can''t pass both.'
-      in: query
-      name: taskId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    BatchTaskEnvironmentIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task environment.
-      in: path
-      name: batchTaskEnvironmentId
-      required: true
-      schema:
-        type: string
-    BatchContextIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: query
-      name: workRequestId
+      name: batchJobId
       x-default-description: 'null'
       schema:
         type: string
@@ -5787,41 +5916,22 @@ components:
         - CPU
         - GPU
         default: CPU
-    BatchContextIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the given display name exactly.
       in: query
-      name: batchContextId
+      name: displayName
       x-default-description: 'null'
       schema:
         type: string
-    BatchTaskLifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
+        maxLength: 255
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
       in: query
-      name: lifecycleState
-      required: false
+      name: workRequestId
       x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/BatchTask/lifecycleState'
       schema:
         type: string
-    BatchContextSortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
-
-        is descending. Default order for `displayName` is ascending.
-
-        '
-      in: query
-      name: sortBy
-      x-obmcs-top-level-enum: '#/definitions/SortBy'
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -5841,82 +5951,6 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    BatchTaskProfileLifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/BatchTaskProfile/lifecycleState'
-      schema:
-        type: string
-    BatchJobIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job.
-      in: path
-      name: batchJobId
-      required: true
-      schema:
-        type: string
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
-
-        '
-      in: query
-      name: sortBy
-      x-obmcs-top-level-enum: '#/definitions/WorkRequestSortBy'
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    BatchContextIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch context.
-      in: path
-      name: batchContextId
-      required: true
-      schema:
-        type: string
-    BatchTaskEnvironmentSortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
-
-        is descending. Default order for `displayName` is ascending.
-
-        '
-      in: query
-      name: sortBy
-      x-obmcs-top-level-enum: '#/definitions/SortBy'
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    BatchTaskProfileIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch task profile.
-      in: path
-      name: batchTaskProfileId
-      required: true
-      schema:
-        type: string
-    BatchGroupTaskNameQueryParam:
-      description: 'Hierarchical name of the group task. A filter to return only tasks contained within the selected group task. Omit to return top-level tasks only. Can be combined with task name query parameter, in which case task name becomes a hierarchical name relative to the selected group task, e.g. ?groupTaskName=A.B&taskName=C.D is equal to ?taskName=A.B.C.D. Mutually exclusive with the task id query parameter: you can''t pass both.'
-      in: query
-      name: groupTaskName
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
     PaginationLimitQueryParam:
       description: 'For list pagination. The maximum number of results per page, or items to return in a
 
@@ -5932,40 +5966,6 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
-    BatchContextLifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/BatchContext/lifecycleState'
-      schema:
-        type: string
-    CompartmentIdRequiredQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    BatchJobPoolIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job pool.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    BatchJobIdentifierExplicitQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the batch job.
-      in: query
-      name: batchJobId
-      x-default-description: 'null'
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

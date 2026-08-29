@@ -88,11 +88,10 @@ paths:
       - listEnrichmentJobs
 components:
   parameters:
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
     SortOrderQueryParam:
@@ -122,6 +121,20 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    semanticStoreIdPathParam:
+      description: The OCID of the semantic store
+      in: path
+      name: semanticStoreId
+      required: true
+      schema:
+        type: string
     DisplayNameQueryParam:
       description: A filter to return only resources that match the entire display name given.
       in: query
@@ -131,19 +144,6 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -153,10 +153,10 @@ components:
         default: 10
         maximum: 100
         minimum: 1
-    semanticStoreIdPathParam:
-      description: The OCID of the semantic store
-      in: path
-      name: semanticStoreId
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
       required: true
       schema:
         type: string
@@ -177,6 +177,17 @@ components:
         - CANCELING
         - CANCELED
   schemas:
+    EnrichmentJobCollection:
+      description: Object representing list of EnrichmentJobSummaries.
+      properties:
+        items:
+          description: List of EnrichmentJobSummary objects.
+          items:
+            $ref: '#/components/schemas/EnrichmentJobSummary'
+          type: array
+      required:
+      - items
+      type: object
     EnrichmentJobSummary:
       description: Object representing EnrichmentJobSummary resource.
       properties:
@@ -253,17 +264,6 @@ components:
       - enrichmentJobType
       - timeAccepted
       - lifecycleState
-      type: object
-    EnrichmentJobCollection:
-      description: Object representing list of EnrichmentJobSummaries.
-      properties:
-        items:
-          description: List of EnrichmentJobSummary objects.
-          items:
-            $ref: '#/components/schemas/EnrichmentJobSummary'
-          type: array
-      required:
-      - items
       type: object
     Error:
       description: Error Information.

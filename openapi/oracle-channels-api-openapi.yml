@@ -551,47 +551,36 @@ paths:
       x-related-resource: '#/definitions/ChannelStatus'
 components:
   schemas:
-    UpdateChannelSourceDetails:
-      description: Parameters detailing how to provision the source for the given Channel.
-      discriminator:
-        propertyName: sourceType
-      properties:
-        sourceType:
-          description: 'The specific source identifier.
+    ChannelStatus:
+      description: 'Runtime status summary of a Channel, aggregating information about health and operational indicators.
 
-            '
+        '
+      properties:
+        channelStatusResult:
+          $ref: '#/components/schemas/ChannelStatusResult'
+        timeCreated:
+          description: "The date and time that the Work Request to generate the Channel status was issued, \nas described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).\n"
+          format: date-time
           type: string
-          x-obmcs-enumref: '#/definitions/ChannelSource/sourceType'
+        timeUpdated:
+          description: "The date and time that the Channel status was generated, \nas described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).\n"
+          format: date-time
+          type: string
       required:
-      - sourceType
-    ChannelTarget:
-      description: Details about the Channel target.
+      - channelStatusResult
+      - timeCreated
+      - timeUpdated
+    CreateChannelTargetDetails:
+      description: Parameters detailing how to provision the target for the given Channel.
       discriminator:
         propertyName: targetType
       properties:
         targetType:
           description: The specific target identifier.
-          enum:
-          - DBSYSTEM
           type: string
+          x-obmcs-enumref: '#/definitions/ChannelTarget/targetType'
       required:
       - targetType
-    Error:
-      description: Sorry.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ChannelSource:
       description: Parameters detailing how to provision the source for the given Channel.
       discriminator:
@@ -604,42 +593,6 @@ components:
           type: string
       required:
       - sourceType
-    ChannelStatusResult:
-      description: 'Status information for the channel attached to the DB System.
-
-        '
-      properties:
-        channelId:
-          description: 'The OCID of the Channel for which the status is gathered.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        errors:
-          description: Channel errors identified, if there are any.
-          items:
-            type: string
-          maxItems: 2
-          minItems: 0
-          type: array
-          uniqueItems: true
-        isHealthy:
-          description: "Specifies if the channel is healthy or not. If healthy, replication target DB System is connected to the \nsource and no replication errors are seen.\n"
-          type: boolean
-        isReceivedGtidSetApplied:
-          description: 'Specifies if all transactions received by this channel are executed and their GTIDs are part of gtid_executed
-
-            set.
-
-            '
-          type: boolean
-        lagDuration:
-          description: "The channel lag, with respect to the immediate source of the channel. \nIf the channel is configured with replication delay, the channel lag includes the replication delay.\n"
-          format: x-obmcs-duration
-          type: string
-      required:
-      - channelId
     UpdateChannelDetails:
       description: Details required to update a Channel
       properties:
@@ -697,102 +650,6 @@ components:
           $ref: '#/components/schemas/UpdateChannelSourceDetails'
         target:
           $ref: '#/components/schemas/UpdateChannelTargetDetails'
-    CreateChannelTargetDetails:
-      description: Parameters detailing how to provision the target for the given Channel.
-      discriminator:
-        propertyName: targetType
-      properties:
-        targetType:
-          description: The specific target identifier.
-          type: string
-          x-obmcs-enumref: '#/definitions/ChannelTarget/targetType'
-      required:
-      - targetType
-    CreateChannelDetails:
-      description: Details required to create a Channel.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-          x-default-description: 'If not specified by the user it will assume the value of the compartment of
-
-            the target DB System.
-
-            '
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of predefined tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: User provided information about the Channel.
-          maxLength: 400
-          minLength: 1
-          type: string
-        displayName:
-          description: The user-friendly name for the Channel. It does not have to be unique.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        isEnabled:
-          default: true
-          description: 'Whether the Channel should be enabled upon creation. If set to true, the Channel
-
-            will be asynchronously started as a result of the create Channel operation.
-
-            '
-          type: boolean
-        source:
-          $ref: '#/components/schemas/CreateChannelSourceDetails'
-        target:
-          $ref: '#/components/schemas/CreateChannelTargetDetails'
-      required:
-      - source
-      - target
-    ChannelStatus:
-      description: 'Runtime status summary of a Channel, aggregating information about health and operational indicators.
-
-        '
-      properties:
-        channelStatusResult:
-          $ref: '#/components/schemas/ChannelStatusResult'
-        timeCreated:
-          description: "The date and time that the Work Request to generate the Channel status was issued, \nas described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).\n"
-          format: date-time
-          type: string
-        timeUpdated:
-          description: "The date and time that the Channel status was generated, \nas described by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).\n"
-          format: date-time
-          type: string
-      required:
-      - channelStatusResult
-      - timeCreated
-      - timeUpdated
     Channel:
       description: A Channel connecting a DB System to an external entity.
       properties:
@@ -913,6 +770,110 @@ components:
       - lifecycleState
       - timeCreated
       - timeUpdated
+    CreateChannelDetails:
+      description: Details required to create a Channel.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: 'If not specified by the user it will assume the value of the compartment of
+
+            the target DB System.
+
+            '
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of predefined tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: User provided information about the Channel.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: The user-friendly name for the Channel. It does not have to be unique.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isEnabled:
+          default: true
+          description: 'Whether the Channel should be enabled upon creation. If set to true, the Channel
+
+            will be asynchronously started as a result of the create Channel operation.
+
+            '
+          type: boolean
+        source:
+          $ref: '#/components/schemas/CreateChannelSourceDetails'
+        target:
+          $ref: '#/components/schemas/CreateChannelTargetDetails'
+      required:
+      - source
+      - target
+    CreateChannelSourceDetails:
+      description: Parameters detailing how to provision the source for the given Channel.
+      discriminator:
+        propertyName: sourceType
+      properties:
+        sourceType:
+          description: The specific source identifier.
+          type: string
+          x-obmcs-enumref: '#/definitions/ChannelSource/sourceType'
+      required:
+      - sourceType
+    Error:
+      description: Sorry.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    UpdateChannelTargetDetails:
+      description: Parameters detailing how to provision the target for the given Channel.
+      discriminator:
+        propertyName: targetType
+      properties:
+        targetType:
+          description: The specific targetType identifier.
+          type: string
+          x-obmcs-enumref: '#/definitions/ChannelTarget/targetType'
+      required:
+      - targetType
     ChannelSummary:
       description: Summary of a Channel.
       properties:
@@ -1020,42 +981,76 @@ components:
       - displayName
       - timeCreated
       - timeUpdated
-    UpdateChannelTargetDetails:
-      description: Parameters detailing how to provision the target for the given Channel.
+    ChannelStatusResult:
+      description: 'Status information for the channel attached to the DB System.
+
+        '
+      properties:
+        channelId:
+          description: 'The OCID of the Channel for which the status is gathered.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        errors:
+          description: Channel errors identified, if there are any.
+          items:
+            type: string
+          maxItems: 2
+          minItems: 0
+          type: array
+          uniqueItems: true
+        isHealthy:
+          description: "Specifies if the channel is healthy or not. If healthy, replication target DB System is connected to the \nsource and no replication errors are seen.\n"
+          type: boolean
+        isReceivedGtidSetApplied:
+          description: 'Specifies if all transactions received by this channel are executed and their GTIDs are part of gtid_executed
+
+            set.
+
+            '
+          type: boolean
+        lagDuration:
+          description: "The channel lag, with respect to the immediate source of the channel. \nIf the channel is configured with replication delay, the channel lag includes the replication delay.\n"
+          format: x-obmcs-duration
+          type: string
+      required:
+      - channelId
+    ChannelTarget:
+      description: Details about the Channel target.
       discriminator:
         propertyName: targetType
       properties:
         targetType:
-          description: The specific targetType identifier.
+          description: The specific target identifier.
+          enum:
+          - DBSYSTEM
           type: string
-          x-obmcs-enumref: '#/definitions/ChannelTarget/targetType'
       required:
       - targetType
-    CreateChannelSourceDetails:
+    UpdateChannelSourceDetails:
       description: Parameters detailing how to provision the source for the given Channel.
       discriminator:
         propertyName: sourceType
       properties:
         sourceType:
-          description: The specific source identifier.
+          description: 'The specific source identifier.
+
+            '
           type: string
           x-obmcs-enumref: '#/definitions/ChannelSource/sourceType'
       required:
       - sourceType
   parameters:
-    PaginationTokenQueryParam:
-      description: 'The value of the `opc-next-page` or `opc-prev-page` response header from
-
-        the previous list call. For information about pagination, see [List
-
-        Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
-
-        '
-      in: query
-      name: page
+    ChannelIdPathParam:
+      description: The Channel [OCID](/Content/General/Concepts/identifiers.htm).
+      in: path
+      name: channelId
+      required: true
       schema:
         type: string
-        maxLength: 4096
+        maxLength: 255
         minLength: 1
     IfNoneMatchHeader:
       description: 'For conditional requests. In the GET call for a resource, set the
@@ -1074,6 +1069,14 @@ components:
       x-default-description: No conditional request is made.
       schema:
         type: string
+    FilterByDisplayNameQueryParam:
+      description: A filter to return only the resource matching the given display name exactly.
+      in: query
+      name: displayName
+      required: false
+      schema:
+        type: string
+        maxLength: 255
     OpcRetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case
 
@@ -1094,6 +1097,91 @@ components:
         type: string
         maxLength: 64
         minLength: 1
+    FilterByCompartmentIdQueryParam:
+      description: The compartment [OCID](/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    FilterByDbSystemIdQueryParam:
+      description: The DB System [OCID](/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: dbSystemId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    SortOrderQueryParam:
+      description: The sort order to use (ASC or DESC).
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    OpcRequestIdHeader:
+      description: 'Customer-defined unique identifier for the request. If you need to
+
+        contact Oracle about a specific request, please provide the request
+
+        ID that you supplied in this header with the request.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` or `opc-prev-page` response header from
+
+        the previous list call. For information about pagination, see [List
+
+        Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    FilterByChannelIdQueryParam:
+      description: The OCID of the Channel.
+      in: query
+      name: channelId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    FilterByChannelLifecycleStateQueryParam:
+      description: The LifecycleState of the Channel.
+      in: query
+      name: lifecycleState
+      required: false
+      x-obmcs-enumref: '#/definitions/Channel/lifecycleState'
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return in a paginated list call. For information about pagination, see
+
+        [List Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call for a
 
@@ -1110,55 +1198,6 @@ components:
       name: if-match
       schema:
         type: string
-    FilterByCompartmentIdQueryParam:
-      description: The compartment [OCID](/Content/General/Concepts/identifiers.htm).
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    FilterByDisplayNameQueryParam:
-      description: A filter to return only the resource matching the given display name exactly.
-      in: query
-      name: displayName
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-    ChannelIdPathParam:
-      description: The Channel [OCID](/Content/General/Concepts/identifiers.htm).
-      in: path
-      name: channelId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: 'The maximum number of items to return in a paginated list call. For information about pagination, see
-
-        [List Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    SortOrderQueryParam:
-      description: The sort order to use (ASC or DESC).
-      in: query
-      name: sortOrder
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
     SortByDbSystemFieldQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Time fields are default ordered as descending. Display name is default ordered as ascending.
 
@@ -1183,91 +1222,7 @@ components:
       required: false
       schema:
         type: boolean
-    OpcRequestIdHeader:
-      description: 'Customer-defined unique identifier for the request. If you need to
-
-        contact Oracle about a specific request, please provide the request
-
-        ID that you supplied in this header with the request.
-
-        '
-      in: header
-      name: opc-request-id
-      required: false
-      schema:
-        type: string
-    FilterByDbSystemIdQueryParam:
-      description: The DB System [OCID](/Content/General/Concepts/identifiers.htm).
-      in: query
-      name: dbSystemId
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    FilterByChannelLifecycleStateQueryParam:
-      description: The LifecycleState of the Channel.
-      in: query
-      name: lifecycleState
-      required: false
-      x-obmcs-enumref: '#/definitions/Channel/lifecycleState'
-      schema:
-        type: string
-    FilterByChannelIdQueryParam:
-      description: The OCID of the Channel.
-      in: query
-      name: channelId
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
   responses:
-    409-Conflict:
-      description: Conflict
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    404-NotFound:
-      description: Not Found
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    400-BadRequest:
-      description: Bad Request
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     500-ServerError:
       description: Internal Server Error
       headers:
@@ -1283,38 +1238,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    DefaultError:
-      description: An error has occurred.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    412-PreconditionFailed:
-      description: Precondition Failed
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    401-Unauthorized:
-      description: Unauthorized
+    400-BadRequest:
+      description: Bad Request
       headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
@@ -1360,6 +1285,81 @@ components:
           description: A decimal number representing the number of seconds the client should wait before polling this endpoint again.
           schema:
             type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    404-NotFound:
+      description: Not Found
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    409-Conflict:
+      description: Conflict
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    DefaultError:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401-Unauthorized:
+      description: Unauthorized
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    412-PreconditionFailed:
+      description: Precondition Failed
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
       content:
         application/json:
           schema:

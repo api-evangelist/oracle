@@ -421,55 +421,27 @@ paths:
           '
         required: true
 components:
-  parameters:
-    PaginationTokenQueryParam:
-      description: The page at which to start retrieving results.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    ResourceNamePathParam:
-      description: The name of the resource type.
-      in: path
-      name: name
-      required: true
-      schema:
-        type: string
-        minLength: 1
-    TenantIdQueryParam:
-      description: 'The tenancy ID, which can be used to specify a different tenancy (for cross-tenancy authorization) when searching for resources in a different tenancy.
-
-        '
-      in: query
-      name: tenantId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return. The value must be between 1 and 1000.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 1000
-        maximum: 1000
-        minimum: 1
-    OpcRequestIdHeaderParam:
-      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
-
-        request, please provide the complete request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   schemas:
+    ResourceType:
+      description: Defines a type of resource that you can find with a search or query.
+      properties:
+        fields:
+          description: 'List of all the fields and their value type that are indexed for querying.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryableFieldDescription'
+          type: array
+        name:
+          description: 'The unique name of the resource type, which matches the value returned as part of the ResourceSummary object.
+
+            '
+          type: string
+      required:
+      - name
+      - fields
+      type: object
+      x-example: "[\n  {\n    \"fields\": [\n      {\n        \"fieldName\": \"freeformTags\", \n        \"fieldType\": \"OBJECT\", \n        \"isArray\": true, \n        \"objectProperties\": [\n          {\n            \"fieldName\": \"freeformTags.value\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }, \n          {\n            \"fieldName\": \"freeformTags.key\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }\n        ]\n      }, \n      {\n        \"fieldName\": \"displayName\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"definedTags\", \n        \"fieldType\": \"OBJECT\", \n        \"isArray\": true, \n        \"objectProperties\": [\n          {\n            \"fieldName\": \"definedTags.key\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }, \n          {\n            \"fieldName\": \"definedTags.namespace\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }, \n          {\n            \"fieldName\": \"definedTags.value\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }\n        ]\n      },\n      {\n        \"fieldName\": \"systemTags\",\n        \"fieldType\": \"OBJECT\",\n        \"isArray\": true,\n        \"objectProperties\": [\n          {\n            \"fieldName\": \"systemTags.key\",\n            \"fieldType\": \"STRING\",\n            \"isArray\": false,\n            \"objectProperties\": null\n          },\n          {\n            \"fieldName\": \"systemTags.namespace\",\n            \"fieldType\": \"STRING\",\n            \"isArray\": false,\n            \"objectProperties\": null\n          },\n          {\n            \"fieldName\": \"systemTags.value\",\n            \"fieldType\": \"STRING\",\n            \"isArray\": false,\n            \"objectProperties\": null\n          }\n        ]\n      },\n      {\n        \"fieldName\": \"lifecycleState\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"compartmentId\", \n        \"fieldType\": \"IDENTIFIER\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"availabilityDomain\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"timeLastIndexed\", \n        \"fieldType\": \"DATETIME\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"timeCreated\", \n        \"fieldType\": \"DATETIME\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"identifier\", \n        \"fieldType\": \"IDENTIFIER\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"cidrBlock\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"dnsLabel\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"vcnDomainName\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }\n    ], \n    \"name\": \"Vcn\"\n  },\n  ...\n]\n"
     SearchDetails:
       description: A base request type that contains common criteria for searching for resources.
       discriminator:
@@ -502,92 +474,6 @@ components:
           type: object
       type: object
       x-example: "{\n  \"searchContext\": {\n    \"highlights\": {\n      \"description\": [\n        \"Compartment for &lt;h1&gt;Jane&lt;/h1&gt; Doe to use\"\n      ]\n    }\n  }\n}\n"
-    Error:
-      description: The representation of an error.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-      type: object
-    ResourceType:
-      description: Defines a type of resource that you can find with a search or query.
-      properties:
-        fields:
-          description: 'List of all the fields and their value type that are indexed for querying.
-
-            '
-          items:
-            $ref: '#/components/schemas/QueryableFieldDescription'
-          type: array
-        name:
-          description: 'The unique name of the resource type, which matches the value returned as part of the ResourceSummary object.
-
-            '
-          type: string
-      required:
-      - name
-      - fields
-      type: object
-      x-example: "[\n  {\n    \"fields\": [\n      {\n        \"fieldName\": \"freeformTags\", \n        \"fieldType\": \"OBJECT\", \n        \"isArray\": true, \n        \"objectProperties\": [\n          {\n            \"fieldName\": \"freeformTags.value\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }, \n          {\n            \"fieldName\": \"freeformTags.key\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }\n        ]\n      }, \n      {\n        \"fieldName\": \"displayName\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"definedTags\", \n        \"fieldType\": \"OBJECT\", \n        \"isArray\": true, \n        \"objectProperties\": [\n          {\n            \"fieldName\": \"definedTags.key\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }, \n          {\n            \"fieldName\": \"definedTags.namespace\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }, \n          {\n            \"fieldName\": \"definedTags.value\", \n            \"fieldType\": \"STRING\", \n            \"isArray\": false, \n            \"objectProperties\": null\n          }\n        ]\n      },\n      {\n        \"fieldName\": \"systemTags\",\n        \"fieldType\": \"OBJECT\",\n        \"isArray\": true,\n        \"objectProperties\": [\n          {\n            \"fieldName\": \"systemTags.key\",\n            \"fieldType\": \"STRING\",\n            \"isArray\": false,\n            \"objectProperties\": null\n          },\n          {\n            \"fieldName\": \"systemTags.namespace\",\n            \"fieldType\": \"STRING\",\n            \"isArray\": false,\n            \"objectProperties\": null\n          },\n          {\n            \"fieldName\": \"systemTags.value\",\n            \"fieldType\": \"STRING\",\n            \"isArray\": false,\n            \"objectProperties\": null\n          }\n        ]\n      },\n      {\n        \"fieldName\": \"lifecycleState\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"compartmentId\", \n        \"fieldType\": \"IDENTIFIER\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"availabilityDomain\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"timeLastIndexed\", \n        \"fieldType\": \"DATETIME\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"timeCreated\", \n        \"fieldType\": \"DATETIME\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"identifier\", \n        \"fieldType\": \"IDENTIFIER\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"cidrBlock\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"dnsLabel\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }, \n      {\n        \"fieldName\": \"vcnDomainName\", \n        \"fieldType\": \"STRING\", \n        \"isArray\": false, \n        \"objectProperties\": null\n      }\n    ], \n    \"name\": \"Vcn\"\n  },\n  ...\n]\n"
-    ResourceSummaryCollection:
-      description: A summary representation of resources that matched the search criteria.
-      properties:
-        items:
-          description: A list of resources.
-          items:
-            $ref: '#/components/schemas/ResourceSummary'
-          type: array
-      type: object
-      x-example: "{\n  \"items\": [\n    {\n      \"resourceType\": \"User\",\n      \"identifier\": \"ocid1.user.oc1..exampleavephoafuxcvbwb4t7dvik5m2ibuokweo6ofaux5pda7nxv2nwp3a\",\n      \"compartmentId\": \"ocidv1:tenancy:oc1:phx:1457636318783:examplea3lagrcvbljxg6mk55eo2fauxwy\",\n      \"timeCreated\": \"2016-12-12T19:31:03.749Z\",\n      \"displayName\": \"Jane.Doe\",\n      \"availabilityDomain\": null,\n      \"lifecycleState\": \"ACTIVE\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"searchContext\": {\n        \"highlights\": {\n          \"description\": [\n            \"&lt;h1&gt;Jane&lt;/h1&gt; Doe's account\"\n          ]\n        }\n      }\n    },\n    {\n      \"resourceType\": \"Compartment\",\n      \"identifier\": \"ocid1.compartment.oc1..exampleaeug24qzjpmwcvb33f3zz5kdh2jpvzm52n5faux3nndh3diys7pca\",\n      \"compartmentId\": \"ocidv1:tenancy:oc1:phx:1457636318783:examplea3lagrcvbljxg6mk55eo2fauxwy\",\n      \"timeCreated\": \"2017-01-20T00:18:14.236Z\",\n      \"displayName\": \"JanesCompartment\",\n      \"availabilityDomain\": null,\n      \"lifecycleState\": \"ACTIVE\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"searchContext\": {\n        \"highlights\": {\n          \"description\": [\n            \"Compartment for &lt;h1&gt;Jane&lt;/h1&gt; Doe to use\"\n          ]\n        }\n      }\n    }\n  ]\n}\n"
-    QueryableFieldDescription:
-      description: An individual field that can be used as part of a query filter.
-      properties:
-        fieldName:
-          description: 'The name of the field to use when constructing the query. Field names are present for all types except `OBJECT`.
-
-            '
-          type: string
-        fieldType:
-          description: 'The type of the field, which dictates what semantics and query constraints you can use when searching or querying.
-
-            '
-          enum:
-          - IDENTIFIER
-          - STRING
-          - INTEGER
-          - RATIONAL
-          - BOOLEAN
-          - DATETIME
-          - IP
-          - OBJECT
-          type: string
-        isArray:
-          description: 'Indicates that this field is actually an array of the specified field type.
-
-            '
-          type: boolean
-        objectProperties:
-          description: 'If the field type is `OBJECT`, then this property will provide all the individual properties of the object that can
-
-            be queried.
-
-            '
-          items:
-            $ref: '#/components/schemas/QueryableFieldDescription'
-          type: array
-      required:
-      - fieldType
-      - fieldName
-      type: object
-      x-example: "{\n  \"fieldName\": \"definedTags\", \n  \"fieldType\": \"OBJECT\", \n  \"isArray\": true, \n  \"objectProperties\": [\n    {\n      \"fieldName\": \"definedTags.key\", \n      \"fieldType\": \"STRING\", \n      \"isArray\": false, \n      \"objectProperties\": null\n    }, \n    {\n      \"fieldName\": \"definedTags.namespace\", \n      \"fieldType\": \"STRING\", \n      \"isArray\": false, \n      \"objectProperties\": null\n    }, \n    {\n      \"fieldName\": \"definedTags.value\", \n      \"fieldType\": \"STRING\", \n      \"isArray\": false, \n      \"objectProperties\": null\n    }\n  ]\n}\n\n  \n"
     ResourceSummary:
       description: A resource that exists in the cloud network that you're querying.
       properties:
@@ -651,6 +537,120 @@ components:
       - compartmentId
       type: object
       x-example: "{\n  \"resourceType\": \"Compartment\",\n  \"identifier\": \"ocid1.compartment.oc1..exampleaeug24qzjpmwcvb33f3zz5kdh2jpvzm52n5faux3nndh3diys7pca\",\n  \"compartmentId\": \"ocidv1:tenancy:oc1:phx:1457636318783:examplea3lagrcvbljxg6mk55eo2fauxwy\",\n  \"timeCreated\": \"2017-01-20T00:18:14.236Z\",\n  \"displayName\": \"JanesCompartment\",\n  \"availabilityDomain\": null,\n  \"lifecycleState\": \"ACTIVE\",\n  \"freeformTags\": null,\n  \"definedTags\": null,\n  \"systemTags\": null,\n  \"additionalDetails\" : {\n    \"attachedVnic\" : [\n      {\n        \"publicIP\" : \"172.110.110.110\",\n        \"privateIP\" : \"10.10.10.10\",\n        \"isPrimary\" : true\n      },\n      {\n        \"publicIP\" : \"172.110.110.111\",\n        \"privateIP\" : \"10.10.10.11\",\n        \"isPrimary\" : false\n      }]\n  },\n  \"searchContext\": {\n    \"highlights\": {\n      \"description\": [\n        \"Compartment for &lt;h1&gt;Jane&lt;/h1&gt; Doe to use\"\n      ]\n    }\n  }\n}\n"
+    QueryableFieldDescription:
+      description: An individual field that can be used as part of a query filter.
+      properties:
+        fieldName:
+          description: 'The name of the field to use when constructing the query. Field names are present for all types except `OBJECT`.
+
+            '
+          type: string
+        fieldType:
+          description: 'The type of the field, which dictates what semantics and query constraints you can use when searching or querying.
+
+            '
+          enum:
+          - IDENTIFIER
+          - STRING
+          - INTEGER
+          - RATIONAL
+          - BOOLEAN
+          - DATETIME
+          - IP
+          - OBJECT
+          type: string
+        isArray:
+          description: 'Indicates that this field is actually an array of the specified field type.
+
+            '
+          type: boolean
+        objectProperties:
+          description: 'If the field type is `OBJECT`, then this property will provide all the individual properties of the object that can
+
+            be queried.
+
+            '
+          items:
+            $ref: '#/components/schemas/QueryableFieldDescription'
+          type: array
+      required:
+      - fieldType
+      - fieldName
+      type: object
+      x-example: "{\n  \"fieldName\": \"definedTags\", \n  \"fieldType\": \"OBJECT\", \n  \"isArray\": true, \n  \"objectProperties\": [\n    {\n      \"fieldName\": \"definedTags.key\", \n      \"fieldType\": \"STRING\", \n      \"isArray\": false, \n      \"objectProperties\": null\n    }, \n    {\n      \"fieldName\": \"definedTags.namespace\", \n      \"fieldType\": \"STRING\", \n      \"isArray\": false, \n      \"objectProperties\": null\n    }, \n    {\n      \"fieldName\": \"definedTags.value\", \n      \"fieldType\": \"STRING\", \n      \"isArray\": false, \n      \"objectProperties\": null\n    }\n  ]\n}\n\n  \n"
+    Error:
+      description: The representation of an error.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    ResourceSummaryCollection:
+      description: A summary representation of resources that matched the search criteria.
+      properties:
+        items:
+          description: A list of resources.
+          items:
+            $ref: '#/components/schemas/ResourceSummary'
+          type: array
+      type: object
+      x-example: "{\n  \"items\": [\n    {\n      \"resourceType\": \"User\",\n      \"identifier\": \"ocid1.user.oc1..exampleavephoafuxcvbwb4t7dvik5m2ibuokweo6ofaux5pda7nxv2nwp3a\",\n      \"compartmentId\": \"ocidv1:tenancy:oc1:phx:1457636318783:examplea3lagrcvbljxg6mk55eo2fauxwy\",\n      \"timeCreated\": \"2016-12-12T19:31:03.749Z\",\n      \"displayName\": \"Jane.Doe\",\n      \"availabilityDomain\": null,\n      \"lifecycleState\": \"ACTIVE\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"searchContext\": {\n        \"highlights\": {\n          \"description\": [\n            \"&lt;h1&gt;Jane&lt;/h1&gt; Doe's account\"\n          ]\n        }\n      }\n    },\n    {\n      \"resourceType\": \"Compartment\",\n      \"identifier\": \"ocid1.compartment.oc1..exampleaeug24qzjpmwcvb33f3zz5kdh2jpvzm52n5faux3nndh3diys7pca\",\n      \"compartmentId\": \"ocidv1:tenancy:oc1:phx:1457636318783:examplea3lagrcvbljxg6mk55eo2fauxwy\",\n      \"timeCreated\": \"2017-01-20T00:18:14.236Z\",\n      \"displayName\": \"JanesCompartment\",\n      \"availabilityDomain\": null,\n      \"lifecycleState\": \"ACTIVE\",\n      \"freeformTags\": {},\n      \"definedTags\": {},\n      \"searchContext\": {\n        \"highlights\": {\n          \"description\": [\n            \"Compartment for &lt;h1&gt;Jane&lt;/h1&gt; Doe to use\"\n          ]\n        }\n      }\n    }\n  ]\n}\n"
+  parameters:
+    PaginationTokenQueryParam:
+      description: The page at which to start retrieving results.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    TenantIdQueryParam:
+      description: 'The tenancy ID, which can be used to specify a different tenancy (for cross-tenancy authorization) when searching for resources in a different tenancy.
+
+        '
+      in: query
+      name: tenantId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return. The value must be between 1 and 1000.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 1000
+        maximum: 1000
+        minimum: 1
+    OpcRequestIdHeaderParam:
+      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular
+
+        request, please provide the complete request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    ResourceNamePathParam:
+      description: The name of the resource type.
+      in: path
+      name: name
+      required: true
+      schema:
+        type: string
+        minLength: 1
 x-anchors:
   x-headers:
     opc-next-page:

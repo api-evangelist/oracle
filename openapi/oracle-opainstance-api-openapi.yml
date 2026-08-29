@@ -574,14 +574,6 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   parameters:
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
 
@@ -594,42 +586,46 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
-    OpaInstanceIdentifierQueryParam:
-      description: unique OpaInstance identifier
+    LifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
       in: query
-      name: id
+      name: lifecycleState
+      required: false
       x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/OpaInstance/lifecycleState'
       schema:
         type: string
-    ResourceIdentifierQueryParam:
-      description: The ID of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
 
         '
-      in: header
-      name: if-match
-      required: false
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestIdPathParam:
+      description: The ID of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
       schema:
         type: string
     WorkRequestStatusQueryParam:
@@ -649,51 +645,48 @@ components:
         - SUCCEEDED
         - CANCELING
         - CANCELED
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    LifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
+        type: string
+    OpaInstanceIdentifierPathParam:
+      description: unique OpaInstance identifier
+      in: path
+      name: opaInstanceId
+      required: true
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
       in: query
-      name: lifecycleState
-      required: false
+      name: page
       x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/OpaInstance/lifecycleState'
       schema:
         type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
+        minLength: 1
+    OpaInstanceIdentifierQueryParam:
+      description: unique OpaInstance identifier
       in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      name: id
+      x-default-description: 'null'
       schema:
         type: string
-        enum:
-        - ASC
-        - DESC
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     WorkRequestIdQueryParam:
       description: The ID of the asynchronous work request.
       in: query
       name: workRequestId
       x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestIdPathParam:
-      description: The ID of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
       schema:
         type: string
     RetryTokenHeader:
@@ -715,40 +708,244 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    OpaInstanceIdentifierPathParam:
-      description: unique OpaInstance identifier
-      in: path
-      name: opaInstanceId
-      required: true
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: displayName
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
-
-        '
+    ResourceIdentifierQueryParam:
+      description: The ID of the resource affected by the work request.
       in: query
-      name: sortBy
+      name: resourceId
+      x-default-description: 'null'
       schema:
         type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    RequestIdHeader:
-      description: The client request ID for tracing.
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
       in: header
-      name: opc-request-id
+      name: if-match
+      required: false
       schema:
         type: string
   schemas:
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. Error codes are listed on
+
+            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+
+            '
+          type: string
+        message:
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
+      properties:
+        compartmentId:
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_OPA_INSTANCE
+          - UPDATE_OPA_INSTANCE
+          - DELETE_OPA_INSTANCE
+          - MOVE_OPA_INSTANCE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequest:
+      description: A description of workrequest status
+      properties:
+        compartmentId:
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_OPA_INSTANCE
+          - UPDATE_OPA_INSTANCE
+          - DELETE_OPA_INSTANCE
+          - MOVE_OPA_INSTANCE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestLogEntries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
     ChangeOpaInstanceCompartmentDetails:
       description: The information to be updated.
       properties:
@@ -764,18 +961,86 @@ components:
       required:
       - compartmentId
       type: object
-    Error:
-      description: Error Information.
+    OpaInstanceCollection:
+      description: Results of a opaInstance search. Contains boh OpaInstanceSummary items and other information, such as metadata.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
+        items:
+          description: List of opaInstances.
+          items:
+            $ref: '#/components/schemas/OpaInstanceSummary'
+          type: array
       required:
-      - code
-      - message
+      - items
+      type: object
+    CreateOpaInstanceDetails:
+      description: The information about new OpaInstance.
+      properties:
+        compartmentId:
+          description: Compartment Identifier
+          maxLength: 255
+          minLength: 1
+          type: string
+        consumptionModel:
+          description: Parameter specifying which entitlement to use for billing purposes
+          type: string
+          x-obmcs-enumref: '#/definitions/OpaInstance/consumptionModel'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: Description of the Oracle Process Automation instance.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: OpaInstance Identifier. User-friendly name for the instance. Avoid entering confidential information. You can change this value anytime.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        idcsAt:
+          description: IDCS Authentication token. This is required for all realms with IDCS. This property is optional, as it is not required for non-IDCS realms.
+          type: string
+        isBreakglassEnabled:
+          description: indicates if breakGlass is enabled for the opa instance.
+          type: boolean
+        meteringType:
+          description: MeteringType Identifier
+          type: string
+          x-obmcs-enumref: '#/definitions/OpaInstance/meteringType'
+        shapeName:
+          description: Shape of the instance.
+          type: string
+          x-obmcs-enumref: '#/definitions/OpaInstance/shapeName'
+      required:
+      - displayName
+      - shapeName
+      - compartmentId
+      type: object
     UpdateOpaInstanceDetails:
       description: The information to be updated.
       properties:
@@ -818,17 +1083,133 @@ components:
             '
           type: object
       type: object
-    OpaInstanceCollection:
-      description: Results of a opaInstance search. Contains boh OpaInstanceSummary items and other information, such as metadata.
+    OpaInstanceSummary:
+      description: Summary of the OpaInstance.
       properties:
-        items:
-          description: List of opaInstances.
-          items:
-            $ref: '#/components/schemas/OpaInstanceSummary'
-          type: array
+        compartmentId:
+          description: Compartment Identifier
+          type: string
+        consumptionModel:
+          description: Parameter specifying which entitlement to use for billing purposes
+          type: string
+          x-obmcs-enumref: '#/definitions/OpaInstance/consumptionModel'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: Description of the Process Automation instance.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: OpaInstance Identifier, can be renamed
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: Unique identifier that is immutable on creation
+          type: string
+        instanceUrl:
+          description: OPA Instance URL
+          type: string
+        isBreakglassEnabled:
+          description: indicates if breakGlass is enabled for the opa instance.
+          type: boolean
+        lifecycleState:
+          description: The current state of the OpaInstance.
+          type: string
+          x-obmcs-enumref: '#/definitions/OpaInstance/lifecycleState'
+        meteringType:
+          description: MeteringType Identifier
+          type: string
+          x-obmcs-enumref: '#/definitions/OpaInstance/meteringType'
+        shapeName:
+          description: Shape of the instance.
+          type: string
+          x-obmcs-enumref: '#/definitions/OpaInstance/shapeName'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time the the OpaInstance was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the OpaInstance was updated. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
       required:
-      - items
+      - id
+      - compartmentId
+      - shapeName
+      - lifecycleState
+      - timeCreated
+      - displayName
       type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time the log message was written. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
     WorkRequestSummaryCollection:
       description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
       properties:
@@ -1012,387 +1393,6 @@ components:
       - timeCreated
       - displayName
       type: object
-    CreateOpaInstanceDetails:
-      description: The information about new OpaInstance.
-      properties:
-        compartmentId:
-          description: Compartment Identifier
-          maxLength: 255
-          minLength: 1
-          type: string
-        consumptionModel:
-          description: Parameter specifying which entitlement to use for billing purposes
-          type: string
-          x-obmcs-enumref: '#/definitions/OpaInstance/consumptionModel'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: Description of the Oracle Process Automation instance.
-          maxLength: 400
-          minLength: 1
-          type: string
-        displayName:
-          description: OpaInstance Identifier. User-friendly name for the instance. Avoid entering confidential information. You can change this value anytime.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        idcsAt:
-          description: IDCS Authentication token. This is required for all realms with IDCS. This property is optional, as it is not required for non-IDCS realms.
-          type: string
-        isBreakglassEnabled:
-          description: indicates if breakGlass is enabled for the opa instance.
-          type: boolean
-        meteringType:
-          description: MeteringType Identifier
-          type: string
-          x-obmcs-enumref: '#/definitions/OpaInstance/meteringType'
-        shapeName:
-          description: Shape of the instance.
-          type: string
-          x-obmcs-enumref: '#/definitions/OpaInstance/shapeName'
-      required:
-      - displayName
-      - shapeName
-      - compartmentId
-      type: object
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestError objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestSummary:
-      description: A summary of the status of a work request.
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - CREATE_OPA_INSTANCE
-          - UPDATE_OPA_INSTANCE
-          - DELETE_OPA_INSTANCE
-          - MOVE_OPA_INSTANCE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed on
-
-            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    OpaInstanceSummary:
-      description: Summary of the OpaInstance.
-      properties:
-        compartmentId:
-          description: Compartment Identifier
-          type: string
-        consumptionModel:
-          description: Parameter specifying which entitlement to use for billing purposes
-          type: string
-          x-obmcs-enumref: '#/definitions/OpaInstance/consumptionModel'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: Description of the Process Automation instance.
-          maxLength: 400
-          minLength: 1
-          type: string
-        displayName:
-          description: OpaInstance Identifier, can be renamed
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: Unique identifier that is immutable on creation
-          type: string
-        instanceUrl:
-          description: OPA Instance URL
-          type: string
-        isBreakglassEnabled:
-          description: indicates if breakGlass is enabled for the opa instance.
-          type: boolean
-        lifecycleState:
-          description: The current state of the OpaInstance.
-          type: string
-          x-obmcs-enumref: '#/definitions/OpaInstance/lifecycleState'
-        meteringType:
-          description: MeteringType Identifier
-          type: string
-          x-obmcs-enumref: '#/definitions/OpaInstance/meteringType'
-        shapeName:
-          description: Shape of the instance.
-          type: string
-          x-obmcs-enumref: '#/definitions/OpaInstance/shapeName'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the the OpaInstance was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the OpaInstance was updated. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - shapeName
-      - lifecycleState
-      - timeCreated
-      - displayName
-      type: object
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestLogEntries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequest:
-      description: A description of workrequest status
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - CREATE_OPA_INSTANCE
-          - UPDATE_OPA_INSTANCE
-          - DELETE_OPA_INSTANCE
-          - MOVE_OPA_INSTANCE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
   responses:
     default:
       description: Unknown Error

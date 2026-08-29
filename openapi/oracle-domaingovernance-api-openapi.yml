@@ -1,11 +1,16 @@
 openapi: 3.2.0
 info:
   title: Oracle Domain Governance API
+  x-refined-note:
+  - x-evidence differs across the merged source definitions and was not carried
+  - x-provenance differs across the merged source definitions and was not carried
   version: '1.0'
   description: 'Operations tagged domainGovernance across 2 of this provider''s published API definitions: oci-organizations-1-openapi.yaml, oci-organizations-openapi.yaml. Each path carries the servers of the definition it was published in.'
 servers:
-- url: http://127.0.0.1/20220518
-- url: https://127.0.0.1/20220518
+- url: http://127.0.0.1/20230401
+- url: https://127.0.0.1/20230401
+- url: http://127.0.0.1/20200801
+- url: https://127.0.0.1/20200801
 tags:
 - name: domainGovernance
 paths:
@@ -120,6 +125,9 @@ paths:
               $ref: '#/components/schemas/CreateDomainGovernanceDetails'
         description: Parameters for adding domain governance to a claimed domain.
         required: true
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
   /domainGovernances/{domainGovernanceId}:
     delete:
       description: Removes domain governance from a claimed domain.
@@ -255,25 +263,20 @@ paths:
               $ref: '#/components/schemas/UpdateDomainGovernanceDetails'
         description: The information to be updated.
         required: true
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
 components:
   parameters:
-    NameQueryParam:
-      description: A filter to return only resources that exactly match the name given.
+    DomainIdQueryParam:
+      description: The domain OCID.
       in: query
-      name: name
+      name: domainId
       required: false
       x-default-description: 'null'
       schema:
         type: string
         maxLength: 255
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order can be provided.
 
@@ -292,40 +295,21 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
+    LifecycleStateQueryParam:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
       schema:
         type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
+        enum:
+        - CREATING
+        - ACTIVE
+        - INACTIVE
+        - UPDATING
+        - FAILED
+        - TERMINATED
     DomainGovernanceIdPathParam:
       description: The domain governance OCID.
       in: path
@@ -345,24 +329,20 @@ components:
         enum:
         - ASC
         - DESC
-    DomainGovernanceIdQueryParam:
-      description: The domain governance OCID.
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
       in: query
-      name: domainGovernanceId
-      required: false
+      name: page
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 255
-    DomainIdQueryParam:
-      description: The domain OCID.
-      in: query
-      name: domainId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
+        minLength: 1
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
 
@@ -382,28 +362,180 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: The lifecycle state of the resource.
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
       in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      name: compartmentId
+      required: true
       schema:
         type: string
-        enum:
-        - CREATING
-        - ACTIVE
-        - INACTIVE
-        - UPDATING
-        - FAILED
-        - TERMINATED
+        maxLength: 255
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    DomainGovernanceIdQueryParam:
+      description: The domain governance OCID.
+      in: query
+      name: domainGovernanceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    NameQueryParam:
+      description: A filter to return only resources that exactly match the name given.
+      in: query
+      name: name
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    CompartmentIdQueryParam_2:
+      description: OCID of the compartment. Always a tenancy OCID.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
   schemas:
+    DomainGovernanceSummary:
+      description: The summary of a domain govenance entity owned by a tenancy.
+      properties:
+        compartmentId:
+          description: The OCID of the tenancy that has started the registration process for this domain.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        domainId:
+          description: The OCID of the domain associated with this domain governance entity.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the domain governance entity.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isGovernanceEnabled:
+          description: Indicates whether governance is enabled for this domain.
+          example: true
+          type: boolean
+        lifecycleState:
+          description: The lifecycle state of the domain governance entity.
+          example: ACTIVE
+          type: string
+          x-obmcs-enumref: '#/definitions/DomainGovernance/lifecycleState'
+        onsSubscriptionId:
+          description: The ONS subscription associated with this domain governance entity.
+          maxLength: 255
+          minLength: 1
+          type: string
+        onsTopicId:
+          description: The ONS topic associated with this domain governance entity.
+          maxLength: 255
+          minLength: 1
+          type: string
+        ownerId:
+          description: The OCID of the tenancy that owns this domain governance entity.
+          maxLength: 255
+          minLength: 1
+          type: string
+        subscriptionEmail:
+          description: Email address to be used to notify the user, and that the ONS subscription will be created with.
+          maxLength: 255
+          minLength: 6
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: Date-time when this domain governance was created. An RFC 3339-formatted date and time string.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeUpdated:
+          description: Date-time when this domain governance was last updated. An RFC 3339-formatted date and time string.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+      required:
+      - id
+      - ownerId
+      - compartmentId
+      - domainId
+      - lifecycleState
+      - isGovernanceEnabled
+      - onsTopicId
+      - onsSubscriptionId
     DomainGovernanceCollection:
       description: Result of a query request for a list of domain governance entities. Contains DomainGovernanceSummary items.
       properties:
@@ -415,18 +547,6 @@ components:
       required:
       - items
       type: object
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     DomainGovernance:
       description: The model for a domain governance entity.
       properties:
@@ -603,6 +723,18 @@ components:
       - subscriptionEmail
       - onsTopicId
       - onsSubscriptionId
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     UpdateDomainGovernanceDetails:
       description: The parameters for updating a domain govenance entity.
       properties:
@@ -643,119 +775,6 @@ components:
           maxLength: 255
           minLength: 6
           type: string
-    DomainGovernanceSummary:
-      description: The summary of a domain govenance entity owned by a tenancy.
-      properties:
-        compartmentId:
-          description: The OCID of the tenancy that has started the registration process for this domain.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        domainId:
-          description: The OCID of the domain associated with this domain governance entity.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the domain governance entity.
-          maxLength: 255
-          minLength: 1
-          type: string
-        isGovernanceEnabled:
-          description: Indicates whether governance is enabled for this domain.
-          example: true
-          type: boolean
-        lifecycleState:
-          description: The lifecycle state of the domain governance entity.
-          example: ACTIVE
-          type: string
-          x-obmcs-enumref: '#/definitions/DomainGovernance/lifecycleState'
-        onsSubscriptionId:
-          description: The ONS subscription associated with this domain governance entity.
-          maxLength: 255
-          minLength: 1
-          type: string
-        onsTopicId:
-          description: The ONS topic associated with this domain governance entity.
-          maxLength: 255
-          minLength: 1
-          type: string
-        ownerId:
-          description: The OCID of the tenancy that owns this domain governance entity.
-          maxLength: 255
-          minLength: 1
-          type: string
-        subscriptionEmail:
-          description: Email address to be used to notify the user, and that the ONS subscription will be created with.
-          maxLength: 255
-          minLength: 6
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: Date-time when this domain governance was created. An RFC 3339-formatted date and time string.
-          example: 2016-08-29 09:12:33.001000+00:00
-          format: date-time
-          type: string
-        timeUpdated:
-          description: Date-time when this domain governance was last updated. An RFC 3339-formatted date and time string.
-          example: 2016-08-29 09:12:33.001000+00:00
-          format: date-time
-          type: string
-      required:
-      - id
-      - ownerId
-      - compartmentId
-      - domainId
-      - lifecycleState
-      - isGovernanceEnabled
-      - onsTopicId
-      - onsSubscriptionId
   responses:
     default:
       description: Unknown Error

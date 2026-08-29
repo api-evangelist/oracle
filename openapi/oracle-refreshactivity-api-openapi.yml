@@ -337,18 +337,198 @@ paths:
       - refreshActivity
       x-related-resource: '#/definitions/FusionEnvironment'
 components:
+  parameters:
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIME_CREATED
+        - DISPLAY_NAME
+        default: TIME_CREATED
+    RefreshActivityLifecycleStateQueryParam:
+      description: A filter that returns all resources that match the specified status
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: Returns all lifecycle states by default
+      x-obmcs-enumref: '#/definitions/RefreshActivity/lifecycleState'
+      schema:
+        type: string
+    ScheduledStartTimeQueryParam:
+      description: A filter that returns all resources that are scheduled after this date
+      in: query
+      name: timeScheduledStartGreaterThanOrEqualTo
+      required: false
+      x-default-description: Returns based on other filters by default
+      schema:
+        type: string
+        format: date-time
+    FusionEnvironmentIdentifierPathParam:
+      description: unique FusionEnvironment identifier
+      in: path
+      name: fusionEnvironmentId
+      required: true
+      schema:
+        type: string
+    RefreshActivityIdentifierPathParam:
+      description: The unique identifier (OCID) of the Refresh activity.
+      in: path
+      name: refreshActivityId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    RefreshActivityIdentifierToRescheduleQueryParam:
+      description: A filter that returns all available refresh times including the refresh window of the refresh ID provided
+      in: query
+      name: refreshActivityIdToReschedule
+      required: false
+      x-default-description: Returns all available refresh times
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ExpectedFinishTimeQueryParam:
+      description: A filter that returns all resources that end before this date
+      in: query
+      name: timeExpectedFinishLessThanOrEqualTo
+      required: false
+      x-default-description: Returns based on other filters by default
+      schema:
+        type: string
+        format: date-time
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 100
+        minimum: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   schemas:
-    TimeAvailableForRefreshSummary:
-      description: one available refresh time.
+    UpdateRefreshActivityDetails:
+      description: The information about scheduled refresh.
       properties:
-        timeAvailableForRefresh:
-          description: refresh time.
+        timeScheduledStart:
+          description: Time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
           format: date-time
-          pattern: /([0-9]{4})-(?:[0-9]{2})-([0-9]{2})/
+          type: string
+      type: object
+    CreateRefreshActivityDetails:
+      description: The information about current refresh.
+      properties:
+        isDataMaskingOpted:
+          default: false
+          description: Represents if the customer opted for Data Masking or not during refreshActivity.
+          type: boolean
+        sourceFusionEnvironmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the source environment
+
+            '
+          maxLength: 1024
+          minLength: 1
+          type: string
+        timeScheduledStart:
+          description: Current time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
+          format: date-time
           type: string
       required:
-      - timeAvailableForRefresh
+      - sourceFusionEnvironmentId
       type: object
+    TimeAvailableForRefreshCollection:
+      description: The available refresh times for a fusion environment
+      properties:
+        items:
+          description: A list of available refresh time objects.
+          items:
+            $ref: '#/components/schemas/TimeAvailableForRefreshSummary'
+          type: array
+      required:
+      - items
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     RefreshActivitySummary:
       description: Summary of the refresh activity.
       properties:
@@ -415,18 +595,35 @@ components:
       - timeExpectedFinish
       - serviceAvailability
       type: object
-    Error:
-      description: Error Information.
+    RefreshIssueDetails:
+      description: Details of refresh failure or validation failure that needs to be investigated.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+        refreshIssues:
+          description: Detail reasons of refresh failure or validation failure that needs to be shown to customer.
           type: string
-        message:
-          description: A human-readable error string.
+      type: object
+    TimeAvailableForRefreshSummary:
+      description: one available refresh time.
+      properties:
+        timeAvailableForRefresh:
+          description: refresh time.
+          format: date-time
+          pattern: /([0-9]{4})-(?:[0-9]{2})-([0-9]{2})/
           type: string
       required:
-      - code
-      - message
+      - timeAvailableForRefresh
+      type: object
+    RefreshActivityCollection:
+      description: Results of a refresh activity search.
+      properties:
+        items:
+          description: A page of refresh activity objects.
+          items:
+            $ref: '#/components/schemas/RefreshActivitySummary'
+          type: array
+      required:
+      - items
+      type: object
     RefreshActivity:
       description: An environment refresh copies data from a source environment to a target environment, making a copy of the source environment onto the target environment. For more information, see [Refreshing an Environment](/iaas/Content/fusion-applications/refresh-environment.htm).
       properties:
@@ -506,203 +703,6 @@ components:
       - timeExpectedFinish
       - serviceAvailability
       type: object
-    CreateRefreshActivityDetails:
-      description: The information about current refresh.
-      properties:
-        isDataMaskingOpted:
-          default: false
-          description: Represents if the customer opted for Data Masking or not during refreshActivity.
-          type: boolean
-        sourceFusionEnvironmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the source environment
-
-            '
-          maxLength: 1024
-          minLength: 1
-          type: string
-        timeScheduledStart:
-          description: Current time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - sourceFusionEnvironmentId
-      type: object
-    RefreshActivityCollection:
-      description: Results of a refresh activity search.
-      properties:
-        items:
-          description: A page of refresh activity objects.
-          items:
-            $ref: '#/components/schemas/RefreshActivitySummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateRefreshActivityDetails:
-      description: The information about scheduled refresh.
-      properties:
-        timeScheduledStart:
-          description: Time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      type: object
-    RefreshIssueDetails:
-      description: Details of refresh failure or validation failure that needs to be investigated.
-      properties:
-        refreshIssues:
-          description: Detail reasons of refresh failure or validation failure that needs to be shown to customer.
-          type: string
-      type: object
-    TimeAvailableForRefreshCollection:
-      description: The available refresh times for a fusion environment
-      properties:
-        items:
-          description: A list of available refresh time objects.
-          items:
-            $ref: '#/components/schemas/TimeAvailableForRefreshSummary'
-          type: array
-      required:
-      - items
-      type: object
-  parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - TIME_CREATED
-        - DISPLAY_NAME
-        default: TIME_CREATED
-    ScheduledStartTimeQueryParam:
-      description: A filter that returns all resources that are scheduled after this date
-      in: query
-      name: timeScheduledStartGreaterThanOrEqualTo
-      required: false
-      x-default-description: Returns based on other filters by default
-      schema:
-        type: string
-        format: date-time
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    RefreshActivityIdentifierToRescheduleQueryParam:
-      description: A filter that returns all available refresh times including the refresh window of the refresh ID provided
-      in: query
-      name: refreshActivityIdToReschedule
-      required: false
-      x-default-description: Returns all available refresh times
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 100
-        minimum: 1
-    RefreshActivityIdentifierPathParam:
-      description: The unique identifier (OCID) of the Refresh activity.
-      in: path
-      name: refreshActivityId
-      required: true
-      schema:
-        type: string
-    FusionEnvironmentIdentifierPathParam:
-      description: unique FusionEnvironment identifier
-      in: path
-      name: fusionEnvironmentId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      required: false
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        minLength: 1
-    ExpectedFinishTimeQueryParam:
-      description: A filter that returns all resources that end before this date
-      in: query
-      name: timeExpectedFinishLessThanOrEqualTo
-      required: false
-      x-default-description: Returns based on other filters by default
-      schema:
-        type: string
-        format: date-time
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    RefreshActivityLifecycleStateQueryParam:
-      description: A filter that returns all resources that match the specified status
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: Returns all lifecycle states by default
-      x-obmcs-enumref: '#/definitions/RefreshActivity/lifecycleState'
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

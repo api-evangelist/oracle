@@ -805,7 +805,239 @@ paths:
       - redisCluster
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
+  parameters:
+    RedisClusterIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    LifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/RedisCluster/lifecycleState'
+      schema:
+        type: string
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestIdPathParam:
+      description: The the asynchronous request ID.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    WorkRequestStatusQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given OperationStatus.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - WAITING
+        - NEEDS_ATTENTION
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+    RedisClusterIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
+      in: path
+      name: redisClusterId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    ResourceIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   schemas:
+    ChangeRedisClusterCompartmentDetails:
+      description: The configuration details for the move operation.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment
+
+            into which the cluster should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    RedisNodeCollection:
+      description: A list of nodes in a cluster that match filter criteria, if any.
+      properties:
+        items:
+          description: The list of nodes in a cluster.
+          items:
+            $ref: '#/components/schemas/NodeSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestErrorCollection:
+      description: A list of errors for a work request.
+      properties:
+        items:
+          description: A collection of work request errors.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestError:
+      description: An error encountered while executing an operation that is tracked by a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. Error codes are listed at [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string for the error that occured.
+          type: string
+        timestamp:
+          description: The time and time the error occured.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
     ImportOciCacheFromObjectStorageObject:
       description: An object to import from the specified bucket.
       properties:
@@ -817,6 +1049,294 @@ components:
       required:
       - objectName
       type: object
+    WorkRequestSummary:
+      description: A description of the work request status.
+      properties:
+        compartmentId:
+          description: 'The OCID of the compartment that contains the work request.
+
+            '
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the work request.
+          type: string
+        operationType:
+          description: The type of operation that spawned the work request.
+          enum:
+          - CREATE_REDIS_CLUSTER
+          - UPDATE_REDIS_CLUSTER
+          - DELETE_REDIS_CLUSTER
+          - MOVE_REDIS_CLUSTER
+          - FAILOVER_REDIS_CLUSTER
+          - CREATE_REDIS_CONFIG_SET
+          - UPDATE_REDIS_CONFIG_SET
+          - DELETE_REDIS_CONFIG_SET
+          - MOVE_REDIS_CONFIG_SET
+          - MIGRATE_CLUSTER
+          - CLUSTER_ROLLBACK
+          - ATTACH_OCI_CACHE_USERS
+          - DETACH_OCI_CACHE_USERS
+          - CREATE_OCI_CACHE_USER
+          - UPDATE_OCI_CACHE_USER
+          - DELETE_OCI_CACHE_USER
+          - CREATE_OCI_CACHE_CONFIG_SET
+          - UPDATE_OCI_CACHE_CONFIG_SET
+          - DELETE_OCI_CACHE_CONFIG_SET
+          - CHANGE_OCI_CACHE_CONFIG_SET_COMPARTMENT
+          - CHANGE_OCI_CACHE_USER_COMPARTMENT
+          - CREATE_OCI_CACHE_BACKUP
+          - UPDATE_OCI_CACHE_BACKUP
+          - DELETE_OCI_CACHE_BACKUP
+          - MOVE_OCI_CACHE_BACKUP
+          - EXPORT_OCI_CACHE_BACKUP_TO_OS
+          - PATCH_OCI_CACHE_CLUSTER
+          - REPLACE_OCI_CACHE_NODE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the work request was created, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the work request completed, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the work request was started, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequest:
+      description: An asynchronous work request.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the work request.
+
+            '
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the work request.
+          type: string
+        operationType:
+          description: The type of operation that spawned the work request.
+          enum:
+          - CREATE_REDIS_CLUSTER
+          - UPDATE_REDIS_CLUSTER
+          - DELETE_REDIS_CLUSTER
+          - MOVE_REDIS_CLUSTER
+          - FAILOVER_REDIS_CLUSTER
+          - CREATE_REDIS_CONFIG_SET
+          - UPDATE_REDIS_CONFIG_SET
+          - DELETE_REDIS_CONFIG_SET
+          - MOVE_REDIS_CONFIG_SET
+          - MIGRATE_CLUSTER
+          - CLUSTER_ROLLBACK
+          - ATTACH_OCI_CACHE_USERS
+          - DETACH_OCI_CACHE_USERS
+          - CREATE_OCI_CACHE_USER
+          - UPDATE_OCI_CACHE_USER
+          - DELETE_OCI_CACHE_USER
+          - CREATE_OCI_CACHE_CONFIG_SET
+          - UPDATE_OCI_CACHE_CONFIG_SET
+          - DELETE_OCI_CACHE_CONFIG_SET
+          - CHANGE_OCI_CACHE_CONFIG_SET_COMPARTMENT
+          - CHANGE_OCI_CACHE_USER_COMPARTMENT
+          - CREATE_OCI_CACHE_BACKUP
+          - UPDATE_OCI_CACHE_BACKUP
+          - DELETE_OCI_CACHE_BACKUP
+          - MOVE_OCI_CACHE_BACKUP
+          - EXPORT_OCI_CACHE_BACKUP_TO_OS
+          - PATCH_OCI_CACHE_CLUSTER
+          - REPLACE_OCI_CACHE_NODE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: The percentage complete of the operation tracked by the work request.
+          format: float
+          type: number
+        resources:
+          description: The resources that are affected by the work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the work request was created, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the work request completed, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the work request was started, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequestLogEntryCollection:
+      description: A list of logs for the specified work request.
+      properties:
+        items:
+          description: A collection of work request logs.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    AttachOciCacheUsersDetails:
+      description: OCI cache user details to be attached with a cluster.
+      properties:
+        ociCacheUsers:
+          description: List of OCI cache user unique IDs (OCIDs).
+          items:
+            type: string
+          type: array
+      required:
+      - ociCacheUsers
+      type: object
+    ImportOciCacheFromObjectStorageDetails:
+      description: Details for importing OCI Cache data from Object Storage RDB file(s) during cluster creation.
+      properties:
+        bucketName:
+          description: The Object Storage bucket name.
+          maxLength: 256
+          minLength: 1
+          type: string
+        namespaceName:
+          description: The Object Storage namespace name.
+          maxLength: 256
+          minLength: 1
+          type: string
+        objects:
+          description: The list of objects to import from the specified bucket.
+          items:
+            $ref: '#/components/schemas/ImportOciCacheFromObjectStorageObject'
+          maxItems: 1024
+          minItems: 1
+          type: array
+      required:
+      - namespaceName
+      - bucketName
+      - objects
+      type: object
+    Node:
+      description: The details of each node in the cluster.
+      properties:
+        displayName:
+          description: A user-friendly name of a cluster node.
+          type: string
+        privateEndpointFqdn:
+          description: The fully qualified domain name (FQDN) of the API endpoint to access a specific node.
+          type: string
+        privateEndpointIpAddress:
+          description: The private IP address of the API endpoint to access a specific node.
+          type: string
+      required:
+      - privateEndpointFqdn
+      - privateEndpointIpAddress
+      - displayName
+      type: object
+    Error:
+      description: Specifies details for an error.
+      properties:
+        code:
+          description: A machine-usable code for the error that occured.
+          type: string
+        message:
+          description: A human-readable error string for the error that occured.
+          type: string
+      required:
+      - code
+      - message
     NodeSummary:
       description: The details of each node in the cluster.
       properties:
@@ -841,212 +1361,19 @@ components:
       - displayName
       - redisClusterId
       type: object
-    AttachedOciCacheUser:
-      description: OciCacheUser attached to the OciCacheCluster.
+    WorkRequestLogEntry:
+      description: A log message from executing an operation that is tracked by a work request.
       properties:
-        ociCacheUserId:
-          description: 'OCID of the OciCacheUser
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - ociCacheUserId
-      type: object
-    Error:
-      description: Specifies details for an error.
-      properties:
-        code:
-          description: A machine-usable code for the error that occured.
-          type: string
         message:
-          description: A human-readable error string for the error that occured.
+          description: A human-readable log message.
+          type: string
+        timestamp:
+          description: The date and time the log message was written.
+          format: date-time
           type: string
       required:
-      - code
       - message
-    AttachOciCacheUsersDetails:
-      description: OCI cache user details to be attached with a cluster.
-      properties:
-        ociCacheUsers:
-          description: List of OCI cache user unique IDs (OCIDs).
-          items:
-            type: string
-          type: array
-      required:
-      - ociCacheUsers
-      type: object
-    Node:
-      description: The details of each node in the cluster.
-      properties:
-        displayName:
-          description: A user-friendly name of a cluster node.
-          type: string
-        privateEndpointFqdn:
-          description: The fully qualified domain name (FQDN) of the API endpoint to access a specific node.
-          type: string
-        privateEndpointIpAddress:
-          description: The private IP address of the API endpoint to access a specific node.
-          type: string
-      required:
-      - privateEndpointFqdn
-      - privateEndpointIpAddress
-      - displayName
-      type: object
-    RedisClusterCollection:
-      description: A list of clusters that match filter criteria, if any. A cluster is a memory-based storage solution. For more information, see [OCI Cache](/iaas/Content/ocicache/home.htm).
-      properties:
-        items:
-          description: The list of clusters.
-          items:
-            $ref: '#/components/schemas/RedisClusterSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateRedisClusterDetails:
-      description: The configuration to update for an existing cluster.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        nodeCount:
-          description: The number of nodes per shard in the cluster when clusterMode is SHARDED. This is the total number of nodes when clusterMode is NONSHARDED.
-          maximum: 5
-          minimum: 1
-          type: integer
-        nodeMemoryInGBs:
-          description: The amount of memory allocated to the cluster's nodes, in gigabytes.
-          format: float
-          maximum: 500
-          minimum: 2
-          type: number
-        nsgIds:
-          description: 'A list of Network Security Group (NSG) [OCIDs](/iaas/Content/General/Concepts/identifiers.htm)
-
-            associated with this cluster. For more information,
-
-            see [Using an NSG for Clusters](/iaas/Content/ocicache/connecttocluster.htm#connecttocluster__networksecuritygroup).
-
-            '
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 5
-          type: array
-        ociCacheConfigSetId:
-          description: The ID of the corresponding OCI Cache Config Set for the cluster.
-          type: string
-        securityAttributes:
-          additionalProperties:
-            additionalProperties:
-              description: 'Attribute value and mode. Only the String type is supported for value. Mode is currently always "enforce".
-
-                '
-              type: object
-            description: 'Key-value pair representing a security attribute key and value, scoped to a namespace.
-
-
-              Example: `{"MaxEgressCount": {"value": "42", "mode": "enforce"}}`
-
-              '
-            type: object
-          description: 'Security attributes for redis cluster resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
-
-            '
-          type: object
-        shardCount:
-          description: The number of shards in sharded cluster. Only applicable when clusterMode is SHARDED.
-          type: integer
-        softwareVersion:
-          description: The OCI Cache engine version that the cluster is running.
-          example: VALKEY_7_2
-          type: string
-          x-obmcs-enumref: '#/definitions/RedisCluster/softwareVersion'
-      type: object
-    RedisNodeCollection:
-      description: A list of nodes in a cluster that match filter criteria, if any.
-      properties:
-        items:
-          description: The list of nodes in a cluster.
-          items:
-            $ref: '#/components/schemas/NodeSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestResource:
-      description: The resources that are affected by the work request.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work tracked in the work request.
-
-            A resource being created, updated, or deleted will remain in the `IN_PROGRESS` state until
-
-            work is complete for that resource at which point it will transition to `CREATED`, `UPDATED`,
-
-            or `DELETED`, respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type the work request affects.
-          type: string
-        entityUri:
-          description: The URI path that you can use for a GET to access the resource metadata
-          type: string
-        identifier:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the resource the work request affects.
-          type: string
-      required:
-      - actionType
-      - entityType
-      - identifier
+      - timestamp
     WorkRequestSummaryCollection:
       description: A list of work requests.
       properties:
@@ -1058,31 +1385,16 @@ components:
       required:
       - items
       type: object
-    WorkRequestErrorCollection:
-      description: A list of errors for a work request.
+    RedisClusterCollection:
+      description: A list of clusters that match filter criteria, if any. A cluster is a memory-based storage solution. For more information, see [OCI Cache](/iaas/Content/ocicache/home.htm).
       properties:
         items:
-          description: A collection of work request errors.
+          description: The list of clusters.
           items:
-            $ref: '#/components/schemas/WorkRequestError'
+            $ref: '#/components/schemas/RedisClusterSummary'
           type: array
       required:
       - items
-      type: object
-    ChangeRedisClusterCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment
-
-            into which the cluster should be moved.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
       type: object
     RedisCluster:
       description: An OCI Cache cluster is a memory-based storage solution. For more information, see [OCI Cache](/iaas/Content/ocicache/home.htm).
@@ -1272,14 +1584,79 @@ components:
       - replicasFqdn
       - replicasEndpointIpAddress
       type: object
-    WorkRequestSummary:
-      description: A description of the work request status.
+    AttachedOciCacheUser:
+      description: OciCacheUser attached to the OciCacheCluster.
       properties:
-        compartmentId:
-          description: 'The OCID of the compartment that contains the work request.
+        ociCacheUserId:
+          description: 'OCID of the OciCacheUser
 
             '
+          maxLength: 255
+          minLength: 1
           type: string
+      required:
+      - ociCacheUserId
+      type: object
+    WorkRequestResource:
+      description: The resources that are affected by the work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
+
+            A resource being created, updated, or deleted will remain in the `IN_PROGRESS` state until
+
+            work is complete for that resource at which point it will transition to `CREATED`, `UPDATED`,
+
+            or `DELETED`, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - RELATED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type the work request affects.
+          type: string
+        entityUri:
+          description: The URI path that you can use for a GET to access the resource metadata
+          type: string
+        identifier:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the resource the work request affects.
+          type: string
+      required:
+      - actionType
+      - entityType
+      - identifier
+    DetachOciCacheUsersDetails:
+      description: OCI cache user details to be detached with a cluster.
+      properties:
+        ociCacheUsers:
+          description: List of OCI cache user unique IDs (OCIDs).
+          items:
+            type: string
+          type: array
+      required:
+      - ociCacheUsers
+      type: object
+    NodeCollection:
+      description: The collection of  cluster nodes.
+      properties:
+        items:
+          description: Collection of node objects.
+          items:
+            $ref: '#/components/schemas/Node'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateRedisClusterDetails:
+      description: The configuration to update for an existing cluster.
+      properties:
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -1299,6 +1676,11 @@ components:
 
             '
           type: object
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -1308,109 +1690,66 @@ components:
 
             '
           type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the work request.
-          type: string
-        operationType:
-          description: The type of operation that spawned the work request.
-          enum:
-          - CREATE_REDIS_CLUSTER
-          - UPDATE_REDIS_CLUSTER
-          - DELETE_REDIS_CLUSTER
-          - MOVE_REDIS_CLUSTER
-          - FAILOVER_REDIS_CLUSTER
-          - CREATE_REDIS_CONFIG_SET
-          - UPDATE_REDIS_CONFIG_SET
-          - DELETE_REDIS_CONFIG_SET
-          - MOVE_REDIS_CONFIG_SET
-          - MIGRATE_CLUSTER
-          - CLUSTER_ROLLBACK
-          - ATTACH_OCI_CACHE_USERS
-          - DETACH_OCI_CACHE_USERS
-          - CREATE_OCI_CACHE_USER
-          - UPDATE_OCI_CACHE_USER
-          - DELETE_OCI_CACHE_USER
-          - CREATE_OCI_CACHE_CONFIG_SET
-          - UPDATE_OCI_CACHE_CONFIG_SET
-          - DELETE_OCI_CACHE_CONFIG_SET
-          - CHANGE_OCI_CACHE_CONFIG_SET_COMPARTMENT
-          - CHANGE_OCI_CACHE_USER_COMPARTMENT
-          - CREATE_OCI_CACHE_BACKUP
-          - UPDATE_OCI_CACHE_BACKUP
-          - DELETE_OCI_CACHE_BACKUP
-          - MOVE_OCI_CACHE_BACKUP
-          - EXPORT_OCI_CACHE_BACKUP_TO_OS
-          - PATCH_OCI_CACHE_CLUSTER
-          - REPLACE_OCI_CACHE_NODE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
+        nodeCount:
+          description: The number of nodes per shard in the cluster when clusterMode is SHARDED. This is the total number of nodes when clusterMode is NONSHARDED.
+          maximum: 5
+          minimum: 1
+          type: integer
+        nodeMemoryInGBs:
+          description: The amount of memory allocated to the cluster's nodes, in gigabytes.
           format: float
+          maximum: 500
+          minimum: 2
           type: number
-        resources:
-          description: The resources affected by this work request.
+        nsgIds:
+          description: 'A list of Network Security Group (NSG) [OCIDs](/iaas/Content/General/Concepts/identifiers.htm)
+
+            associated with this cluster. For more information,
+
+            see [Using an NSG for Clusters](/iaas/Content/ocicache/connecttocluster.htm#connecttocluster__networksecuritygroup).
+
+            '
           items:
-            $ref: '#/components/schemas/WorkRequestResource'
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 5
           type: array
-        status:
-          description: The status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - NEEDS_ATTENTION
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
+        ociCacheConfigSetId:
+          description: The ID of the corresponding OCI Cache Config Set for the cluster.
           type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the work request was created, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+        securityAttributes:
+          additionalProperties:
+            additionalProperties:
+              description: 'Attribute value and mode. Only the String type is supported for value. Mode is currently always "enforce".
+
+                '
+              type: object
+            description: 'Key-value pair representing a security attribute key and value, scoped to a namespace.
+
+
+              Example: `{"MaxEgressCount": {"value": "42", "mode": "enforce"}}`
+
+              '
+            type: object
+          description: 'Security attributes for redis cluster resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "enforce"}}}`
 
             '
-          format: date-time
+          type: object
+        shardCount:
+          description: The number of shards in sharded cluster. Only applicable when clusterMode is SHARDED.
+          type: integer
+        softwareVersion:
+          description: The OCI Cache engine version that the cluster is running.
+          example: VALKEY_7_2
           type: string
-        timeFinished:
-          description: 'The date and time the work request completed, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the work request was started, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    WorkRequestError:
-      description: An error encountered while executing an operation that is tracked by a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed at [API Errors](/iaas/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string for the error that occured.
-          type: string
-        timestamp:
-          description: The time and time the error occured.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
+          x-obmcs-enumref: '#/definitions/RedisCluster/softwareVersion'
+      type: object
     RedisClusterSummary:
       description: 'Summary of information about a cluster. A cluster is a memory-based storage solution. For more information, see [OCI Cache](/iaas/Content/ocicache/home.htm).
 
@@ -1586,66 +1925,6 @@ components:
       - replicasFqdn
       - replicasEndpointIpAddress
       type: object
-    DetachOciCacheUsersDetails:
-      description: OCI cache user details to be detached with a cluster.
-      properties:
-        ociCacheUsers:
-          description: List of OCI cache user unique IDs (OCIDs).
-          items:
-            type: string
-          type: array
-      required:
-      - ociCacheUsers
-      type: object
-    WorkRequestLogEntry:
-      description: A log message from executing an operation that is tracked by a work request.
-      properties:
-        message:
-          description: A human-readable log message.
-          type: string
-        timestamp:
-          description: The date and time the log message was written.
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    ImportOciCacheFromObjectStorageDetails:
-      description: Details for importing OCI Cache data from Object Storage RDB file(s) during cluster creation.
-      properties:
-        bucketName:
-          description: The Object Storage bucket name.
-          maxLength: 256
-          minLength: 1
-          type: string
-        namespaceName:
-          description: The Object Storage namespace name.
-          maxLength: 256
-          minLength: 1
-          type: string
-        objects:
-          description: The list of objects to import from the specified bucket.
-          items:
-            $ref: '#/components/schemas/ImportOciCacheFromObjectStorageObject'
-          maxItems: 1024
-          minItems: 1
-          type: array
-      required:
-      - namespaceName
-      - bucketName
-      - objects
-      type: object
-    NodeCollection:
-      description: The collection of  cluster nodes.
-      properties:
-        items:
-          description: Collection of node objects.
-          items:
-            $ref: '#/components/schemas/Node'
-          type: array
-      required:
-      - items
-      type: object
     CreateRedisClusterDetails:
       description: The configuration details for a new OCI Cache cluster. An OCI Cache cluster is a memory-based storage solution. For more information, see [OCI Cache](/iaas/Content/ocicache/home.htm).
       properties:
@@ -1767,285 +2046,6 @@ components:
       - subnetId
       - softwareVersion
       type: object
-    WorkRequestLogEntryCollection:
-      description: A list of logs for the specified work request.
-      properties:
-        items:
-          description: A collection of work request logs.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequest:
-      description: An asynchronous work request.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the compartment that contains the work request.
-
-            '
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the work request.
-          type: string
-        operationType:
-          description: The type of operation that spawned the work request.
-          enum:
-          - CREATE_REDIS_CLUSTER
-          - UPDATE_REDIS_CLUSTER
-          - DELETE_REDIS_CLUSTER
-          - MOVE_REDIS_CLUSTER
-          - FAILOVER_REDIS_CLUSTER
-          - CREATE_REDIS_CONFIG_SET
-          - UPDATE_REDIS_CONFIG_SET
-          - DELETE_REDIS_CONFIG_SET
-          - MOVE_REDIS_CONFIG_SET
-          - MIGRATE_CLUSTER
-          - CLUSTER_ROLLBACK
-          - ATTACH_OCI_CACHE_USERS
-          - DETACH_OCI_CACHE_USERS
-          - CREATE_OCI_CACHE_USER
-          - UPDATE_OCI_CACHE_USER
-          - DELETE_OCI_CACHE_USER
-          - CREATE_OCI_CACHE_CONFIG_SET
-          - UPDATE_OCI_CACHE_CONFIG_SET
-          - DELETE_OCI_CACHE_CONFIG_SET
-          - CHANGE_OCI_CACHE_CONFIG_SET_COMPARTMENT
-          - CHANGE_OCI_CACHE_USER_COMPARTMENT
-          - CREATE_OCI_CACHE_BACKUP
-          - UPDATE_OCI_CACHE_BACKUP
-          - DELETE_OCI_CACHE_BACKUP
-          - MOVE_OCI_CACHE_BACKUP
-          - EXPORT_OCI_CACHE_BACKUP_TO_OS
-          - PATCH_OCI_CACHE_CLUSTER
-          - REPLACE_OCI_CACHE_NODE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: The percentage complete of the operation tracked by the work request.
-          format: float
-          type: number
-        resources:
-          description: The resources that are affected by the work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: The status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - NEEDS_ATTENTION
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the work request was created, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the work request completed, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the work request was started, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-  parameters:
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RedisClusterIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
-      in: path
-      name: redisClusterId
-      required: true
-      schema:
-        type: string
-    ResourceIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    WorkRequestStatusQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given OperationStatus.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-      schema:
-        type: string
-        enum:
-        - ACCEPTED
-        - IN_PROGRESS
-        - WAITING
-        - NEEDS_ATTENTION
-        - FAILED
-        - SUCCEEDED
-        - CANCELING
-        - CANCELED
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    LifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/RedisCluster/lifecycleState'
-      schema:
-        type: string
-    WorkRequestIdPathParam:
-      description: The the asynchronous request ID.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    RedisClusterIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

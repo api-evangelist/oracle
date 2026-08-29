@@ -562,7 +562,403 @@ paths:
         description: The Certificate Details of Vanity Domain to be uploaded
         required: true
 components:
+  parameters:
+    DoesDownloadAkamaiCsrQueryParam:
+      description: A parameter indicating whether to download the Akamai Csr or not
+      in: query
+      name: doesDownloadAkamaiCsr
+      required: false
+      x-default-description: default = false
+      schema:
+        type: boolean
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIME_CREATED
+        - DISPLAY_NAME
+        default: TIME_CREATED
+    VanityDomainActivityIdentifierPathParam:
+      description: The unique identifier (OCID) of the VanityDomainActivity
+      in: path
+      name: vanityDomainActivityId
+      required: true
+      schema:
+        type: string
+    DoesDownloadOriginCsrQueryParam:
+      description: A parameter indicating whether to download the Origin Csr or not
+      in: query
+      name: doesDownloadOriginCsr
+      required: false
+      x-default-description: default = false
+      schema:
+        type: boolean
+    FusionEnvironmentIdentifierPathParam:
+      description: unique FusionEnvironment identifier
+      in: path
+      name: fusionEnvironmentId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    IsFullVanityQueryParam:
+      description: The boolean filter to distinguish prefix or full vanity
+      in: query
+      name: isFullVanityDomain
+      required: true
+      schema:
+        type: boolean
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 100
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    VanityDomainIdentifierPathParam:
+      description: The unique identifier (OCID) of the VanityDomain
+      in: path
+      name: vanityDomainId
+      required: true
+      schema:
+        type: string
   schemas:
+    CreateVanityDomainActivityDetails:
+      description: Schedule activity details to vanity domain on pod
+      properties:
+        operationType:
+          description: The type of operation
+          enum:
+          - ENABLE_VANITY_DOMAIN
+          - DELETE_VANITY_DOMAIN
+          type: string
+        timeScheduled:
+          description: Activity start time
+          format: date-time
+          type: string
+        vanityDomainId:
+          description: Vanity domain ID
+          type: string
+      required:
+      - vanityDomainId
+      - timeScheduled
+      - operationType
+      type: object
+    CreateVanityDomainDetails:
+      description: Vanity domain request detail
+      properties:
+        cdnCertRequestType:
+          description: The cdn request type for which the certificate is generated
+          enum:
+          - REQUEST_CSR
+          - REQUEST_DV
+          type: string
+        certificateInfo:
+          $ref: '#/components/schemas/CertificateInfo'
+        changeManagementLink:
+          description: The cm link that was used to create the DNS prefix
+          type: string
+        dnsManagedBy:
+          description: The dns is managed by the customer or Oracle
+          enum:
+          - ORACLE_MANAGED
+          - CUSTOMER_MANAGED
+          type: string
+        originCertRequestType:
+          description: The origin request type for which the certificate is generated
+          enum:
+          - REQUEST_CSR
+          - REQUEST_DV
+          type: string
+        prefix:
+          description: The prefix value of the DnsPrefix. Can't be changed after creation
+          type: string
+        vanityDomain:
+          description: Vanity domain
+          type: string
+      type: object
+    UploadVanityDomainCertificateDetails:
+      description: Add vanity domain with certificate
+      properties:
+        certificateChainPem:
+          description: Certificate chain PEM, including intermediate and root
+          type: string
+        certificatePem:
+          description: Public certificate PEM
+          type: string
+        commonName:
+          description: Fully qualified host name
+          type: string
+        isAkamai:
+          description: Identify if this is certificate for pod LB or Akamai
+          type: boolean
+      required:
+      - isAkamai
+      - commonName
+      - certificatePem
+      type: object
+    VanityDomainActivity:
+      description: Vanity Domain Activity resource
+      properties:
+        fusionEnvironmentId:
+          description: The OCID of the Fusion environment that the VanityDomainActivity is created on
+          type: string
+        id:
+          description: The unique identifier (OCID) of the VanityDomainActivity. Can't be changed after creation
+          type: string
+        lifecycleDetails:
+          description: The current lifecycleDetails of the VanityDomainActivity
+          enum:
+          - NONE
+          type: string
+        lifecycleState:
+          description: The current lifecycleState of the VanityDomainActivity
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELED
+          - NEEDS_ATTENTION
+          type: string
+        operationType:
+          description: The type of operation
+          enum:
+          - ENABLE_VANITY_DOMAIN
+          - DELETE_VANITY_DOMAIN
+          type: string
+        timeCreated:
+          description: The time the VanityDomainactivity was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeDeactivated:
+          description: The time the VanityDomainactivity is scheduled to deactivate. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeEnabled:
+          description: The time the VanityDomainactivity is scheduled to enable. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeScheduled:
+          description: Activity start time
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the VanityDomainactivity was updated. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        vanityDomainId:
+          description: Vanity domain ID
+          type: string
+      required:
+      - id
+      - vanityDomainId
+      - fusionEnvironmentId
+      - lifecycleState
+      - lifecycleDetails
+      - timeCreated
+      - timeUpdated
+      - timeEnabled
+      - timeDeactivated
+      - timeScheduled
+      - operationType
+      type: object
+    VanityDnsRecord:
+      description: DNS record for vanity domain
+      properties:
+        domain:
+          description: domain name for dns record
+          type: string
+        rdata:
+          description: dns server hostname is pointed to
+          type: string
+        ttlInSeconds:
+          description: time to live for dns record
+          type: integer
+        type:
+          description: record data for record type
+          type: string
+      required:
+      - domain
+      - rdata
+      - type
+      - ttlInSeconds
+      type: object
+    VanityDomainCollection:
+      description: Results of a VanityDomain search
+      properties:
+        items:
+          description: A page of VanityDomainSummary objects
+          items:
+            $ref: '#/components/schemas/VanityDomainSummary'
+          type: array
+      required:
+      - items
+      type: object
+    VanityDomainSummary:
+      description: Summary of the VanityDomain
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        fusionEnvironmentId:
+          description: The OCID of the Fusion environment that the VanityDomain is created on
+          type: string
+        id:
+          description: The unique identifier (OCID) of the VanityDomain. Can't be changed after creation
+          type: string
+        lifecycleDetails:
+          description: The current lifecycleDetails of the VanityDomain
+          type: string
+          x-obmcs-enumref: '#/definitions/VanityDomain/lifecycleDetails'
+        lifecycleState:
+          description: The current lifecycleState of the VanityDomain
+          type: string
+          x-obmcs-enumref: '#/definitions/VanityDomain/lifecycleState'
+        prefix:
+          description: The prefix value of the DnsPrefix. Can't be changed after creation
+          type: string
+        scheduledActivityId:
+          description: The ID of the VanityDomainActivity is scheduled
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time the VanityDomain was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeEnabled:
+          description: The time the VanityDomain is scheduled to enable. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the VanityDomain was updated. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        vanityDomain:
+          description: Vanity domain. Can't be changed after creation
+          type: string
+      required:
+      - id
+      - vanityDomain
+      - fusionEnvironmentId
+      - lifecycleState
+      - lifecycleDetails
+      - timeCreated
+      - timeUpdated
+      - timeEnabled
+      - systemTags
+      - freeformTags
+      - definedTags
+      type: object
     CertificateInfo:
       description: Properties of certificate
       properties:
@@ -617,17 +1013,6 @@ components:
             type: string
           type: array
       type: object
-    VanityDomainCollection:
-      description: Results of a VanityDomain search
-      properties:
-        items:
-          description: A page of VanityDomainSummary objects
-          items:
-            $ref: '#/components/schemas/VanityDomainSummary'
-          type: array
-      required:
-      - items
-      type: object
     UpdateVanityDomainActivityDetails:
       description: The information about scheduled refresh.
       properties:
@@ -648,79 +1033,11 @@ components:
       required:
       - code
       - message
-    CreateVanityDomainDetails:
-      description: Vanity domain request detail
+    UpdateVanityDomainDetails:
+      description: The information about scheduled VanityDomain refresh.
       properties:
-        cdnCertRequestType:
-          description: The cdn request type for which the certificate is generated
-          enum:
-          - REQUEST_CSR
-          - REQUEST_DV
-          type: string
         certificateInfo:
           $ref: '#/components/schemas/CertificateInfo'
-        changeManagementLink:
-          description: The cm link that was used to create the DNS prefix
-          type: string
-        dnsManagedBy:
-          description: The dns is managed by the customer or Oracle
-          enum:
-          - ORACLE_MANAGED
-          - CUSTOMER_MANAGED
-          type: string
-        originCertRequestType:
-          description: The origin request type for which the certificate is generated
-          enum:
-          - REQUEST_CSR
-          - REQUEST_DV
-          type: string
-        prefix:
-          description: The prefix value of the DnsPrefix. Can't be changed after creation
-          type: string
-        vanityDomain:
-          description: Vanity domain
-          type: string
-      type: object
-    CreateVanityDomainActivityDetails:
-      description: Schedule activity details to vanity domain on pod
-      properties:
-        operationType:
-          description: The type of operation
-          enum:
-          - ENABLE_VANITY_DOMAIN
-          - DELETE_VANITY_DOMAIN
-          type: string
-        timeScheduled:
-          description: Activity start time
-          format: date-time
-          type: string
-        vanityDomainId:
-          description: Vanity domain ID
-          type: string
-      required:
-      - vanityDomainId
-      - timeScheduled
-      - operationType
-      type: object
-    UploadVanityDomainCertificateDetails:
-      description: Add vanity domain with certificate
-      properties:
-        certificateChainPem:
-          description: Certificate chain PEM, including intermediate and root
-          type: string
-        certificatePem:
-          description: Public certificate PEM
-          type: string
-        commonName:
-          description: Fully qualified host name
-          type: string
-        isAkamai:
-          description: Identify if this is certificate for pod LB or Akamai
-          type: boolean
-      required:
-      - isAkamai
-      - commonName
-      - certificatePem
       type: object
     VanityDomain:
       description: Vanity Domain resource
@@ -899,323 +1216,6 @@ components:
       - freeformTags
       - definedTags
       type: object
-    VanityDomainActivity:
-      description: Vanity Domain Activity resource
-      properties:
-        fusionEnvironmentId:
-          description: The OCID of the Fusion environment that the VanityDomainActivity is created on
-          type: string
-        id:
-          description: The unique identifier (OCID) of the VanityDomainActivity. Can't be changed after creation
-          type: string
-        lifecycleDetails:
-          description: The current lifecycleDetails of the VanityDomainActivity
-          enum:
-          - NONE
-          type: string
-        lifecycleState:
-          description: The current lifecycleState of the VanityDomainActivity
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELED
-          - NEEDS_ATTENTION
-          type: string
-        operationType:
-          description: The type of operation
-          enum:
-          - ENABLE_VANITY_DOMAIN
-          - DELETE_VANITY_DOMAIN
-          type: string
-        timeCreated:
-          description: The time the VanityDomainactivity was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeDeactivated:
-          description: The time the VanityDomainactivity is scheduled to deactivate. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeEnabled:
-          description: The time the VanityDomainactivity is scheduled to enable. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeScheduled:
-          description: Activity start time
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the VanityDomainactivity was updated. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        vanityDomainId:
-          description: Vanity domain ID
-          type: string
-      required:
-      - id
-      - vanityDomainId
-      - fusionEnvironmentId
-      - lifecycleState
-      - lifecycleDetails
-      - timeCreated
-      - timeUpdated
-      - timeEnabled
-      - timeDeactivated
-      - timeScheduled
-      - operationType
-      type: object
-    VanityDnsRecord:
-      description: DNS record for vanity domain
-      properties:
-        domain:
-          description: domain name for dns record
-          type: string
-        rdata:
-          description: dns server hostname is pointed to
-          type: string
-        ttlInSeconds:
-          description: time to live for dns record
-          type: integer
-        type:
-          description: record data for record type
-          type: string
-      required:
-      - domain
-      - rdata
-      - type
-      - ttlInSeconds
-      type: object
-    VanityDomainSummary:
-      description: Summary of the VanityDomain
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        fusionEnvironmentId:
-          description: The OCID of the Fusion environment that the VanityDomain is created on
-          type: string
-        id:
-          description: The unique identifier (OCID) of the VanityDomain. Can't be changed after creation
-          type: string
-        lifecycleDetails:
-          description: The current lifecycleDetails of the VanityDomain
-          type: string
-          x-obmcs-enumref: '#/definitions/VanityDomain/lifecycleDetails'
-        lifecycleState:
-          description: The current lifecycleState of the VanityDomain
-          type: string
-          x-obmcs-enumref: '#/definitions/VanityDomain/lifecycleState'
-        prefix:
-          description: The prefix value of the DnsPrefix. Can't be changed after creation
-          type: string
-        scheduledActivityId:
-          description: The ID of the VanityDomainActivity is scheduled
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{orcl-cloud: {free-tier-retain: true}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the VanityDomain was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeEnabled:
-          description: The time the VanityDomain is scheduled to enable. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the VanityDomain was updated. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        vanityDomain:
-          description: Vanity domain. Can't be changed after creation
-          type: string
-      required:
-      - id
-      - vanityDomain
-      - fusionEnvironmentId
-      - lifecycleState
-      - lifecycleDetails
-      - timeCreated
-      - timeUpdated
-      - timeEnabled
-      - systemTags
-      - freeformTags
-      - definedTags
-      type: object
-    UpdateVanityDomainDetails:
-      description: The information about scheduled VanityDomain refresh.
-      properties:
-        certificateInfo:
-          $ref: '#/components/schemas/CertificateInfo'
-      type: object
-  parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - TIME_CREATED
-        - DISPLAY_NAME
-        default: TIME_CREATED
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    VanityDomainIdentifierPathParam:
-      description: The unique identifier (OCID) of the VanityDomain
-      in: path
-      name: vanityDomainId
-      required: true
-      schema:
-        type: string
-    DoesDownloadOriginCsrQueryParam:
-      description: A parameter indicating whether to download the Origin Csr or not
-      in: query
-      name: doesDownloadOriginCsr
-      required: false
-      x-default-description: default = false
-      schema:
-        type: boolean
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 100
-        minimum: 1
-    DoesDownloadAkamaiCsrQueryParam:
-      description: A parameter indicating whether to download the Akamai Csr or not
-      in: query
-      name: doesDownloadAkamaiCsr
-      required: false
-      x-default-description: default = false
-      schema:
-        type: boolean
-    IsFullVanityQueryParam:
-      description: The boolean filter to distinguish prefix or full vanity
-      in: query
-      name: isFullVanityDomain
-      required: true
-      schema:
-        type: boolean
-    FusionEnvironmentIdentifierPathParam:
-      description: unique FusionEnvironment identifier
-      in: path
-      name: fusionEnvironmentId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      required: false
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    VanityDomainActivityIdentifierPathParam:
-      description: The unique identifier (OCID) of the VanityDomainActivity
-      in: path
-      name: vanityDomainActivityId
-      required: true
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

@@ -1,7 +1,7 @@
 openapi: 3.2.0
 info:
   description: Use the Oracle Access Governance API to create, view, and manage GovernanceInstances.
-  title: Access Governance Access Governance CP API
+  title: Access Governance CP API
   version: '20220518'
   x-provenance:
     method: harvested
@@ -820,78 +820,56 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   schemas:
-    ResourceLock:
-      description: 'Resource locks are used to prevent certain APIs from being called for the resource.
-
-        A full lock prevents both updating the resource and deleting the resource. A delete
-
-        lock prevents deleting the resource.
-
-        '
+    SenderConfig:
+      description: The sender information for email notifications sent by GovernanceInstance.
       properties:
-        compartmentId:
-          description: The compartment ID of the lock.
+        displayName:
+          description: The sender's displayName.
+          maxLength: 255
+          minLength: 1
           type: string
-        message:
-          description: 'A message added by the creator of the lock. This is typically used to give an
-
-            indication of why the resource is locked.
-
-            '
+        email:
+          description: The sender's email.
           type: string
-        relatedResourceId:
-          description: 'The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
-
-            '
-          type: string
-        timeCreated:
-          description: When the lock was created.
+        isInboxConfigured:
+          description: Whether the sender email has inbox configured to receive emails.
+          type: boolean
+        isVerified:
+          description: Whether or not the sender's email has been verified.
+          type: boolean
+        timeVerifyResponseExpiry:
+          description: The time when the verify response needs to be received by.
           format: date-time
           type: string
-        type:
-          description: Type of the lock.
-          enum:
-          - FULL
-          - DELETE
-          type: string
-      required:
-      - type
       type: object
-    Error:
-      description: Error Information.
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      properties:
+        items:
+          description: A list of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestError:
+      description: An error encountered while executing a work request.
       properties:
         code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+          description: "A machine-usable code for the error that occured. Error codes are listed on \n<a href=\"/iaas/Content/API/References/apierrors.htm\">API Errors Landing Page</a>.\n"
           type: string
         message:
-          description: A human-readable error string.
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An RFC3339 formatted datetime string.
+          format: date-time
           type: string
       required:
       - code
       - message
-    RemoveResourceLockDetails:
-      description: 'Used to remove a resource lock.
-
-        Resource locks are used to prevent certain APIs from being called for the resource.
-
-        A full lock prevents both updating the resource and deleting the resource. A delete
-
-        lock prevents deleting the resource.
-
-        '
-      properties:
-        compartmentId:
-          description: The compartment ID of the lock.
-          type: string
-        type:
-          description: Type of the lock.
-          enum:
-          - FULL
-          - DELETE
-          type: string
-      required:
-      - type
-      type: object
+      - timestamp
     GovernanceInstance:
       description: The details of a GovernanceInstance.
       properties:
@@ -1010,8 +988,181 @@ components:
       - timeCreated
       - displayName
       type: object
-    SenderConfig:
-      description: The sender information for email notifications sent by GovernanceInstance.
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
+      properties:
+        compartmentId:
+          description: 'The OCID of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The OCID of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_GOVERNANCE_INSTANCE
+          - DELETE_GOVERNANCE_INSTANCE
+          - UPDATE_GOVERNANCE_INSTANCE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          maxItems: 50
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          - NEEDS_ATTENTION
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequest:
+      description: A description of workrequest status
+      properties:
+        compartmentId:
+          description: 'The OCID of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The OCID of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_GOVERNANCE_INSTANCE
+          - DELETE_GOVERNANCE_INSTANCE
+          - UPDATE_GOVERNANCE_INSTANCE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          maxItems: 50
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          - NEEDS_ATTENTION
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
+      properties:
+        items:
+          description: A list of workRequestLogEntries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateGovernanceInstanceConfigurationDetails:
+      description: The details of a tenancy-wide configuration for GovernanceInstances to be updated.
+      properties:
+        senderInfo:
+          $ref: '#/components/schemas/UpdateSenderConfig'
+      type: object
+    UpdateSenderConfig:
+      description: Update to a sender information for email notifications sent by GovernanceInstance.
       properties:
         displayName:
           description: The sender's displayName.
@@ -1024,17 +1175,32 @@ components:
         isInboxConfigured:
           description: Whether the sender email has inbox configured to receive emails.
           type: boolean
-        isVerified:
-          description: Whether or not the sender's email has been verified.
+        isResendNotificationEmail:
+          description: Whether there is a need to resend the verification email.
           type: boolean
-        timeVerifyResponseExpiry:
-          description: The time when the verify response needs to be received by.
-          format: date-time
-          type: string
+      required:
+      - email
+      - isInboxConfigured
       type: object
-    UpdateGovernanceInstanceDetails:
-      description: The details of a GovernanceInstance to be updated.
+    ChangeGovernanceInstanceCompartmentDetails:
+      description: The details of a GovernanceInstance to be updated for a compartment change.
       properties:
+        compartmentId:
+          description: The OCID of the compartment where the GovernanceInstance resides.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    CreateGovernanceInstanceDetails:
+      description: The details about a new GovernanceInstance.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment where the GovernanceInstance resides.
+          maxLength: 255
+          minLength: 1
+          type: string
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -1073,6 +1239,12 @@ components:
 
             '
           type: object
+        idcsAccessToken:
+          description: 'IDCS access token identifying a stripe and service administrator user.
+
+            '
+          maxLength: 8192
+          type: string
         licenseType:
           description: The license type of the instance.
           enum:
@@ -1081,93 +1253,128 @@ components:
           - AG_PREMIUM
           type: string
           x-obmcs-top-level-enum: '#/definitions/LicenseType'
+        locks:
+          description: Locks associated with this resource.
+          items:
+            $ref: '#/components/schemas/ResourceLock'
+          maxItems: 2
+          type: array
+        tenancyNamespace:
+          description: The namespace for tenancy object storage.
+          maxLength: 400
+          minLength: 1
+          type: string
+      required:
+      - displayName
+      - licenseType
+      - tenancyNamespace
+      - compartmentId
+      - idcsAccessToken
       type: object
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
+    ResourceLock:
+      description: 'Resource locks are used to prevent certain APIs from being called for the resource.
+
+        A full lock prevents both updating the resource and deleting the resource. A delete
+
+        lock prevents deleting the resource.
+
+        '
       properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work tracked in the work request.
+        compartmentId:
+          description: The compartment ID of the lock.
+          type: string
+        message:
+          description: 'A message added by the creator of the lock. This is typically used to give an
 
-            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
-
-            work is complete for that resource at which point it will transition to CREATED, UPDATED,
-
-            or DELETED, respectively.
+            indication of why the resource is locked.
 
             '
+          type: string
+        relatedResourceId:
+          description: 'The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
+
+            '
+          type: string
+        timeCreated:
+          description: When the lock was created.
+          format: date-time
+          type: string
+        type:
+          description: Type of the lock.
           enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          - FAILED
+          - FULL
+          - DELETE
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type the work request affects.
-          type: string
-        entityUri:
-          description: The URI path that the user can do a GET on to access the resource metadata
-          type: string
-        identifier:
-          description: The identifier of the resource the work request affects.
-          type: string
-        metadata:
-          additionalProperties:
-            type: string
-          description: Additional information that helps to explain the resource.
-          enum:
-          - IS_DRY_RUN
-          type: object
-          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
       required:
-      - actionType
-      - entityType
-      - identifier
-    WorkRequestSummaryCollection:
-      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
+      - type
+      type: object
+    GovernanceInstanceCollection:
+      description: Results of a GovernanceInstance search.
       properties:
         items:
-          description: A list of workRequestSummary objects.
+          description: List of GovernanceInstances.
           items:
-            $ref: '#/components/schemas/WorkRequestSummary'
+            $ref: '#/components/schemas/GovernanceInstanceSummary'
           type: array
       required:
       - items
       type: object
-    UpdateSenderConfig:
-      description: Update to a sender information for email notifications sent by GovernanceInstance.
-      properties:
-        displayName:
-          description: The sender's displayName.
-          maxLength: 255
-          minLength: 1
-          type: string
-        email:
-          description: The sender's email.
-          type: string
-        isInboxConfigured:
-          description: Whether the sender email has inbox configured to receive emails.
-          type: boolean
-        isResendNotificationEmail:
-          description: Whether there is a need to resend the verification email.
-          type: boolean
-      required:
-      - email
-      - isInboxConfigured
-      type: object
-    ChangeGovernanceInstanceCompartmentDetails:
-      description: The details of a GovernanceInstance to be updated for a compartment change.
+    RemoveResourceLockDetails:
+      description: 'Used to remove a resource lock.
+
+        Resource locks are used to prevent certain APIs from being called for the resource.
+
+        A full lock prevents both updating the resource and deleting the resource. A delete
+
+        lock prevents deleting the resource.
+
+        '
       properties:
         compartmentId:
-          description: The OCID of the compartment where the GovernanceInstance resides.
-          maxLength: 255
-          minLength: 1
+          description: The compartment ID of the lock.
+          type: string
+        type:
+          description: Type of the lock.
+          enum:
+          - FULL
+          - DELETE
           type: string
       required:
-      - compartmentId
+      - type
       type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    GovernanceInstanceConfiguration:
+      description: The tenancy-wide configuration for GovernanceInstances.
+      properties:
+        senderInfo:
+          $ref: '#/components/schemas/SenderConfig'
+      required:
+      - senderInfo
+      type: object
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time the log message was written. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
     GovernanceInstanceSummary:
       description: The summary of an GovernanceInstance.
       properties:
@@ -1281,193 +1488,63 @@ components:
       - timeCreated
       - displayName
       type: object
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+    WorkRequestSummaryCollection:
+      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
       properties:
         items:
-          description: A list of workRequestError objects.
+          description: A list of workRequestSummary objects.
           items:
-            $ref: '#/components/schemas/WorkRequestError'
+            $ref: '#/components/schemas/WorkRequestSummary'
           type: array
       required:
       - items
       type: object
-    GovernanceInstanceConfiguration:
-      description: The tenancy-wide configuration for GovernanceInstances.
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
       properties:
-        senderInfo:
-          $ref: '#/components/schemas/SenderConfig'
-      required:
-      - senderInfo
-      type: object
-    GovernanceInstanceCollection:
-      description: Results of a GovernanceInstance search.
-      properties:
-        items:
-          description: List of GovernanceInstances.
-          items:
-            $ref: '#/components/schemas/GovernanceInstanceSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestSummary:
-      description: A summary of the status of a work request.
-      properties:
-        compartmentId:
-          description: 'The OCID of the compartment that contains the work request. Work requests should be scoped to
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
 
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
 
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
+            work is complete for that resource at which point it will transition to CREATED, UPDATED,
 
-            resource whose compartment should be used
+            or DELETED, respectively.
 
             '
-          type: string
-        id:
-          description: The OCID of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
           enum:
-          - CREATE_GOVERNANCE_INSTANCE
-          - DELETE_GOVERNANCE_INSTANCE
-          - UPDATE_GOVERNANCE_INSTANCE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          maxItems: 50
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
+          - CREATED
+          - UPDATED
+          - DELETED
           - IN_PROGRESS
-          - WAITING
+          - RELATED
           - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          - NEEDS_ATTENTION
           type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type the work request affects.
           type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
+        entityUri:
+          description: The URI path that the user can do a GET on to access the resource metadata
           type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
+        identifier:
+          description: The identifier of the resource the work request affects.
           type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    UpdateGovernanceInstanceConfigurationDetails:
-      description: The details of a tenancy-wide configuration for GovernanceInstances to be updated.
-      properties:
-        senderInfo:
-          $ref: '#/components/schemas/UpdateSenderConfig'
-      type: object
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: "A machine-usable code for the error that occured. Error codes are listed on \n<a href=\"/iaas/Content/API/References/apierrors.htm\">API Errors Landing Page</a>.\n"
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    AddResourceLockDetails:
-      description: 'Used to add a resource lock.
-
-        Resource locks are used to prevent certain APIs from being called for the resource.
-
-        A full lock prevents both updating the resource and deleting the resource. A delete
-
-        lock prevents deleting the resource.
-
-        '
-      properties:
-        compartmentId:
-          description: The compartment ID of the lock.
-          type: string
-        message:
-          description: 'A message added by the creator of the lock. This is typically used to give an
-
-            indication of why the resource is locked.
-
-            '
-          type: string
-        relatedResourceId:
-          description: 'The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
-
-            '
-          type: string
-        type:
-          description: Type of the lock.
+        metadata:
+          additionalProperties:
+            type: string
+          description: Additional information that helps to explain the resource.
           enum:
-          - FULL
-          - DELETE
-          type: string
+          - IS_DRY_RUN
+          type: object
+          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
       required:
-      - type
-      type: object
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
+      - actionType
+      - entityType
+      - identifier
+    UpdateGovernanceInstanceDetails:
+      description: The details of a GovernanceInstance to be updated.
       properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    CreateGovernanceInstanceDetails:
-      description: The details about a new GovernanceInstance.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment where the GovernanceInstance resides.
-          maxLength: 255
-          minLength: 1
-          type: string
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -1506,12 +1583,6 @@ components:
 
             '
           type: object
-        idcsAccessToken:
-          description: 'IDCS access token identifying a stripe and service administrator user.
-
-            '
-          maxLength: 8192
-          type: string
         licenseType:
           description: The license type of the instance.
           enum:
@@ -1520,122 +1591,43 @@ components:
           - AG_PREMIUM
           type: string
           x-obmcs-top-level-enum: '#/definitions/LicenseType'
-        locks:
-          description: Locks associated with this resource.
-          items:
-            $ref: '#/components/schemas/ResourceLock'
-          maxItems: 2
-          type: array
-        tenancyNamespace:
-          description: The namespace for tenancy object storage.
-          maxLength: 400
-          minLength: 1
-          type: string
-      required:
-      - displayName
-      - licenseType
-      - tenancyNamespace
-      - compartmentId
-      - idcsAccessToken
       type: object
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
-      properties:
-        items:
-          description: A list of workRequestLogEntries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequest:
-      description: A description of workrequest status
+    AddResourceLockDetails:
+      description: 'Used to add a resource lock.
+
+        Resource locks are used to prevent certain APIs from being called for the resource.
+
+        A full lock prevents both updating the resource and deleting the resource. A delete
+
+        lock prevents deleting the resource.
+
+        '
       properties:
         compartmentId:
-          description: 'The OCID of the compartment that contains the work request. Work requests should be scoped to
+          description: The compartment ID of the lock.
+          type: string
+        message:
+          description: 'A message added by the creator of the lock. This is typically used to give an
 
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
+            indication of why the resource is locked.
 
             '
           type: string
-        id:
-          description: The OCID of the work request.
+        relatedResourceId:
+          description: 'The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
+
+            '
           type: string
-        operationType:
-          description: Type of the work request
+        type:
+          description: Type of the lock.
           enum:
-          - CREATE_GOVERNANCE_INSTANCE
-          - DELETE_GOVERNANCE_INSTANCE
-          - UPDATE_GOVERNANCE_INSTANCE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          maxItems: 50
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          - NEEDS_ATTENTION
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
+          - FULL
+          - DELETE
           type: string
       required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
+      - type
+      type: object
   parameters:
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
     AddResourceLockDetailsBodyParam:
       description: AddResourceLockDetails body parameter
       in: body
@@ -1643,36 +1635,72 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/AddResourceLockDetails'
-    ResourceIdentifierQueryParam:
-      description: The ID of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The OCID of the compartment in which resources are listed.
-      in: query
-      name: compartmentId
+    AccessGovernanceIdentifierPathParam:
+      description: The OCID of the GovernanceInstance
+      in: path
+      name: governanceInstanceId
       required: true
-      x-default-description: 'null'
       schema:
         type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
+    RemoveResourceLockDetailsBodyParam:
+      description: RemoveResourceLockDetails body parameter
+      in: body
+      name: RemoveResourceLockDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/RemoveResourceLockDetails'
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
 
         '
-      in: header
-      name: if-match
-      required: false
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    InstanceSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        - timeUpdated
+        - lifecycleState
+        default: timeCreated
+    AccessGovernanceIdentifierQueryParam:
+      description: The OCID of the GovernanceInstance
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestIdPathParam:
+      description: The OCID of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
       schema:
         type: string
     WorkRequestStatusQueryParam:
@@ -1693,34 +1721,41 @@ components:
         - CANCELING
         - CANCELED
         - NEEDS_ATTENTION
-    RemoveResourceLockDetailsBodyParam:
-      description: RemoveResourceLockDetails body parameter
-      in: body
-      name: RemoveResourceLockDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/RemoveResourceLockDetails'
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
-    AccessGovernanceIdentifierPathParam:
-      description: The OCID of the GovernanceInstance
-      in: path
-      name: governanceInstanceId
-      required: true
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
-    WorkRequestIdPathParam:
-      description: The OCID of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
+    OverrideLocksQueryParameter:
+      description: Whether to override locks (if any exist).
+      in: query
+      name: isLockOverride
+      schema:
+        type: boolean
+        default: false
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    InstanceLifecycleStateQueryParam:
+      description: The lifecycle state to filter on.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
       schema:
         type: string
     WorkRequestIdQueryParam:
@@ -1730,21 +1765,30 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment in which resources are listed.
+      in: query
+      name: compartmentId
+      required: true
+      x-default-description: 'null'
       schema:
         type: string
-        enum:
-        - ASC
-        - DESC
+    ResourceIdentifierQueryParam:
+      description: The ID of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1764,65 +1808,21 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    InstanceLifecycleStateQueryParam:
-      description: The lifecycle state to filter on.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      schema:
-        type: string
-    OverrideLocksQueryParameter:
-      description: Whether to override locks (if any exist).
-      in: query
-      name: isLockOverride
-      schema:
-        type: boolean
-        default: false
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    InstanceSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending.
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
 
         '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        - timeUpdated
-        - lifecycleState
-        default: timeCreated
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    RequestIdHeader:
-      description: The client request ID for tracing.
       in: header
-      name: opc-request-id
-      schema:
-        type: string
-    AccessGovernanceIdentifierQueryParam:
-      description: The OCID of the GovernanceInstance
-      in: query
-      name: id
-      x-default-description: 'null'
+      name: if-match
+      required: false
       schema:
         type: string
   responses:

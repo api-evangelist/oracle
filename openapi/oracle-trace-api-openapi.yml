@@ -229,23 +229,12 @@ paths:
       x-related-resource: '#/definitions/TraceSnapshot'
 components:
   parameters:
-    TraceStartTimeGreaterThanOrEqualToParam:
-      description: 'Include traces that have a minTraceStartTime equal to or greater than this value.
+    SpanNamespaceParam:
+      description: 'Name space from which the span details need to be retrieved.
 
         '
       in: query
-      name: timeTraceStartedGreaterThanOrEqualTo
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    TraceNamespaceParam:
-      description: 'Name space from which the trace details need to be retrieved.
-
-        '
-      in: query
-      name: traceNamespace
+      name: spanNamespace
       required: false
       x-default-description: 'null'
       schema:
@@ -253,6 +242,25 @@ components:
         enum:
         - TRACES
         - SYNTHETIC
+    IsSummaryQueryParam:
+      description: 'If enabled, only span level details are sent.
+
+        '
+      in: query
+      name: isSummarized
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    SpanIdentifierPathParam:
+      description: 'Unique Application Performance Monitoring span identifier (spanId).
+
+        '
+      in: path
+      name: spanKey
+      required: true
+      schema:
+        type: string
     ThreadIdQueryParam:
       description: 'Thread ID for which snapshots need to be retrieved. This identifier of a thread is a long positive number generated when a thread is created.
 
@@ -263,6 +271,17 @@ components:
       x-default-description: 'null'
       schema:
         type: string
+    SpanStartTimeGreaterThanOrEqualToNotRequiredParam:
+      description: 'Include spans that have a `spanStartTime` equal to or greater than this value.
+
+        '
+      in: query
+      name: timeSpanStartedGreaterThanOrEqualTo
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
     TraceStartTimeLessThanParam:
       description: 'Include traces that have a minTraceStartTime less than this value.
 
@@ -294,19 +313,6 @@ components:
       schema:
         type: string
         format: date-time
-    SpanNamespaceParam:
-      description: 'Name space from which the span details need to be retrieved.
-
-        '
-      in: query
-      name: spanNamespace
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        enum:
-        - TRACES
-        - SYNTHETIC
     SnapshotTimeQueryParam:
       description: 'Epoch time of snapshot.
 
@@ -317,45 +323,19 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    IsSummaryQueryParam:
-      description: 'If enabled, only span level details are sent.
+    TraceNamespaceParam:
+      description: 'Name space from which the trace details need to be retrieved.
 
         '
       in: query
-      name: isSummarized
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    SpanIdentifierPathParam:
-      description: 'Unique Application Performance Monitoring span identifier (spanId).
-
-        '
-      in: path
-      name: spanKey
-      required: true
-      schema:
-        type: string
-    SpanStartTimeGreaterThanOrEqualToNotRequiredParam:
-      description: 'Include spans that have a `spanStartTime` equal to or greater than this value.
-
-        '
-      in: query
-      name: timeSpanStartedGreaterThanOrEqualTo
+      name: traceNamespace
       required: false
       x-default-description: 'null'
       schema:
         type: string
-        format: date-time
-    TraceIdentifierPathParam:
-      description: 'Unique Application Performance Monitoring trace identifier (traceId).
-
-        '
-      in: path
-      name: traceKey
-      required: true
-      schema:
-        type: string
+        enum:
+        - TRACES
+        - SYNTHETIC
     RequestIdHeader:
       description: 'Unique Oracle-assigned identifier for the request.  If you need to contact Oracle about a
 
@@ -366,7 +346,43 @@ components:
       name: opc-request-id
       schema:
         type: string
+    TraceIdentifierPathParam:
+      description: 'Unique Application Performance Monitoring trace identifier (traceId).
+
+        '
+      in: path
+      name: traceKey
+      required: true
+      schema:
+        type: string
+    TraceStartTimeGreaterThanOrEqualToParam:
+      description: 'Include traces that have a minTraceStartTime equal to or greater than this value.
+
+        '
+      in: query
+      name: timeTraceStartedGreaterThanOrEqualTo
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
   schemas:
+    SnapshotDetail:
+      description: 'A generic key value pair object, which contains information such as the thread ID, thread name, and thread state.
+
+        '
+      properties:
+        key:
+          description: 'Name of the property.
+
+            '
+          type: string
+        value:
+          description: 'Value of the property.
+
+            '
+          type: object
+      type: object
     TraceServiceSummary:
       description: 'Summary of the spans in a trace by service.
 
@@ -394,351 +410,58 @@ components:
       - totalSpans
       - errorSpans
       type: object
-    Error:
-      description: 'Details of an error that occurred.
-
-        '
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing.
-
-            '
-          type: string
-        message:
-          description: 'A human-readable error string.
-
-            '
-          type: string
-      required:
-      - code
-      - message
-      type: object
-    ThreadSnapshot:
-      description: 'Thread snapshot.
-
-        '
-      properties:
-        stackTrace:
-          description: 'Stack trace.
-
-            '
-          items:
-            $ref: '#/components/schemas/StackTraceElement'
-          type: array
-        threadSnapshotDetails:
-          description: 'Snapshot details.
-
-            '
-          items:
-            $ref: '#/components/schemas/SnapshotDetail'
-          type: array
-        timeStamp:
-          description: 'Snapshot time.
-
-            '
-          format: date-time
-          type: string
-      type: object
-    SnapshotDetail:
-      description: 'A generic key value pair object, which contains information such as the thread ID, thread name, and thread state.
-
-        '
-      properties:
-        key:
-          description: 'Name of the property.
-
-            '
-          type: string
-        value:
-          description: 'Value of the property.
-
-            '
-          type: object
-      type: object
-    StackTraceElement:
-      description: 'Stack trace element.
-
-        '
-      properties:
-        className:
-          description: 'Name of the class containing the execution point.
-
-            '
-          type: string
-        fileName:
-          description: 'Name of the source file containing the execution point.
-
-            '
-          type: string
-        lineNumber:
-          description: 'Line number of the source line containing the execution point.
-
-            '
-          type: integer
-        methodName:
-          description: 'Name of the method containing the execution point.
-
-            '
-          type: string
-        weightage:
-          description: 'The weight distribution that denotes the percentage occurrence of a method in the captured snapshots.
-
-            '
-          format: float
-          type: number
-      type: object
-    TraceSpanSummary:
-      description: 'Summary of the information pertaining to the spans in the trace window that is being queried.
-
-        '
-      properties:
-        errorSpanCount:
-          description: "The number of spans with errors that have been processed by the system for the trace.\nNote that the number of spans with errors will be less than or equal to the total number of spans in the trace. \n"
-          format: int32
-          maximum: 604800
-          minimum: 0
-          type: integer
-        isFault:
-          description: 'Boolean flag that indicates whether the trace has an error.
-
-            '
-          type: boolean
-        key:
-          description: 'Unique identifier (traceId) for the trace that represents the span set.  Note that this field is
-
-            defined as traceKey in the API and it maps to the traceId in the trace data in Application Performance
-
-            Monitoring.
-
-            '
-          type: string
-        rootSpanDurationInMs:
-          description: 'Time taken for the root span operation to complete in milliseconds.
-
-            '
-          format: int32
-          maximum: 604800
-          minimum: 0
-          type: integer
-        rootSpanOperationName:
-          description: 'Root span name associated with the trace. This is the flow start operation name.
-
-            Null is displayed if the root span is not yet completed.
-
-            '
-          type: string
-        rootSpanServiceName:
-          description: 'Service associated with the trace.
-
-            '
-          type: string
-        serviceSummaries:
-          description: 'A summary of the spans by service.
-
-            '
-          items:
-            $ref: '#/components/schemas/TraceServiceSummary'
-          type: array
-        spanCount:
-          description: 'The number of spans that have been processed by the system for the trace.  Note that there
-
-            could be additional spans that have not been processed or reported yet if the trace is still
-
-            in progress.
-
-            '
-          format: int32
-          maximum: 604800
-          minimum: 0
-          type: integer
-        timeEarliestSpanStarted:
-          description: 'Start time of the earliest span in the span collection.
-
-            '
-          format: date-time
-          type: string
-        timeLatestSpanEnded:
-          description: 'End time of the span that most recently ended in the span collection.
-
-            '
-          format: date-time
-          type: string
-        timeRootSpanEnded:
-          description: 'End time of the root span for the span collection.
-
-            '
-          format: date-time
-          type: string
-        timeRootSpanStarted:
-          description: 'Start time of the root span for the span collection.
-
-            '
-          format: date-time
-          type: string
-        traceDurationInMs:
-          description: 'Time between the start of the earliest span and the end of the most recent span in milliseconds.
-
-            '
-          format: int32
-          maximum: 604800
-          minimum: 0
-          type: integer
-        traceErrorCode:
-          description: 'Error code of the trace.
-
-            '
-          type: string
-        traceErrorType:
-          description: 'Error type of the trace.
-
-            '
-          type: string
-        traceStatus:
-          description: 'The status of the trace.
-
-            The trace statuses are defined as follows:
-
-            complete - a root span has been recorded, but there is no information on the errors.
-
-            success - a complete root span is recorded there is a successful error type and error code - HTTP 200.
-
-            incomplete - the root span has not yet been received.
-
-            error - the root span returned with an error. There may or may not be an associated error code or error type.
-
-            '
-          type: string
-      required:
-      - key
-      - timeEarliestSpanStarted
-      - timeLatestSpanEnded
-      - spanCount
-      - errorSpanCount
-      - traceDurationInMs
-      - isFault
-      - traceStatus
-      - traceErrorCode
-      - traceErrorType
-      type: object
-    AggregatedStackTrace:
-      description: 'A branching tree with aggregated stack trace.
+    SpanSnapshot:
+      description: 'Definition of a span snapshot object.
 
         '
       properties:
         children:
-          description: 'List of child aggregated stack trace to represent branches.
-
-            '
-          items:
-            $ref: '#/components/schemas/AggregatedStackTrace'
-          type: array
-        stackTraceElement:
-          $ref: '#/components/schemas/StackTraceElement'
-      type: object
-    SpanLog:
-      description: 'Definition of a log which is a key-value pair of log data.
-
-        '
-      properties:
-        logKey:
-          description: 'Key that specifies the log name.
-
-            '
-          type: string
-        logValue:
-          description: 'Value associated with the log key.
-
-            '
-          type: string
-      required:
-      - logKey
-      - logValue
-      type: object
-    AggregatedSnapshot:
-      description: 'Aggregated snapshots of all spans.
-
-        '
-      properties:
-        aggregatedStackTraces:
-          description: 'List of aggregated stack trace.
-
-            '
-          items:
-            $ref: '#/components/schemas/AggregatedStackTrace'
-          type: array
-        details:
-          description: 'Aggregated snapshot details.
-
-            '
-          items:
-            $ref: '#/components/schemas/SnapshotDetail'
-          type: array
-      required:
-      - details
-      - aggregatedStackTraces
-      type: object
-    Tag:
-      description: 'Definition of a tag which is a key-value pair.
-
-        '
-      properties:
-        tagName:
-          description: 'Key that specifies the tag name.
-
-            '
-          type: string
-        tagValue:
-          description: 'Value associated with the tag key.
-
-            '
-          type: string
-      required:
-      - tagName
-      - tagValue
-      type: object
-    TraceSnapshot:
-      description: 'Definition of a trace snapshot object.
-
-        '
-      properties:
-        key:
-          description: 'Unique identifier (traceId) for the trace that represents the span set.  Note that this field is
-
-            defined as traceKey in the API and it maps to the traceId in the trace data in Application Performance
-
-            Monitoring.
-
-            '
-          type: string
-        spanSnapshots:
-          description: 'List of spans.
+          description: 'An array of child span snapshots.
 
             '
           items:
             $ref: '#/components/schemas/SpanSnapshot'
           type: array
-        timeEnded:
-          description: 'End time of the trace.
+        key:
+          description: 'Unique identifier (spanId) for the trace span.
 
             '
-          format: date-time
           type: string
-        timeStarted:
-          description: 'Start time of the trace.
+        spanName:
+          description: 'Span name associated with the trace.
 
             '
-          format: date-time
           type: string
-        traceSnapshotDetails:
-          description: 'Trace snapshots properties.
+        spanSnapshotDetails:
+          description: 'Span snapshots properties.
 
             '
           items:
             $ref: '#/components/schemas/SnapshotDetail'
           type: array
+        threadSnapshots:
+          description: 'Thread snapshots.
+
+            '
+          items:
+            $ref: '#/components/schemas/ThreadSnapshot'
+          type: array
+        timeEnded:
+          description: 'End time of the span.
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'Start time of the span.
+
+            '
+          format: date-time
+          type: string
       required:
       - key
-      - spanSnapshots
+      - timeStarted
+      - timeEnded
       type: object
     Span:
       description: 'Definition of a span object.
@@ -839,6 +562,171 @@ components:
       - durationInMs
       - operationName
       - isError
+      type: object
+    Tag:
+      description: 'Definition of a tag which is a key-value pair.
+
+        '
+      properties:
+        tagName:
+          description: 'Key that specifies the tag name.
+
+            '
+          type: string
+        tagValue:
+          description: 'Value associated with the tag key.
+
+            '
+          type: string
+      required:
+      - tagName
+      - tagValue
+      type: object
+    AggregatedSnapshot:
+      description: 'Aggregated snapshots of all spans.
+
+        '
+      properties:
+        aggregatedStackTraces:
+          description: 'List of aggregated stack trace.
+
+            '
+          items:
+            $ref: '#/components/schemas/AggregatedStackTrace'
+          type: array
+        details:
+          description: 'Aggregated snapshot details.
+
+            '
+          items:
+            $ref: '#/components/schemas/SnapshotDetail'
+          type: array
+      required:
+      - details
+      - aggregatedStackTraces
+      type: object
+    AggregatedStackTrace:
+      description: 'A branching tree with aggregated stack trace.
+
+        '
+      properties:
+        children:
+          description: 'List of child aggregated stack trace to represent branches.
+
+            '
+          items:
+            $ref: '#/components/schemas/AggregatedStackTrace'
+          type: array
+        stackTraceElement:
+          $ref: '#/components/schemas/StackTraceElement'
+      type: object
+    ThreadSnapshot:
+      description: 'Thread snapshot.
+
+        '
+      properties:
+        stackTrace:
+          description: 'Stack trace.
+
+            '
+          items:
+            $ref: '#/components/schemas/StackTraceElement'
+          type: array
+        threadSnapshotDetails:
+          description: 'Snapshot details.
+
+            '
+          items:
+            $ref: '#/components/schemas/SnapshotDetail'
+          type: array
+        timeStamp:
+          description: 'Snapshot time.
+
+            '
+          format: date-time
+          type: string
+      type: object
+    Error:
+      description: 'Details of an error that occurred.
+
+        '
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing.
+
+            '
+          type: string
+        message:
+          description: 'A human-readable error string.
+
+            '
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    SpanLog:
+      description: 'Definition of a log which is a key-value pair of log data.
+
+        '
+      properties:
+        logKey:
+          description: 'Key that specifies the log name.
+
+            '
+          type: string
+        logValue:
+          description: 'Value associated with the log key.
+
+            '
+          type: string
+      required:
+      - logKey
+      - logValue
+      type: object
+    TraceSnapshot:
+      description: 'Definition of a trace snapshot object.
+
+        '
+      properties:
+        key:
+          description: 'Unique identifier (traceId) for the trace that represents the span set.  Note that this field is
+
+            defined as traceKey in the API and it maps to the traceId in the trace data in Application Performance
+
+            Monitoring.
+
+            '
+          type: string
+        spanSnapshots:
+          description: 'List of spans.
+
+            '
+          items:
+            $ref: '#/components/schemas/SpanSnapshot'
+          type: array
+        timeEnded:
+          description: 'End time of the trace.
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'Start time of the trace.
+
+            '
+          format: date-time
+          type: string
+        traceSnapshotDetails:
+          description: 'Trace snapshots properties.
+
+            '
+          items:
+            $ref: '#/components/schemas/SnapshotDetail'
+          type: array
+      required:
+      - key
+      - spanSnapshots
       type: object
     Trace:
       description: 'Definition of a trace object.
@@ -982,6 +870,139 @@ components:
       - key
       - spans
       type: object
+    TraceSpanSummary:
+      description: 'Summary of the information pertaining to the spans in the trace window that is being queried.
+
+        '
+      properties:
+        errorSpanCount:
+          description: "The number of spans with errors that have been processed by the system for the trace.\nNote that the number of spans with errors will be less than or equal to the total number of spans in the trace. \n"
+          format: int32
+          maximum: 604800
+          minimum: 0
+          type: integer
+        isFault:
+          description: 'Boolean flag that indicates whether the trace has an error.
+
+            '
+          type: boolean
+        key:
+          description: 'Unique identifier (traceId) for the trace that represents the span set.  Note that this field is
+
+            defined as traceKey in the API and it maps to the traceId in the trace data in Application Performance
+
+            Monitoring.
+
+            '
+          type: string
+        rootSpanDurationInMs:
+          description: 'Time taken for the root span operation to complete in milliseconds.
+
+            '
+          format: int32
+          maximum: 604800
+          minimum: 0
+          type: integer
+        rootSpanOperationName:
+          description: 'Root span name associated with the trace. This is the flow start operation name.
+
+            Null is displayed if the root span is not yet completed.
+
+            '
+          type: string
+        rootSpanServiceName:
+          description: 'Service associated with the trace.
+
+            '
+          type: string
+        serviceSummaries:
+          description: 'A summary of the spans by service.
+
+            '
+          items:
+            $ref: '#/components/schemas/TraceServiceSummary'
+          type: array
+        spanCount:
+          description: 'The number of spans that have been processed by the system for the trace.  Note that there
+
+            could be additional spans that have not been processed or reported yet if the trace is still
+
+            in progress.
+
+            '
+          format: int32
+          maximum: 604800
+          minimum: 0
+          type: integer
+        timeEarliestSpanStarted:
+          description: 'Start time of the earliest span in the span collection.
+
+            '
+          format: date-time
+          type: string
+        timeLatestSpanEnded:
+          description: 'End time of the span that most recently ended in the span collection.
+
+            '
+          format: date-time
+          type: string
+        timeRootSpanEnded:
+          description: 'End time of the root span for the span collection.
+
+            '
+          format: date-time
+          type: string
+        timeRootSpanStarted:
+          description: 'Start time of the root span for the span collection.
+
+            '
+          format: date-time
+          type: string
+        traceDurationInMs:
+          description: 'Time between the start of the earliest span and the end of the most recent span in milliseconds.
+
+            '
+          format: int32
+          maximum: 604800
+          minimum: 0
+          type: integer
+        traceErrorCode:
+          description: 'Error code of the trace.
+
+            '
+          type: string
+        traceErrorType:
+          description: 'Error type of the trace.
+
+            '
+          type: string
+        traceStatus:
+          description: 'The status of the trace.
+
+            The trace statuses are defined as follows:
+
+            complete - a root span has been recorded, but there is no information on the errors.
+
+            success - a complete root span is recorded there is a successful error type and error code - HTTP 200.
+
+            incomplete - the root span has not yet been received.
+
+            error - the root span returned with an error. There may or may not be an associated error code or error type.
+
+            '
+          type: string
+      required:
+      - key
+      - timeEarliestSpanStarted
+      - timeLatestSpanEnded
+      - spanCount
+      - errorSpanCount
+      - traceDurationInMs
+      - isFault
+      - traceStatus
+      - traceErrorCode
+      - traceErrorType
+      type: object
     TagMetadata:
       description: 'Definition of the tag metadata.
 
@@ -1033,58 +1054,37 @@ components:
           format: date-time
           type: string
       type: object
-    SpanSnapshot:
-      description: 'Definition of a span snapshot object.
+    StackTraceElement:
+      description: 'Stack trace element.
 
         '
       properties:
-        children:
-          description: 'An array of child span snapshots.
-
-            '
-          items:
-            $ref: '#/components/schemas/SpanSnapshot'
-          type: array
-        key:
-          description: 'Unique identifier (spanId) for the trace span.
+        className:
+          description: 'Name of the class containing the execution point.
 
             '
           type: string
-        spanName:
-          description: 'Span name associated with the trace.
+        fileName:
+          description: 'Name of the source file containing the execution point.
 
             '
           type: string
-        spanSnapshotDetails:
-          description: 'Span snapshots properties.
+        lineNumber:
+          description: 'Line number of the source line containing the execution point.
 
             '
-          items:
-            $ref: '#/components/schemas/SnapshotDetail'
-          type: array
-        threadSnapshots:
-          description: 'Thread snapshots.
+          type: integer
+        methodName:
+          description: 'Name of the method containing the execution point.
 
             '
-          items:
-            $ref: '#/components/schemas/ThreadSnapshot'
-          type: array
-        timeEnded:
-          description: 'End time of the span.
-
-            '
-          format: date-time
           type: string
-        timeStarted:
-          description: 'Start time of the span.
+        weightage:
+          description: 'The weight distribution that denotes the percentage occurrence of a method in the captured snapshots.
 
             '
-          format: date-time
-          type: string
-      required:
-      - key
-      - timeStarted
-      - timeEnded
+          format: float
+          type: number
       type: object
   responses:
     DefaultError:

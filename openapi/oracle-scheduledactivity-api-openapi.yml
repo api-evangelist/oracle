@@ -127,39 +127,11 @@ paths:
       tags:
       - scheduledActivity
 components:
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
   parameters:
-    ExpectedFinishTimeQueryParam:
-      description: A filter that returns all resources that end before this date
-      in: query
-      name: timeExpectedFinishLessThanOrEqualTo
-      required: false
-      x-default-description: Returns based on other filters by default
-      schema:
-        type: string
-        format: date-time
-    ScheduledActivityRunCycleQueryParam:
-      description: A filter that returns all resources that match the specified run cycle.
-      in: query
-      name: runCycle
-      required: false
-      x-default-description: Returns all states by default
-      x-obmcs-enumref: '#/definitions/ScheduledActivity/runCycle'
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
     ScheduledActivityIdentifierPathParam:
@@ -167,6 +139,15 @@ components:
       in: path
       name: scheduledActivityId
       required: true
+      schema:
+        type: string
+    ScheduledActivityRunCycleQueryParam:
+      description: A filter that returns all resources that match the specified run cycle.
+      in: query
+      name: runCycle
+      required: false
+      x-default-description: Returns all states by default
+      x-obmcs-enumref: '#/definitions/ScheduledActivity/runCycle'
       schema:
         type: string
     SortOrderQueryParam:
@@ -180,14 +161,21 @@ components:
         - ASC
         - DESC
         default: DESC
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
+    ScheduledStartTimeQueryParam:
+      description: A filter that returns all resources that are scheduled after this date
       in: query
-      name: displayName
-      x-default-description: 'null'
+      name: timeScheduledStartGreaterThanOrEqualTo
+      required: false
+      x-default-description: Returns based on other filters by default
       schema:
         type: string
-        maxLength: 255
+        format: date-time
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
         minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
@@ -201,28 +189,6 @@ components:
         - TIME_CREATED
         - DISPLAY_NAME
         default: TIME_CREATED
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 100
-        minimum: 1
     ScheduledActivityLifecycleStateQueryParam:
       description: A filter that returns all resources that match the specified status
       in: query
@@ -239,59 +205,34 @@ components:
       required: true
       schema:
         type: string
-    ScheduledStartTimeQueryParam:
-      description: A filter that returns all resources that are scheduled after this date
+    ExpectedFinishTimeQueryParam:
+      description: A filter that returns all resources that end before this date
       in: query
-      name: timeScheduledStartGreaterThanOrEqualTo
+      name: timeExpectedFinishLessThanOrEqualTo
       required: false
       x-default-description: Returns based on other filters by default
       schema:
         type: string
         format: date-time
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 100
+        minimum: 1
   schemas:
-    Action:
-      description: Action details.
-      discriminator:
-        propertyName: actionType
-      properties:
-        actionType:
-          description: Type of action.
-          enum:
-          - QUARTERLY_UPGRADE
-          - PATCH
-          - VERTEX
-          - MFA_ENFORCEMENT
-          type: string
-        description:
-          description: A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering confidential information.
-          type: string
-        referenceKey:
-          description: Unique identifier of the object that represents the action.
-          type: string
-        state:
-          description: A string that describes whether the change is applied hot or cold.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - SUCCEEDED
-          - FAILED
-          - CANCELED
-          type: string
-      required:
-      - actionType
-      - description
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ScheduledActivity:
       description: Details of scheduled activity.
       properties:
@@ -373,17 +314,6 @@ components:
       - timeScheduledStart
       - timeExpectedFinish
       - serviceAvailability
-      type: object
-    ScheduledActivityCollection:
-      description: Results of a scheduled activity search.
-      properties:
-        items:
-          description: A page of scheduled activity objects.
-          items:
-            $ref: '#/components/schemas/ScheduledActivitySummary'
-          type: array
-      required:
-      - items
       type: object
     ScheduledActivitySummary:
       description: Summary of the scheduled activity for a Fusion environment.
@@ -478,6 +408,76 @@ components:
       - timeExpectedFinish
       - serviceAvailability
       type: object
+    Action:
+      description: Action details.
+      discriminator:
+        propertyName: actionType
+      properties:
+        actionType:
+          description: Type of action.
+          enum:
+          - QUARTERLY_UPGRADE
+          - PATCH
+          - VERTEX
+          - MFA_ENFORCEMENT
+          type: string
+        description:
+          description: A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering confidential information.
+          type: string
+        referenceKey:
+          description: Unique identifier of the object that represents the action.
+          type: string
+        state:
+          description: A string that describes whether the change is applied hot or cold.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - SUCCEEDED
+          - FAILED
+          - CANCELED
+          type: string
+      required:
+      - actionType
+      - description
+    ScheduledActivityCollection:
+      description: Results of a scheduled activity search.
+      properties:
+        items:
+          description: A page of scheduled activity objects.
+          items:
+            $ref: '#/components/schemas/ScheduledActivitySummary'
+          type: array
+      required:
+      - items
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

@@ -7,7 +7,7 @@ info:
     '
   license:
     name: Oracle Corporation
-  title: Email Delivery Submission ${submit Email Tag} ${submit Email Tag} API
+  title: Email Delivery Submission ${submit Email Tag} API
   version: '20220926'
   x-provenance:
     method: harvested
@@ -73,43 +73,139 @@ paths:
         description: Parameters for submitEmail API.
         required: true
 components:
-  schemas:
-    Recipients:
-      description: 'The destination for the email, composed of To, CC, and BCC fields.
+  parameters:
+    RequestIdHeader:
+      description: The request ID for tracing from the system
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+  responses:
+    '401':
+      description: 'The required information to complete authentication was not provided or
 
-        NOTE: At least one of To, CC, and BCC must be provided. And max 50 recipients are allowed across the To:, CC: and BCC: fields.
+        was incorrect. Extra detail may be provided in the response body.
 
         '
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Authorization failed or the requested resource was not found.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '413':
+      description: The request entity is larger than limits defined by server for your tenancy.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '400':
+      description: Incorrectly formatted request. | Limit exceeded. | Related resource not authorized or not found
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Error:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too Many Requests
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    EmailAddress:
+      description: Email address Object that holds display name and email address.
       properties:
-        bcc:
-          description: Array of BCC address. Bcc headers can only be viewed by non bcc recipients.
-          items:
-            $ref: '#/components/schemas/EmailAddress'
-          type: array
-        cc:
-          description: Array of CC address.
-          items:
-            $ref: '#/components/schemas/EmailAddress'
-          type: array
-        to:
-          description: Array of To address.
-          items:
-            $ref: '#/components/schemas/EmailAddress'
-          type: array
-      type: object
-    Sender:
-      description: The envelope and the header from email address details, that is sending the email. Email address must be an approved sender.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the approved sender resource.
-          maxLength: 255
+        email:
+          description: ASCII only email address.
+          maxLength: 256
           minLength: 1
           type: string
-        senderAddress:
-          $ref: '#/components/schemas/EmailAddress'
+        name:
+          description: Display name for the email address. UTF-8 is supported for display name [RFC 2047](https://www.rfc-editor.org/rfc/rfc2047).
+          maxLength: 256
+          minLength: 1
+          type: string
       required:
-      - senderAddress
-      - compartmentId
+      - email
       type: object
     EmailSubmittedResponse:
       description: Response object that is returned to sender upon successfully submitting the email request.
@@ -138,22 +234,29 @@ components:
       - envelopeId
       - suppressedRecipients
       type: object
-    Error:
-      description: An error has occurred.
+    Recipients:
+      description: 'The destination for the email, composed of To, CC, and BCC fields.
+
+        NOTE: At least one of To, CC, and BCC must be provided. And max 50 recipients are allowed across the To:, CC: and BCC: fields.
+
+        '
       properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
+        bcc:
+          description: Array of BCC address. Bcc headers can only be viewed by non bcc recipients.
+          items:
+            $ref: '#/components/schemas/EmailAddress'
+          type: array
+        cc:
+          description: Array of CC address.
+          items:
+            $ref: '#/components/schemas/EmailAddress'
+          type: array
+        to:
+          description: Array of To address.
+          items:
+            $ref: '#/components/schemas/EmailAddress'
+          type: array
+      type: object
     SubmitEmailDetails:
       description: Details that are required by the sender to submit a request to send email.
       properties:
@@ -212,139 +315,36 @@ components:
       - recipients
       - subject
       type: object
-    EmailAddress:
-      description: Email address Object that holds display name and email address.
+    Sender:
+      description: The envelope and the header from email address details, that is sending the email. Email address must be an approved sender.
       properties:
-        email:
-          description: ASCII only email address.
-          maxLength: 256
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the approved sender resource.
+          maxLength: 255
           minLength: 1
           type: string
-        name:
-          description: Display name for the email address. UTF-8 is supported for display name [RFC 2047](https://www.rfc-editor.org/rfc/rfc2047).
-          maxLength: 256
-          minLength: 1
-          type: string
+        senderAddress:
+          $ref: '#/components/schemas/EmailAddress'
       required:
-      - email
+      - senderAddress
+      - compartmentId
       type: object
-  responses:
-    '413':
-      description: The request entity is larger than limits defined by server for your tenancy.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '400':
-      description: Incorrectly formatted request. | Limit exceeded. | Related resource not authorized or not found
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     Error:
       description: An error has occurred.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
 
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '500':
-      description: Internal Server Error.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
+            [API Errors](/Content/API/References/apierrors.htm).
 
             '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '401':
-      description: 'The required information to complete authentication was not provided or
-
-        was incorrect. Extra detail may be provided in the response body.
-
-        '
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '404':
-      description: Authorization failed or the requested resource was not found.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '429':
-      description: Too Many Requests
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  parameters:
-    RequestIdHeader:
-      description: The request ID for tracing from the system
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
 x-anchors:
   x-headers:
     opc-request-id:

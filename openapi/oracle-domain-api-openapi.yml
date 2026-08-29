@@ -1,11 +1,16 @@
 openapi: 3.2.0
 info:
   title: Oracle Domain API
+  x-refined-note:
+  - x-evidence differs across the merged source definitions and was not carried
+  - x-provenance differs across the merged source definitions and was not carried
   version: '1.0'
   description: 'Operations tagged domain across 2 of this provider''s published API definitions: oci-organizations-1-openapi.yaml, oci-organizations-openapi.yaml. Each path carries the servers of the definition it was published in.'
 servers:
-- url: http://127.0.0.1/20220518
-- url: https://127.0.0.1/20220518
+- url: http://127.0.0.1/20230401
+- url: https://127.0.0.1/20230401
+- url: http://127.0.0.1/20200801
+- url: https://127.0.0.1/20200801
 tags:
 - name: domain
 paths:
@@ -126,6 +131,9 @@ paths:
               $ref: '#/components/schemas/CreateDomainDetails'
         description: Parameters for domain creation.
         required: true
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
   /domains/{domainId}:
     delete:
       description: Releases the domain, making it available to be claimed again by another tenancy.
@@ -261,25 +269,20 @@ paths:
               $ref: '#/components/schemas/UpdateDomainDetails'
         description: The information to be updated.
         required: true
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
 components:
   parameters:
-    NameQueryParam:
-      description: A filter to return only resources that exactly match the name given.
+    DomainIdQueryParam:
+      description: The domain OCID.
       in: query
-      name: name
+      name: domainId
       required: false
       x-default-description: 'null'
       schema:
         type: string
         maxLength: 255
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order can be provided.
 
@@ -298,11 +301,105 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    LifecycleStateQueryParam:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - ACTIVE
+        - INACTIVE
+        - UPDATING
+        - FAILED
+        - TERMINATED
+    DomainIdPathParam:
+      description: The domain OCID.
+      in: path
+      name: domainId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+    SortOrderQueryParam:
+      description: The sort order to use, whether 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-default-description: The default order depends on what parameter is being sorted by.
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    DomainStatusQueryParam:
+      description: The status of the domain.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/Domain/status'
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
+
+        server error, without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        will be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
       in: query
       name: compartmentId
       required: true
+      schema:
+        type: string
+        maxLength: 255
+    NameQueryParam:
+      description: A filter to return only resources that exactly match the name given.
+      in: query
+      name: name
+      required: false
+      x-default-description: 'null'
       schema:
         type: string
         maxLength: 255
@@ -323,158 +420,15 @@ components:
       required: false
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
+    CompartmentIdQueryParam_2:
+      description: OCID of the compartment. Always a tenancy OCID.
       in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    DomainStatusQueryParam:
-      description: The status of the domain.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/Domain/status'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, whether 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-default-description: The default order depends on what parameter is being sorted by.
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    DomainIdPathParam:
-      description: The domain OCID.
-      in: path
-      name: domainId
+      name: compartmentId
       required: true
       schema:
         type: string
         maxLength: 255
-    DomainIdQueryParam:
-      description: The domain OCID.
-      in: query
-      name: domainId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
-
-        server error, without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        will be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: The lifecycle state of the resource.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - ACTIVE
-        - INACTIVE
-        - UPDATING
-        - FAILED
-        - TERMINATED
   schemas:
-    CreateDomainDetails:
-      description: The parameters for creating a domain.
-      properties:
-        compartmentId:
-          description: OCID of the tenancy.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        domainName:
-          description: The domain name.
-          example: example.com
-          maxLength: 253
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        isGovernanceEnabled:
-          description: Indicates whether governance should be enabled for this domain. Defaults to false.
-          type: boolean
-        subscriptionEmail:
-          description: Email address to be used to notify the user, and that the ONS subscription will be created with.
-          maxLength: 255
-          minLength: 6
-          type: string
-      required:
-      - compartmentId
-      - domainName
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     DomainSummary:
       description: The summary of a domain owned by a tenancy.
       properties:
@@ -580,6 +534,113 @@ components:
       - lifecycleState
       - status
       - txtRecord
+    CreateDomainDetails:
+      description: The parameters for creating a domain.
+      properties:
+        compartmentId:
+          description: OCID of the tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        domainName:
+          description: The domain name.
+          example: example.com
+          maxLength: 253
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isGovernanceEnabled:
+          description: Indicates whether governance should be enabled for this domain. Defaults to false.
+          type: boolean
+        subscriptionEmail:
+          description: Email address to be used to notify the user, and that the ONS subscription will be created with.
+          maxLength: 255
+          minLength: 6
+          type: string
+      required:
+      - compartmentId
+      - domainName
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    DomainCollection:
+      description: Result of a query request for a list of domains. Contains DomainSummary items.
+      properties:
+        items:
+          description: Array containing DomainSummary items.
+          items:
+            $ref: '#/components/schemas/DomainSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateDomainDetails:
+      description: The parameters for updating a domain.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
     Domain:
       description: The domain model that is associated with a tenancy.
       properties:
@@ -695,20 +756,14 @@ components:
       - lifecycleState
       - status
       - txtRecord
-    DomainCollection:
-      description: Result of a query request for a list of domains. Contains DomainSummary items.
+    Domain_2:
+      description: The domain model that is associated with a tenancy.
       properties:
-        items:
-          description: Array containing DomainSummary items.
-          items:
-            $ref: '#/components/schemas/DomainSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateDomainDetails:
-      description: The parameters for updating a domain.
-      properties:
+        compartmentId:
+          description: The OCID of the tenancy that owns this domain governance entity.
+          maxLength: 255
+          minLength: 1
+          type: string
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -728,6 +783,12 @@ components:
 
             '
           type: object
+        domainName:
+          description: The domain name.
+          example: example.com
+          maxLength: 253
+          minLength: 1
+          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -737,6 +798,80 @@ components:
 
             '
           type: object
+        id:
+          description: The OCID of the domain.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: Lifecycle state of the domain.
+          enum:
+          - ACTIVE
+          - DELETED
+          - FAILED
+          example: ACTIVE
+          type: string
+        ownerId:
+          description: The OCID of the tenancy that has started the registration process for this domain.
+          maxLength: 255
+          minLength: 1
+          type: string
+        status:
+          description: Status of the domain.
+          enum:
+          - PENDING
+          - RELEASING
+          - RELEASED
+          - EXPIRING
+          - REVOKING
+          - REVOKED
+          - ACTIVE
+          - FAILED
+          example: PENDING
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: Date-time when this domain was created. An RFC 3339-formatted date and time string.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeUpdated:
+          description: Date-time when this domain was last updated. An RFC 3339-formatted date and time string.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        txtRecord:
+          description: The code that the owner of the domain will need to add as a TXT record to their domain.
+          example: oci-domain-verification=exampleEncodedToken
+          maxLength: 45
+          minLength: 40
+          type: string
+      required:
+      - id
+      - domainName
+      - ownerId
+      - compartmentId
+      - lifecycleState
+      - status
+      - txtRecord
   responses:
     default:
       description: Unknown Error

@@ -551,53 +551,144 @@ paths:
       x-related-resource: '#/definitions/Gateway'
 components:
   schemas:
-    ResourceLock:
-      description: 'Resource locks are used to prevent certain APIs from being called for the resource.
-
-        A full lock prevents both updating the resource and deleting the resource. A delete
-
-        lock prevents deleting the resource.
-
-        '
+    CreateGatewayDetails:
+      description: Information about the new gateway.
       properties:
-        message:
-          description: 'A message added by the creator of the lock. This is typically used to give an
+        caBundles:
+          description: An array of CA bundles that should be used on the Gateway for TLS validation.
+          items:
+            $ref: '#/components/schemas/CaBundle'
+          type: array
+        certificateId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource which can be
 
-            indication of why the resource is locked.
+            empty string.
+
+            '
+          maxLength: 255
+          minLength: 0
+          type: string
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
+
+            resource is created.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a
+
+              namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a
+
+            namespace. For more information, see
+
+            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+
+            Example: `My new resource`
 
             '
           type: string
-        relatedResourceId:
-          description: 'The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
+        endpointType:
+          description: 'Gateway endpoint type. `PUBLIC` will have a public ip address assigned to it, while `PRIVATE` will only be
+
+            accessible on a private IP address on the subnet.
+
+
+            Example: `PUBLIC` or `PRIVATE`
 
             '
           type: string
-        timeCreated:
-          description: When the lock was created.
-          format: date-time
+          x-obmcs-enumref: '#/definitions/Gateway/endpointType'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair
+
+            with no predefined name, type, or namespace. For more information, see
+
+            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        ipMode:
+          description: 'Determines whether the gateway has an IPv4 or IPv6 address assigned to it, or both.
+
+            `IPV4` means the gateway will only have an IPv4 address assigned to it, and `IPV6` means the gateway will
+
+            only have an `IPv6` address assigned to it. `DUAL_STACK` means the gateway will have both an IPv4 and IPv6
+
+            address assigned to it.
+
+            Example: `IPV4` or `IPV6` or `DUAL_STACK`
+
+            '
           type: string
-        type:
-          description: Type of the lock.
-          enum:
-          - FULL
-          - DELETE
-          type: string
-      required:
-      - type
-      type: object
-    Ipv4AddressConfiguration:
-      description: IPv4 address configuration details that should be used when creating the gateway.
-      properties:
-        reservedIpIds:
-          description: List of Reserved IP OCIDs created in VCN service.
+          x-obmcs-enumref: '#/definitions/Gateway/ipMode'
+        ipv4AddressConfiguration:
+          $ref: '#/components/schemas/Ipv4AddressConfiguration'
+        ipv6AddressConfiguration:
+          $ref: '#/components/schemas/Ipv6AddressConfiguration'
+        locks:
+          description: Locks associated with this resource.
+          items:
+            $ref: '#/components/schemas/AddResourceLockDetails'
+          maxItems: 1
+          type: array
+        networkSecurityGroupIds:
+          description: 'An array of Network Security Groups OCIDs associated with this API Gateway.
+
+            '
           items:
             maxLength: 255
             minLength: 1
             type: string
-          maxItems: 1
-          minItems: 1
+          maxItems: 5
           type: array
           uniqueItems: true
+        responseCacheDetails:
+          $ref: '#/components/schemas/ResponseCacheDetails'
+        subnetId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the subnet in which
+
+            related resources are created.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - endpointType
+      - compartmentId
+      - subnetId
       type: object
     GatewayCollection:
       description: Collection of gateway summaries.
@@ -610,92 +701,6 @@ components:
       required:
       - items
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-      type: object
-    RemoveResourceLockDetails:
-      description: 'Used to remove a resource lock.
-
-        Resource locks are used to prevent certain APIs from being called for the resource.
-
-        A full lock prevents both updating the resource and deleting the resource. A delete
-
-        lock prevents deleting the resource.
-
-        '
-      properties:
-        type:
-          description: Type of the lock.
-          enum:
-          - FULL
-          - DELETE
-          type: string
-      required:
-      - type
-      type: object
-    CaBundle:
-      description: Reference to the CA bundle that should be used on the gateway
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Type of the CA bundle
-          enum:
-          - CA_BUNDLE
-          - CERTIFICATE_AUTHORITY
-          type: string
-      required:
-      - type
-      type: object
-    ChangeGatewayCompartmentDetails:
-      description: The new compartment details for the gateway.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
-
-            resource is created.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    IpAddress:
-      description: IP address associated with the gateway.
-      properties:
-        ipAddress:
-          description: An IP address.
-          type: string
-      required:
-      - ipAddress
-      type: object
-    ResponseCacheDetails:
-      description: 'Base Gateway response cache.
-
-        '
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: Type of the Response Cache.
-          enum:
-          - EXTERNAL_RESP_CACHE
-          - NONE
-          type: string
-      required:
-      - type
     Gateway:
       description: 'A gateway is a virtual network appliance in a regional subnet. A gateway routes inbound traffic to back-end services including public, private, and partner HTTP APIs, as well as Oracle Functions. Avoid entering confidential information. For more information, see
 
@@ -903,8 +908,8 @@ components:
       - compartmentId
       - endpointType
       type: object
-    CreateGatewayDetails:
-      description: Information about the new gateway.
+    UpdateGatewayDetails:
+      description: The information to be updated.
       properties:
         caBundles:
           description: An array of CA bundles that should be used on the Gateway for TLS validation.
@@ -919,15 +924,6 @@ components:
             '
           maxLength: 255
           minLength: 0
-          type: string
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
-
-            resource is created.
-
-            '
-          maxLength: 255
-          minLength: 1
           type: string
         definedTags:
           additionalProperties:
@@ -966,17 +962,6 @@ components:
 
             '
           type: string
-        endpointType:
-          description: 'Gateway endpoint type. `PUBLIC` will have a public ip address assigned to it, while `PRIVATE` will only be
-
-            accessible on a private IP address on the subnet.
-
-
-            Example: `PUBLIC` or `PRIVATE`
-
-            '
-          type: string
-          x-obmcs-enumref: '#/definitions/Gateway/endpointType'
         freeformTags:
           additionalProperties:
             type: string
@@ -991,30 +976,6 @@ components:
 
             '
           type: object
-        ipMode:
-          description: 'Determines whether the gateway has an IPv4 or IPv6 address assigned to it, or both.
-
-            `IPV4` means the gateway will only have an IPv4 address assigned to it, and `IPV6` means the gateway will
-
-            only have an `IPv6` address assigned to it. `DUAL_STACK` means the gateway will have both an IPv4 and IPv6
-
-            address assigned to it.
-
-            Example: `IPV4` or `IPV6` or `DUAL_STACK`
-
-            '
-          type: string
-          x-obmcs-enumref: '#/definitions/Gateway/ipMode'
-        ipv4AddressConfiguration:
-          $ref: '#/components/schemas/Ipv4AddressConfiguration'
-        ipv6AddressConfiguration:
-          $ref: '#/components/schemas/Ipv6AddressConfiguration'
-        locks:
-          description: Locks associated with this resource.
-          items:
-            $ref: '#/components/schemas/AddResourceLockDetails'
-          maxItems: 1
-          type: array
         networkSecurityGroupIds:
           description: 'An array of Network Security Groups OCIDs associated with this API Gateway.
 
@@ -1028,19 +989,125 @@ components:
           uniqueItems: true
         responseCacheDetails:
           $ref: '#/components/schemas/ResponseCacheDetails'
-        subnetId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the subnet in which
+      type: object
+    ResourceLock:
+      description: 'Resource locks are used to prevent certain APIs from being called for the resource.
 
-            related resources are created.
+        A full lock prevents both updating the resource and deleting the resource. A delete
+
+        lock prevents deleting the resource.
+
+        '
+      properties:
+        message:
+          description: 'A message added by the creator of the lock. This is typically used to give an
+
+            indication of why the resource is locked.
 
             '
-          maxLength: 255
-          minLength: 1
+          type: string
+        relatedResourceId:
+          description: 'The id of the resource that is locking this resource. Indicates that deleting this resource will remove the lock.
+
+            '
+          type: string
+        timeCreated:
+          description: When the lock was created.
+          format: date-time
+          type: string
+        type:
+          description: Type of the lock.
+          enum:
+          - FULL
+          - DELETE
           type: string
       required:
-      - endpointType
-      - compartmentId
-      - subnetId
+      - type
+      type: object
+    RemoveResourceLockDetails:
+      description: 'Used to remove a resource lock.
+
+        Resource locks are used to prevent certain APIs from being called for the resource.
+
+        A full lock prevents both updating the resource and deleting the resource. A delete
+
+        lock prevents deleting the resource.
+
+        '
+      properties:
+        type:
+          description: Type of the lock.
+          enum:
+          - FULL
+          - DELETE
+          type: string
+      required:
+      - type
+      type: object
+    CaBundle:
+      description: Reference to the CA bundle that should be used on the gateway
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: Type of the CA bundle
+          enum:
+          - CA_BUNDLE
+          - CERTIFICATE_AUTHORITY
+          type: string
+      required:
+      - type
+      type: object
+    Ipv4AddressConfiguration:
+      description: IPv4 address configuration details that should be used when creating the gateway.
+      properties:
+        reservedIpIds:
+          description: List of Reserved IP OCIDs created in VCN service.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+          uniqueItems: true
+      type: object
+    ResponseCacheDetails:
+      description: 'Base Gateway response cache.
+
+        '
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: Type of the Response Cache.
+          enum:
+          - EXTERNAL_RESP_CACHE
+          - NONE
+          type: string
+      required:
+      - type
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    IpAddress:
+      description: IP address associated with the gateway.
+      properties:
+        ipAddress:
+          description: An IP address.
+          type: string
+      required:
+      - ipAddress
       type: object
     GatewaySummary:
       description: A summary of the gateway.
@@ -1218,6 +1285,44 @@ components:
       - compartmentId
       - endpointType
       type: object
+    ChangeGatewayCompartmentDetails:
+      description: The new compartment details for the gateway.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment in which the
+
+            resource is created.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    Ipv6AddressConfiguration:
+      description: IPv6 address configuration details that should be used when creating the gateway.
+      properties:
+        addresses:
+          description: List of IPv6 addresses that will be assigned to the gateway during creation.
+          items:
+            maxLength: 45
+            minLength: 1
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+          uniqueItems: true
+        subnetCidrs:
+          description: List of IPv6 prefixes from which to provision IPv6 addresses from. This is required if more than one prefix exists on the subnet.
+          items:
+            maxLength: 45
+            minLength: 1
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+      type: object
     AddResourceLockDetails:
       description: 'Used to add a resource lock.
 
@@ -1245,128 +1350,7 @@ components:
       required:
       - type
       type: object
-    UpdateGatewayDetails:
-      description: The information to be updated.
-      properties:
-        caBundles:
-          description: An array of CA bundles that should be used on the Gateway for TLS validation.
-          items:
-            $ref: '#/components/schemas/CaBundle'
-          type: array
-        certificateId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the resource which can be
-
-            empty string.
-
-            '
-          maxLength: 255
-          minLength: 0
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a
-
-              namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a
-
-            namespace. For more information, see
-
-            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Avoid entering confidential information.
-
-
-            Example: `My new resource`
-
-            '
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair
-
-            with no predefined name, type, or namespace. For more information, see
-
-            [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        networkSecurityGroupIds:
-          description: 'An array of Network Security Groups OCIDs associated with this API Gateway.
-
-            '
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 5
-          type: array
-          uniqueItems: true
-        responseCacheDetails:
-          $ref: '#/components/schemas/ResponseCacheDetails'
-      type: object
-    Ipv6AddressConfiguration:
-      description: IPv6 address configuration details that should be used when creating the gateway.
-      properties:
-        addresses:
-          description: List of IPv6 addresses that will be assigned to the gateway during creation.
-          items:
-            maxLength: 45
-            minLength: 1
-            type: string
-          maxItems: 1
-          minItems: 1
-          type: array
-          uniqueItems: true
-        subnetCidrs:
-          description: List of IPv6 prefixes from which to provision IPv6 addresses from. This is required if more than one prefix exists on the subnet.
-          items:
-            maxLength: 45
-            minLength: 1
-            type: string
-          maxItems: 1
-          minItems: 1
-          type: array
-      type: object
   parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        default: 'null'
-        maxLength: 1024
-        minLength: 1
-    AddResourceLockDetailsBodyParam:
-      description: AddResourceLockDetails body parameter
-      in: body
-      name: AddResourceLockDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/AddResourceLockDetails'
     SortByQueryParam:
       description: 'The field to sort by. You can provide one sort order (`sortOrder`).
 
@@ -1385,6 +1369,20 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    AddResourceLockDetailsBodyParam:
+      description: AddResourceLockDetails body parameter
+      in: body
+      name: AddResourceLockDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/AddResourceLockDetails'
+    RemoveResourceLockDetailsBodyParam:
+      description: RemoveResourceLockDetails body parameter
+      in: body
+      name: RemoveResourceLockDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/RemoveResourceLockDetails'
     GatewayLifecycleStateQueryParam:
       description: 'A filter to return only resources that match the given lifecycle state.
 
@@ -1399,60 +1397,6 @@ components:
       schema:
         type: string
         default: 'null'
-    CompartmentIdQueryParam:
-      description: The ocid of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      schema:
-        type: string
-        default: 'null'
-    GatewayIdentifierPathParam:
-      description: The ocid of the gateway.
-      in: path
-      name: gatewayId
-      required: true
-      schema:
-        type: string
-    RemoveResourceLockDetailsBodyParam:
-      description: RemoveResourceLockDetails body parameter
-      in: body
-      name: RemoveResourceLockDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/RemoveResourceLockDetails'
-    CertificateIdQueryParam:
-      description: Filter gateways by the certificate ocid.
-      in: query
-      name: certificateId
-      schema:
-        type: string
-        default: 'null'
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
     SortOrderQueryParam:
       description: The sort order to use, either 'asc' or 'desc'. The default order depends on the sortBy value.
       in: query
@@ -1463,6 +1407,73 @@ components:
         - ASC
         - DESC
         default: ASC
+    GatewayIdentifierPathParam:
+      description: The ocid of the gateway.
+      in: path
+      name: gatewayId
+      required: true
+      schema:
+        type: string
+    CertificateIdQueryParam:
+      description: Filter gateways by the certificate ocid.
+      in: query
+      name: certificateId
+      schema:
+        type: string
+        default: 'null'
+    RequestIdHeader:
+      description: The client request id for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+        default: 'null'
+    OverrideLocksQueryParameter:
+      description: Whether to override locks (if any exist).
+      in: query
+      name: isLockOverride
+      schema:
+        type: boolean
+        default: false
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        default: 'null'
+        maxLength: 1024
+        minLength: 1
+    DisplayNameQueryParam:
+      description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+
+        Example: `My new resource`
+
+        '
+      in: query
+      name: displayName
+      schema:
+        type: string
+        default: 'null'
+        maxLength: 255
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ocid of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1482,31 +1493,20 @@ components:
         default: 'null'
         maxLength: 64
         minLength: 1
-    OverrideLocksQueryParameter:
-      description: Whether to override locks (if any exist).
-      in: query
-      name: isLockOverride
-      schema:
-        type: boolean
-        default: false
-    DisplayNameQueryParam:
-      description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
 
+        for a resource, set the `if-match` parameter to the value of the
 
-        Example: `My new resource`
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
 
         '
-      in: query
-      name: displayName
-      schema:
-        type: string
-        default: 'null'
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request id for tracing.
       in: header
-      name: opc-request-id
+      name: if-match
       schema:
         type: string
         default: 'null'

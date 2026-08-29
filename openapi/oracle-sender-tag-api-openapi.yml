@@ -3,7 +3,7 @@ info:
   description: "Use the Email Delivery API to do the necessary set up to send high-volume and application-generated emails through the OCI Email Delivery service.\nFor more information, see [Overview of the Email Delivery Service](/iaas/Content/Email/Concepts/overview.htm).\n\n **Note:** Write actions (POST, UPDATE, DELETE) may take several minutes to propagate and be reflected by the API.\n If a subsequent read request fails to reflect your changes, wait a few minutes and try again.\n"
   license:
     name: Oracle Corporation
-  title: Email Delivery ${sender Tag} ${sender Tag} API
+  title: Email Delivery ${sender Tag} API
   version: '20170907'
   x-provenance:
     method: harvested
@@ -441,135 +441,285 @@ paths:
         description: Details for removing a lock from a resource.
         required: true
 components:
-  schemas:
-    ResourceLock:
-      description: 'Resource locks prevent certain APIs from being called for the resource.
+  parameters:
+    senderEmailAddressQueryParam:
+      description: The email address of the approved sender.
+      in: query
+      name: emailAddress
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: email
+        maxLength: 254
+        minLength: 6
+    SortByQueryParam:
+      description: 'The field to sort by. The `TIMECREATED` value returns the list in in
 
-        A full lock prevents both updating and deleting the resource. A delete lock
+        descending order by default. The `EMAILADDRESS` value returns the list in
 
-        prevents deleting the resource.
+        ascending order by default. Use the `SortOrderQueryParam` to change the
 
-        '
-      properties:
-        compartmentId:
-          description: The lock compartment ID.
-          type: string
-        message:
-          description: 'A message added by the lock creator. The message typically gives an
-
-            indication of why the resource is locked.
-
-            '
-          type: string
-        relatedResourceId:
-          description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
-
-            '
-          type: string
-        timeCreated:
-          description: Indicates when the lock was created, in the format defined by RFC 3339.
-          format: date-time
-          type: string
-        type:
-          description: Lock type.
-          enum:
-          - FULL
-          - DELETE
-          type: string
-      required:
-      - type
-      - compartmentId
-      type: object
-    UpdateSenderDetails:
-      description: 'The details allowed for updating a sender.
+        direction of the returned list of items.
 
         '
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported as valid value type.
+      in: query
+      name: sortBy
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        enum:
+        - TIMECREATED
+        - EMAILADDRESS
+    compartmentIdQueryParam:
+      description: The OCID for the compartment.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending or descending order.
 
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+        '
+      in: query
+      name: sortOrder
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    FilterByDomainQueryParam:
+      description: A filter to only return resources that match the given domain exactly.
+      in: query
+      name: domain
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The request ID for tracing from the system
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    FilterByIpPoolQueryParam:
+      description: A filter to only return resources that match the given IpPool resource exactly.
+      in: query
+      name: emailIpPoolId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    OverrideLocksQueryParameter:
+      description: Whether to override locks (if any exist).
+      in: query
+      name: isLockOverride
+      schema:
+        type: boolean
+        default: false
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous "List" call.
 
+        For important details about how pagination works,
 
-              Example: `{"bar-key": "value"}`
+        see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 2000
+        minLength: 1
+    lifecycleStateQueryParam:
+      description: The current state of a sender.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/Sender/lifecycleState'
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
 
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+        paginated "List" call. `1` is the minimum, `1000` is the maximum. For important details about
 
+        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
-            Example: `{"Operations": {"CostCenter": "42"}}`
+        '
+      in: query
+      name: limit
+      x-default-description: 'null'
+      schema:
+        type: integer
+        maximum: 1000
+        minimum: 1
+    senderIdPathParam:
+      description: The unique OCID of the sender.
+      in: path
+      name: senderId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IfMatchHeader:
+      description: 'Used for optimistic concurrency control. In the update or delete call for a resource, set the `if-match`
+
+        parameter to the value of the etag from a previous get, create, or update response for that resource.  The resource
+
+        will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+  responses:
+    '204':
+      description: The operation completed successfully.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
 
             '
-          type: object
-        emailIpPoolId:
-          description: The IpPool [OCID](/iaas/Content/General/Concepts/identifiers.htm) used to submit an email by Email Delivery when sent from this sender.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
+          schema:
             type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+    '400':
+      description: Incorrectly formatted request.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
+            Oracle about a particular request, please provide the request ID.
 
             '
-          type: object
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     Error:
       description: An error has occurred.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-            [API Errors](/Content/API/References/apierrors.htm).
+            Oracle about a particular request, please provide the request ID.
 
             '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    AddLockDetails:
-      description: 'Request payload to add lock to the resource.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '409':
+      description: Authorization failed or the requested resource already exists.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'The required information to complete authentication was not provided or
+
+        was incorrect. Extra detail may be provided in the response body.
 
         '
-      properties:
-        compartmentId:
-          description: The lock compartment ID.
-          type: string
-        message:
-          description: 'A message added by the lock creator. The message typically gives an
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-            indication of why the resource is locked.
+            Oracle about a particular request, please provide the request ID.
 
             '
-          type: string
-        relatedResourceId:
-          description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
 
             '
-          type: string
-        type:
-          description: Lock type.
-          enum:
-          - FULL
-          - DELETE
-          type: string
-      required:
-      - type
-      type: object
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '412':
+      description: Precondition Failed.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Authorization failed or the requested resource was not found.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too Many Requests
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
     CreateSenderDetails:
       description: 'The details needed for creating a sender.
 
@@ -629,25 +779,6 @@ components:
       required:
       - compartmentId
       - emailAddress
-    ChangeSenderCompartmentDetails:
-      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
-
-        into which the resource should be moved.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
-
-            into which the sender should be moved.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
     RemoveLockDetails:
       description: 'Request payload to remove the resource lock.
 
@@ -665,104 +796,73 @@ components:
       required:
       - type
       type: object
-    SenderSummary:
-      description: The email addresses and `senderId` representing an approved sender.
+    AddLockDetails:
+      description: 'Request payload to add lock to the resource.
+
+        '
       properties:
         compartmentId:
-          description: The OCID for the compartment.
-          maxLength: 255
-          minLength: 1
+          description: The lock compartment ID.
           type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported as valid value type.
+        message:
+          description: 'A message added by the lock creator. The message typically gives an
 
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
+            indication of why the resource is locked.
 
             '
-          type: object
-        emailAddress:
-          description: The email address of the sender.
-          maxLength: 254
-          minLength: 6
           type: string
-        emailIpPoolId:
-          description: The IpPool [OCID](/iaas/Content/General/Concepts/identifiers.htm) used to submit an email by Email Delivery when sent from this sender.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
+        relatedResourceId:
+          description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
 
             '
-          type: object
-        id:
-          description: The unique ID of the sender.
-          maxLength: 255
-          minLength: 1
           type: string
-        lifecycleState:
-          description: The current status of the approved sender.
-          type: string
-          x-obmcs-enumref: '#/definitions/Sender/lifecycleState'
-        locks:
-          description: Locks associated with this resource.
-          items:
-            $ref: '#/components/schemas/ResourceLock'
-          type: array
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'Date time the approved sender was added, in "YYYY-MM-ddThh:mmZ"
-
-            format with a Z offset, as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
+        type:
+          description: Lock type.
+          enum:
+          - FULL
+          - DELETE
           type: string
       required:
-      - id
+      - type
+      type: object
+    ResourceLock:
+      description: 'Resource locks prevent certain APIs from being called for the resource.
+
+        A full lock prevents both updating and deleting the resource. A delete lock
+
+        prevents deleting the resource.
+
+        '
+      properties:
+        compartmentId:
+          description: The lock compartment ID.
+          type: string
+        message:
+          description: 'A message added by the lock creator. The message typically gives an
+
+            indication of why the resource is locked.
+
+            '
+          type: string
+        relatedResourceId:
+          description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
+
+            '
+          type: string
+        timeCreated:
+          description: Indicates when the lock was created, in the format defined by RFC 3339.
+          format: date-time
+          type: string
+        type:
+          description: Lock type.
+          enum:
+          - FULL
+          - DELETE
+          type: string
+      required:
+      - type
       - compartmentId
-      - emailAddress
+      type: object
     Sender:
       description: The full information representing an approved sender.
       properties:
@@ -886,284 +986,184 @@ components:
       - id
       - compartmentId
       - emailAddress
-  parameters:
-    FilterByDomainQueryParam:
-      description: A filter to only return resources that match the given domain exactly.
-      in: query
-      name: domain
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous "List" call.
+    SenderSummary:
+      description: The email addresses and `senderId` representing an approved sender.
+      properties:
+        compartmentId:
+          description: The OCID for the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported as valid value type.
 
-        For important details about how pagination works,
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
 
-        see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 2000
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. The `TIMECREATED` value returns the list in in
+              Example: `{"bar-key": "value"}`
 
-        descending order by default. The `EMAILADDRESS` value returns the list in
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
 
-        ascending order by default. Use the `SortOrderQueryParam` to change the
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
 
-        direction of the returned list of items.
 
-        '
-      in: query
-      name: sortBy
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        enum:
-        - TIMECREATED
-        - EMAILADDRESS
-    compartmentIdQueryParam:
-      description: The OCID for the compartment.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    FilterByIpPoolQueryParam:
-      description: A filter to only return resources that match the given IpPool resource exactly.
-      in: query
-      name: emailIpPoolId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'Used for optimistic concurrency control. In the update or delete call for a resource, set the `if-match`
-
-        parameter to the value of the etag from a previous get, create, or update response for that resource.  The resource
-
-        will be updated or deleted only if the etag you provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. `1` is the minimum, `1000` is the maximum. For important details about
-
-        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      x-default-description: 'null'
-      schema:
-        type: integer
-        maximum: 1000
-        minimum: 1
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending or descending order.
-
-        '
-      in: query
-      name: sortOrder
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    OverrideLocksQueryParameter:
-      description: Whether to override locks (if any exist).
-      in: query
-      name: isLockOverride
-      schema:
-        type: boolean
-        default: false
-    senderIdPathParam:
-      description: The unique OCID of the sender.
-      in: path
-      name: senderId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    lifecycleStateQueryParam:
-      description: The current state of a sender.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/Sender/lifecycleState'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The request ID for tracing from the system
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    senderEmailAddressQueryParam:
-      description: The email address of the approved sender.
-      in: query
-      name: emailAddress
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: email
-        maxLength: 254
-        minLength: 6
-  responses:
-    '400':
-      description: Incorrectly formatted request.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
+            Example: `{"Operations": {"CostCenter": "42"}}`
 
             '
-          schema:
+          type: object
+        emailAddress:
+          description: The email address of the sender.
+          maxLength: 254
+          minLength: 6
+          type: string
+        emailIpPoolId:
+          description: The IpPool [OCID](/iaas/Content/General/Concepts/identifiers.htm) used to submit an email by Email Delivery when sent from this sender.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
             type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '204':
-      description: The operation completed successfully.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
 
-            Oracle about a particular request, please provide the request ID.
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
 
             '
-          schema:
-            type: string
-    '404':
-      description: Authorization failed or the requested resource was not found.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+          type: object
+        id:
+          description: The unique ID of the sender.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current status of the approved sender.
+          type: string
+          x-obmcs-enumref: '#/definitions/Sender/lifecycleState'
+        locks:
+          description: Locks associated with this resource.
+          items:
+            $ref: '#/components/schemas/ResourceLock'
+          type: array
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
 
-            Oracle about a particular request, please provide the request ID.
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
 
             '
-          schema:
+          type: object
+        timeCreated:
+          description: 'Date time the approved sender was added, in "YYYY-MM-ddThh:mmZ"
+
+            format with a Z offset, as defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - emailAddress
+    UpdateSenderDetails:
+      description: 'The details allowed for updating a sender.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported as valid value type.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        emailIpPoolId:
+          description: The IpPool [OCID](/iaas/Content/General/Concepts/identifiers.htm) used to submit an email by Email Delivery when sent from this sender.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
             type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
     Error:
       description: An error has occurred.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
 
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '412':
-      description: Precondition Failed.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
+            [API Errors](/Content/API/References/apierrors.htm).
 
             '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '401':
-      description: 'The required information to complete authentication was not provided or
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ChangeSenderCompartmentDetails:
+      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
 
-        was incorrect. Extra detail may be provided in the response body.
+        into which the resource should be moved.
 
         '
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
 
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '429':
-      description: Too Many Requests
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
+            into which the sender should be moved.
 
             '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '409':
-      description: Authorization failed or the requested resource already exists.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '500':
-      description: Internal Server Error.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
 x-anchors:
   x-headers:
     etag:

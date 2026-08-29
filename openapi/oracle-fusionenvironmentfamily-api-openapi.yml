@@ -409,135 +409,211 @@ paths:
       - fusionEnvironmentFamily
       x-related-resource: '#/definitions/FusionEnvironmentFamily'
 components:
-  parameters:
-    FusionEnvironmentFamilyIdQueryParam:
-      description: The ID of the fusion environment family in which to list resources.
-      in: query
-      name: fusionEnvironmentFamilyId
-      required: false
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - TIME_CREATED
-        - DISPLAY_NAME
-        default: TIME_CREATED
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 100
-        minimum: 1
-    FusionEnvironmentFamilyLifecycleStateQueryParam:
-      description: A filter that returns all resources that match the specified lifecycle state.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: Returns all lifecycle states by default
-      x-obmcs-enumref: '#/definitions/FusionEnvironmentFamily/lifecycleState'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      required: false
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    OpcProvisionOptionHeaderParam:
-      description: For Oracle internal use only.
-      in: header
-      name: opc-provision-option
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    FusionEnvironmentFamilyIdentifierPathParam:
-      description: The unique identifier (OCID) of the FusionEnvironmentFamily.
-      in: path
-      name: fusionEnvironmentFamilyId
-      required: true
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   schemas:
+    Subscription:
+      description: Subscription information for compartmentId. Only root compartments are allowed.
+      properties:
+        classicSubscriptionId:
+          description: Subscription id.
+          example: '7971096'
+          maxLength: 31
+          minLength: 1
+          type: string
+        id:
+          description: OCID of the subscription details for particular root compartment or tenancy.
+          example: ocid1.organizationssubscription.oc1..exampleuniqueID
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: Subscription resource intermediate states.
+          enum:
+          - ACTIVE
+          - PURGED
+          - CANCELED
+          - PAID_PURGED
+          - INITIALIZED
+          - SOFT_TERMINATED
+          - DISABLED
+          - BEGIN_TERMINATION
+          - MIGRATED
+          - PENDING_CANCELATION
+          - ARCHIVED
+          - NON_RECOVERABLE
+          - BEGIN_SOFT_TERMINATION
+          - ACTIVATED
+          - ACCESS_DISABLED
+          - PENDING_REGISTRATION
+          - TERMINATED
+          - RELOCATING
+          - DEPROVISIONED
+          - PROVISIONED
+          - BEGIN_TERMINATION_PASSIVE
+          - LOCKED
+          - PENDING_DEPROVISIONING
+          - REGISTERED
+          - CANCELLED
+          - EXPIRED
+          example: ACTIVE
+          maxLength: 100
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: Lifecycle state of the subscription.
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - FAILED
+          - NEEDS_ATTENTION
+          example: ACTIVE
+          maxLength: 100
+          minLength: 1
+          type: string
+        serviceName:
+          description: The type of subscription, such as 'CLOUDCM'/'SAAS'/'CRM', etc.
+          type: string
+        skus:
+          description: Stock keeping unit.
+          items:
+            $ref: '#/components/schemas/SubscriptionSku'
+          type: array
+      required:
+      - id
+      - classicSubscriptionId
+      - serviceName
+      - skus
+    FusionEnvironmentFamilySummary:
+      description: Summary information for a Fusion environment family.
+      properties:
+        capabilities:
+          description: Supported or Enabled capabilities.
+          items:
+            $ref: '#/components/schemas/Capabilities'
+          type: object
+        compartmentId:
+          description: The OCID of the compartment where the environment family is located.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: A friendly name for the environment family. The name must contain only letters, numbers, dashes, and underscores. Can be changed later.
+          type: string
+        familyMaintenancePolicy:
+          $ref: '#/components/schemas/FamilyMaintenancePolicy'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The unique identifier (OCID) of the environment family. Can't be changed after creation.
+          type: string
+        isSubscriptionUpdateNeeded:
+          description: When set to True, a subscription update is required for the environment family.
+          type: boolean
+        lifecycleDetails:
+          description: A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
+          type: string
+        lifecycleState:
+          description: The current state of the FusionEnvironmentFamily.
+          type: string
+          x-obmcs-enumref: '#/definitions/FusionEnvironmentFamily/lifecycleState'
+        subscriptionIds:
+          description: The list of the IDs of the applications subscriptions that are associated with the environment family.
+          items:
+            type: string
+          type: array
+        timeCreated:
+          description: The time the the FusionEnvironmentFamily was created. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the FusionEnvironmentFamily was updated. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - compartmentId
+      - subscriptionIds
+      - lifecycleState
+      type: object
+    FusionEnvironmentFamilyCollection:
+      description: Results of a Fusion environment family search.
+      properties:
+        items:
+          description: A page of FusionEnvironmentFamilySummary objects.
+          items:
+            $ref: '#/components/schemas/FusionEnvironmentFamilySummary'
+          type: array
+      required:
+      - items
+      type: object
+    LimitAndUsage:
+      description: The limit and usage for a specific environment type, for example, production, development, or test.
+      properties:
+        limit:
+          description: The limit of current environment.
+          type: integer
+        usage:
+          description: The usage of current environment.
+          type: integer
+      required:
+      - limit
+      - usage
+      type: object
+    ChangeFusionEnvironmentFamilyCompartmentDetails:
+      description: Details about the compartment the environment family should be moved to.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    FusionEnvironmentFamilyLimitsAndUsage:
+      description: Details of EnvironmentLimits.
+      properties:
+        developmentLimitAndUsage:
+          $ref: '#/components/schemas/LimitAndUsage'
+        productionLimitAndUsage:
+          $ref: '#/components/schemas/LimitAndUsage'
+        testLimitAndUsage:
+          $ref: '#/components/schemas/LimitAndUsage'
+      required:
+      - productionLimitAndUsage
+      - testLimitAndUsage
+      - developmentLimitAndUsage
+      type: object
     Capabilities:
       description: Status of capabilities that can be enabled for an environment family.
       properties:
@@ -575,6 +651,106 @@ components:
           type: string
       type: object
       x-default-description: when unspecified, default value is automatically assigned
+    UpdateFusionEnvironmentFamilyDetails:
+      description: The details of the Fusion environment family to be updated.
+      properties:
+        capabilities:
+          description: Supported or Enabled capabilities.
+          items:
+            $ref: '#/components/schemas/Capabilities'
+          type: object
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: A friendly name for the environment family. The name must contain only letters, numbers, dashes, and underscores. Can be changed later.
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: when unspecified, the current value of this field will be preserved
+        familyMaintenancePolicy:
+          $ref: '#/components/schemas/UpdateFamilyMaintenancePolicyDetails'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isLive:
+          description: Whether the production fusion environment is accepting customer traffic or not.
+          type: boolean
+        subscriptionIds:
+          description: The list of the IDs of the applications subscriptions that are associated with the environment family.
+          items:
+            type: string
+          type: array
+          x-default-description: when unspecified, the current value of this field will be preserved
+        timeOfGoLive:
+          description: Time the production fusion environment is accepting customer traffic. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      type: object
+    SubscriptionSku:
+      description: SKU information.
+      properties:
+        description:
+          description: Description of the stock units.
+          example: Oracle Database Exadata Cloud Service - Half Rack - X6 - BYOL - Hosted Environment Per Hour
+          maxLength: 2000
+          type: string
+        licensePartDescription:
+          description: Description of the covered product belonging to this Sku.
+          example: Additional Bandwidth - Megabyte BUNDLED-BW-1MB
+          maxLength: 240
+          type: string
+        metricName:
+          description: Base metric for billing the service.
+          example: HOSTED EXPENSE REPORT
+          maxLength: 60
+          type: string
+        quantity:
+          description: Quantity of the stock units.
+          example: 1
+          type: integer
+        sku:
+          description: Stock keeping unit id.
+          example: '7971096'
+          maxLength: 40
+          type: string
+      required:
+      - sku
+      - quantity
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     FusionEnvironmentFamily:
       description: Details of a Fusion environment family. An environment family is a logical grouping of environments. The environment family defines a set of characteristics that are shared across the environments to allow consistent management and maintenance across your production, test, and development environments. For more information, see [Planning an Environment Family](/iaas/Content/fusion-applications/plan-environment-family.htm).
       properties:
@@ -668,94 +844,33 @@ components:
       - subscriptionIds
       - lifecycleState
       type: object
-    Error:
-      description: Error Information.
+    UpdateFamilyMaintenancePolicyDetails:
+      description: The editable settings of the policy that specifies the maintenance and upgrade preferences for an environment.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+        concurrentMaintenance:
+          default: DISABLED
+          description: Whether production and non-production environments are upgraded concurrently.
           type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    FusionEnvironmentFamilySummary:
-      description: Summary information for a Fusion environment family.
-      properties:
-        capabilities:
-          description: Supported or Enabled capabilities.
-          items:
-            $ref: '#/components/schemas/Capabilities'
-          type: object
-        compartmentId:
-          description: The OCID of the compartment where the environment family is located.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: A friendly name for the environment family. The name must contain only letters, numbers, dashes, and underscores. Can be changed later.
-          type: string
-        familyMaintenancePolicy:
-          $ref: '#/components/schemas/FamilyMaintenancePolicy'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The unique identifier (OCID) of the environment family. Can't be changed after creation.
-          type: string
-        isSubscriptionUpdateNeeded:
-          description: When set to True, a subscription update is required for the environment family.
+          x-obmcs-enumref: '#/definitions/FamilyMaintenancePolicy/concurrentMaintenance'
+        isMonthlyPatchingEnabled:
+          default: false
+          description: Whether the Fusion environment receives monthly patching.
           type: boolean
-        lifecycleDetails:
-          description: A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
+        quarterlyUpgradeBeginTimes:
+          description: The cohort the fusion environment family is in.
+          format: x-obmcs-recurring-time
           type: string
-        lifecycleState:
-          description: The current state of the FusionEnvironmentFamily.
-          type: string
-          x-obmcs-enumref: '#/definitions/FusionEnvironmentFamily/lifecycleState'
-        subscriptionIds:
-          description: The list of the IDs of the applications subscriptions that are associated with the environment family.
+      type: object
+    SubscriptionDetail:
+      description: Detail for the FusionEnvironmentFamily subscription.
+      properties:
+        subscriptions:
+          description: List of subscriptions.
           items:
-            type: string
+            $ref: '#/components/schemas/Subscription'
           type: array
-        timeCreated:
-          description: The time the the FusionEnvironmentFamily was created. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the FusionEnvironmentFamily was updated. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
       required:
-      - id
-      - displayName
-      - compartmentId
-      - subscriptionIds
-      - lifecycleState
+      - subscriptions
       type: object
     CreateFusionEnvironmentFamilyDetails:
       description: The information about new FusionEnvironmentFamily.
@@ -824,249 +939,134 @@ components:
       - compartmentId
       - subscriptionIds
       type: object
-    FusionEnvironmentFamilyCollection:
-      description: Results of a Fusion environment family search.
-      properties:
-        items:
-          description: A page of FusionEnvironmentFamilySummary objects.
-          items:
-            $ref: '#/components/schemas/FusionEnvironmentFamilySummary'
-          type: array
-      required:
-      - items
-      type: object
-    LimitAndUsage:
-      description: The limit and usage for a specific environment type, for example, production, development, or test.
-      properties:
-        limit:
-          description: The limit of current environment.
-          type: integer
-        usage:
-          description: The usage of current environment.
-          type: integer
-      required:
-      - limit
-      - usage
-      type: object
-    SubscriptionSku:
-      description: SKU information.
-      properties:
-        description:
-          description: Description of the stock units.
-          example: Oracle Database Exadata Cloud Service - Half Rack - X6 - BYOL - Hosted Environment Per Hour
-          maxLength: 2000
-          type: string
-        licensePartDescription:
-          description: Description of the covered product belonging to this Sku.
-          example: Additional Bandwidth - Megabyte BUNDLED-BW-1MB
-          maxLength: 240
-          type: string
-        metricName:
-          description: Base metric for billing the service.
-          example: HOSTED EXPENSE REPORT
-          maxLength: 60
-          type: string
-        quantity:
-          description: Quantity of the stock units.
-          example: 1
-          type: integer
-        sku:
-          description: Stock keeping unit id.
-          example: '7971096'
-          maxLength: 40
-          type: string
-      required:
-      - sku
-      - quantity
-    UpdateFamilyMaintenancePolicyDetails:
-      description: The editable settings of the policy that specifies the maintenance and upgrade preferences for an environment.
-      properties:
-        concurrentMaintenance:
-          default: DISABLED
-          description: Whether production and non-production environments are upgraded concurrently.
-          type: string
-          x-obmcs-enumref: '#/definitions/FamilyMaintenancePolicy/concurrentMaintenance'
-        isMonthlyPatchingEnabled:
-          default: false
-          description: Whether the Fusion environment receives monthly patching.
-          type: boolean
-        quarterlyUpgradeBeginTimes:
-          description: The cohort the fusion environment family is in.
-          format: x-obmcs-recurring-time
-          type: string
-      type: object
-    FusionEnvironmentFamilyLimitsAndUsage:
-      description: Details of EnvironmentLimits.
-      properties:
-        developmentLimitAndUsage:
-          $ref: '#/components/schemas/LimitAndUsage'
-        productionLimitAndUsage:
-          $ref: '#/components/schemas/LimitAndUsage'
-        testLimitAndUsage:
-          $ref: '#/components/schemas/LimitAndUsage'
-      required:
-      - productionLimitAndUsage
-      - testLimitAndUsage
-      - developmentLimitAndUsage
-      type: object
-    SubscriptionDetail:
-      description: Detail for the FusionEnvironmentFamily subscription.
-      properties:
-        subscriptions:
-          description: List of subscriptions.
-          items:
-            $ref: '#/components/schemas/Subscription'
-          type: array
-      required:
-      - subscriptions
-      type: object
-    UpdateFusionEnvironmentFamilyDetails:
-      description: The details of the Fusion environment family to be updated.
-      properties:
-        capabilities:
-          description: Supported or Enabled capabilities.
-          items:
-            $ref: '#/components/schemas/Capabilities'
-          type: object
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
+  parameters:
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIME_CREATED
+        - DISPLAY_NAME
+        default: TIME_CREATED
+    OpcProvisionOptionHeaderParam:
+      description: For Oracle internal use only.
+      in: header
+      name: opc-provision-option
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    FusionEnvironmentFamilyLifecycleStateQueryParam:
+      description: A filter that returns all resources that match the specified lifecycle state.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: Returns all lifecycle states by default
+      x-obmcs-enumref: '#/definitions/FusionEnvironmentFamily/lifecycleState'
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    FusionEnvironmentFamilyIdQueryParam:
+      description: The ID of the fusion environment family in which to list resources.
+      in: query
+      name: fusionEnvironmentFamilyId
+      required: false
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
-              Example: `{"bar-key": "value"}`
+        server error without risk of executing that same action again. Retry tokens expire after 24
 
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
 
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
+        has been deleted and purged from the system, then a retry of the original creation request
 
-            '
-          type: object
-        displayName:
-          description: A friendly name for the environment family. The name must contain only letters, numbers, dashes, and underscores. Can be changed later.
-          maxLength: 255
-          minLength: 1
-          type: string
-          x-default-description: when unspecified, the current value of this field will be preserved
-        familyMaintenancePolicy:
-          $ref: '#/components/schemas/UpdateFamilyMaintenancePolicyDetails'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+        might be rejected.
 
-            Example: `{"bar-key": "value"}`
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 100
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    FusionEnvironmentFamilyIdentifierPathParam:
+      description: The unique identifier (OCID) of the FusionEnvironmentFamily.
+      in: path
+      name: fusionEnvironmentFamilyId
+      required: true
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
 
-            '
-          type: object
-        isLive:
-          description: Whether the production fusion environment is accepting customer traffic or not.
-          type: boolean
-        subscriptionIds:
-          description: The list of the IDs of the applications subscriptions that are associated with the environment family.
-          items:
-            type: string
-          type: array
-          x-default-description: when unspecified, the current value of this field will be preserved
-        timeOfGoLive:
-          description: Time the production fusion environment is accepting customer traffic. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      type: object
-    ChangeFusionEnvironmentFamilyCompartmentDetails:
-      description: Details about the compartment the environment family should be moved to.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment into which the resource should be moved.
+        for a resource, set the `if-match` parameter to the value of the
 
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    Subscription:
-      description: Subscription information for compartmentId. Only root compartments are allowed.
-      properties:
-        classicSubscriptionId:
-          description: Subscription id.
-          example: '7971096'
-          maxLength: 31
-          minLength: 1
-          type: string
-        id:
-          description: OCID of the subscription details for particular root compartment or tenancy.
-          example: ocid1.organizationssubscription.oc1..exampleuniqueID
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: Subscription resource intermediate states.
-          enum:
-          - ACTIVE
-          - PURGED
-          - CANCELED
-          - PAID_PURGED
-          - INITIALIZED
-          - SOFT_TERMINATED
-          - DISABLED
-          - BEGIN_TERMINATION
-          - MIGRATED
-          - PENDING_CANCELATION
-          - ARCHIVED
-          - NON_RECOVERABLE
-          - BEGIN_SOFT_TERMINATION
-          - ACTIVATED
-          - ACCESS_DISABLED
-          - PENDING_REGISTRATION
-          - TERMINATED
-          - RELOCATING
-          - DEPROVISIONED
-          - PROVISIONED
-          - BEGIN_TERMINATION_PASSIVE
-          - LOCKED
-          - PENDING_DEPROVISIONING
-          - REGISTERED
-          - CANCELLED
-          - EXPIRED
-          example: ACTIVE
-          maxLength: 100
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: Lifecycle state of the subscription.
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          - FAILED
-          - NEEDS_ATTENTION
-          example: ACTIVE
-          maxLength: 100
-          minLength: 1
-          type: string
-        serviceName:
-          description: The type of subscription, such as 'CLOUDCM'/'SAAS'/'CRM', etc.
-          type: string
-        skus:
-          description: Stock keeping unit.
-          items:
-            $ref: '#/components/schemas/SubscriptionSku'
-          type: array
-      required:
-      - id
-      - classicSubscriptionId
-      - serviceName
-      - skus
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   responses:
     default:
       description: Unknown Error

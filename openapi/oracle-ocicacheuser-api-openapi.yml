@@ -1,7 +1,7 @@
 openapi: 3.2.0
 info:
   description: Use the OCI Cache API to create and manage clusters. A cluster is a memory-based storage solution. For more information, see [OCI Cache](/iaas/Content/ocicache/home.htm).
-  title: OCI Cache Oci Cache User API
+  title: Oci Cache User API
   version: '20220315'
   x-provenance:
     method: harvested
@@ -382,135 +382,20 @@ paths:
       - ociCacheUser
       x-related-resource: '#/definitions/AttachedOciCacheCluster'
 components:
-  parameters:
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    LifeCycleStateQueryParam:
-      description: A filter to return the resources, whose lifecycleState matches with the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/OciCacheUser/lifecycleState'
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    OciCacheUsernameQueryParam:
-      description: A filter to return the resources that match with the given OCI cache user name.
-      in: query
-      name: name
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    OciCacheUserIdentifierPathParam:
-      description: A filter to return only resources, that match with the given OCI cache user ID (OCID).
-      in: path
-      name: ociCacheUserId
-      required: true
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
   schemas:
+    AttachedOciCacheCluster:
+      description: OciCacheCluster to which the OciCacheUser is attached.
+      properties:
+        ociCacheClusterId:
+          description: 'OCID of the OciCacheCluster
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - ociCacheClusterId
+      type: object
     OciCacheUser:
       description: An OCI cache user is required to connect to an OCI cache cluster.
       properties:
@@ -611,18 +496,17 @@ components:
       - status
       - lifecycleState
       type: object
-    Error:
-      description: Specifies details for an error.
+    ChangeOciCacheUserCompartmentDetails:
+      description: The configuration details for the move operation.
       properties:
-        code:
-          description: A machine-usable code for the error that occured.
-          type: string
-        message:
-          description: A human-readable error string for the error that occured.
+        compartmentId:
+          description: OCID of the compartment into which the OCI cache user will be moved.
+          maxLength: 255
+          minLength: 1
           type: string
       required:
-      - code
-      - message
+      - compartmentId
+      type: object
     AuthenticationMode:
       description: These are the Authentication details of an OCI cache user.
       discriminator:
@@ -636,149 +520,6 @@ components:
           type: string
       required:
       - authenticationType
-    OciCacheUserCollection:
-      description: A list of OCI cache users that match filter criteria, if any.
-      properties:
-        items:
-          description: A collection of OCI Cache users.
-          items:
-            $ref: '#/components/schemas/OciCacheUserSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateOciCacheUserDetails:
-      description: Details required to update an existing OCI cache user.
-      properties:
-        aclString:
-          description: ACL string of OCI cache user.
-          type: string
-        authenticationMode:
-          $ref: '#/components/schemas/AuthenticationMode'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: Description of OCI cache user.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        status:
-          description: OCI cache user status. ON enables and OFF disables the OCI cache user to login to the associated clusters.
-          type: string
-          x-obmcs-enumref: '#/definitions/OciCacheUser/status'
-      type: object
-    ChangeOciCacheUserCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: OCID of the compartment into which the OCI cache user will be moved.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    AttachedOciCacheCluster:
-      description: OciCacheCluster to which the OciCacheUser is attached.
-      properties:
-        ociCacheClusterId:
-          description: 'OCID of the OciCacheCluster
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - ociCacheClusterId
-      type: object
-    CreateOciCacheUserDetails:
-      description: Details required to create a new OCI cache user.
-      properties:
-        aclString:
-          description: ACL string of OCI cache user.
-          type: string
-        authenticationMode:
-          $ref: '#/components/schemas/AuthenticationMode'
-        compartmentId:
-          description: OCI cache user compartment ID.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: Description of OCI cache user.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        name:
-          description: OCI cache user name is required to connect to an OCI cache cluster.
-          maxLength: 255
-          minLength: 1
-          type: string
-        status:
-          description: OCI cache user status. ON enables and OFF disables the OCI cache user to login to the associated clusters. Default value is ON.
-          type: string
-          x-obmcs-enumref: '#/definitions/OciCacheUser/status'
-      required:
-      - name
-      - description
-      - compartmentId
-      - authenticationMode
-      - aclString
-      type: object
     OciCacheUserSummary:
       description: OCI Cache user summary.
       properties:
@@ -866,6 +607,265 @@ components:
       - status
       - lifecycleState
       type: object
+    Error:
+      description: Specifies details for an error.
+      properties:
+        code:
+          description: A machine-usable code for the error that occured.
+          type: string
+        message:
+          description: A human-readable error string for the error that occured.
+          type: string
+      required:
+      - code
+      - message
+    OciCacheUserCollection:
+      description: A list of OCI cache users that match filter criteria, if any.
+      properties:
+        items:
+          description: A collection of OCI Cache users.
+          items:
+            $ref: '#/components/schemas/OciCacheUserSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateOciCacheUserDetails:
+      description: Details required to update an existing OCI cache user.
+      properties:
+        aclString:
+          description: ACL string of OCI cache user.
+          type: string
+        authenticationMode:
+          $ref: '#/components/schemas/AuthenticationMode'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: Description of OCI cache user.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        status:
+          description: OCI cache user status. ON enables and OFF disables the OCI cache user to login to the associated clusters.
+          type: string
+          x-obmcs-enumref: '#/definitions/OciCacheUser/status'
+      type: object
+    CreateOciCacheUserDetails:
+      description: Details required to create a new OCI cache user.
+      properties:
+        aclString:
+          description: ACL string of OCI cache user.
+          type: string
+        authenticationMode:
+          $ref: '#/components/schemas/AuthenticationMode'
+        compartmentId:
+          description: OCI cache user compartment ID.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: Description of OCI cache user.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        name:
+          description: OCI cache user name is required to connect to an OCI cache cluster.
+          maxLength: 255
+          minLength: 1
+          type: string
+        status:
+          description: OCI cache user status. ON enables and OFF disables the OCI cache user to login to the associated clusters. Default value is ON.
+          type: string
+          x-obmcs-enumref: '#/definitions/OciCacheUser/status'
+      required:
+      - name
+      - description
+      - compartmentId
+      - authenticationMode
+      - aclString
+      type: object
+  parameters:
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    OciCacheUserIdentifierPathParam:
+      description: A filter to return only resources, that match with the given OCI cache user ID (OCID).
+      in: path
+      name: ociCacheUserId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    OciCacheUsernameQueryParam:
+      description: A filter to return the resources that match with the given OCI cache user name.
+      in: query
+      name: name
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    LifeCycleStateQueryParam:
+      description: A filter to return the resources, whose lifecycleState matches with the given lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/OciCacheUser/lifecycleState'
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   responses:
     default:
       description: Unknown Error

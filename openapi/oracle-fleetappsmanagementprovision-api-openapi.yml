@@ -340,114 +340,153 @@ paths:
         description: Details of the target compartment.
         required: true
 components:
+  parameters:
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+
+        '
+      in: query
+      name: sortBy
+      x-default-description: timeCreated
+      x-obmcs-top-level-enum: '#/definitions/SortBy'
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+    ProvisionIdentifierQueryParam:
+      description: 'Unique identifier or OCID for listing a single provision by id.
+
+        Either compartmentId or id must be provided.
+
+        '
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    ProvisionIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the FamProvision.
+      in: path
+      name: provisionId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: page
+      schema:
+        type: string
+        minLength: 1
+    AssociatedFleetIdentifierQueryParam:
+      description: unique Fleet identifier
+      in: query
+      name: fleetId
+      x-default-description: 'null'
+      schema:
+        type: string
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: 'The ID of the compartment in which to list resources.
+
+        Empty only if the resource OCID query param is not specified.
+
+        '
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    ProvisionLifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/Provision/lifecycleState'
+      schema:
+        type: string
   schemas:
-    InstanceSummary:
-      description: InstanceSummary contains info regarding deployed instances.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which instance is deployed.
-          maxLength: 255
-          minLength: 1
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the instance.
-          maxLength: 255
-          minLength: 1
-          type: string
-        state:
-          description: Instance lifecycle state
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - id
-      - compartmentId
-      - state
-      type: object
-    JobExecutionDetails:
-      description: The Apply job output variable
-      properties:
-        isSensitive:
-          description: The indicator if the data for this parameter is sensitive (e.g. should the data be hidden in UI, encrypted if stored, etc.)
-          maxLength: 255
-          minLength: 1
-          type: boolean
-        outputDescription:
-          description: The output description
-          maxLength: 255
-          minLength: 1
-          type: string
-        outputName:
-          description: The output name
-          maxLength: 255
-          minLength: 1
-          type: string
-        outputType:
-          description: The output type
-          maxLength: 255
-          minLength: 1
-          type: string
-        outputValue:
-          description: The output value
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - outputName
-      - outputType
-      - outputValue
-      type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    DeployedResourceDetails:
-      description: The Filtered List Of Deployed Resources
-      properties:
-        mode:
-          description: 'The mode of the resource. Example: "managed"'
-          maxLength: 255
-          minLength: 1
-          type: string
-        resourceInstanceList:
-          description: Collection of InstanceSummary
-          items:
-            $ref: '#/components/schemas/InstanceSummary'
-          type: array
-        resourceName:
-          description: The name of the resource
-          maxLength: 255
-          minLength: 1
-          type: string
-        resourceProvider:
-          description: The name of the Provider
-          maxLength: 255
-          minLength: 1
-          type: string
-        resourceType:
-          description: 'The provider resource type. Must be supported by the [Oracle Cloud Infrastructure provider](https://registry.terraform.io/providers/oracle/oci/latest/docs).
-
-            Example: oci_core_instance
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - mode
-      - resourceName
-      - resourceProvider
-      - resourceType
-      - resourceInstanceList
-      type: object
     ProvisionSummary:
       description: Summary information about a FamProvision.
       properties:
@@ -619,9 +658,67 @@ components:
       - freeformTags
       - definedTags
       type: object
-    UpdateProvisionDetails:
-      description: The data to update a FamProvision.
+    ChangeProvisionCompartmentDetails:
+      description: The configuration details for the move operation.
       properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the FamProvision to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    JobExecutionDetails:
+      description: The Apply job output variable
+      properties:
+        isSensitive:
+          description: The indicator if the data for this parameter is sensitive (e.g. should the data be hidden in UI, encrypted if stored, etc.)
+          maxLength: 255
+          minLength: 1
+          type: boolean
+        outputDescription:
+          description: The output description
+          maxLength: 255
+          minLength: 1
+          type: string
+        outputName:
+          description: The output name
+          maxLength: 255
+          minLength: 1
+          type: string
+        outputType:
+          description: The output type
+          maxLength: 255
+          minLength: 1
+          type: string
+        outputValue:
+          description: The output value
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - outputName
+      - outputType
+      - outputValue
+      type: object
+    CreateProvisionDetails:
+      description: The data to create a FamProvision.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to create the FamProvision in.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        configCatalogItemId:
+          description: A [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Catalog Item to a file with key/value pairs to set up variables for createStack API.
+          maxLength: 255
+          minLength: 1
+          type: string
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -646,6 +743,11 @@ components:
           maxLength: 255
           minLength: 1
           type: string
+        fleetId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Fleet.
+          maxLength: 255
+          minLength: 1
+          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -655,24 +757,118 @@ components:
 
             '
           type: object
+        packageCatalogItemId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Catalog Item.
+          maxLength: 255
+          minLength: 1
+          type: string
         provisionDescription:
           description: A description of the provision.
           maxLength: 255
           minLength: 1
           type: string
-      type: object
-    ProvisionCollection:
-      description: Results of a famProvision search. Contains both FamProvisionSummary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of famProvisions.
-          items:
-            $ref: '#/components/schemas/ProvisionSummary'
-          maxItems: 100
-          type: array
+        tfVariableCompartmentId:
+          description: An optional variable added to a list of RMS variables for createStack API. Overrides the one supplied in configuration file.
+          maxLength: 255
+          minLength: 1
+          type: string
+        tfVariableCurrentUserId:
+          description: An optional variable added to a list of RMS variables for createStack API. Overrides the one supplied in configuration file.
+          maxLength: 255
+          minLength: 1
+          type: string
+        tfVariableRegionId:
+          description: A mandatory variable added to a list of RMS variables for createStack API. Overrides the one supplied in configuration file.
+          maxLength: 255
+          minLength: 1
+          type: string
+        tfVariableTenancyId:
+          description: A mandatory variable added to a list of RMS variables for createStack API. Overrides the one supplied in configuration file.
+          maxLength: 255
+          minLength: 1
+          type: string
       required:
-      - items
+      - compartmentId
+      - packageCatalogItemId
+      - configCatalogItemId
+      - fleetId
+      - tfVariableTenancyId
+      - tfVariableRegionId
       type: object
+    InstanceSummary:
+      description: InstanceSummary contains info regarding deployed instances.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which instance is deployed.
+          maxLength: 255
+          minLength: 1
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the instance.
+          maxLength: 255
+          minLength: 1
+          type: string
+        state:
+          description: Instance lifecycle state
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - compartmentId
+      - state
+      type: object
+    DeployedResourceDetails:
+      description: The Filtered List Of Deployed Resources
+      properties:
+        mode:
+          description: 'The mode of the resource. Example: "managed"'
+          maxLength: 255
+          minLength: 1
+          type: string
+        resourceInstanceList:
+          description: Collection of InstanceSummary
+          items:
+            $ref: '#/components/schemas/InstanceSummary'
+          type: array
+        resourceName:
+          description: The name of the resource
+          maxLength: 255
+          minLength: 1
+          type: string
+        resourceProvider:
+          description: The name of the Provider
+          maxLength: 255
+          minLength: 1
+          type: string
+        resourceType:
+          description: 'The provider resource type. Must be supported by the [Oracle Cloud Infrastructure provider](https://registry.terraform.io/providers/oracle/oci/latest/docs).
+
+            Example: oci_core_instance
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - mode
+      - resourceName
+      - resourceProvider
+      - resourceType
+      - resourceInstanceList
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     Provision:
       description: 'A FamProvision is a description of a FamProvision.
 
@@ -894,21 +1090,21 @@ components:
       - freeformTags
       - definedTags
       type: object
-    CreateProvisionDetails:
-      description: The data to create a FamProvision.
+    ProvisionCollection:
+      description: Results of a famProvision search. Contains both FamProvisionSummary items and other information, such as metadata.
       properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to create the FamProvision in.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        configCatalogItemId:
-          description: A [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Catalog Item to a file with key/value pairs to set up variables for createStack API.
-          maxLength: 255
-          minLength: 1
-          type: string
+        items:
+          description: List of famProvisions.
+          items:
+            $ref: '#/components/schemas/ProvisionSummary'
+          maxItems: 100
+          type: array
+      required:
+      - items
+      type: object
+    UpdateProvisionDetails:
+      description: The data to update a FamProvision.
+      properties:
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -933,11 +1129,6 @@ components:
           maxLength: 255
           minLength: 1
           type: string
-        fleetId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Fleet.
-          maxLength: 255
-          minLength: 1
-          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -947,203 +1138,12 @@ components:
 
             '
           type: object
-        packageCatalogItemId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Catalog Item.
-          maxLength: 255
-          minLength: 1
-          type: string
         provisionDescription:
           description: A description of the provision.
           maxLength: 255
           minLength: 1
           type: string
-        tfVariableCompartmentId:
-          description: An optional variable added to a list of RMS variables for createStack API. Overrides the one supplied in configuration file.
-          maxLength: 255
-          minLength: 1
-          type: string
-        tfVariableCurrentUserId:
-          description: An optional variable added to a list of RMS variables for createStack API. Overrides the one supplied in configuration file.
-          maxLength: 255
-          minLength: 1
-          type: string
-        tfVariableRegionId:
-          description: A mandatory variable added to a list of RMS variables for createStack API. Overrides the one supplied in configuration file.
-          maxLength: 255
-          minLength: 1
-          type: string
-        tfVariableTenancyId:
-          description: A mandatory variable added to a list of RMS variables for createStack API. Overrides the one supplied in configuration file.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      - packageCatalogItemId
-      - configCatalogItemId
-      - fleetId
-      - tfVariableTenancyId
-      - tfVariableRegionId
       type: object
-    ChangeProvisionCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the FamProvision to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-  parameters:
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      x-default-description: timeCreated
-      x-obmcs-top-level-enum: '#/definitions/SortBy'
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: page
-      schema:
-        type: string
-        minLength: 1
-    CompartmentIdQueryParam:
-      description: 'The ID of the compartment in which to list resources.
-
-        Empty only if the resource OCID query param is not specified.
-
-        '
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    AssociatedFleetIdentifierQueryParam:
-      description: unique Fleet identifier
-      in: query
-      name: fleetId
-      x-default-description: 'null'
-      schema:
-        type: string
-    ProvisionIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the FamProvision.
-      in: path
-      name: provisionId
-      required: true
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    ProvisionLifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/Provision/lifecycleState'
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ProvisionIdentifierQueryParam:
-      description: 'Unique identifier or OCID for listing a single provision by id.
-
-        Either compartmentId or id must be provided.
-
-        '
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
   responses:
     DefaultError:
       description: An error has occurred.

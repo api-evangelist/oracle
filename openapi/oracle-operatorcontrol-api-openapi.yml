@@ -326,14 +326,6 @@ paths:
         required: true
 components:
   parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
@@ -346,6 +338,89 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    OperatorControlIdentifierPathParam:
+      description: unique OperatorControl identifier
+      in: path
+      name: operatorControlId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    OperatorControlQueryParam:
+      description: A filter to return OperatorControl that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    OperatorControlLifecycleStateQueryParam:
+      description: A filter to return only resources whose lifecycleState matches the given OperatorControl lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperatorControlLifecycleStates'
+      schema:
+        type: string
+        enum:
+        - CREATED
+        - ASSIGNED
+        - UNASSIGNED
+        - DELETED
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
       in: query
@@ -370,33 +445,6 @@ components:
       required: false
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    OperatorControlIdentifierPathParam:
-      description: unique OperatorControl identifier
-      in: path
-      name: operatorControlId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
     DeleteOperatorDescQueryParam:
       description: reason for deletion of OperatorControl.
       in: query
@@ -406,67 +454,7 @@ components:
         type: string
         maxLength: 250
         minLength: 0
-    OperatorControlLifecycleStateQueryParam:
-      description: A filter to return only resources whose lifecycleState matches the given OperatorControl lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperatorControlLifecycleStates'
-      schema:
-        type: string
-        enum:
-        - CREATED
-        - ASSIGNED
-        - UNASSIGNED
-        - DELETED
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    OperatorControlQueryParam:
-      description: A filter to return OperatorControl that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
   schemas:
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ChangeOperatorControlCompartmentDetails:
       description: Details of the new compartment to contain the operator control.
       properties:
@@ -475,85 +463,6 @@ components:
           maxLength: 255
           minLength: 1
           type: string
-    OperatorControlCollection:
-      description: Results of Operator Control search, which contains summary of the operator control.
-      properties:
-        items:
-          description: contains OperatorControlSummary
-          items:
-            $ref: '#/components/schemas/OperatorControlSummary'
-          type: array
-      required:
-      - items
-      type: object
-    OperatorControlSummary:
-      description: Summary of the OperatorControl.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment that contains the operator control.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            '
-          type: object
-        id:
-          description: The OCID of the operator control.
-          type: string
-        isFullyPreApproved:
-          description: Whether all operator actions are pre-approved. If yes, an access request associated with a resource governed by the operator control will be automatically approved by the system.
-          type: boolean
-        lifecycleState:
-          description: The current lifecycle state of the operator control.
-          enum:
-          - CREATED
-          - ASSIGNED
-          - UNASSIGNED
-          - DELETED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperatorControlLifecycleStates'
-        operatorControlName:
-          description: Name of the operator control.
-          type: string
-        timeOfCreation:
-          description: 'Time when the operator control was created, expressed in [RFC 3339] (https://tools.ietf.org/html/rfc3339) timestamp format. Example: ''2020-05-22T21:10:29.600Z''
-
-            '
-          format: date-time
-          type: string
-        timeOfDeletion:
-          description: 'Time when the operator control was deleted, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format. Example: ''2020-05-22T21:10:29.600Z''
-
-            '
-          format: date-time
-          type: string
-        timeOfModification:
-          description: 'Time when the operator control was last modified, expressed in [RFC 3339] (https://tools.ietf.org/html/rfc3339) timestamp format. Example: ''2020-05-22T21:10:29.600Z''
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - operatorControlName
-      type: object
     UpdateOperatorControlDetails:
       description: Information about the new operator control.
       properties:
@@ -624,6 +533,74 @@ components:
       - operatorControlName
       - isFullyPreApproved
       - approverGroupsList
+      type: object
+    OperatorControlSummary:
+      description: Summary of the OperatorControl.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment that contains the operator control.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            '
+          type: object
+        id:
+          description: The OCID of the operator control.
+          type: string
+        isFullyPreApproved:
+          description: Whether all operator actions are pre-approved. If yes, an access request associated with a resource governed by the operator control will be automatically approved by the system.
+          type: boolean
+        lifecycleState:
+          description: The current lifecycle state of the operator control.
+          enum:
+          - CREATED
+          - ASSIGNED
+          - UNASSIGNED
+          - DELETED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperatorControlLifecycleStates'
+        operatorControlName:
+          description: Name of the operator control.
+          type: string
+        timeOfCreation:
+          description: 'Time when the operator control was created, expressed in [RFC 3339] (https://tools.ietf.org/html/rfc3339) timestamp format. Example: ''2020-05-22T21:10:29.600Z''
+
+            '
+          format: date-time
+          type: string
+        timeOfDeletion:
+          description: 'Time when the operator control was deleted, expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format. Example: ''2020-05-22T21:10:29.600Z''
+
+            '
+          format: date-time
+          type: string
+        timeOfModification:
+          description: 'Time when the operator control was last modified, expressed in [RFC 3339] (https://tools.ietf.org/html/rfc3339) timestamp format. Example: ''2020-05-22T21:10:29.600Z''
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - operatorControlName
       type: object
     OperatorControl:
       description: 'Operator Access Control enables you to grant, audit, or revoke the access Oracle has to your Exadata Cloud@Customer infrastructure, and obtain audit reports of all actions taken by a human operator, in a near real-time manner.
@@ -839,6 +816,29 @@ components:
       - isFullyPreApproved
       - resourceType
       - approverGroupsList
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    OperatorControlCollection:
+      description: Results of Operator Control search, which contains summary of the operator control.
+      properties:
+        items:
+          description: contains OperatorControlSummary
+          items:
+            $ref: '#/components/schemas/OperatorControlSummary'
+          type: array
+      required:
+      - items
       type: object
   responses:
     default:

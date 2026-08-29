@@ -2114,91 +2114,140 @@ paths:
         '
 components:
   schemas:
-    SwitchSnapChannelDetails:
-      description: Provides the information used to switch a snap channel.
+    ModuleStreamDetailsBody:
+      description: Provides the information used to enable or disable the module stream on a managed instance.
       properties:
-        channel:
-          description: The channel to switch to (e.g. stable, edge, beta, candidate, or a custom channel).
+        moduleName:
+          description: The name of a module.
           type: string
-          x-default-description: 'null'
+        streamName:
+          description: The name of a stream of the specified module.
+          type: string
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
+      required:
+      - moduleName
+      type: object
+    InstallWindowsUpdatesOnManagedInstanceDetails:
+      description: Provides the information used to install Windows updates on a managed instance.
+      properties:
+        windowsUpdateName:
+          description: "The list of Windows update unique identifiers. \nNote that this is not an OCID, but is a unique identifier assigned by Microsoft.\nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          type: array
+        windowsUpdateTypes:
+          description: The types of Windows updates to be installed.
+          items:
+            enum:
+            - SECURITY
+            - BUGFIX
+            - ENHANCEMENT
+            - OTHER
+            - ALL
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/WindowsUpdateTypes'
+          maxItems: 20
+          type: array
+          uniqueItems: true
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
+      type: object
+    WindowsUpdateSummary:
+      description: Provides summary information about an update for a Windows instance.
+      properties:
+        installable:
+          description: Indicates whether the update can be installed using the service.
+          type: string
+          x-obmcs-enumref: '#/definitions/WindowsUpdate/installable'
+        isRebootRequiredForInstallation:
+          description: Indicates whether a reboot is required to complete the installation of this update.
+          type: boolean
         name:
-          description: The name of the snap.
+          description: Name of the Windows update.
           type: string
+        updateId:
+          description: "Unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: 6981d463-cd91-4a26-b7c4-ea4ded9183ed\n"
+          type: string
+        updateType:
+          description: The type of Windows update.
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          - OTHER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
       required:
       - name
+      - updateType
+      - updateId
       type: object
-    SnapCollection:
-      description: "The set of snaps returned for the \n[ListManagedInstanceSnaps](#/en/osmh/latest/ManagedInstance/ListManagedInstanceSnaps) operation.\n"
+    AvailableSoftwareSourceSummary:
+      description: "Provides summary information about an available software source. \nAn available software source can be added to a managed instance. \nAfter a software source is added, packages from that software source can be installed on that managed instance.\n"
       properties:
-        items:
-          description: The list of snaps.
-          items:
-            $ref: '#/components/schemas/SnapSummary'
-          type: array
-      required:
-      - items
-      type: object
-    Error:
-      description: Provides the information for an error.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the software source.
           type: string
-        message:
-          description: A human-readable error string.
+        description:
+          description: Software source description.
           type: string
-      required:
-      - code
-      - message
-    PackageSummary:
-      description: Provides summary information for a software package.
-      discriminator:
-        propertyName: packageClassification
-      properties:
-        architecture:
-          description: The architecture for which this package was built.
-          enum:
-          - X86_64
-          - AARCH64
-          - I686
-          - NOARCH
-          - SRC
-          - I386
-          - AMD64
-          - ARM64
-          - ALL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ArchType'
         displayName:
-          description: Package name.
+          description: User-friendly name for the software source.
           type: string
-        name:
-          description: Unique identifier for the package.
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
           type: string
-        packageClassification:
-          description: Status of the software package.
+        softwareSourceType:
+          description: Type of the software source.
           enum:
-          - INSTALLED
-          - AVAILABLE
-          - UPDATABLE
+          - VENDOR
+          - CUSTOM
+          - VERSIONED
+          - PRIVATE
+          - THIRD_PARTY
           type: string
-        softwareSources:
-          description: List of software sources that provide the software package.
-          items:
-            $ref: '#/components/schemas/SoftwareSourceDetails'
-          type: array
-        type:
-          description: Type of the package.
-          type: string
-        version:
-          description: Version of the installed package.
-          type: string
+          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
       required:
       - displayName
-      - type
-      - version
-      - name
-      - packageClassification
+      - id
+      - compartmentId
+      - softwareSourceType
+      type: object
+    AutonomousSettings:
+      description: Settings for the Autonomous Linux service.
+      properties:
+        isDataCollectionAuthorized:
+          description: Indicates whether Autonomous Linux will collect crash files. This setting can be changed by the user.
+          type: boolean
+        scheduledJobId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the restricted scheduled job associated with this instance. This value cannot be deleted by the user.
+          type: string
+      type: object
+    SwitchModuleStreamOnManagedInstanceDetails:
+      allOf:
+      - $ref: '#/components/schemas/ModuleStreamDetails'
+      - properties:
+          workRequestDetails:
+            $ref: '#/components/schemas/WorkRequestDetails'
+        type: object
+      description: Provides the information used to switch module streams on a managed instance.
+      type: object
+    SwitchSnapChannelOnManagedInstanceDetails:
+      description: Provides the information used to switch snap channel a managed instance. - snapDetails
+      properties:
+        snapDetails:
+          $ref: '#/components/schemas/SwitchSnapChannelDetails'
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
+      type: object
+    InstallModuleStreamProfileOnManagedInstanceDetails:
+      allOf:
+      - $ref: '#/components/schemas/ModuleStreamProfileDetailsBody'
+      description: Provides the information used to install a module stream profile on a managed instance.
+      type: object
     ManagedInstanceSummary:
       description: Provides summary information for a managed instance.
       properties:
@@ -2320,119 +2369,54 @@ components:
       - compartmentId
       - status
       type: object
-    AvailableSoftwareSourceSummary:
-      description: "Provides summary information about an available software source. \nAn available software source can be added to a managed instance. \nAfter a software source is added, packages from that software source can be installed on that managed instance.\n"
+    AssociateManagedInstancesWithManagementStationDetails:
+      description: Provides the information used to associate managed instances to a management station.
       properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the software source.
-          type: string
-        description:
-          description: Software source description.
-          type: string
+        managedInstances:
+          description: List of managed instance [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) to associate to the management station.
+          items:
+            type: string
+          maxItems: 100
+          minItems: 1
+          type: array
+          uniqueItems: true
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
+      required:
+      - managedInstances
+    Id:
+      description: Id and name of a resource to simplify the display for the user.
+      properties:
         displayName:
-          description: User-friendly name for the software source.
+          description: User-friendly name.
           type: string
         id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource that is immutable on creation.
           type: string
-        softwareSourceType:
-          description: Type of the software source.
-          enum:
-          - VENDOR
-          - CUSTOM
-          - VERSIONED
-          - PRIVATE
-          - THIRD_PARTY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
       required:
       - displayName
       - id
-      - compartmentId
-      - softwareSourceType
-      type: object
-    InstallPackagesOnManagedInstanceDetails:
+    AvailablePackageSummary:
       allOf:
-      - $ref: '#/components/schemas/SoftwarePackagesDetails'
-      description: Provides the information used to install software packages on a managed instance.
-      type: object
-    SoftwarePackagesDetails:
-      description: Provides the information used to install, remove, or update software packages.
-      properties:
-        packageNames:
-          description: The list of package names.
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
-      required:
-      - packageNames
-      type: object
-    AttachSoftwareSourcesToManagedInstanceDetails:
+      - $ref: '#/components/schemas/PackageSummary'
+      - discriminator: AVAILABLE
+      description: Provides summary information about a software package available for installation on a managed instance.
+    DisableModuleStreamOnManagedInstanceDetails:
       allOf:
-      - $ref: '#/components/schemas/SoftwareSourcesDetails'
-      description: Provides the information used to attach software sources to a managed instance.
+      - $ref: '#/components/schemas/ModuleStreamDetailsBody'
+      description: Provides the information used to disable a module stream on a managed instance.
       type: object
-    RemoveSnapDetails:
-      description: Provides the information used to remove a snap.
+    InstalledWindowsUpdateSummary:
+      description: An object that defines an installed update for a Windows instance.
       properties:
         name:
-          description: 'The name of the snap to remove.
-
-            '
+          description: Name of the Windows update.
           type: string
-        revision:
-          description: 'The revision to remove. Note: This option cannot be used when removing multiple snaps.
-
-            '
+        updateId:
+          description: "Unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
           type: string
-          x-default-description: 'null'
-      required:
-      - name
-      type: object
-    SwitchSnapChannelOnManagedInstanceDetails:
-      description: Provides the information used to switch snap channel a managed instance. - snapDetails
-      properties:
-        snapDetails:
-          $ref: '#/components/schemas/SwitchSnapChannelDetails'
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
-      type: object
-    SoftwareSourceDetails:
-      description: Provides identifying information for the specified software source.
-      properties:
-        description:
-          description: Software source description.
-          type: string
-        displayName:
-          description: Software source name.
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
-          type: string
-        isMandatoryForAutonomousLinux:
-          description: Indicates whether this is a required software source for Autonomous Linux instances. If true, the user can't unselect it.
-          type: boolean
-        softwareSourceType:
-          description: Type of the software source.
-          enum:
-          - VENDOR
-          - CUSTOM
-          - VERSIONED
-          - PRIVATE
-          - THIRD_PARTY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
-      required:
-      - id
-      type: object
-    ManagedInstanceErratumSummary:
-      description: Provides summary information about an erratum associated with a managed instance.
-      properties:
-        advisoryType:
-          description: The advisory type of the erratum.
+        updateType:
+          description: The type of Windows update.
           enum:
           - SECURITY
           - BUGFIX
@@ -2440,56 +2424,37 @@ components:
           - OTHER
           type: string
           x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
-        name:
-          description: The identifier of the erratum.
-          type: string
-        packages:
-          description: The list of packages affected by this erratum.
-          items:
-            $ref: '#/components/schemas/PackageNameSummary'
-          type: array
-        relatedCves:
-          description: The list of CVEs applicable to this erratum.
-          items:
-            type: string
-          type: array
-        synopsis:
-          description: A summary description of the erratum.
-          type: string
-        timeIssued:
-          description: 'The date and time the package was issued by a providing erratum (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-            '
-          format: date-time
-          type: string
       required:
       - name
-      - advisoryType
-      - packages
+      - updateType
+      - updateId
       type: object
-    ManagedInstanceCollection:
-      description: 'The set of managed instances returned for the [ListManagedInstances](#/en/osmh/latest/ManagedInstance/ListManagedInstances) operation.
+    ManagedInstanceErratumSummaryCollection:
+      description: 'The set of errata returned for the [ListManagedInstanceErrata](#/en/osmh/20220901/ManagedInstance/ListManagedInstanceErrata) operation.
 
         '
       properties:
         items:
-          description: List of managed instances.
+          description: List of errata.
           items:
-            $ref: '#/components/schemas/ManagedInstanceSummary'
+            $ref: '#/components/schemas/ManagedInstanceErratumSummary'
           type: array
       required:
       - items
       type: object
-    InstallSnapsOnManagedInstanceDetails:
-      description: Provides the information used to install snaps to a managed instance. - snapDetails
+    SoftwareSourcesDetails:
+      description: The details about the software sources to be attached/detached.
       properties:
-        snapDetails:
-          description: The array of snaps to install.
+        softwareSources:
+          description: The list of software source OCIDs to be attached/detached.
           items:
-            $ref: '#/components/schemas/InstallSnapDetails'
+            type: string
+          maxItems: 255
           type: array
         workRequestDetails:
           $ref: '#/components/schemas/WorkRequestDetails'
+      required:
+      - softwareSources
       type: object
     InstallSnapDetails:
       description: Provides the information used to install a snap.
@@ -2541,72 +2506,50 @@ components:
       required:
       - profileId
       type: object
-    ManagedInstanceModuleCollection:
-      description: 'The set of modules returned for the [ListManagedInstanceModules](#/en/osmh/latest/ManagedInstance/ListManagedInstanceModules) operation.
-
-        '
-      properties:
-        items:
-          description: List of module streams.
-          items:
-            $ref: '#/components/schemas/ManagedInstanceModuleSummary'
-          type: array
-      required:
-      - items
-      type: object
-    InstallModuleStreamProfileOnManagedInstanceDetails:
+    InstallPackagesOnManagedInstanceDetails:
       allOf:
-      - $ref: '#/components/schemas/ModuleStreamProfileDetailsBody'
-      description: Provides the information used to install a module stream profile on a managed instance.
+      - $ref: '#/components/schemas/SoftwarePackagesDetails'
+      description: Provides the information used to install software packages on a managed instance.
       type: object
-    SnapSummary:
-      description: Provides summary information for a snap.
+    ManageModuleStreamsOnManagedInstanceDetails:
+      description: The set of changes to make to the state of the modules, streams, and profiles on a managed instance
       properties:
-        description:
-          description: The description of of snap.
-          type: string
-        name:
-          description: The name of the snap.
-          type: string
-        publisher:
-          description: The publisher of the snap.
-          type: string
-        revision:
-          description: The revision number of the snap channel.
-          type: string
-        storeUrl:
-          description: The snap's store url.
-          type: string
-        timeRefreshed:
-          description: The date and time of the snap's last refresh in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format.
-          format: date-time
-          type: string
-        tracking:
-          description: The track this snap is following.
-          type: string
-        version:
-          description: The version of the snap.
-          type: string
-      required:
-      - name
-      - version
-      - revision
-      - publisher
-      - tracking
-      type: object
-    WorkRequestDetails:
-      description: Provides the name and description of the job.
-      properties:
-        description:
-          description: User-specified information about the job. Avoid entering confidential information.
-          maxLength: 400
-          minLength: 0
-          type: string
-        displayName:
-          description: A user-friendly name for the job. The name does not have to be unique. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
+        disable:
+          description: "The set of module streams to disable. Any profiles that are installed for the module stream will be removed as part of the operation. \nOnce complete, the streams will be in 'DISABLED' status.\n"
+          items:
+            $ref: '#/components/schemas/ModuleStreamDetails'
+          type: array
+        enable:
+          description: "The set of module streams to enable. If any streams of a module are already enabled, the service switches from the current stream to the new stream. \nOnce complete, the streams will be in 'ENABLED' status.\n"
+          items:
+            $ref: '#/components/schemas/ModuleStreamDetails'
+          type: array
+        install:
+          description: "The set of module stream profiles to install. Any packages that are part of the profile are installed on the managed instance. \nOnce complete, the profile will be in 'INSTALLED' status. The operation will return an error if you attempt to install a profile from a disabled stream, unless enabling the new module stream is included in this operation.\n"
+          items:
+            $ref: '#/components/schemas/ModuleStreamProfileDetails'
+          type: array
+        isDryRun:
+          default: false
+          description: 'Indicates if this operation is a dry run or if the operation
+
+            should be committed.  If set to true, the result of the operation
+
+            will be evaluated but not committed.  If set to false, the
+
+            operation is committed to the managed instance.  The default is
+
+            false.
+
+            '
+          type: boolean
+        remove:
+          description: "The set of module stream profiles to remove. Once complete, the profile will be in 'AVAILABLE' status. \nThe status of packages within the profile after the operation is complete is defined by the package manager on the managed instance group.\n"
+          items:
+            $ref: '#/components/schemas/ModuleStreamProfileDetails'
+          type: array
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
       type: object
     AvailableSoftwareSourceCollection:
       description: "The set of available software sources returned for the [ListManagedInstanceAvailableSoftwareSources](#/en/osmh/latest/ManagedInstance/ListManagedInstanceAvailableSoftwareSources) or the \n[ListManagedInstanceGroupAvailableSoftwareSources](#/en/osmh/latest/ManagedInstanceGroup/ListManagedInstanceGroupAvailableSoftwareSources) operation.\n"
@@ -2619,97 +2562,123 @@ components:
       required:
       - items
       type: object
-    DetachSoftwareSourcesFromManagedInstanceDetails:
-      allOf:
-      - $ref: '#/components/schemas/SoftwareSourcesDetails'
-      description: Provides the information used to detach the software sources from the managed instance.
-      type: object
-    EnableModuleStreamOnManagedInstanceDetails:
-      allOf:
-      - $ref: '#/components/schemas/ModuleStreamDetailsBody'
-      description: Provides the information used to enable a module stream on a managed instance.
-      type: object
-    RemoveSnapsFromManagedInstanceDetails:
-      description: Provides the information used to install snaps from a managed instance.
+    ModuleStreamProfileDetailsBody:
+      description: Provides the information used to install or remove a module stream profile on a managed instance.
       properties:
-        snapDetails:
-          description: The array of snaps to remove.
-          items:
-            $ref: '#/components/schemas/RemoveSnapDetails'
-          type: array
+        moduleName:
+          description: The name of a module.
+          type: string
+        profileName:
+          description: The name of a profile of the specified module stream.
+          type: string
+        streamName:
+          description: The name of a stream of the specified module.
+          type: string
         workRequestDetails:
           $ref: '#/components/schemas/WorkRequestDetails'
       required:
-      - snapDetails
+      - moduleName
       type: object
-    UpdatePackagesOnManagedInstanceDetails:
-      description: Provides the information used to update software packages on a managed instance.
+    PackageNameSummary:
+      description: Provides summary information about a package.
       properties:
-        packageNames:
-          description: The list of package names.
+        architecture:
+          description: The CPU architecture type for which this package was built.
+          enum:
+          - X86_64
+          - AARCH64
+          - I686
+          - NOARCH
+          - SRC
+          - I386
+          - AMD64
+          - ARM64
+          - ALL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ArchType'
+        displayName:
+          description: Full package name in NERVA format. This value should be unique.
+          type: string
+        name:
+          description: The name of the software package.
+          type: string
+        type:
+          description: Type of the package.
+          type: string
+        version:
+          description: The version of the software package.
+          type: string
+      required:
+      - displayName
+      - name
+      type: object
+    WindowsUpdateCollection:
+      description: "A set of Windows updates returned for the [ListWindowsUpdates](#/en/osmh/latest/WindowsUpdateCollection/ListWindowsUpdates) operation. \nThe list contains a summary of each update.\n"
+      properties:
+        items:
+          description: List of Windows updates.
           items:
-            type: string
+            $ref: '#/components/schemas/WindowsUpdateSummary'
           type: array
-        updateTypes:
-          description: The types of updates to be applied.
-          items:
-            enum:
-            - SECURITY
-            - BUGFIX
-            - ENHANCEMENT
-            - OTHER
-            - KSPLICE_KERNEL
-            - KSPLICE_USERSPACE
-            - ALL
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/UpdateTypes'
-          type: array
-          uniqueItems: true
+      required:
+      - items
+      type: object
+    RemovePackagesFromManagedInstanceDetails:
+      allOf:
+      - $ref: '#/components/schemas/SoftwarePackagesDetails'
+      description: Provides the information used to remove software packages from a managed instance.
+      type: object
+    RemoveSnapDetails:
+      description: Provides the information used to remove a snap.
+      properties:
+        name:
+          description: 'The name of the snap to remove.
+
+            '
+          type: string
+        revision:
+          description: 'The revision to remove. Note: This option cannot be used when removing multiple snaps.
+
+            '
+          type: string
+          x-default-description: 'null'
+      required:
+      - name
+      type: object
+    InstallationRequirements:
+      description: Indicates requirements for installing updates on a managed instance.
+      enum:
+      - EULA_ACCEPTANCE_REQUIRED
+      - SOFTWARE_MEDIA_REQUIRED
+      - USER_INTERACTION_REQUIRED
+      type: string
+    AttachSoftwareSourcesToManagedInstanceDetails:
+      allOf:
+      - $ref: '#/components/schemas/SoftwareSourcesDetails'
+      description: Provides the information used to attach software sources to a managed instance.
+      type: object
+    RebootManagedInstanceDetails:
+      description: Provides the information used for the reboot job.
+      properties:
+        rebootTimeoutInMins:
+          default: 20
+          description: "The number of minutes the service waits for the reboot to complete. If the instance doesn't reboot within this \ntime, the reboot job status is set to failed.\n"
+          maximum: 240
+          minimum: 5
+          type: integer
         workRequestDetails:
           $ref: '#/components/schemas/WorkRequestDetails'
       type: object
-    UpdateManagedInstanceDetails:
-      description: Provides the information used to update a managed instance.
+    AvailablePackageCollection:
+      description: The set of packages returned for the [ListManagedInstanceAvailablePackages](#/en/osmh/latest/ManagedInstance/ListManagedInstanceAvailablePackages) operation.
       properties:
-        autonomousSettings:
-          $ref: '#/components/schemas/UpdatableAutonomousSettings'
-        description:
-          description: User-specified description of the managed instance. Avoid entering confidential information.
-          type: string
-        notificationTopicId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the Oracle Notifications service (ONS) topic. ONS is the channel used to send notifications to the customer.
-
-            '
-          type: string
-        primaryManagementStationId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station for the instance to use as primary management station.
-
-            '
-          type: string
-        secondaryManagementStationId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station for the instance to use as secondary management station.
-
-            '
-          type: string
-      type: object
-    SwitchModuleStreamOnManagedInstanceDetails:
-      allOf:
-      - $ref: '#/components/schemas/ModuleStreamDetails'
-      - properties:
-          workRequestDetails:
-            $ref: '#/components/schemas/WorkRequestDetails'
-        type: object
-      description: Provides the information used to switch module streams on a managed instance.
-      type: object
-    AutonomousSettings:
-      description: Settings for the Autonomous Linux service.
-      properties:
-        isDataCollectionAuthorized:
-          description: Indicates whether Autonomous Linux will collect crash files. This setting can be changed by the user.
-          type: boolean
-        scheduledJobId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the restricted scheduled job associated with this instance. This value cannot be deleted by the user.
-          type: string
+        items:
+          description: List of available packages.
+          items:
+            $ref: '#/components/schemas/AvailablePackageSummary'
+          type: array
+      required:
+      - items
       type: object
     ManagedInstanceModuleSummary:
       description: Provides summary information for a module on a managed instance.
@@ -2750,16 +2719,106 @@ components:
       required:
       - name
       type: object
-    InstallWindowsUpdatesOnManagedInstanceDetails:
-      description: Provides the information used to install Windows updates on a managed instance.
+    InstalledPackageCollection:
+      description: The set of installed packages on a managed instance.
       properties:
-        windowsUpdateName:
-          description: "The list of Windows update unique identifiers. \nNote that this is not an OCID, but is a unique identifier assigned by Microsoft.\nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
+        items:
+          description: List of installed packages.
           items:
-            maxLength: 255
-            minLength: 1
+            $ref: '#/components/schemas/InstalledPackageSummary'
+          type: array
+      required:
+      - items
+      type: object
+    SoftwarePackagesDetails:
+      description: Provides the information used to install, remove, or update software packages.
+      properties:
+        packageNames:
+          description: The list of package names.
+          items:
+            type: string
+          maxItems: 255
+          type: array
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
+      required:
+      - packageNames
+      type: object
+    AvailableWindowsUpdateSummary:
+      description: An object that defines an available update for a Windows instance.
+      properties:
+        installable:
+          description: Indicates whether the update can be installed using the service.
+          type: string
+          x-obmcs-enumref: '#/definitions/WindowsUpdate/installable'
+        isRebootRequiredForInstallation:
+          description: Indicates whether a reboot is required to complete the installation of this update.
+          type: boolean
+        name:
+          description: Name of the Windows update.
+          type: string
+        updateId:
+          description: "Unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
+          type: string
+        updateType:
+          description: The type of Windows update.
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          - OTHER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
+      required:
+      - name
+      - updateType
+      - updateId
+      type: object
+    SnapCollection:
+      description: "The set of snaps returned for the \n[ListManagedInstanceSnaps](#/en/osmh/latest/ManagedInstance/ListManagedInstanceSnaps) operation.\n"
+      properties:
+        items:
+          description: The list of snaps.
+          items:
+            $ref: '#/components/schemas/SnapSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdatePackagesOnManagedInstanceDetails:
+      description: Provides the information used to update software packages on a managed instance.
+      properties:
+        packageNames:
+          description: The list of package names.
+          items:
             type: string
           type: array
+        updateTypes:
+          description: The types of updates to be applied.
+          items:
+            enum:
+            - SECURITY
+            - BUGFIX
+            - ENHANCEMENT
+            - OTHER
+            - KSPLICE_KERNEL
+            - KSPLICE_USERSPACE
+            - ALL
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/UpdateTypes'
+          type: array
+          uniqueItems: true
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
+      type: object
+    InstallAllWindowsUpdatesOnManagedInstancesInCompartmentDetails:
+      description: 'Provides the information used to install all Windows updates of a specified type on managed instances within the specified compartment.
+
+        '
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          type: string
         windowsUpdateTypes:
           description: The types of Windows updates to be installed.
           items:
@@ -2776,113 +2835,57 @@ components:
           uniqueItems: true
         workRequestDetails:
           $ref: '#/components/schemas/WorkRequestDetails'
-      type: object
-    AvailablePackageCollection:
-      description: The set of packages returned for the [ListManagedInstanceAvailablePackages](#/en/osmh/latest/ManagedInstance/ListManagedInstanceAvailablePackages) operation.
-      properties:
-        items:
-          description: List of available packages.
-          items:
-            $ref: '#/components/schemas/AvailablePackageSummary'
-          type: array
       required:
-      - items
+      - compartmentId
       type: object
-    RebootManagedInstanceDetails:
-      description: Provides the information used for the reboot job.
+    ManagedInstanceErratumSummary:
+      description: Provides summary information about an erratum associated with a managed instance.
       properties:
-        rebootTimeoutInMins:
-          default: 20
-          description: "The number of minutes the service waits for the reboot to complete. If the instance doesn't reboot within this \ntime, the reboot job status is set to failed.\n"
-          maximum: 240
-          minimum: 5
-          type: integer
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
-      type: object
-    RemovePackagesFromManagedInstanceDetails:
-      allOf:
-      - $ref: '#/components/schemas/SoftwarePackagesDetails'
-      description: Provides the information used to remove software packages from a managed instance.
-      type: object
-    InstalledWindowsUpdateCollection:
-      description: 'The set of installed Windows updates returned for the [ListManagedInstanceInstalledWindowsUpdates](#/en/osmh/latest/ManagedInstance/ListManagedInstanceInstalledWindowsUpdates) operation.
-
-        '
-      properties:
-        items:
-          description: List of installed Windows updates.
+        advisoryType:
+          description: The advisory type of the erratum.
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          - OTHER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
+        name:
+          description: The identifier of the erratum.
+          type: string
+        packages:
+          description: The list of packages affected by this erratum.
           items:
-            $ref: '#/components/schemas/InstalledWindowsUpdateSummary'
+            $ref: '#/components/schemas/PackageNameSummary'
           type: array
-      required:
-      - items
-      type: object
-    AvailablePackageSummary:
-      allOf:
-      - $ref: '#/components/schemas/PackageSummary'
-      - discriminator: AVAILABLE
-      description: Provides summary information about a software package available for installation on a managed instance.
-    WindowsUpdateCollection:
-      description: "A set of Windows updates returned for the [ListWindowsUpdates](#/en/osmh/latest/WindowsUpdateCollection/ListWindowsUpdates) operation. \nThe list contains a summary of each update.\n"
-      properties:
-        items:
-          description: List of Windows updates.
-          items:
-            $ref: '#/components/schemas/WindowsUpdateSummary'
-          type: array
-      required:
-      - items
-      type: object
-    AssociateManagedInstancesWithManagementStationDetails:
-      description: Provides the information used to associate managed instances to a management station.
-      properties:
-        managedInstances:
-          description: List of managed instance [OCIDs](/iaas/Content/General/Concepts/identifiers.htm) to associate to the management station.
+        relatedCves:
+          description: The list of CVEs applicable to this erratum.
           items:
             type: string
-          maxItems: 100
-          minItems: 1
           type: array
-          uniqueItems: true
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
+        synopsis:
+          description: A summary description of the erratum.
+          type: string
+        timeIssued:
+          description: 'The date and time the package was issued by a providing erratum (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+
+            '
+          format: date-time
+          type: string
       required:
-      - managedInstances
-    ModuleStreamProfileDetailsBody:
-      description: Provides the information used to install or remove a module stream profile on a managed instance.
-      properties:
-        moduleName:
-          description: The name of a module.
-          type: string
-        profileName:
-          description: The name of a profile of the specified module stream.
-          type: string
-        streamName:
-          description: The name of a stream of the specified module.
-          type: string
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
-      required:
-      - moduleName
+      - name
+      - advisoryType
+      - packages
       type: object
-    InstallationRequirements:
-      description: Indicates requirements for installing updates on a managed instance.
-      enum:
-      - EULA_ACCEPTANCE_REQUIRED
-      - SOFTWARE_MEDIA_REQUIRED
-      - USER_INTERACTION_REQUIRED
-      type: string
-    InstalledPackageCollection:
-      description: The set of installed packages on a managed instance.
-      properties:
-        items:
-          description: List of installed packages.
-          items:
-            $ref: '#/components/schemas/InstalledPackageSummary'
-          type: array
-      required:
-      - items
+    RemoveModuleStreamProfileFromManagedInstanceDetails:
+      allOf:
+      - $ref: '#/components/schemas/ModuleStreamProfileDetailsBody'
+      description: Provides the information used to remove a module stream profile on a managed instance.
+      type: object
+    DetachSoftwareSourcesFromManagedInstanceDetails:
+      allOf:
+      - $ref: '#/components/schemas/SoftwareSourcesDetails'
+      description: Provides the information used to detach the software sources from the managed instance.
       type: object
     UpdateAllPackagesOnManagedInstancesInCompartmentDetails:
       description: 'Provides the information used to update all packages of a specified type on managed instances within the specified compartment.
@@ -2913,40 +2916,6 @@ components:
       required:
       - compartmentId
       type: object
-    UpdatableAutonomousSettings:
-      description: Updatable settings for the Autonomous Linux service. This is required when creating an Autonomous Linux Managed Instance Group. Do not include it when creating a standard (non-Autonomous) Managed Instance Group.
-      properties:
-        isDataCollectionAuthorized:
-          description: Indicates whether Autonomous Linux will collect crash files.
-          type: boolean
-      type: object
-    InstallAllWindowsUpdatesOnManagedInstancesInCompartmentDetails:
-      description: 'Provides the information used to install all Windows updates of a specified type on managed instances within the specified compartment.
-
-        '
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          type: string
-        windowsUpdateTypes:
-          description: The types of Windows updates to be installed.
-          items:
-            enum:
-            - SECURITY
-            - BUGFIX
-            - ENHANCEMENT
-            - OTHER
-            - ALL
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/WindowsUpdateTypes'
-          maxItems: 20
-          type: array
-          uniqueItems: true
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
-      required:
-      - compartmentId
-      type: object
     UpdatablePackageCollection:
       description: The set of packages returned for the [ListManagedInstanceUpdatablePackages](#/en/osmh/latest/ManagedInstance/ListManagedInstanceUpdatablePackages) operation.
       properties:
@@ -2957,137 +2926,6 @@ components:
           type: array
       required:
       - items
-      type: object
-    ManagedInstanceErratumSummaryCollection:
-      description: 'The set of errata returned for the [ListManagedInstanceErrata](#/en/osmh/20220901/ManagedInstance/ListManagedInstanceErrata) operation.
-
-        '
-      properties:
-        items:
-          description: List of errata.
-          items:
-            $ref: '#/components/schemas/ManagedInstanceErratumSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WindowsUpdateSummary:
-      description: Provides summary information about an update for a Windows instance.
-      properties:
-        installable:
-          description: Indicates whether the update can be installed using the service.
-          type: string
-          x-obmcs-enumref: '#/definitions/WindowsUpdate/installable'
-        isRebootRequiredForInstallation:
-          description: Indicates whether a reboot is required to complete the installation of this update.
-          type: boolean
-        name:
-          description: Name of the Windows update.
-          type: string
-        updateId:
-          description: "Unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: 6981d463-cd91-4a26-b7c4-ea4ded9183ed\n"
-          type: string
-        updateType:
-          description: The type of Windows update.
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          - OTHER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
-      required:
-      - name
-      - updateType
-      - updateId
-      type: object
-    UpdatablePackageSummary:
-      allOf:
-      - $ref: '#/components/schemas/PackageSummary'
-      - discriminator:
-          propertyName: UPDATABLE
-        properties:
-          advisorySeverity:
-            description: The severity level of the security update. Only applicable when updateType is SECURITY.
-            enum:
-            - LOW
-            - MODERATE
-            - IMPORTANT
-            - CRITICAL
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
-          errata:
-            description: List of errata applicable to this update.
-            items:
-              type: string
-            type: array
-          installedVersion:
-            description: The version of the package that is currently installed on the instance.
-            type: string
-          relatedCves:
-            description: List of CVEs applicable to this erratum.
-            items:
-              type: string
-            type: array
-          updateType:
-            description: The type of update.
-            enum:
-            - SECURITY
-            - BUGFIX
-            - ENHANCEMENT
-            - OTHER
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
-        required:
-        - updateType
-      description: Provides summary information for a software package available for installation on a managed instance.
-    ModuleStreamProfileDetails:
-      description: Provides the information used to update a module stream profile.
-      properties:
-        moduleName:
-          description: The name of a module.
-          type: string
-        profileName:
-          description: The name of a profile of the specified module stream.
-          type: string
-        softwareSourceId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source that contains the module stream.
-
-            '
-          type: string
-        streamName:
-          description: The name of a stream of the specified module.
-          type: string
-      required:
-      - moduleName
-      - streamName
-      - profileName
-    AvailableWindowsUpdateCollection:
-      description: 'The set of available Windows updates returned for the [ListManagedInstanceAvailableWindowsUpdates](#/en/osmh/latest/ManagedInstance/ListManagedInstanceAvailableWindowsUpdates) operation.
-
-        '
-      properties:
-        items:
-          description: List of available Windows updates.
-          items:
-            $ref: '#/components/schemas/AvailableWindowsUpdateSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ModuleStreamDetailsBody:
-      description: Provides the information used to enable or disable the module stream on a managed instance.
-      properties:
-        moduleName:
-          description: The name of a module.
-          type: string
-        streamName:
-          description: The name of a stream of the specified module.
-          type: string
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
-      required:
-      - moduleName
       type: object
     WindowsUpdate:
       description: An object that provides information about an update for a Windows instance.
@@ -3138,147 +2976,163 @@ components:
       - updateType
       - updateId
       type: object
-    Id:
-      description: Id and name of a resource to simplify the display for the user.
+    WorkRequestDetails:
+      description: Provides the name and description of the job.
       properties:
+        description:
+          description: User-specified information about the job. Avoid entering confidential information.
+          maxLength: 400
+          minLength: 0
+          type: string
         displayName:
-          description: User-friendly name.
+          description: A user-friendly name for the job. The name does not have to be unique. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
           type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource that is immutable on creation.
-          type: string
-      required:
-      - displayName
-      - id
-    SoftwareSourcesDetails:
-      description: The details about the software sources to be attached/detached.
-      properties:
-        softwareSources:
-          description: The list of software source OCIDs to be attached/detached.
-          items:
-            type: string
-          maxItems: 255
-          type: array
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
-      required:
-      - softwareSources
       type: object
-    AvailableWindowsUpdateSummary:
-      description: An object that defines an available update for a Windows instance.
+    UpdateManagedInstanceDetails:
+      description: Provides the information used to update a managed instance.
       properties:
-        installable:
-          description: Indicates whether the update can be installed using the service.
+        autonomousSettings:
+          $ref: '#/components/schemas/UpdatableAutonomousSettings'
+        description:
+          description: User-specified description of the managed instance. Avoid entering confidential information.
           type: string
-          x-obmcs-enumref: '#/definitions/WindowsUpdate/installable'
-        isRebootRequiredForInstallation:
-          description: Indicates whether a reboot is required to complete the installation of this update.
-          type: boolean
+        notificationTopicId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the Oracle Notifications service (ONS) topic. ONS is the channel used to send notifications to the customer.
+
+            '
+          type: string
+        primaryManagementStationId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station for the instance to use as primary management station.
+
+            '
+          type: string
+        secondaryManagementStationId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station for the instance to use as secondary management station.
+
+            '
+          type: string
+      type: object
+    ManagedInstanceCollection:
+      description: 'The set of managed instances returned for the [ListManagedInstances](#/en/osmh/latest/ManagedInstance/ListManagedInstances) operation.
+
+        '
+      properties:
+        items:
+          description: List of managed instances.
+          items:
+            $ref: '#/components/schemas/ManagedInstanceSummary'
+          type: array
+      required:
+      - items
+      type: object
+    SnapSummary:
+      description: Provides summary information for a snap.
+      properties:
+        description:
+          description: The description of of snap.
+          type: string
         name:
-          description: Name of the Windows update.
+          description: The name of the snap.
           type: string
-        updateId:
-          description: "Unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
+        publisher:
+          description: The publisher of the snap.
           type: string
-        updateType:
-          description: The type of Windows update.
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          - OTHER
+        revision:
+          description: The revision number of the snap channel.
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
+        storeUrl:
+          description: The snap's store url.
+          type: string
+        timeRefreshed:
+          description: The date and time of the snap's last refresh in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format.
+          format: date-time
+          type: string
+        tracking:
+          description: The track this snap is following.
+          type: string
+        version:
+          description: The version of the snap.
+          type: string
       required:
       - name
-      - updateType
-      - updateId
+      - version
+      - revision
+      - publisher
+      - tracking
       type: object
-    ModuleStreamDetails:
-      description: Provides the information used to update a module stream.
-      properties:
-        moduleName:
-          description: The name of a module.
-          type: string
-        softwareSourceId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source that contains the module stream.
+    AvailableWindowsUpdateCollection:
+      description: 'The set of available Windows updates returned for the [ListManagedInstanceAvailableWindowsUpdates](#/en/osmh/latest/ManagedInstance/ListManagedInstanceAvailableWindowsUpdates) operation.
 
-            '
-          type: string
-        streamName:
-          description: The name of a stream of the specified module.
-          type: string
+        '
+      properties:
+        items:
+          description: List of available Windows updates.
+          items:
+            $ref: '#/components/schemas/AvailableWindowsUpdateSummary'
+          type: array
       required:
-      - moduleName
-      - streamName
-    ManageModuleStreamsOnManagedInstanceDetails:
-      description: The set of changes to make to the state of the modules, streams, and profiles on a managed instance
-      properties:
-        disable:
-          description: "The set of module streams to disable. Any profiles that are installed for the module stream will be removed as part of the operation. \nOnce complete, the streams will be in 'DISABLED' status.\n"
-          items:
-            $ref: '#/components/schemas/ModuleStreamDetails'
-          type: array
-        enable:
-          description: "The set of module streams to enable. If any streams of a module are already enabled, the service switches from the current stream to the new stream. \nOnce complete, the streams will be in 'ENABLED' status.\n"
-          items:
-            $ref: '#/components/schemas/ModuleStreamDetails'
-          type: array
-        install:
-          description: "The set of module stream profiles to install. Any packages that are part of the profile are installed on the managed instance. \nOnce complete, the profile will be in 'INSTALLED' status. The operation will return an error if you attempt to install a profile from a disabled stream, unless enabling the new module stream is included in this operation.\n"
-          items:
-            $ref: '#/components/schemas/ModuleStreamProfileDetails'
-          type: array
-        isDryRun:
-          default: false
-          description: 'Indicates if this operation is a dry run or if the operation
-
-            should be committed.  If set to true, the result of the operation
-
-            will be evaluated but not committed.  If set to false, the
-
-            operation is committed to the managed instance.  The default is
-
-            false.
-
-            '
-          type: boolean
-        remove:
-          description: "The set of module stream profiles to remove. Once complete, the profile will be in 'AVAILABLE' status. \nThe status of packages within the profile after the operation is complete is defined by the package manager on the managed instance group.\n"
-          items:
-            $ref: '#/components/schemas/ModuleStreamProfileDetails'
-          type: array
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
+      - items
       type: object
-    DisableModuleStreamOnManagedInstanceDetails:
-      allOf:
-      - $ref: '#/components/schemas/ModuleStreamDetailsBody'
-      description: Provides the information used to disable a module stream on a managed instance.
-      type: object
-    InstalledPackageSummary:
+    UpdatablePackageSummary:
       allOf:
       - $ref: '#/components/schemas/PackageSummary'
       - discriminator:
-          propertyName: INSTALLED
+          propertyName: UPDATABLE
         properties:
-          timeInstalled:
-            description: 'The date and time the package was installed, as described in
-
-              [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-              '
-            format: date-time
+          advisorySeverity:
+            description: The severity level of the security update. Only applicable when updateType is SECURITY.
+            enum:
+            - LOW
+            - MODERATE
+            - IMPORTANT
+            - CRITICAL
             type: string
-          timeIssued:
-            description: 'The date and time the package was issued by a providing erratum (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-              '
-            format: date-time
+            x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
+          errata:
+            description: List of errata applicable to this update.
+            items:
+              type: string
+            type: array
+          installedVersion:
+            description: The version of the package that is currently installed on the instance.
             type: string
+          relatedCves:
+            description: List of CVEs applicable to this erratum.
+            items:
+              type: string
+            type: array
+          updateType:
+            description: The type of update.
+            enum:
+            - SECURITY
+            - BUGFIX
+            - ENHANCEMENT
+            - OTHER
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
         required:
-        - timeInstalled
-      description: Provides summary information for a software package installed on a managed instance.
+        - updateType
+      description: Provides summary information for a software package available for installation on a managed instance.
+    EnableModuleStreamOnManagedInstanceDetails:
+      allOf:
+      - $ref: '#/components/schemas/ModuleStreamDetailsBody'
+      description: Provides the information used to enable a module stream on a managed instance.
+      type: object
+    RemoveSnapsFromManagedInstanceDetails:
+      description: Provides the information used to install snaps from a managed instance.
+      properties:
+        snapDetails:
+          description: The array of snaps to remove.
+          items:
+            $ref: '#/components/schemas/RemoveSnapDetails'
+          type: array
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
+      required:
+      - snapDetails
+      type: object
     ManagedInstance:
       description: An object that defines the instance being managed by the service.
       properties:
@@ -3486,11 +3340,141 @@ components:
       - compartmentId
       - status
       type: object
-    PackageNameSummary:
-      description: Provides summary information about a package.
+    InstalledPackageSummary:
+      allOf:
+      - $ref: '#/components/schemas/PackageSummary'
+      - discriminator:
+          propertyName: INSTALLED
+        properties:
+          timeInstalled:
+            description: 'The date and time the package was installed, as described in
+
+              [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+              '
+            format: date-time
+            type: string
+          timeIssued:
+            description: 'The date and time the package was issued by a providing erratum (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+
+              '
+            format: date-time
+            type: string
+        required:
+        - timeInstalled
+      description: Provides summary information for a software package installed on a managed instance.
+    UpdatableAutonomousSettings:
+      description: Updatable settings for the Autonomous Linux service. This is required when creating an Autonomous Linux Managed Instance Group. Do not include it when creating a standard (non-Autonomous) Managed Instance Group.
+      properties:
+        isDataCollectionAuthorized:
+          description: Indicates whether Autonomous Linux will collect crash files.
+          type: boolean
+      type: object
+    Error:
+      description: Provides the information for an error.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    SoftwareSourceDetails:
+      description: Provides identifying information for the specified software source.
+      properties:
+        description:
+          description: Software source description.
+          type: string
+        displayName:
+          description: Software source name.
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source.
+          type: string
+        isMandatoryForAutonomousLinux:
+          description: Indicates whether this is a required software source for Autonomous Linux instances. If true, the user can't unselect it.
+          type: boolean
+        softwareSourceType:
+          description: Type of the software source.
+          enum:
+          - VENDOR
+          - CUSTOM
+          - VERSIONED
+          - PRIVATE
+          - THIRD_PARTY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SoftwareSourceType'
+      required:
+      - id
+      type: object
+    SwitchSnapChannelDetails:
+      description: Provides the information used to switch a snap channel.
+      properties:
+        channel:
+          description: The channel to switch to (e.g. stable, edge, beta, candidate, or a custom channel).
+          type: string
+          x-default-description: 'null'
+        name:
+          description: The name of the snap.
+          type: string
+      required:
+      - name
+      type: object
+    InstallSnapsOnManagedInstanceDetails:
+      description: Provides the information used to install snaps to a managed instance. - snapDetails
+      properties:
+        snapDetails:
+          description: The array of snaps to install.
+          items:
+            $ref: '#/components/schemas/InstallSnapDetails'
+          type: array
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
+      type: object
+    InstalledWindowsUpdateCollection:
+      description: 'The set of installed Windows updates returned for the [ListManagedInstanceInstalledWindowsUpdates](#/en/osmh/latest/ManagedInstance/ListManagedInstanceInstalledWindowsUpdates) operation.
+
+        '
+      properties:
+        items:
+          description: List of installed Windows updates.
+          items:
+            $ref: '#/components/schemas/InstalledWindowsUpdateSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ModuleStreamProfileDetails:
+      description: Provides the information used to update a module stream profile.
+      properties:
+        moduleName:
+          description: The name of a module.
+          type: string
+        profileName:
+          description: The name of a profile of the specified module stream.
+          type: string
+        softwareSourceId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source that contains the module stream.
+
+            '
+          type: string
+        streamName:
+          description: The name of a stream of the specified module.
+          type: string
+      required:
+      - moduleName
+      - streamName
+      - profileName
+    PackageSummary:
+      description: Provides summary information for a software package.
+      discriminator:
+        propertyName: packageClassification
       properties:
         architecture:
-          description: The CPU architecture type for which this package was built.
+          description: The architecture for which this package was built.
           enum:
           - X86_64
           - AARCH64
@@ -3504,32 +3488,104 @@ components:
           type: string
           x-obmcs-top-level-enum: '#/definitions/ArchType'
         displayName:
-          description: Full package name in NERVA format. This value should be unique.
+          description: Package name.
           type: string
         name:
-          description: The name of the software package.
+          description: Unique identifier for the package.
           type: string
+        packageClassification:
+          description: Status of the software package.
+          enum:
+          - INSTALLED
+          - AVAILABLE
+          - UPDATABLE
+          type: string
+        softwareSources:
+          description: List of software sources that provide the software package.
+          items:
+            $ref: '#/components/schemas/SoftwareSourceDetails'
+          type: array
         type:
           description: Type of the package.
           type: string
         version:
-          description: The version of the software package.
+          description: Version of the installed package.
           type: string
       required:
       - displayName
+      - type
+      - version
       - name
-      type: object
-    InstalledWindowsUpdateSummary:
-      description: An object that defines an installed update for a Windows instance.
+      - packageClassification
+    ModuleStreamDetails:
+      description: Provides the information used to update a module stream.
       properties:
-        name:
-          description: Name of the Windows update.
+        moduleName:
+          description: The name of a module.
           type: string
-        updateId:
-          description: "Unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
+        softwareSourceId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source that contains the module stream.
+
+            '
           type: string
-        updateType:
-          description: The type of Windows update.
+        streamName:
+          description: The name of a stream of the specified module.
+          type: string
+      required:
+      - moduleName
+      - streamName
+    ManagedInstanceModuleCollection:
+      description: 'The set of modules returned for the [ListManagedInstanceModules](#/en/osmh/latest/ManagedInstance/ListManagedInstanceModules) operation.
+
+        '
+      properties:
+        items:
+          description: List of module streams.
+          items:
+            $ref: '#/components/schemas/ManagedInstanceModuleSummary'
+          type: array
+      required:
+      - items
+      type: object
+  parameters:
+    GroupOrLifecycleQueryParam:
+      description: A filter to return only managed instances that are attached to the specified group or lifecycle environment.
+      in: query
+      name: isAttachedToGroupOrLifecycleStage
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    MultiManagementStationQueryParam:
+      description: "A filter to return resources that are associated with the specified management \nstation [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).\n"
+      in: query
+      name: managementStation
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+    LifecycleStageQueryParam:
+      description: A filter to return only managed instances that are associated with the specified lifecycle environment.
+      in: query
+      name: lifecycleStage
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    MultiClassificationTypeQueryParam:
+      description: A filter to return only packages that match the given update classification type.
+      in: query
+      name: classificationType
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
           enum:
           - SECURITY
           - BUGFIX
@@ -3537,71 +3593,20 @@ components:
           - OTHER
           type: string
           x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
-      required:
-      - name
-      - updateType
-      - updateId
-      type: object
-    RemoveModuleStreamProfileFromManagedInstanceDetails:
-      allOf:
-      - $ref: '#/components/schemas/ModuleStreamProfileDetailsBody'
-      description: Provides the information used to remove a module stream profile on a managed instance.
-      type: object
-  parameters:
-    LifecycleStageNotEqualToQueryParam:
-      description: A filter to return only managed instances that are NOT associated with the specified lifecycle environment.
-      in: query
-      name: lifecycleStageNotEqualTo
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    WindowsUpdateSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeInstalled is descending. Default order for name or displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - name
-        - displayName
-        default: timeCreated
-    RequiredCompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment. This parameter is required and returns only resources contained within the specified compartment.
-      in: query
-      name: compartmentId
-      required: true
-      x-default-description: 'null'
-      schema:
-        type: string
-    MultiDisplayNameQueryParam:
-      description: A filter to return resources that match the given display names.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          maxLength: 255
-          minLength: 1
-          type: string
         maxItems: 5
         uniqueItems: true
-    GroupNotEqualToQueryParam:
-      description: A filter to return only managed instances that are NOT attached to the specified group.
+    IsManagedByAutonomousLinuxQueryParam:
+      description: 'Indicates whether to list only resources managed by the Autonomous Linux service.
+
+        '
       in: query
-      name: groupNotEqualTo
+      name: isManagedByAutonomousLinux
       required: false
       x-default-description: 'null'
       schema:
-        type: string
-    ErrataSortByQueryParam:
-      description: 'The field to sort errata by. Only one sort order may be provided. Default order for timeIssued is descending. Default order for name is ascending. If no value is specified timeIssued is default.
+        type: boolean
+    InstalledPackageSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeInstalled is descending. Default order for displayName is ascending.
 
         '
       in: query
@@ -3609,33 +3614,17 @@ components:
       schema:
         type: string
         enum:
-        - timeIssued
-        - name
-        default: timeIssued
-    InstallModuleStreamProfileOnManagedInstanceDetailsParam:
-      description: The details of the module stream profile to be installed on a managed instance.
+        - timeInstalled
+        - timeCreated
+        - displayName
+        default: timeInstalled
+    RebootManagedInstanceParam:
+      description: "The timeout to be set for the reboot job. The timeout is the amount of time in minutes that the service waits for \nthe reboot to complete before marking the job as failed.\n"
       in: body
-      name: InstallModuleStreamProfileOnManagedInstanceDetails
+      name: RebootManagedInstanceDetails
       required: true
       schema:
-        $ref: '#/components/schemas/InstallModuleStreamProfileOnManagedInstanceDetails'
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
+        $ref: '#/components/schemas/RebootManagedInstanceDetails'
     AgentVersionQueryParam:
       description: A filter to return only managed instances with the specified version of osmh-agent running.
       in: query
@@ -3644,12 +3633,15 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    AdvisorySeverityQueryParam:
-      description: 'The advisory severity.
+    ErratumNameQueryParam:
+      description: 'The assigned erratum name. It''s unique and not changeable.
+
+
+        Example: `ELSA-2020-5804`
 
         '
       in: query
-      name: advisorySeverity
+      name: name
       required: false
       x-default-description: 'null'
       style: form
@@ -3657,14 +3649,35 @@ components:
       schema:
         type: array
         items:
-          enum:
-          - LOW
-          - MODERATE
-          - IMPORTANT
-          - CRITICAL
           type: string
-          x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
-        maxItems: 10
+        maxItems: 51
+    AttachProfileToManagedInstanceParam:
+      description: Details of the registration profile to be attached to a managed instance.
+      in: body
+      name: AttachProfileToManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/AttachProfileToManagedInstanceDetails'
+    ManagedInstanceSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    GroupQueryParam:
+      description: A filter to return only managed instances that are attached to the specified group.
+      in: query
+      name: group
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
     MultiOsFamilyQueryParam:
       description: A filter to return only resources that match the given operating system family.
       in: query
@@ -3695,6 +3708,126 @@ components:
           x-obmcs-top-level-enum: '#/definitions/OsFamily'
         maxItems: 5
         uniqueItems: true
+    ManagementStationIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station.
+      in: path
+      name: managementStationId
+      required: true
+      schema:
+        type: string
+    MultiWindowsUpdateIdQueryParam:
+      description: "A filter based on the unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
+      in: query
+      name: name
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          maxLength: 255
+          minLength: 1
+          type: string
+        maxItems: 5
+        uniqueItems: true
+    AdvisoryNameQueryParam:
+      description: 'The assigned erratum name. It''s unique and not changeable.
+
+
+        Example: `ELSA-2020-5804`
+
+        '
+      in: query
+      name: advisoryName
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        maxItems: 51
+    InstallPackagesOnManagedInstanceDetailsParam:
+      description: Details about packages to be installed on a managed instance.
+      in: body
+      name: InstallPackagesOnManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/InstallPackagesOnManagedInstanceDetails'
+    RemoveModuleStreamProfileFromManagedInstanceDetailsParam:
+      description: The details of the module stream profile to be removed from a managed instance.
+      in: body
+      name: RemoveModuleStreamProfileFromManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/RemoveModuleStreamProfileFromManagedInstanceDetails'
+    SoftwareSourceIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source. This filter returns resources associated with this software source.
+      in: query
+      name: softwareSourceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    LifeCycleEnvironmentQueryParam:
+      description: A filter to return only managed instances in a specific lifecycle environment.
+      in: query
+      name: lifecycleEnvironment
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ProfileQueryParam:
+      description: A filter to return only managed instances with a registration profile attached.
+      in: query
+      name: isProfileAttached
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    AvailablePackagePaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        Example: `700`
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 500
+        maximum: 1000
+        minimum: 1
+    UpdateManagedInstanceDetailsParam:
+      description: Details about a managed instance to be updated.
+      in: body
+      name: UpdateManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/UpdateManagedInstanceDetails'
+    NameSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for name is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - name
+        default: name
+    IsInstallableQueryParam:
+      description: Indicates if the update can be installed by the OS Management Hub service.
+      in: query
+      name: isInstallable
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/WindowsUpdate/installable'
+      schema:
+        type: string
     SortOrderQueryParam:
       description: The sort order to use, either 'ASC' or 'DESC'.
       in: query
@@ -3710,76 +3843,14 @@ components:
         enum:
         - ASC
         - DESC
-    IsInstallableQueryParam:
-      description: Indicates if the update can be installed by the OS Management Hub service.
+    ErratumNameContainsQueryParam:
+      description: A filter to return resources that may partially match the erratum name given.
       in: query
-      name: isInstallable
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/WindowsUpdate/installable'
-      schema:
-        type: string
-    EnableModuleStreamOnManagedInstanceDetailsParam:
-      description: The details of the module stream to be enabled on a managed instance.
-      in: body
-      name: EnableModuleStreamOnManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/EnableModuleStreamOnManagedInstanceDetails'
-    ManagedInstanceIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance.
-      in: path
-      name: managedInstanceId
-      required: true
-      schema:
-        type: string
-    RequestIdHeader:
-      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    UpdatePackagesOnManagedInstanceDetailsParam:
-      description: Details about packages to be updated on a managed instance.
-      in: body
-      name: UpdatePackagesOnManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdatePackagesOnManagedInstanceDetails'
-    MultiManagementStationNotEqualToQueryParam:
-      description: "A filter to return resources that aren't associated with the specified management \nstation [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).\n"
-      in: query
-      name: managementStationNotEqualTo
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        uniqueItems: true
-    LifeCycleEnvironmentQueryParam:
-      description: A filter to return only managed instances in a specific lifecycle environment.
-      in: query
-      name: lifecycleEnvironment
+      name: nameContains
       required: false
       x-default-description: 'null'
       schema:
         type: string
-    RebootManagedInstanceParam:
-      description: "The timeout to be set for the reboot job. The timeout is the amount of time in minutes that the service waits for \nthe reboot to complete before marking the job as failed.\n"
-      in: body
-      name: RebootManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/RebootManagedInstanceDetails'
-    UpdateManagedInstanceDetailsParam:
-      description: Details about a managed instance to be updated.
-      in: body
-      name: UpdateManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdateManagedInstanceDetails'
     DisplayNameContainsQueryParam:
       description: A filter to return resources that may partially match the given display name.
       in: query
@@ -3789,21 +3860,99 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    LifeCycleEnvironmentNotEqualToQueryParam:
-      description: A filter to return only managed instances that aren't in a specific lifecycle environment.
+    AdvisorySeverityQueryParam:
+      description: 'The advisory severity.
+
+        '
       in: query
-      name: lifecycleEnvironmentNotEqualTo
+      name: advisorySeverity
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - LOW
+          - MODERATE
+          - IMPORTANT
+          - CRITICAL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AdvisorySeverity'
+        maxItems: 10
+    GroupNotEqualToQueryParam:
+      description: A filter to return only managed instances that are NOT attached to the specified group.
+      in: query
+      name: groupNotEqualTo
       required: false
       x-default-description: 'null'
       schema:
         type: string
-    ManagementStationIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the management station.
-      in: path
-      name: managementStationId
-      required: true
+    ErrataSortByQueryParam:
+      description: 'The field to sort errata by. Only one sort order may be provided. Default order for timeIssued is descending. Default order for name is ascending. If no value is specified timeIssued is default.
+
+        '
+      in: query
+      name: sortBy
       schema:
         type: string
+        enum:
+        - timeIssued
+        - name
+        default: timeIssued
+    ManageModuleStreamsOnManagedInstanceParam:
+      description: A description of an operation to perform against the modules, streams, and profiles of a managed instance.
+      in: body
+      name: ManageModuleStreamsOnManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/ManageModuleStreamsOnManagedInstanceDetails'
+    RequestIdHeader:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `3`
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    RemoveSnapsFromManagedInstanceDetailsParam:
+      description: Details about snaps to install.
+      in: body
+      name: RemoveSnapsFromManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/RemoveSnapsFromManagedInstanceDetails'
+    NameParam:
+      description: 'The resource name.
+
+        '
+      in: query
+      name: name
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    InstallModuleStreamProfileOnManagedInstanceDetailsParam:
+      description: The details of the module stream profile to be installed on a managed instance.
+      in: body
+      name: InstallModuleStreamProfileOnManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/InstallModuleStreamProfileOnManagedInstanceDetails'
     MultiLocationQueryParam:
       description: A filter to return only resources whose location matches the given value.
       in: query
@@ -3824,63 +3973,31 @@ components:
           x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
         maxItems: 5
         uniqueItems: true
-    AvailablePackagePaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        Example: `700`
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 500
-        maximum: 1000
-        minimum: 1
-    InstalledPackageSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeInstalled is descending. Default order for displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeInstalled
-        - timeCreated
-        - displayName
-        default: timeInstalled
-    RemoveModuleStreamProfileFromManagedInstanceDetailsParam:
-      description: The details of the module stream profile to be removed from a managed instance.
+    DisableModuleStreamOnManagedInstanceDetailsParam:
+      description: The details of the module stream to be disabled on a managed instance.
       in: body
-      name: RemoveModuleStreamProfileFromManagedInstanceDetails
+      name: DisableModuleStreamOnManagedInstanceDetails
       required: true
       schema:
-        $ref: '#/components/schemas/RemoveModuleStreamProfileFromManagedInstanceDetails'
-    NameSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for name is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - name
-        default: name
-    InstallAllWindowsUpdatesOnManagedInstancesInCompartmentDetailsParam:
-      description: The details about Windows update types to be installed on all managed instances in a compartment.
+        $ref: '#/components/schemas/DisableModuleStreamOnManagedInstanceDetails'
+    EnableModuleStreamOnManagedInstanceDetailsParam:
+      description: The details of the module stream to be enabled on a managed instance.
       in: body
-      name: InstallAllWindowsUpdatesOnManagedInstancesInCompartmentDetails
+      name: EnableModuleStreamOnManagedInstanceDetails
       required: true
       schema:
-        $ref: '#/components/schemas/InstallAllWindowsUpdatesOnManagedInstancesInCompartmentDetails'
-    NameContainsQueryParam:
-      description: A filter to return resources that may partially match the name given.
+        $ref: '#/components/schemas/EnableModuleStreamOnManagedInstanceDetails'
+    InstallSnapsOnManagedInstanceDetailsParam:
+      description: Details about snaps to install.
+      in: body
+      name: InstallSnapsOnManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/InstallSnapsOnManagedInstanceDetails'
+    LifeCycleEnvironmentNotEqualToQueryParam:
+      description: A filter to return only managed instances that aren't in a specific lifecycle environment.
       in: query
-      name: nameContains
+      name: lifecycleEnvironmentNotEqualTo
       required: false
       x-default-description: 'null'
       schema:
@@ -3905,57 +4022,6 @@ components:
           x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
         maxItems: 5
         uniqueItems: true
-    ManagementStationQueryParam:
-      description: A filter to return only managed instances that are acting as management stations.
-      in: query
-      name: isManagementStation
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    DetachSoftwareSourcesFromManagedInstanceParam:
-      description: Details of software sources to be detached from a managed instance.
-      in: body
-      name: DetachSoftwareSourcesFromManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/DetachSoftwareSourcesFromManagedInstanceDetails'
-    ManagedInstanceSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    DisplayNameQueryParam:
-      description: A filter to return resources that match the given user-friendly name.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    UpdateAllPackagesOnManagedInstancesInCompartmentDetailsParam:
-      description: The details about package types are to be updated on all managed instances in a compartment.
-      in: body
-      name: UpdateAllPackagesOnManagedInstancesInCompartmentDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdateAllPackagesOnManagedInstancesInCompartmentDetails'
-    ManagedInstanceIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance. This filter returns resources associated with this managed instance.
-      in: query
-      name: managedInstanceId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
     WindowsUpdateIdPathParam:
       description: "The unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
       in: path
@@ -3964,28 +4030,27 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    RemoveSnapsFromManagedInstanceDetailsParam:
-      description: Details about snaps to install.
+    AttachSoftwareSourcesToManagedInstanceParam:
+      description: Details of software sources to be attached to a managed instance.
       in: body
-      name: RemoveSnapsFromManagedInstanceDetails
+      name: AttachSoftwareSourcesToManagedInstanceDetails
       required: true
       schema:
-        $ref: '#/components/schemas/RemoveSnapsFromManagedInstanceDetails'
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `3`
-
-        '
+        $ref: '#/components/schemas/AttachSoftwareSourcesToManagedInstanceDetails'
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
       in: query
-      name: page
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-        minLength: 1
+    UpdatePackagesOnManagedInstanceDetailsParam:
+      description: Details about packages to be updated on a managed instance.
+      in: body
+      name: UpdatePackagesOnManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/UpdatePackagesOnManagedInstanceDetails'
     SwitchSnapChannelOnManagedInstanceDetailsParam:
       description: Details about snaps to install.
       in: body
@@ -3993,6 +4058,23 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/SwitchSnapChannelOnManagedInstanceDetails'
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
     EndInstallDateQueryParam:
       description: 'A filter to return only packages that were installed on or before the date provided, in ISO 8601 format.
 
@@ -4007,18 +4089,65 @@ components:
       schema:
         type: string
         format: date-time
-    LifecycleStageQueryParam:
-      description: A filter to return only managed instances that are associated with the specified lifecycle environment.
+    RequiredCompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment. This parameter is required and returns only resources contained within the specified compartment.
       in: query
-      name: lifecycleStage
-      required: false
+      name: compartmentId
+      required: true
       x-default-description: 'null'
       schema:
         type: string
-    MultiClassificationTypeQueryParam:
-      description: A filter to return only packages that match the given update classification type.
+    RemovePackagesFromManagedInstanceDetailsParam:
+      description: Details about packages to be removed on a managed instance.
+      in: body
+      name: RemovePackagesFromManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/RemovePackagesFromManagedInstanceDetails'
+    MultiManagementStationNotEqualToQueryParam:
+      description: "A filter to return resources that aren't associated with the specified management \nstation [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).\n"
       in: query
-      name: classificationType
+      name: managementStationNotEqualTo
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+    MultiDisplayNameQueryParam:
+      description: A filter to return resources that match the given display names.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          maxLength: 255
+          minLength: 1
+          type: string
+        maxItems: 5
+        uniqueItems: true
+    MultiProfileNotEqualToQueryParam:
+      description: A multi filter to return only managed instances that don't contain the given profile [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: profileNotEqualTo
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+    MultiManagedInstanceStatusQueryParam:
+      description: A filter to return only managed instances whose status matches the status provided.
+      in: query
+      name: status
+      required: false
       x-default-description: 'null'
       style: form
       explode: true
@@ -4026,14 +4155,25 @@ components:
         type: array
         items:
           enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          - OTHER
+          - NORMAL
+          - UNREACHABLE
+          - ERROR
+          - WARNING
+          - REGISTRATION_ERROR
+          - DELETING
+          - ONBOARDING
+          - REBOOTING
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ClassificationTypes'
+          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceStatus'
         maxItems: 5
         uniqueItems: true
+    ManagedInstanceIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance.
+      in: path
+      name: managedInstanceId
+      required: true
+      schema:
+        type: string
     MultiArchTypeQueryParam:
       description: A filter to return only instances whose architecture type matches the given architecture.
       in: query
@@ -4059,10 +4199,38 @@ components:
           x-obmcs-top-level-enum: '#/definitions/ArchType'
         maxItems: 5
         uniqueItems: true
-    MultiProfileNotEqualToQueryParam:
-      description: A multi filter to return only managed instances that don't contain the given profile [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).
+    StartInstallDateQueryParam:
+      description: 'The install date after which to list all packages, in ISO 8601 format
+
+
+        Example: 2017-07-14T02:40:00.000Z
+
+        '
       in: query
-      name: profileNotEqualTo
+      name: timeInstallDateStart
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    SwitchModuleStreamOnManagedInstanceDetailsParam:
+      description: The details of the module stream to be switched on a managed instance.
+      in: body
+      name: SwitchModuleStreamOnManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/SwitchModuleStreamOnManagedInstanceDetails'
+    InstallWindowsUpdatesOnManagedInstanceDetailsParam:
+      description: Details about Windows updates to be installed on a managed instance.
+      in: body
+      name: InstallWindowsUpdatesOnManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/InstallWindowsUpdatesOnManagedInstanceDetails'
+    MultiProfileQueryParam:
+      description: A multi filter to return only managed instances that match the given profile ids.
+      in: query
+      name: profile
       x-default-description: 'null'
       style: form
       explode: true
@@ -4071,6 +4239,89 @@ components:
         items:
           type: string
         uniqueItems: true
+    WindowsUpdateSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeInstalled is descending. Default order for name or displayName is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - name
+        - displayName
+        default: timeCreated
+    DetachSoftwareSourcesFromManagedInstanceParam:
+      description: Details of software sources to be detached from a managed instance.
+      in: body
+      name: DetachSoftwareSourcesFromManagedInstanceDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/DetachSoftwareSourcesFromManagedInstanceDetails'
+    InstallAllWindowsUpdatesOnManagedInstancesInCompartmentDetailsParam:
+      description: The details about Windows update types to be installed on all managed instances in a compartment.
+      in: body
+      name: InstallAllWindowsUpdatesOnManagedInstancesInCompartmentDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/InstallAllWindowsUpdatesOnManagedInstancesInCompartmentDetails'
+    NameContainsQueryParam:
+      description: A filter to return resources that may partially match the name given.
+      in: query
+      name: nameContains
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ManagementStationQueryParam:
+      description: A filter to return only managed instances that are acting as management stations.
+      in: query
+      name: isManagementStation
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    ManagedInstanceIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance. This filter returns resources associated with this managed instance.
+      in: query
+      name: managedInstanceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    RebootRequiredQueryParam:
+      description: A filter to return only managed instances that require a reboot to install updates.
+      in: query
+      name: isRebootRequired
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: boolean
+    UpdateAllPackagesOnManagedInstancesInCompartmentDetailsParam:
+      description: The details about package types are to be updated on all managed instances in a compartment.
+      in: body
+      name: UpdateAllPackagesOnManagedInstancesInCompartmentDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/UpdateAllPackagesOnManagedInstancesInCompartmentDetails'
+    DisplayNameQueryParam:
+      description: A filter to return resources that match the given user-friendly name.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    LifecycleStageNotEqualToQueryParam:
+      description: A filter to return only managed instances that are NOT associated with the specified lifecycle environment.
+      in: query
+      name: lifecycleStageNotEqualTo
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -4090,155 +4341,6 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    AttachSoftwareSourcesToManagedInstanceParam:
-      description: Details of software sources to be attached to a managed instance.
-      in: body
-      name: AttachSoftwareSourcesToManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/AttachSoftwareSourcesToManagedInstanceDetails'
-    IsManagedByAutonomousLinuxQueryParam:
-      description: 'Indicates whether to list only resources managed by the Autonomous Linux service.
-
-        '
-      in: query
-      name: isManagedByAutonomousLinux
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    ProfileQueryParam:
-      description: A filter to return only managed instances with a registration profile attached.
-      in: query
-      name: isProfileAttached
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    AttachProfileToManagedInstanceParam:
-      description: Details of the registration profile to be attached to a managed instance.
-      in: body
-      name: AttachProfileToManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/AttachProfileToManagedInstanceDetails'
-    GroupQueryParam:
-      description: A filter to return only managed instances that are attached to the specified group.
-      in: query
-      name: group
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    RemovePackagesFromManagedInstanceDetailsParam:
-      description: Details about packages to be removed on a managed instance.
-      in: body
-      name: RemovePackagesFromManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/RemovePackagesFromManagedInstanceDetails'
-    InstallSnapsOnManagedInstanceDetailsParam:
-      description: Details about snaps to install.
-      in: body
-      name: InstallSnapsOnManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/InstallSnapsOnManagedInstanceDetails'
-    AdvisoryNameQueryParam:
-      description: 'The assigned erratum name. It''s unique and not changeable.
-
-
-        Example: `ELSA-2020-5804`
-
-        '
-      in: query
-      name: advisoryName
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        maxItems: 51
-    NameParam:
-      description: 'The resource name.
-
-        '
-      in: query
-      name: name
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    MultiWindowsUpdateIdQueryParam:
-      description: "A filter based on the unique identifier for the Windows update. Note that this is not an OCID, but is a unique identifier assigned by Microsoft. \nExample: '6981d463-cd91-4a26-b7c4-ea4ded9183ed'\n"
-      in: query
-      name: name
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          maxLength: 255
-          minLength: 1
-          type: string
-        maxItems: 5
-        uniqueItems: true
-    MultiManagementStationQueryParam:
-      description: "A filter to return resources that are associated with the specified management \nstation [OCIDs](/iaas/Content/General/Concepts/identifiers.htm).\n"
-      in: query
-      name: managementStation
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        uniqueItems: true
-    ErratumNameQueryParam:
-      description: 'The assigned erratum name. It''s unique and not changeable.
-
-
-        Example: `ELSA-2020-5804`
-
-        '
-      in: query
-      name: name
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        maxItems: 51
-    RebootRequiredQueryParam:
-      description: A filter to return only managed instances that require a reboot to install updates.
-      in: query
-      name: isRebootRequired
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    CompartmentIdQueryParam:
-      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    InstallWindowsUpdatesOnManagedInstanceDetailsParam:
-      description: Details about Windows updates to be installed on a managed instance.
-      in: body
-      name: InstallWindowsUpdatesOnManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/InstallWindowsUpdatesOnManagedInstanceDetails'
     PaginationLimitQueryParam:
       description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
 
@@ -4255,108 +4357,6 @@ components:
         default: 10
         maximum: 100
         minimum: 1
-    SoftwareSourceIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the software source. This filter returns resources associated with this software source.
-      in: query
-      name: softwareSourceId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    MultiProfileQueryParam:
-      description: A multi filter to return only managed instances that match the given profile ids.
-      in: query
-      name: profile
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        uniqueItems: true
-    ErratumNameContainsQueryParam:
-      description: A filter to return resources that may partially match the erratum name given.
-      in: query
-      name: nameContains
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    GroupOrLifecycleQueryParam:
-      description: A filter to return only managed instances that are attached to the specified group or lifecycle environment.
-      in: query
-      name: isAttachedToGroupOrLifecycleStage
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: boolean
-    MultiManagedInstanceStatusQueryParam:
-      description: A filter to return only managed instances whose status matches the status provided.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - NORMAL
-          - UNREACHABLE
-          - ERROR
-          - WARNING
-          - REGISTRATION_ERROR
-          - DELETING
-          - ONBOARDING
-          - REBOOTING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceStatus'
-        maxItems: 5
-        uniqueItems: true
-    SwitchModuleStreamOnManagedInstanceDetailsParam:
-      description: The details of the module stream to be switched on a managed instance.
-      in: body
-      name: SwitchModuleStreamOnManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/SwitchModuleStreamOnManagedInstanceDetails'
-    InstallPackagesOnManagedInstanceDetailsParam:
-      description: Details about packages to be installed on a managed instance.
-      in: body
-      name: InstallPackagesOnManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/InstallPackagesOnManagedInstanceDetails'
-    DisableModuleStreamOnManagedInstanceDetailsParam:
-      description: The details of the module stream to be disabled on a managed instance.
-      in: body
-      name: DisableModuleStreamOnManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/DisableModuleStreamOnManagedInstanceDetails'
-    StartInstallDateQueryParam:
-      description: 'The install date after which to list all packages, in ISO 8601 format
-
-
-        Example: 2017-07-14T02:40:00.000Z
-
-        '
-      in: query
-      name: timeInstallDateStart
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    ManageModuleStreamsOnManagedInstanceParam:
-      description: A description of an operation to perform against the modules, streams, and profiles of a managed instance.
-      in: body
-      name: ManageModuleStreamsOnManagedInstanceDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/ManageModuleStreamsOnManagedInstanceDetails'
   responses:
     default:
       description: Unknown Error

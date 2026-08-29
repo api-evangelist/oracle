@@ -433,22 +433,15 @@ paths:
       x-related-resource: '#/definitions/MonthlyRewardSummary'
 components:
   parameters:
-    UsagePeriodKeyQueryParam:
-      description: The SPM Identifier for the usage period.
+    PaginationLimitParam:
+      description: The maximum number of items to return in the paginated response.
       in: query
-      name: usagePeriodKey
-      required: true
+      name: limit
       schema:
-        type: string
-        maxLength: 32
-        minLength: 32
-    SubscriptionIdPathParam:
-      description: The subscription ID for which rewards information is requested for.
-      in: path
-      name: subscriptionId
-      required: true
-      schema:
-        type: string
+        type: integer
+        default: 50
+        maximum: 1000
+        minimum: 1
     SortOrderParam:
       description: The sort order to use, which can be ascending (ASC) or descending (DESC).
       in: query
@@ -459,23 +452,15 @@ components:
         - ASC
         - DESC
         default: DESC
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted, only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
+    TimeRedeemedGreaterThanOrEqualToQueryParam:
+      description: The starting redeemed date filter for the redemption history.
+      in: query
+      name: timeRedeemedGreaterThanOrEqualTo
       required: false
+      x-default-description: 'null'
       schema:
         type: string
+        format: date-time
     EmailIdQueryParam:
       description: The email ID that needs to be deleted.
       in: query
@@ -504,43 +489,13 @@ components:
         - ELIGIBLE
         - INELIGIBLE
         default: ALL
-    PaginationLimitParam:
-      description: The maximum number of items to return in the paginated response.
+    TenancyIdQueryParam:
+      description: The OCID of the tenancy.
       in: query
-      name: limit
-      schema:
-        type: integer
-        default: 50
-        maximum: 1000
-        minimum: 1
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error, without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
+      name: tenancyId
+      required: true
       schema:
         type: string
-        maxLength: 64
-        minLength: 1
-    TimeRedeemedGreaterThanOrEqualToQueryParam:
-      description: The starting redeemed date filter for the redemption history.
-      in: query
-      name: timeRedeemedGreaterThanOrEqualTo
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
     TimeRedeemedLessThanQueryParam:
       description: The ending redeemed date filter for the redemption history.
       in: query
@@ -550,11 +505,26 @@ components:
       schema:
         type: string
         format: date-time
-    TenancyIdQueryParam:
-      description: The OCID of the tenancy.
+    UsagePeriodKeyQueryParam:
+      description: The SPM Identifier for the usage period.
       in: query
-      name: tenancyId
+      name: usagePeriodKey
       required: true
+      schema:
+        type: string
+        maxLength: 32
+        minLength: 32
+    RequestIdHeader:
+      description: Unique, Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    UserIdQueryParam:
+      description: The user ID of the person to send a copy of an email.
+      in: query
+      name: userId
+      x-default-description: 'null'
       schema:
         type: string
     SortByListRedemptions:
@@ -575,20 +545,75 @@ components:
         type: string
         maxLength: 512
         minLength: 1
-    RequestIdHeader:
-      description: Unique, Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error, without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
       in: header
-      name: opc-request-id
+      name: opc-retry-token
+      required: false
       schema:
         type: string
-    UserIdQueryParam:
-      description: The user ID of the person to send a copy of an email.
-      in: query
-      name: userId
-      x-default-description: 'null'
+        maxLength: 64
+        minLength: 1
+    SubscriptionIdPathParam:
+      description: The subscription ID for which rewards information is requested for.
+      in: path
+      name: subscriptionId
+      required: true
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted, only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
       schema:
         type: string
   schemas:
+    RedeemableUserCollection:
+      description: The summarized list of users that can redeem rewards.
+      properties:
+        items:
+          description: The summarized list of users that can redeem rewards.
+          items:
+            $ref: '#/components/schemas/RedeemableUserSummary'
+          type: array
+      required:
+      - items
+    RedeemableUser:
+      description: The summary of a user that can redeem rewards.
+      properties:
+        emailId:
+          description: The email ID for a user that can redeem rewards.
+          type: string
+        firstName:
+          description: The first name of the user that can redeem rewards.
+          type: string
+        lastName:
+          description: The last name of the user that can redeem rewards.
+          type: string
+      required:
+      - emailId
+      type: object
     RewardCollection:
       description: The response object for the ListRewards API call. Provides information about the subscription rewards.
       properties:
@@ -602,28 +627,99 @@ components:
       required:
       - summary
       type: object
-    Error:
-      description: Error object model.
+    RedeemableUserSummary:
+      description: User summary that can redeem rewards.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+        emailId:
+          description: The email ID of the user that can redeem rewards.
           type: string
-        message:
-          description: A human-readable error string.
+        firstName:
+          description: The first name of the user that can redeem rewards.
           type: string
-      required:
-      - code
-      - message
-      type: object
-    CreateRedeemableUserDetails:
-      description: The list of new users to be added to the list of users that can redeem rewards.
+        lastName:
+          description: The last name of the user that can redeem rewards.
+          type: string
+    RedemptionCollection:
+      description: The redemption summary list for the requested subscription ID and date range.
       properties:
         items:
-          description: The list of new users to be added to the list of users that can redeem rewards.
+          description: The redemption summary list.
           items:
-            $ref: '#/components/schemas/RedeemableUser'
+            $ref: '#/components/schemas/RedemptionSummary'
           type: array
+      required:
+      - items
+    RedemptionSummary:
+      description: The redemption summary for the requested subscription ID and date range.
+      properties:
+        baseRewards:
+          description: The redeemed rewards in the base/subscription currency.
+          example: 250.0
+          format: float
+          type: number
+        fxRate:
+          description: The exchange rate between the invoice currency and subscription currency.
+          example: 1.732
+          format: double
+          type: number
+        invoiceCurrency:
+          description: The currency associated with the invoice.
+          example: USD
+          type: string
+        invoiceNumber:
+          description: The invoice number against the redemption.
+          example: '98647595'
+          format: integer
+          type: string
+        invoiceTotalAmount:
+          description: The invoice total amount of the given redemption.
+          example: 250.0
+          format: double
+          type: number
+        redeemedRewards:
+          description: The redeemed rewards in the invoice currency.
+          example: 250.0
+          format: float
+          type: number
+        redemptionCode:
+          description: The redemption code used in the Billing Center during the reward redemption process.
+          example: wertyuio-12345678-12345678-1234589
+          type: string
+        redemptionEmail:
+          description: The redemption email ID.
+          example: test@test.com
+          type: string
+        timeInvoiced:
+          description: The invoice date.
+          example: '2007-12-03'
+          format: date-time
+          type: string
+        timeRedeemed:
+          description: The redemption date.
+          example: '2007-12-03T10:15:30+01:00'
+          format: date-time
+          type: string
       type: object
+    ProductSummary:
+      description: Provides details about product rewards and the usage amount.
+      properties:
+        earnedRewards:
+          description: The earned rewards for the product.
+          format: float
+          type: number
+        isEligibleToEarnRewards:
+          description: The boolean parameter to indicate if the product is eligible to earn rewards.
+          type: boolean
+        productName:
+          description: The rate card product name.
+          type: string
+        productNumber:
+          description: The rate card product number.
+          type: string
+        usageAmount:
+          description: The rate card product usage amount.
+          format: double
+          type: number
     RewardDetails:
       description: The overall monthly reward summary.
       properties:
@@ -648,51 +744,6 @@ components:
           format: float
           type: number
       type: object
-    ProductCollection:
-      description: A product list.
-      properties:
-        items:
-          description: The list of product rewards summaries.
-          items:
-            $ref: '#/components/schemas/ProductSummary'
-          type: array
-      required:
-      - items
-    RedeemableUser:
-      description: The summary of a user that can redeem rewards.
-      properties:
-        emailId:
-          description: The email ID for a user that can redeem rewards.
-          type: string
-        firstName:
-          description: The first name of the user that can redeem rewards.
-          type: string
-        lastName:
-          description: The last name of the user that can redeem rewards.
-          type: string
-      required:
-      - emailId
-      type: object
-    ProductSummary:
-      description: Provides details about product rewards and the usage amount.
-      properties:
-        earnedRewards:
-          description: The earned rewards for the product.
-          format: float
-          type: number
-        isEligibleToEarnRewards:
-          description: The boolean parameter to indicate if the product is eligible to earn rewards.
-          type: boolean
-        productName:
-          description: The rate card product name.
-          type: string
-        productNumber:
-          description: The rate card product number.
-          type: string
-        usageAmount:
-          description: The rate card product usage amount.
-          format: double
-          type: number
     MonthlyRewardSummary:
       description: Object describing the monthly rewards summary for the requested subscription ID.
       properties:
@@ -757,86 +808,35 @@ components:
             '
           type: string
       type: object
-    RedeemableUserCollection:
-      description: The summarized list of users that can redeem rewards.
+    Error:
+      description: Error object model.
       properties:
-        items:
-          description: The summarized list of users that can redeem rewards.
-          items:
-            $ref: '#/components/schemas/RedeemableUserSummary'
-          type: array
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
       required:
-      - items
-    RedemptionSummary:
-      description: The redemption summary for the requested subscription ID and date range.
-      properties:
-        baseRewards:
-          description: The redeemed rewards in the base/subscription currency.
-          example: 250.0
-          format: float
-          type: number
-        fxRate:
-          description: The exchange rate between the invoice currency and subscription currency.
-          example: 1.732
-          format: double
-          type: number
-        invoiceCurrency:
-          description: The currency associated with the invoice.
-          example: USD
-          type: string
-        invoiceNumber:
-          description: The invoice number against the redemption.
-          example: '98647595'
-          format: integer
-          type: string
-        invoiceTotalAmount:
-          description: The invoice total amount of the given redemption.
-          example: 250.0
-          format: double
-          type: number
-        redeemedRewards:
-          description: The redeemed rewards in the invoice currency.
-          example: 250.0
-          format: float
-          type: number
-        redemptionCode:
-          description: The redemption code used in the Billing Center during the reward redemption process.
-          example: wertyuio-12345678-12345678-1234589
-          type: string
-        redemptionEmail:
-          description: The redemption email ID.
-          example: test@test.com
-          type: string
-        timeInvoiced:
-          description: The invoice date.
-          example: '2007-12-03'
-          format: date-time
-          type: string
-        timeRedeemed:
-          description: The redemption date.
-          example: '2007-12-03T10:15:30+01:00'
-          format: date-time
-          type: string
+      - code
+      - message
       type: object
-    RedeemableUserSummary:
-      description: User summary that can redeem rewards.
-      properties:
-        emailId:
-          description: The email ID of the user that can redeem rewards.
-          type: string
-        firstName:
-          description: The first name of the user that can redeem rewards.
-          type: string
-        lastName:
-          description: The last name of the user that can redeem rewards.
-          type: string
-    RedemptionCollection:
-      description: The redemption summary list for the requested subscription ID and date range.
+    CreateRedeemableUserDetails:
+      description: The list of new users to be added to the list of users that can redeem rewards.
       properties:
         items:
-          description: The redemption summary list.
+          description: The list of new users to be added to the list of users that can redeem rewards.
           items:
-            $ref: '#/components/schemas/RedemptionSummary'
+            $ref: '#/components/schemas/RedeemableUser'
+          type: array
+      type: object
+    ProductCollection:
+      description: A product list.
+      properties:
+        items:
+          description: The list of product rewards summaries.
+          items:
+            $ref: '#/components/schemas/ProductSummary'
           type: array
       required:
       - items

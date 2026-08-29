@@ -328,6 +328,69 @@ paths:
         required: true
 components:
   schemas:
+    ApproverLevels:
+      description: The approver levels.
+      properties:
+        level1:
+          $ref: '#/components/schemas/ApproverInfo'
+        level2:
+          $ref: '#/components/schemas/ApproverInfo'
+        level3:
+          $ref: '#/components/schemas/ApproverInfo'
+      required:
+      - level1
+      type: object
+    CreateApprovalTemplateDetails:
+      description: The configuration details for a new approval template.
+      properties:
+        approverLevels:
+          $ref: '#/components/schemas/ApproverLevels'
+        autoApprovalState:
+          description: The auto approval state of the lockbox.
+          enum:
+          - ENABLED
+          - DISABLED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LockboxAutoApprovalState'
+        compartmentId:
+          description: The unique identifier (OCID) of the compartment where the resource is located.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: approval template identifier
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+      required:
+      - compartmentId
+      type: object
     UpdateApprovalTemplateDetails:
       description: The action to be updated.
       properties:
@@ -371,6 +434,37 @@ components:
 
             '
           type: object
+      type: object
+    ChangeApprovalTemplateCompartmentDetails:
+      description: The information to be updated.
+      properties:
+        compartmentId:
+          description: The unique identifier (OCID) of the compartment where the resource is located.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    ApproverInfo:
+      description: The approver data for this approver level.
+      properties:
+        approverId:
+          description: The group or user ocid of the approver for this approver level.
+          type: string
+        approverType:
+          description: The approver type of this approver level.
+          enum:
+          - GROUP
+          - USER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ApproverType'
+        domainId:
+          description: The identity domain ocid of the approver.
+          type: string
+      required:
+      - approverType
+      - approverId
       type: object
     Error:
       description: Error Information.
@@ -476,79 +570,6 @@ components:
       - compartmentId
       - timeCreated
       type: object
-    ChangeApprovalTemplateCompartmentDetails:
-      description: The information to be updated.
-      properties:
-        compartmentId:
-          description: The unique identifier (OCID) of the compartment where the resource is located.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    CreateApprovalTemplateDetails:
-      description: The configuration details for a new approval template.
-      properties:
-        approverLevels:
-          $ref: '#/components/schemas/ApproverLevels'
-        autoApprovalState:
-          description: The auto approval state of the lockbox.
-          enum:
-          - ENABLED
-          - DISABLED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LockboxAutoApprovalState'
-        compartmentId:
-          description: The unique identifier (OCID) of the compartment where the resource is located.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: approval template identifier
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      required:
-      - compartmentId
-      type: object
-    ApprovalTemplateCollection:
-      description: Results of approval template search. Contains both ApprovalTemplateSummary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of ApprovalTemplateSummary.
-          items:
-            $ref: '#/components/schemas/ApprovalTemplateSummary'
-          type: array
-      required:
-      - items
-      type: object
     ApprovalTemplateSummary:
       description: Summary info for an approval tmeplate.
       properties:
@@ -635,47 +656,18 @@ components:
       - compartmentId
       - timeCreated
       type: object
-    ApproverInfo:
-      description: The approver data for this approver level.
+    ApprovalTemplateCollection:
+      description: Results of approval template search. Contains both ApprovalTemplateSummary items and other information, such as metadata.
       properties:
-        approverId:
-          description: The group or user ocid of the approver for this approver level.
-          type: string
-        approverType:
-          description: The approver type of this approver level.
-          enum:
-          - GROUP
-          - USER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ApproverType'
-        domainId:
-          description: The identity domain ocid of the approver.
-          type: string
+        items:
+          description: List of ApprovalTemplateSummary.
+          items:
+            $ref: '#/components/schemas/ApprovalTemplateSummary'
+          type: array
       required:
-      - approverType
-      - approverId
-      type: object
-    ApproverLevels:
-      description: The approver levels.
-      properties:
-        level1:
-          $ref: '#/components/schemas/ApproverInfo'
-        level2:
-          $ref: '#/components/schemas/ApproverInfo'
-        level3:
-          $ref: '#/components/schemas/ApproverInfo'
-      required:
-      - level1
+      - items
       type: object
   parameters:
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
 
@@ -689,6 +681,13 @@ components:
         - displayName
         - id
         default: timeCreated
+    ApprovalTemplateIdentifierPathParam:
+      description: The unique identifier (OCID) of the approval template.
+      in: path
+      name: approvalTemplateId
+      required: true
+      schema:
+        type: string
     IdentifierQueryParam:
       description: A generic Id query param used to filter lockbox, access request and approval template by Id.
       in: query
@@ -698,6 +697,80 @@ components:
         type: string
         maxLength: 255
         minLength: 1
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    ApprovalTemplateLifecycleStateQueryParam:
+      description: A filter to return only resources for which their lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/ApprovalTemplate/lifecycleState'
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
       in: query
@@ -720,79 +793,6 @@ components:
       in: header
       name: if-match
       required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    ApprovalTemplateLifecycleStateQueryParam:
-      description: A filter to return only resources for which their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/ApprovalTemplate/lifecycleState'
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ApprovalTemplateIdentifierPathParam:
-      description: The unique identifier (OCID) of the approval template.
-      in: path
-      name: approvalTemplateId
-      required: true
       schema:
         type: string
   responses:

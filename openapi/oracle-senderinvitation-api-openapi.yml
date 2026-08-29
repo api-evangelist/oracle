@@ -1,11 +1,16 @@
 openapi: 3.2.0
 info:
   title: Oracle Sender Invitation API
+  x-refined-note:
+  - x-evidence differs across the merged source definitions and was not carried
+  - x-provenance differs across the merged source definitions and was not carried
   version: '1.0'
   description: 'Operations tagged senderInvitation across 2 of this provider''s published API definitions: oci-organizations-1-openapi.yaml, oci-organizations-openapi.yaml. Each path carries the servers of the definition it was published in.'
 servers:
-- url: http://127.0.0.1/20220518
-- url: https://127.0.0.1/20220518
+- url: http://127.0.0.1/20230401
+- url: https://127.0.0.1/20230401
+- url: http://127.0.0.1/20200801
+- url: https://127.0.0.1/20200801
 tags:
 - name: senderInvitation
 paths:
@@ -127,6 +132,9 @@ paths:
               $ref: '#/components/schemas/CreateSenderInvitationDetails'
         description: Parameters for sender invitation creation.
         required: true
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
   /senderInvitations/{senderInvitationId}:
     get:
       description: Gets information about the sender invitation.
@@ -237,6 +245,9 @@ paths:
               $ref: '#/components/schemas/UpdateSenderInvitationDetails'
         description: The information to be updated.
         required: true
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
   /senderInvitations/{senderInvitationId}/actions/cancel:
     post:
       description: Cancels a sender invitation.
@@ -290,8 +301,231 @@ paths:
       tags:
       - senderInvitation
       x-related-resource: '#/definitions/SenderInvitation'
+    servers:
+    - url: http://127.0.0.1/20230401
+    - url: https://127.0.0.1/20230401
 components:
+  parameters:
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order can be provided.
+
+        * The default order for timeCreated is descending.
+
+        * The default order for displayName is ascending.
+
+        * If no value is specified, timeCreated is the default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    SenderInvitationStatusQueryParam:
+      description: The status of the sender invitation.
+      in: query
+      name: status
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/SenderInvitationStatus'
+      schema:
+        type: string
+        enum:
+        - PENDING
+        - CANCELED
+        - ACCEPTED
+        - EXPIRED
+        - FAILED
+        - NOT_APPLICABLE
+    LifecycleStateQueryParam:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - ACTIVE
+        - INACTIVE
+        - UPDATING
+        - FAILED
+        - TERMINATED
+    SortOrderQueryParam:
+      description: The sort order to use, whether 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-default-description: The default order depends on what parameter is being sorted by.
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
+
+        server error, without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        will be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+    RecipientTenancyIdQueryParam:
+      description: The tenancy that the invitation is addressed to.
+      in: query
+      name: recipientTenancyId
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    CompartmentIdQueryParam_2:
+      description: OCID of the compartment. Always a tenancy OCID.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
   schemas:
+    InvitationSubject:
+      description: A subject an invitation can contain.
+      enum:
+      - LINK
+      - GOVERNANCE
+      - EXTENDED_FEATURES
+      type: string
+    UpdateSenderInvitationDetails:
+      description: The parameters for updating a sender invitation.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: A user-created name to describe the invitation. Avoid entering confidential information.
+          maxLength: 255
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+    InvitationFeature:
+      description: The feature model for sender invitation.
+      properties:
+        name:
+          description: Name of the feature.
+          maxLength: 255
+          minLength: 1
+          type: string
+        recipientInvitationId:
+          description: recipientInvitationId for this feature.
+          maxLength: 255
+          minLength: 1
+          type: string
+        status:
+          description: Status of the sender invitation.
+          enum:
+          - PENDING
+          - CANCELED
+          - ACCEPTED
+          - EXPIRED
+          - FAILED
+          - NOT_APPLICABLE
+          example: ACCEPTED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SenderInvitationStatus'
+      type: object
     SenderInvitationSummary:
       description: The summary of the invitation model that the sender owns.
       properties:
@@ -427,86 +661,6 @@ components:
       - status
       - timeCreated
       - subjects
-    InvitationSubject:
-      description: A subject an invitation can contain.
-      enum:
-      - LINK
-      - GOVERNANCE
-      - EXTENDED_FEATURES
-      type: string
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    UpdateSenderInvitationDetails:
-      description: The parameters for updating a sender invitation.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user-created name to describe the invitation. Avoid entering confidential information.
-          maxLength: 255
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-    InvitationFeature:
-      description: The feature model for sender invitation.
-      properties:
-        name:
-          description: Name of the feature.
-          maxLength: 255
-          minLength: 1
-          type: string
-        recipientInvitationId:
-          description: recipientInvitationId for this feature.
-          maxLength: 255
-          minLength: 1
-          type: string
-        status:
-          description: Status of the sender invitation.
-          enum:
-          - PENDING
-          - CANCELED
-          - ACCEPTED
-          - EXPIRED
-          - FAILED
-          - NOT_APPLICABLE
-          example: ACCEPTED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SenderInvitationStatus'
-      type: object
     SenderInvitation:
       description: The invitation model that the sender owns.
       properties:
@@ -726,150 +880,18 @@ components:
       required:
       - compartmentId
       - recipientTenancyId
-  parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order can be provided.
-
-        * The default order for timeCreated is descending.
-
-        * The default order for displayName is ascending.
-
-        * If no value is specified, timeCreated is the default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    RecipientTenancyIdQueryParam:
-      description: The tenancy that the invitation is addressed to.
-      in: query
-      name: recipientTenancyId
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    SortOrderQueryParam:
-      description: The sort order to use, whether 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-default-description: The default order depends on what parameter is being sorted by.
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    SenderInvitationStatusQueryParam:
-      description: The status of the sender invitation.
-      in: query
-      name: status
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/SenderInvitationStatus'
-      schema:
-        type: string
-        enum:
-        - PENDING
-        - CANCELED
-        - ACCEPTED
-        - EXPIRED
-        - FAILED
-        - NOT_APPLICABLE
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
-
-        server error, without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        will be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: The lifecycle state of the resource.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - ACTIVE
-        - INACTIVE
-        - UPDATING
-        - FAILED
-        - TERMINATED
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
   responses:
     default:
       description: Unknown Error

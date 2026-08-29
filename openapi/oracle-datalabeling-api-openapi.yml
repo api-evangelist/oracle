@@ -854,800 +854,6 @@ paths:
       x-related-resource: '#/definitions/Record'
 components:
   schemas:
-    LabelName:
-      description: It represents a label.
-      properties:
-        name:
-          description: An unique name for a label within its dataset.
-          maxLength: 255
-          type: string
-      type: object
-    RecordMetadata:
-      description: 'Collection of record''s metadata.  This can be, for example, the height, width or depth of image for an image record.
-
-        '
-      discriminator:
-        propertyName: recordType
-      properties:
-        recordType:
-          description: 'The record type based on dataset format details.
-
-            IMAGE_METADATA  - Collection of metadata related to image record.
-
-            TEXT_METADATA - Collection of metadata related to text record.
-
-            DOCUMENT_METADATA - Collection of metadata related to document record.
-
-            '
-          enum:
-          - IMAGE_METADATA
-          - TEXT_METADATA
-          - DOCUMENT_METADATA
-          type: string
-      type: object
-    SourceDetails:
-      description: 'The source information is a polymorphic entity. It captures the details of data used for record creation. The discriminator type must match the dataset''s source type. The convention is enforced by the API.
-
-        '
-      discriminator:
-        propertyName: sourceType
-      properties:
-        sourceType:
-          description: 'The type of data source.
-
-            OBJECT_STORAGE - The source details for an object storage bucket.
-
-            '
-          enum:
-          - OBJECT_STORAGE
-          type: string
-      required:
-      - sourceType
-      type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error. It is for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    AnnotationAnalyticsAggregationCollection:
-      description: Aggregation entities are required by the API consistency guidelines for API Consistency Guidelines#AnalyticsAPIs.  These are used to summarize annotations for a given dataset and will be used to populate UI elements.  Aggregations need to have the fields that identify the exact scope that they're summarizing.  Any filters applied to the list API, have to show up in the aggregation.
-      properties:
-        items:
-          description: The list of annotation entities.
-          items:
-            $ref: '#/components/schemas/AnnotationAnalyticsAggregation'
-          type: array
-      required:
-      - items
-      type: object
-    RecordAggregationDimensions:
-      description: The dimensions to summarize record information for a given dataset.
-      properties:
-        annotationLabelContains:
-          description: Whether or not the annotation contains a label.
-          type: string
-        isLabeled:
-          description: Whether or not the record has been labeled and has associated annotations.
-          type: boolean
-      type: object
-    AnnotationCollection:
-      description: The results of an annotations search. It contains AnnotationSummary items and other information, such as metadata.
-      properties:
-        items:
-          description: The list of annotations.
-          items:
-            $ref: '#/components/schemas/AnnotationSummary'
-          type: array
-      required:
-      - items
-      type: object
-    CreateAnnotationDetails:
-      description: This is the payload sent in the CreateAnnotation operation.  It contains all the information required for a user to create an annotation for a record.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment for the annotation.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              For example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        entities:
-          description: The entity types are validated against the dataset to ensure consistency.
-          items:
-            $ref: '#/components/schemas/Entity'
-          maxItems: 4000
-          minItems: 1
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
-
-            For example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        recordId:
-          description: The OCID of the record annotated.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - recordId
-      - compartmentId
-      - entities
-      type: object
-    UpdateAnnotationDetails:
-      description: This is the payload sent in the CreateAnnotation operation. It contains all the information required for a user to create an annotation for a record.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              For example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        entities:
-          description: The entity types are validated against the dataset to ensure consistency.
-          items:
-            $ref: '#/components/schemas/Entity'
-          maxItems: 4000
-          minItems: 1
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
-
-            For example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      type: object
-    Entity:
-      description: 'An entity allows the labeler to identify an object in the record to label.  This can be, for example, a snippet of text, an entire image, or a bounding box within an image.  All entity types have an array of labels that are indexed. If more than one label is provided, but the annotationType on the corresponding dataset is for a single class, the API rejects the create annotation request.
-
-        '
-      discriminator:
-        propertyName: entityType
-      properties:
-        entityType:
-          description: 'The entity type described in the annotation.
-
-            GENERIC  - An extensible entity type that is the base entity type for some annotation formats.
-
-            IMAGEOBJECTSELECTION- - This allows the labeler to use specify a bounding polygon on the image to represent an object and apply labels to it.
-
-            TEXTSELECTION - This allows the labeler to highlight text, by specifying an offset and a length, and apply labels to it.
-
-            '
-          enum:
-          - GENERIC
-          - IMAGEOBJECTSELECTION
-          - TEXTSELECTION
-          type: string
-      required:
-      - entityType
-      type: object
-    UpdateRecordDetails:
-      description: The details of the tags that is updated.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              For example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
-
-            For example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        recordMetadata:
-          $ref: '#/components/schemas/RecordMetadata'
-      type: object
-    RecordSummary:
-      description: A record summary is the representation returned in list views.  It is usually a subset of the full record entity and should not contain any potentially sensitive information.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment for the task.
-          maxLength: 255
-          minLength: 1
-          type: string
-        datasetId:
-          description: The OCID of the dataset to associate the record with.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              For example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
-
-            For example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the record.
-          maxLength: 255
-          minLength: 1
-          type: string
-        isLabeled:
-          description: Whether or not the record has been labeled and has associated annotations.
-          type: boolean
-        lifecycleState:
-          description: Describes the lifecycle state.
-          type: string
-          x-obmcs-enumref: '#/definitions/Record/lifecycleState'
-        name:
-          description: The name is automatically assigned by the service. It is unique and immutable
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeCreated:
-          description: The date and time the resource was created, in the timestamp format defined by RFC3339.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the resource was updated, in the timestamp format defined by RFC3339.
-          format: date-time
-          type: string
-      required:
-      - id
-      - name
-      - timeCreated
-      - timeUpdated
-      - datasetId
-      - compartmentId
-      - isLabeled
-      - lifecycleState
-      type: object
-    AnnotationAggregationDimensions:
-      description: The dimensions to summarize annotations for a given dataset.
-      properties:
-        label:
-          $ref: '#/components/schemas/Label'
-        updatedBy:
-          description: The OCID of the principal which updated the resource.
-          maxLength: 255
-          minLength: 1
-          type: string
-      type: object
-    Label:
-      description: A label is a string value.  The API validates that it's one of the dataset's pre-defined labels.
-      properties:
-        label:
-          description: The label provided by the annotator.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - label
-      type: object
-    AnnotationAnalyticsAggregation:
-      description: Aggregation entities are required by the API consistency guidelines for API Consistency Guidelines#AnalyticsAPIs.  These are used to summarize annotations for a given dataset and will be used to populate UI elements.  Aggregations need to have the fields that identify the exact scope that they're summarizing.  Any filters applied to the list API, have to show up in the aggregation.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment containing the annotations.
-          maxLength: 255
-          minLength: 1
-          type: string
-        count:
-          description: The count of the matching results.
-          format: integer
-          minimum: 0
-          type: number
-        datasetId:
-          description: The OCID of the dataset the annotations belong to.
-          maxLength: 255
-          minLength: 1
-          type: string
-        dimensions:
-          $ref: '#/components/schemas/AnnotationAggregationDimensions'
-        lifecycleState:
-          description: Describes the lifecycle state.
-          type: string
-          x-obmcs-enumref: '#/definitions/Annotation/lifecycleState'
-        updatedBy:
-          description: The OCID of the principal which updated the annotation.
-          maxLength: 255
-          type: string
-      required:
-      - count
-      - datasetId
-      - compartmentId
-      type: object
-    CreateSourceDetails:
-      description: 'The source information is a polymorphic entity. It captures the details of how to access the data for record creation. The discriminator type must match the dataset''s source type. The convention will be enforced by the API. It should only provide the difference in data necessary to access the content, i.e. the object storage path, or the database record id.
-
-        '
-      discriminator:
-        propertyName: sourceType
-      properties:
-        sourceType:
-          description: 'The type of data source.
-
-            OBJECT_STORAGE - The source details for an object storage bucket.
-
-            '
-          enum:
-          - OBJECT_STORAGE
-          type: string
-      required:
-      - sourceType
-      type: object
-    Record:
-      description: A record represents an entry in a dataset that needs labeling.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment for the task.
-          maxLength: 255
-          minLength: 1
-          type: string
-        datasetId:
-          description: The OCID of the dataset to associate the record with.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              For example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
-
-            For example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the record.
-          maxLength: 255
-          minLength: 1
-          type: string
-        isLabeled:
-          description: Whether or not the record has been labeled and has associated annotations.
-          type: boolean
-        lifecycleState:
-          description: 'The lifecycle state of the record.
-
-            ACTIVE - The record is active and ready for labeling.
-
-            INACTIVE - The record has been marked as inactive and should not be used for labeling.
-
-            DELETED - The record has been deleted and is no longer available for labeling.
-
-            '
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          type: string
-        name:
-          description: The name is created by the user. It is unique and immutable.
-          maxLength: 255
-          minLength: 1
-          type: string
-        recordMetadata:
-          $ref: '#/components/schemas/RecordMetadata'
-        sourceDetails:
-          $ref: '#/components/schemas/SourceDetails'
-        timeCreated:
-          description: The date and time the resource was created, in the timestamp format defined by RFC3339.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the resource was updated, in the timestamp format defined by RFC3339.
-          format: date-time
-          type: string
-      required:
-      - id
-      - name
-      - timeCreated
-      - timeUpdated
-      - datasetId
-      - compartmentId
-      - sourceDetails
-      - isLabeled
-      - lifecycleState
-      type: object
-    AnnotationSummary:
-      description: An annotation summary is the representation returned in list views.  It is usually a subset of the full annotation entity and should not contain any potentially sensitive information.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment for the annotation.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              For example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
-
-            For example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the annotation.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: Describes the lifecycle state.
-          type: string
-          x-obmcs-enumref: '#/definitions/Annotation/lifecycleState'
-        recordId:
-          description: The OCID of the record annotated.
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeCreated:
-          description: The date and time the annotation was created, in the timestamp format defined by RFC3339.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the resource was updated, in the timestamp format defined by RFC3339.
-          format: date-time
-          type: string
-      required:
-      - id
-      - timeCreated
-      - timeUpdated
-      - recordId
-      - compartmentId
-      - lifecycleState
-      type: object
-    LabelSet:
-      description: 'An ordered collection of labels that are unique by name.
-
-        '
-      properties:
-        items:
-          description: An ordered collection of labels that are unique by name.
-          items:
-            $ref: '#/components/schemas/LabelName'
-          maxItems: 250
-          minItems: 0
-          type: array
-      type: object
-    RecordAnalyticsAggregation:
-      description: Aggregation entities are required by the API consistency guidelines for API Consistency Guidelines#AnalyticsAPIs.  These are used to summarize record information for a given dataset and are used to populate UI elements.  Aggregations need to have the fields that identify the exact scope that they're summarizing.  Any filters applied to the list API, have to show up in the aggregation.
-      properties:
-        compartmentId:
-          description: ocid of the compartment the records
-          maxLength: 255
-          minLength: 1
-          type: string
-        count:
-          description: the count of the matching results
-          format: integer
-          minimum: 0
-          type: number
-        datasetId:
-          description: ocid of the dataset the annotation belongs to
-          maxLength: 255
-          minLength: 1
-          type: string
-        dimensions:
-          $ref: '#/components/schemas/RecordAggregationDimensions'
-        lifecycleState:
-          description: Describes the lifecycle state.
-          type: string
-          x-obmcs-enumref: '#/definitions/Record/lifecycleState'
-      required:
-      - count
-      - datasetId
-      - compartmentId
-      type: object
-    RecordCollection:
-      description: The results of a record search. It contains RecordSummary items and other data.
-      properties:
-        items:
-          description: The list of records.
-          items:
-            $ref: '#/components/schemas/RecordSummary'
-          type: array
-      required:
-      - items
-      type: object
-    CreateRecordDetails:
-      description: A record represents an entry in a dataset that needs labeling.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment for the record. This is tied to the dataset. It is not changeable on the record itself.
-          maxLength: 255
-          minLength: 1
-          type: string
-        datasetId:
-          description: The OCID of the dataset to associate the record with.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              For example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
-
-            For example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        name:
-          description: The name is automatically assigned by the service. It is unique and immutable.
-          maxLength: 255
-          minLength: 1
-          type: string
-        recordMetadata:
-          $ref: '#/components/schemas/RecordMetadata'
-        sourceDetails:
-          $ref: '#/components/schemas/CreateSourceDetails'
-      required:
-      - name
-      - datasetId
-      - compartmentId
-      - sourceDetails
-      type: object
-    InitialRecordGenerationConfiguration:
-      description: The initial generate records configuration. It generates records from the dataset's source.
-      properties:
-        limit:
-          description: The maximum number of records to generate.
-          format: integer
-          type: number
-      type: object
-    DatasetSourceDetails:
-      description: This allows the customer to specify the source of the dataset.
-      discriminator:
-        propertyName: sourceType
-      properties:
-        sourceType:
-          description: The source type. OBJECT_STORAGE allows the user to describe where in object storage the dataset is.
-          enum:
-          - OBJECT_STORAGE
-          type: string
-      required:
-      - sourceType
-      type: object
-    DatasetFormatDetails:
-      description: It specifies how to process the data. Supported formats include DOCUMENT, IMAGE, and TEXT.
-      discriminator:
-        propertyName: formatType
-      properties:
-        formatType:
-          description: The format type. DOCUMENT format is for record contents that are PDFs or TIFFs. IMAGE format is for record contents that are JPEGs or PNGs. TEXT format is for record contents that are TXT files.
-          enum:
-          - DOCUMENT
-          - IMAGE
-          - TEXT
-          type: string
-      required:
-      - formatType
-    Annotation:
-      description: An annotation represents a user- or machine-generated annotation for a given record.  The details of the annotation are captured in the RecordAnnotationDetails.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment for the annotation. This is tied to the dataset. It is not changeable on the record itself.
-          maxLength: 255
-          minLength: 1
-          type: string
-        createdBy:
-          description: The OCID of the principal which created the annotation.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              For example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        entities:
-          description: The entity types are validated against the dataset to ensure consistency.
-          items:
-            $ref: '#/components/schemas/Entity'
-          maxItems: 4000
-          minItems: 1
-          type: array
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
-
-            For example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the annotation.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: 'The lifecycle state of an annotation.
-
-            ACTIVE - The annotation is active to be used for labeling.
-
-            INACTIVE - The annotation has been marked as inactive and should not be used for labeling.
-
-            DELETED - Tha annotation been deleted and no longer available for labeling.
-
-            '
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          type: string
-        recordId:
-          description: The OCID of the record annotated.
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeCreated:
-          description: The date and time the annotation was created, in the timestamp format defined by RFC3339.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the resource was updated, in the timestamp format defined by RFC3339.
-          format: date-time
-          type: string
-        updatedBy:
-          description: The OCID of the principal which updated the annotation.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - id
-      - timeCreated
-      - timeUpdated
-      - createdBy
-      - updatedBy
-      - recordId
-      - entities
-      - compartmentId
-      - lifecycleState
-      type: object
     Dataset:
       description: 'A dataset is a logical collection of records. The dataset contains all the information necessary to describe a record''s source, format, the type of annotations allowed for the record, and the labels allowed on annotations.
 
@@ -1785,6 +991,548 @@ components:
       - datasetFormatDetails
       - labelSet
       type: object
+    CreateRecordDetails:
+      description: A record represents an entry in a dataset that needs labeling.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment for the record. This is tied to the dataset. It is not changeable on the record itself.
+          maxLength: 255
+          minLength: 1
+          type: string
+        datasetId:
+          description: The OCID of the dataset to associate the record with.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              For example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+
+            For example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        name:
+          description: The name is automatically assigned by the service. It is unique and immutable.
+          maxLength: 255
+          minLength: 1
+          type: string
+        recordMetadata:
+          $ref: '#/components/schemas/RecordMetadata'
+        sourceDetails:
+          $ref: '#/components/schemas/CreateSourceDetails'
+      required:
+      - name
+      - datasetId
+      - compartmentId
+      - sourceDetails
+      type: object
+    RecordMetadata:
+      description: 'Collection of record''s metadata.  This can be, for example, the height, width or depth of image for an image record.
+
+        '
+      discriminator:
+        propertyName: recordType
+      properties:
+        recordType:
+          description: 'The record type based on dataset format details.
+
+            IMAGE_METADATA  - Collection of metadata related to image record.
+
+            TEXT_METADATA - Collection of metadata related to text record.
+
+            DOCUMENT_METADATA - Collection of metadata related to document record.
+
+            '
+          enum:
+          - IMAGE_METADATA
+          - TEXT_METADATA
+          - DOCUMENT_METADATA
+          type: string
+      type: object
+    AnnotationCollection:
+      description: The results of an annotations search. It contains AnnotationSummary items and other information, such as metadata.
+      properties:
+        items:
+          description: The list of annotations.
+          items:
+            $ref: '#/components/schemas/AnnotationSummary'
+          type: array
+      required:
+      - items
+      type: object
+    DatasetFormatDetails:
+      description: It specifies how to process the data. Supported formats include DOCUMENT, IMAGE, and TEXT.
+      discriminator:
+        propertyName: formatType
+      properties:
+        formatType:
+          description: The format type. DOCUMENT format is for record contents that are PDFs or TIFFs. IMAGE format is for record contents that are JPEGs or PNGs. TEXT format is for record contents that are TXT files.
+          enum:
+          - DOCUMENT
+          - IMAGE
+          - TEXT
+          type: string
+      required:
+      - formatType
+    Entity:
+      description: 'An entity allows the labeler to identify an object in the record to label.  This can be, for example, a snippet of text, an entire image, or a bounding box within an image.  All entity types have an array of labels that are indexed. If more than one label is provided, but the annotationType on the corresponding dataset is for a single class, the API rejects the create annotation request.
+
+        '
+      discriminator:
+        propertyName: entityType
+      properties:
+        entityType:
+          description: 'The entity type described in the annotation.
+
+            GENERIC  - An extensible entity type that is the base entity type for some annotation formats.
+
+            IMAGEOBJECTSELECTION- - This allows the labeler to use specify a bounding polygon on the image to represent an object and apply labels to it.
+
+            TEXTSELECTION - This allows the labeler to highlight text, by specifying an offset and a length, and apply labels to it.
+
+            '
+          enum:
+          - GENERIC
+          - IMAGEOBJECTSELECTION
+          - TEXTSELECTION
+          type: string
+      required:
+      - entityType
+      type: object
+    UpdateAnnotationDetails:
+      description: This is the payload sent in the CreateAnnotation operation. It contains all the information required for a user to create an annotation for a record.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              For example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        entities:
+          description: The entity types are validated against the dataset to ensure consistency.
+          items:
+            $ref: '#/components/schemas/Entity'
+          maxItems: 4000
+          minItems: 1
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+
+            For example: `{"bar-key": "value"}`
+
+            '
+          type: object
+      type: object
+    RecordAnalyticsAggregation:
+      description: Aggregation entities are required by the API consistency guidelines for API Consistency Guidelines#AnalyticsAPIs.  These are used to summarize record information for a given dataset and are used to populate UI elements.  Aggregations need to have the fields that identify the exact scope that they're summarizing.  Any filters applied to the list API, have to show up in the aggregation.
+      properties:
+        compartmentId:
+          description: ocid of the compartment the records
+          maxLength: 255
+          minLength: 1
+          type: string
+        count:
+          description: the count of the matching results
+          format: integer
+          minimum: 0
+          type: number
+        datasetId:
+          description: ocid of the dataset the annotation belongs to
+          maxLength: 255
+          minLength: 1
+          type: string
+        dimensions:
+          $ref: '#/components/schemas/RecordAggregationDimensions'
+        lifecycleState:
+          description: Describes the lifecycle state.
+          type: string
+          x-obmcs-enumref: '#/definitions/Record/lifecycleState'
+      required:
+      - count
+      - datasetId
+      - compartmentId
+      type: object
+    DatasetSourceDetails:
+      description: This allows the customer to specify the source of the dataset.
+      discriminator:
+        propertyName: sourceType
+      properties:
+        sourceType:
+          description: The source type. OBJECT_STORAGE allows the user to describe where in object storage the dataset is.
+          enum:
+          - OBJECT_STORAGE
+          type: string
+      required:
+      - sourceType
+      type: object
+    AnnotationSummary:
+      description: An annotation summary is the representation returned in list views.  It is usually a subset of the full annotation entity and should not contain any potentially sensitive information.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment for the annotation.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              For example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+
+            For example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the annotation.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: Describes the lifecycle state.
+          type: string
+          x-obmcs-enumref: '#/definitions/Annotation/lifecycleState'
+        recordId:
+          description: The OCID of the record annotated.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: The date and time the annotation was created, in the timestamp format defined by RFC3339.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the resource was updated, in the timestamp format defined by RFC3339.
+          format: date-time
+          type: string
+      required:
+      - id
+      - timeCreated
+      - timeUpdated
+      - recordId
+      - compartmentId
+      - lifecycleState
+      type: object
+    Label:
+      description: A label is a string value.  The API validates that it's one of the dataset's pre-defined labels.
+      properties:
+        label:
+          description: The label provided by the annotator.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - label
+      type: object
+    InitialRecordGenerationConfiguration:
+      description: The initial generate records configuration. It generates records from the dataset's source.
+      properties:
+        limit:
+          description: The maximum number of records to generate.
+          format: integer
+          type: number
+      type: object
+    RecordCollection:
+      description: The results of a record search. It contains RecordSummary items and other data.
+      properties:
+        items:
+          description: The list of records.
+          items:
+            $ref: '#/components/schemas/RecordSummary'
+          type: array
+      required:
+      - items
+      type: object
+    RecordAggregationDimensions:
+      description: The dimensions to summarize record information for a given dataset.
+      properties:
+        annotationLabelContains:
+          description: Whether or not the annotation contains a label.
+          type: string
+        isLabeled:
+          description: Whether or not the record has been labeled and has associated annotations.
+          type: boolean
+      type: object
+    AnnotationAggregationDimensions:
+      description: The dimensions to summarize annotations for a given dataset.
+      properties:
+        label:
+          $ref: '#/components/schemas/Label'
+        updatedBy:
+          description: The OCID of the principal which updated the resource.
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    LabelSet:
+      description: 'An ordered collection of labels that are unique by name.
+
+        '
+      properties:
+        items:
+          description: An ordered collection of labels that are unique by name.
+          items:
+            $ref: '#/components/schemas/LabelName'
+          maxItems: 250
+          minItems: 0
+          type: array
+      type: object
+    LabelName:
+      description: It represents a label.
+      properties:
+        name:
+          description: An unique name for a label within its dataset.
+          maxLength: 255
+          type: string
+      type: object
+    CreateAnnotationDetails:
+      description: This is the payload sent in the CreateAnnotation operation.  It contains all the information required for a user to create an annotation for a record.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment for the annotation.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              For example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        entities:
+          description: The entity types are validated against the dataset to ensure consistency.
+          items:
+            $ref: '#/components/schemas/Entity'
+          maxItems: 4000
+          minItems: 1
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+
+            For example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        recordId:
+          description: The OCID of the record annotated.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - recordId
+      - compartmentId
+      - entities
+      type: object
+    SourceDetails:
+      description: 'The source information is a polymorphic entity. It captures the details of data used for record creation. The discriminator type must match the dataset''s source type. The convention is enforced by the API.
+
+        '
+      discriminator:
+        propertyName: sourceType
+      properties:
+        sourceType:
+          description: 'The type of data source.
+
+            OBJECT_STORAGE - The source details for an object storage bucket.
+
+            '
+          enum:
+          - OBJECT_STORAGE
+          type: string
+      required:
+      - sourceType
+      type: object
+    CreateSourceDetails:
+      description: 'The source information is a polymorphic entity. It captures the details of how to access the data for record creation. The discriminator type must match the dataset''s source type. The convention will be enforced by the API. It should only provide the difference in data necessary to access the content, i.e. the object storage path, or the database record id.
+
+        '
+      discriminator:
+        propertyName: sourceType
+      properties:
+        sourceType:
+          description: 'The type of data source.
+
+            OBJECT_STORAGE - The source details for an object storage bucket.
+
+            '
+          enum:
+          - OBJECT_STORAGE
+          type: string
+      required:
+      - sourceType
+      type: object
+    Record:
+      description: A record represents an entry in a dataset that needs labeling.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment for the task.
+          maxLength: 255
+          minLength: 1
+          type: string
+        datasetId:
+          description: The OCID of the dataset to associate the record with.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              For example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+
+            For example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the record.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isLabeled:
+          description: Whether or not the record has been labeled and has associated annotations.
+          type: boolean
+        lifecycleState:
+          description: 'The lifecycle state of the record.
+
+            ACTIVE - The record is active and ready for labeling.
+
+            INACTIVE - The record has been marked as inactive and should not be used for labeling.
+
+            DELETED - The record has been deleted and is no longer available for labeling.
+
+            '
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          type: string
+        name:
+          description: The name is created by the user. It is unique and immutable.
+          maxLength: 255
+          minLength: 1
+          type: string
+        recordMetadata:
+          $ref: '#/components/schemas/RecordMetadata'
+        sourceDetails:
+          $ref: '#/components/schemas/SourceDetails'
+        timeCreated:
+          description: The date and time the resource was created, in the timestamp format defined by RFC3339.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the resource was updated, in the timestamp format defined by RFC3339.
+          format: date-time
+          type: string
+      required:
+      - id
+      - name
+      - timeCreated
+      - timeUpdated
+      - datasetId
+      - compartmentId
+      - sourceDetails
+      - isLabeled
+      - lifecycleState
+      type: object
+    AnnotationAnalyticsAggregationCollection:
+      description: Aggregation entities are required by the API consistency guidelines for API Consistency Guidelines#AnalyticsAPIs.  These are used to summarize annotations for a given dataset and will be used to populate UI elements.  Aggregations need to have the fields that identify the exact scope that they're summarizing.  Any filters applied to the list API, have to show up in the aggregation.
+      properties:
+        items:
+          description: The list of annotation entities.
+          items:
+            $ref: '#/components/schemas/AnnotationAnalyticsAggregation'
+          type: array
+      required:
+      - items
+      type: object
     RecordAnalyticsAggregationCollection:
       description: Collection of records aggregated.
       properties:
@@ -1796,35 +1544,278 @@ components:
       required:
       - items
       type: object
+    AnnotationAnalyticsAggregation:
+      description: Aggregation entities are required by the API consistency guidelines for API Consistency Guidelines#AnalyticsAPIs.  These are used to summarize annotations for a given dataset and will be used to populate UI elements.  Aggregations need to have the fields that identify the exact scope that they're summarizing.  Any filters applied to the list API, have to show up in the aggregation.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment containing the annotations.
+          maxLength: 255
+          minLength: 1
+          type: string
+        count:
+          description: The count of the matching results.
+          format: integer
+          minimum: 0
+          type: number
+        datasetId:
+          description: The OCID of the dataset the annotations belong to.
+          maxLength: 255
+          minLength: 1
+          type: string
+        dimensions:
+          $ref: '#/components/schemas/AnnotationAggregationDimensions'
+        lifecycleState:
+          description: Describes the lifecycle state.
+          type: string
+          x-obmcs-enumref: '#/definitions/Annotation/lifecycleState'
+        updatedBy:
+          description: The OCID of the principal which updated the annotation.
+          maxLength: 255
+          type: string
+      required:
+      - count
+      - datasetId
+      - compartmentId
+      type: object
+    UpdateRecordDetails:
+      description: The details of the tags that is updated.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              For example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+
+            For example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        recordMetadata:
+          $ref: '#/components/schemas/RecordMetadata'
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error. It is for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    RecordSummary:
+      description: A record summary is the representation returned in list views.  It is usually a subset of the full record entity and should not contain any potentially sensitive information.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment for the task.
+          maxLength: 255
+          minLength: 1
+          type: string
+        datasetId:
+          description: The OCID of the dataset to associate the record with.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              For example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+
+            For example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the record.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isLabeled:
+          description: Whether or not the record has been labeled and has associated annotations.
+          type: boolean
+        lifecycleState:
+          description: Describes the lifecycle state.
+          type: string
+          x-obmcs-enumref: '#/definitions/Record/lifecycleState'
+        name:
+          description: The name is automatically assigned by the service. It is unique and immutable
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: The date and time the resource was created, in the timestamp format defined by RFC3339.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the resource was updated, in the timestamp format defined by RFC3339.
+          format: date-time
+          type: string
+      required:
+      - id
+      - name
+      - timeCreated
+      - timeUpdated
+      - datasetId
+      - compartmentId
+      - isLabeled
+      - lifecycleState
+      type: object
+    Annotation:
+      description: An annotation represents a user- or machine-generated annotation for a given record.  The details of the annotation are captured in the RecordAnnotationDetails.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment for the annotation. This is tied to the dataset. It is not changeable on the record itself.
+          maxLength: 255
+          minLength: 1
+          type: string
+        createdBy:
+          description: The OCID of the principal which created the annotation.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'A key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              For example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        entities:
+          description: The entity types are validated against the dataset to ensure consistency.
+          items:
+            $ref: '#/components/schemas/Entity'
+          maxItems: 4000
+          minItems: 1
+          type: array
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'A simple key-value pair that is applied without any predefined name, type, or scope. It exists for cross-compatibility only.
+
+            For example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the annotation.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: 'The lifecycle state of an annotation.
+
+            ACTIVE - The annotation is active to be used for labeling.
+
+            INACTIVE - The annotation has been marked as inactive and should not be used for labeling.
+
+            DELETED - Tha annotation been deleted and no longer available for labeling.
+
+            '
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          type: string
+        recordId:
+          description: The OCID of the record annotated.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: The date and time the annotation was created, in the timestamp format defined by RFC3339.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the resource was updated, in the timestamp format defined by RFC3339.
+          format: date-time
+          type: string
+        updatedBy:
+          description: The OCID of the principal which updated the annotation.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - timeCreated
+      - timeUpdated
+      - createdBy
+      - updatedBy
+      - recordId
+      - entities
+      - compartmentId
+      - lifecycleState
+      type: object
   parameters:
-    RecordIdentifierPathParam:
-      description: The OCID of the record annotated.
+    AnnotationGroupByParam:
+      description: The field to group by. If no value is specified, updatedBy is used by default.
+      in: query
+      name: annotationGroupBy
+      schema:
+        type: string
+        enum:
+        - updatedBy
+        - label
+        default: updatedBy
+    DatasetIdPathParam:
+      description: A unique dataset OCID.
       in: path
-      name: recordId
+      name: datasetId
       required: true
       schema:
         type: string
         maxLength: 255
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
         minLength: 1
-    RecordSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. The default order for timeCreated is descending. The default order for name is ascending. If no value is specified, timeCreated is used by default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - name
-        default: timeCreated
     AnnotationAggregationSortByQueryParam:
       description: The field to sort by. Only one sort order may be provided. The default order is descending. If no value is specified, updatedBy is used by default.
       in: query
@@ -1836,6 +1827,35 @@ components:
         - label
         - updatedBy
         default: updatedBy
+    OcidQueryParam:
+      description: The unique OCID identifier.
+      in: query
+      name: id
+      schema:
+        type: string
+        maxLength: 255
+    RecordNameQueryParam:
+      description: The name of the record.
+      in: query
+      name: name
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    AnnotationLabelsContainsQueryParam:
+      description: 'Lets the user filter records based on the related annotations.
+
+        '
+      in: query
+      name: annotationLabelsContains
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
     IfNoneMatchHeader:
       description: 'For optimistic concurrency control. In the GET call
 
@@ -1866,33 +1886,23 @@ components:
         - isLabeled
         - annotationLabelContains
         default: isLabeled
-    DatasetIdPathParam:
-      description: A unique dataset OCID.
-      in: path
-      name: datasetId
-      required: true
+    RecordLifecycleStateQueryParam:
+      description: A filter to return only resources whose lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/Record/lifecycleState'
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource is updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
+    IsLabeledQueryParam:
+      description: Whether the record has been labeled and has associated annotations.
+      in: query
+      name: isLabeled
       required: false
       x-default-description: 'null'
       schema:
-        type: string
+        type: boolean
     TimeCreatedGreaterThanOrEqualToQueryParam:
       description: 'The date and time the resource was created, in the timestamp format defined by RFC3339.
 
@@ -1902,14 +1912,6 @@ components:
       schema:
         type: string
         format: date-time
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
     RecordAggregationSortByQueryParam:
       description: The field to sort by. Only one sort order may be provided. The default order is descending. If no value is specified, count is used by default.
       in: query
@@ -1920,41 +1922,30 @@ components:
         - count
         - isLabeled
         default: count
-    AnnotationIdentifierPathParam:
-      description: A unique annotation identifier.
-      in: path
-      name: annotationId
+    UpdatedByQueryParam:
+      description: The OCID of the principal which updated the annotation.
+      in: query
+      name: updatedBy
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    DatasetIdQueryParam:
+      description: Filter the results by the OCID of the dataset.
+      in: query
+      name: datasetId
       required: true
       schema:
         type: string
-    AnnotationGroupByParam:
-      description: The field to group by. If no value is specified, updatedBy is used by default.
+        maxLength: 255
+    LabelQueryParam:
+      description: It summarizes annotations with the specified label.
       in: query
-      name: annotationGroupBy
-      schema:
-        type: string
-        enum:
-        - updatedBy
-        - label
-        default: updatedBy
-    RecordLifecycleStateQueryParam:
-      description: A filter to return only resources whose lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
+      name: label
       required: false
       x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/Record/lifecycleState'
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
     SortOrderQueryParam:
       description: The sort order to use, either 'asc' or 'desc'.
       in: query
@@ -1966,25 +1957,15 @@ components:
         - ASC
         - DESC
         default: ASC
-    RecordIdQueryParam:
-      description: The OCID of the record annotated.
+    TimeCreatedLessThanOrEqualToQueryParam:
+      description: 'The date and time the resource was created, in the timestamp format defined by RFC3339.
+
+        '
       in: query
-      name: recordId
-      required: false
-      x-default-description: 'null'
+      name: timeCreatedLessThanOrEqualTo
       schema:
         type: string
-        maxLength: 255
-    AnnotationSortByQueryParam:
-      description: The field to sort by. Only one sort order may be provided. The default order for timeCreated is descending. If no value is specified timeCreated is used by default.
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - label
-        default: timeCreated
+        format: date-time
     AnnotationLifecycleStateQueryParam:
       description: A filter to return only resources whose lifecycleState matches the given lifecycleState.
       in: query
@@ -1994,14 +1975,41 @@ components:
       x-obmcs-enumref: '#/definitions/Annotation/lifecycleState'
       schema:
         type: string
-    LabelQueryParam:
-      description: It summarizes annotations with the specified label.
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
       in: query
-      name: label
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    RecordSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. The default order for timeCreated is descending. The default order for name is ascending. If no value is specified, timeCreated is used by default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - name
+        default: timeCreated
+    RecordIdQueryParam:
+      description: The OCID of the record annotated.
+      in: query
+      name: recordId
       required: false
       x-default-description: 'null'
       schema:
         type: string
+        maxLength: 255
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried, without risk of executing that same action again, if there is a timeout or
 
@@ -2022,74 +2030,66 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    IsLabeledQueryParam:
-      description: Whether the record has been labeled and has associated annotations.
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: isLabeled
-      required: false
-      x-default-description: 'null'
+      name: limit
       schema:
-        type: boolean
-    UpdatedByQueryParam:
-      description: The OCID of the principal which updated the annotation.
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
       in: query
-      name: updatedBy
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    RecordNameQueryParam:
-      description: The name of the record.
-      in: query
-      name: name
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    AnnotationLabelsContainsQueryParam:
-      description: 'Lets the user filter records based on the related annotations.
-
-        '
-      in: query
-      name: annotationLabelsContains
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-    TimeCreatedLessThanOrEqualToQueryParam:
-      description: 'The date and time the resource was created, in the timestamp format defined by RFC3339.
-
-        '
-      in: query
-      name: timeCreatedLessThanOrEqualTo
-      schema:
-        type: string
-        format: date-time
-    DatasetIdQueryParam:
-      description: Filter the results by the OCID of the dataset.
-      in: query
-      name: datasetId
+      name: compartmentId
       required: true
       schema:
         type: string
         maxLength: 255
-    OcidQueryParam:
-      description: The unique OCID identifier.
-      in: query
-      name: id
+    RecordIdentifierPathParam:
+      description: The OCID of the record annotated.
+      in: path
+      name: recordId
+      required: true
       schema:
         type: string
         maxLength: 255
+    AnnotationSortByQueryParam:
+      description: The field to sort by. Only one sort order may be provided. The default order for timeCreated is descending. If no value is specified timeCreated is used by default.
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - label
+        default: timeCreated
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource is updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    AnnotationIdentifierPathParam:
+      description: A unique annotation identifier.
+      in: path
+      name: annotationId
+      required: true
+      schema:
+        type: string
   responses:
     default:
       description: Unknown Error

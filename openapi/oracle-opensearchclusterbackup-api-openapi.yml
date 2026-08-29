@@ -219,11 +219,97 @@ paths:
         required: true
 components:
   parameters:
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    OpensearchClusterBackupIdentifierPathParam:
+      description: unique OpensearchClusterBackup identifier
+      in: path
+      name: opensearchClusterBackupId
+      required: true
+      schema:
+        type: string
+    OpensearchClusterBackupSourceClusterIdQueryParam:
+      description: A filter to return only resources that match the entire source cluster id given.
+      in: query
+      name: sourceOpensearchClusterId
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    OpensearchClusterBackupLifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/OpensearchClusterBackup/lifecycleState'
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
       in: query
       name: compartmentId
       required: true
+      schema:
+        type: string
+    OpensearchClusterBackupIdentifierQueryParam:
+      description: unique OpensearchClusterBackup identifier
+      in: query
+      name: id
+      x-default-description: 'null'
       schema:
         type: string
     IfMatchHeader:
@@ -243,92 +329,6 @@ components:
       required: false
       schema:
         type: string
-    OpensearchClusterBackupIdentifierPathParam:
-      description: unique OpensearchClusterBackup identifier
-      in: path
-      name: opensearchClusterBackupId
-      required: true
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    OpensearchClusterBackupSourceClusterIdQueryParam:
-      description: A filter to return only resources that match the entire source cluster id given.
-      in: query
-      name: sourceOpensearchClusterId
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    OpensearchClusterBackupLifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/OpensearchClusterBackup/lifecycleState'
-      schema:
-        type: string
-    OpensearchClusterBackupIdentifierQueryParam:
-      description: unique OpensearchClusterBackup identifier
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
   schemas:
     UpdateOpensearchClusterBackupDetails:
       description: Information about the cluster backup to update.
@@ -367,17 +367,6 @@ components:
       required:
       - displayName
       type: object
-    OpensearchClusterBackupCollection:
-      description: The list of cluster backups returned in a cluster backup search.
-      properties:
-        items:
-          description: The list of cluster backups.
-          items:
-            $ref: '#/components/schemas/OpensearchClusterBackupSummary'
-          type: array
-      required:
-      - items
-      type: object
     Error:
       description: Error Information.
       properties:
@@ -390,105 +379,6 @@ components:
       required:
       - code
       - message
-    OpensearchClusterBackupSummary:
-      description: The summary of information about an OpenSearch cluster backup.
-      properties:
-        backupSize:
-          description: The size in GB of the cluster backup.
-          format: double
-          type: number
-        backupType:
-          description: Specifies whether the cluster backup was created manually, or automatically as a scheduled backup.
-          type: string
-          x-obmcs-enumref: '#/definitions/OpensearchClusterBackup/backupType'
-        compartmentId:
-          description: The OCID of the compartment where the cluster backup is located.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The name of the cluster backup. Avoid entering confidential information.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the cluster backup.
-          type: string
-        lifecycleDetails:
-          description: Additional information about the current lifecycle state of the cluster backup.
-          type: string
-        lifecycleState:
-          description: The current state of the cluster backup.
-          type: string
-          x-obmcs-enumref: '#/definitions/OpensearchClusterBackup/lifecycleState'
-        sourceClusterDisplayName:
-          description: The name of the source OpenSearch cluster for the cluster backup.
-          type: string
-        sourceClusterId:
-          description: The OCID of the source OpenSearch cluster for the cluster backup.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The date and time the cluster backup was created. Format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-          format: date-time
-          type: string
-        timeExpired:
-          description: The date and time the cluster backup expires. Format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the cluster backup was updated. Format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - backupType
-      - sourceClusterId
-      - lifecycleState
-      type: object
     OpensearchClusterBackup:
       description: 'An OpenSearch cluster backup resource. An cluster is set of instances that provide OpenSearch functionality in OCI Search Service with OpenSearch.
 
@@ -616,6 +506,116 @@ components:
       - backupType
       - sourceClusterId
       - lifecycleState
+      type: object
+    OpensearchClusterBackupSummary:
+      description: The summary of information about an OpenSearch cluster backup.
+      properties:
+        backupSize:
+          description: The size in GB of the cluster backup.
+          format: double
+          type: number
+        backupType:
+          description: Specifies whether the cluster backup was created manually, or automatically as a scheduled backup.
+          type: string
+          x-obmcs-enumref: '#/definitions/OpensearchClusterBackup/backupType'
+        compartmentId:
+          description: The OCID of the compartment where the cluster backup is located.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The name of the cluster backup. Avoid entering confidential information.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the cluster backup.
+          type: string
+        lifecycleDetails:
+          description: Additional information about the current lifecycle state of the cluster backup.
+          type: string
+        lifecycleState:
+          description: The current state of the cluster backup.
+          type: string
+          x-obmcs-enumref: '#/definitions/OpensearchClusterBackup/lifecycleState'
+        sourceClusterDisplayName:
+          description: The name of the source OpenSearch cluster for the cluster backup.
+          type: string
+        sourceClusterId:
+          description: The OCID of the source OpenSearch cluster for the cluster backup.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The date and time the cluster backup was created. Format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+        timeExpired:
+          description: The date and time the cluster backup expires. Format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the cluster backup was updated. Format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - backupType
+      - sourceClusterId
+      - lifecycleState
+      type: object
+    OpensearchClusterBackupCollection:
+      description: The list of cluster backups returned in a cluster backup search.
+      properties:
+        items:
+          description: The list of cluster backups.
+          items:
+            $ref: '#/components/schemas/OpensearchClusterBackupSummary'
+          type: array
+      required:
+      - items
       type: object
   responses:
     default:
