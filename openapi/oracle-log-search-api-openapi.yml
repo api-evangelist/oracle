@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  description: Use the Logging Search API to search for logs in your compartments, log groups, and log objects. For more information, see [Logging Overview](/iaas/Content/Logging/Concepts/loggingoverview.htm).
+  description: Use the Logging Search API to search for logs in your compartments, log groups, and log objects. For more information, see Logging Overview.
   license:
     name: Oracle Corporation
   title: Logging Search Log Search API
@@ -20,16 +20,14 @@ info:
 servers:
 - url: https://logging.$region.oraclecloud.com/20190909
 tags:
-- name: logSearch
+- name: Log Search
 paths:
   /search:
     post:
       description: 'Submit a query to search logs.
 
 
-        See [Using the API](/Content/Logging/Concepts/using_the_api_searchlogs.htm) for SDK examples.
-
-        '
+        See Using the API for SDK examples.'
       operationId: SearchLogs
       parameters:
       - $ref: '#/components/parameters/OpcRequestIdHeader'
@@ -77,9 +75,9 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/DefaultError'
-      summary: Search logs.
+      summary: Search logs
       tags:
-      - logSearch
+      - Log Search
       x-example: "POST /20190909/search\nHost: logging.us-phoenix-1.oci.oraclecloud.com\n<var>&lt;authorization and other headers&gt;</var>\n{\n  \"timeStart\": \"2019-06-19T01:02:29.600Z\",\n  \"timeEnd\": \"2019-06-19T02:02:29.600Z\",\n  \"isReturnFieldInfo\": true,\n  \"searchQuery\": \"search \\\"<var>&lt;compartment_OCID&gt;</var>/<var>&lt;log_group_OCID&gt;</var>/<var>&lt;log_OCID&gt;</var>\\\" | where level = 'ERROR';\"\n}\n"
       x-related-resource: '#/definitions/SearchResult'
       requestBody:
@@ -93,6 +91,23 @@ paths:
         required: true
 components:
   schemas:
+    Error:
+      description: Error response object.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
     SearchResult:
       description: A log search result entry.
       properties:
@@ -102,6 +117,35 @@ components:
           type: object
       required:
       - data
+      type: object
+    SearchResponse:
+      description: Search response object.
+      properties:
+        fields:
+          description: List of log field schema information.
+          items:
+            $ref: '#/components/schemas/FieldInfo'
+          type: array
+        results:
+          description: List of search results
+          items:
+            $ref: '#/components/schemas/SearchResult'
+          type: array
+        summary:
+          $ref: '#/components/schemas/SearchResultSummary'
+      required:
+      - summary
+      type: object
+      x-example: "{\n  \"results\": [\n    {\n      \"data\": {\"ts\": \"2019-06-19T02:58:33Z\", \"severity\": \"ERROR\", \"msg\": \"ERROR 2019-06-19 02:58:33,932 Service error\"},\n    },\n    {\n      \"data\": {\"ts\": \"2019-06-19T02:59:33Z\", \"severity\": \"ERROR\", \"msg\": \"ERROR 2019-06-19 02:59:33,950 Service error\"},\n    },\n  ],\n  \"fields\": [\n      { \"fieldName\": \"ts\", \"fieldType\": \"STRING\" },\n      { \"fieldName\": \"severity\", \"fieldType\": \"STRING\" },\n      { \"fieldName\": \"msg\", \"fieldType\": \"STRING\" }\n    ]\n  \"summary\": {\n      \"resultCount\": 2,\n      \"fieldCount\": 3\n  }\n}\n"
+    SearchResultSummary:
+      description: Summary of results.
+      properties:
+        fieldCount:
+          description: Total number of field schema information.
+          type: integer
+        resultCount:
+          description: Total number of search results.
+          type: integer
       type: object
     SearchLogsDetails:
       description: Search request object.
@@ -141,52 +185,6 @@ components:
       - searchQuery
       type: object
       x-example: "{\n  \"timeStart\": \"2019-06-19T01:02:29.600Z\",\n  \"timeEnd\": \"2019-06-19T02:02:29.600Z\",\n  \"isReturnFieldInfo\": true,\n  \"searchQuery\": \"search \\\"<var>&lt;compartment_OCID&gt;</var>/<var>&lt;log_group_OCID&gt;</var>/<var>&lt;log_OCID&gt;</var>\\\" | where level = 'ERROR'\";\n}\n"
-    SearchResultSummary:
-      description: Summary of results.
-      properties:
-        fieldCount:
-          description: Total number of field schema information.
-          type: integer
-        resultCount:
-          description: Total number of search results.
-          type: integer
-      type: object
-    SearchResponse:
-      description: Search response object.
-      properties:
-        fields:
-          description: List of log field schema information.
-          items:
-            $ref: '#/components/schemas/FieldInfo'
-          type: array
-        results:
-          description: List of search results
-          items:
-            $ref: '#/components/schemas/SearchResult'
-          type: array
-        summary:
-          $ref: '#/components/schemas/SearchResultSummary'
-      required:
-      - summary
-      type: object
-      x-example: "{\n  \"results\": [\n    {\n      \"data\": {\"ts\": \"2019-06-19T02:58:33Z\", \"severity\": \"ERROR\", \"msg\": \"ERROR 2019-06-19 02:58:33,932 Service error\"},\n    },\n    {\n      \"data\": {\"ts\": \"2019-06-19T02:59:33Z\", \"severity\": \"ERROR\", \"msg\": \"ERROR 2019-06-19 02:59:33,950 Service error\"},\n    },\n  ],\n  \"fields\": [\n      { \"fieldName\": \"ts\", \"fieldType\": \"STRING\" },\n      { \"fieldName\": \"severity\", \"fieldType\": \"STRING\" },\n      { \"fieldName\": \"msg\", \"fieldType\": \"STRING\" }\n    ]\n  \"summary\": {\n      \"resultCount\": 2,\n      \"fieldCount\": 3\n  }\n}\n"
-    Error:
-      description: Error response object.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-      type: object
     FieldInfo:
       description: Contains field schema information.
       properties:
@@ -228,6 +226,13 @@ components:
         type: string
         maxLength: 1024
         minLength: 1
+    OpcRequestIdHeader:
+      description: "Unique Oracle-assigned identifier for the request. The input value can be null but an empty string will return an error. \nIf you need to contact Oracle about a particular request, please provide the request ID.\n"
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
     PaginationLimitQueryParam:
       description: 'The maximum number of items to return in a response.
 
@@ -240,13 +245,6 @@ components:
         default: 100
         maximum: 1000
         minimum: 1
-    OpcRequestIdHeader:
-      description: "Unique Oracle-assigned identifier for the request. The input value can be null but an empty string will return an error. \nIf you need to contact Oracle about a particular request, please provide the request ID.\n"
-      in: header
-      name: opc-request-id
-      required: false
-      schema:
-        type: string
   responses:
     DefaultError:
       description: An error has occurred.

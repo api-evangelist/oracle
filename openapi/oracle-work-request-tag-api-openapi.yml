@@ -1,6 +1,13 @@
 openapi: 3.2.0
 info:
-  description: "Use the Email Delivery API to do the necessary set up to send high-volume and application-generated emails through the OCI Email Delivery service.\nFor more information, see [Overview of the Email Delivery Service](/iaas/Content/Email/Concepts/overview.htm).\n\n **Note:** Write actions (POST, UPDATE, DELETE) may take several minutes to propagate and be reflected by the API.\n If a subsequent read request fails to reflect your changes, wait a few minutes and try again.\n"
+  description: 'Use the Email Delivery API to do the necessary set up to send high-volume and application-generated emails through the OCI Email Delivery service.
+
+    For more information, see Overview of the Email Delivery Service.
+
+
+    **Note:** Write actions (POST, UPDATE, DELETE) may take several minutes to propagate and be reflected by the API.
+
+    If a subsequent read request fails to reflect your changes, wait a few minutes and try again.'
   license:
     name: Oracle Corporation
   title: Email Delivery ${work Request Tag} API
@@ -24,9 +31,7 @@ tags:
 paths:
   /workRequests:
     get:
-      description: 'Lists the work requests in a compartment.
-
-        '
+      description: Lists the work requests in a compartment.
       operationId: ListWorkRequests
       parameters:
       - $ref: '#/components/parameters/compartmentIdQueryParam'
@@ -124,9 +129,7 @@ paths:
       x-related-resource: '#/definitions/WorkRequest'
   /workRequests/{workRequestId}/errors:
     get:
-      description: 'Return a (paginated) list of errors for a given work request.
-
-        '
+      description: Return a (paginated) list of errors for a given work request.
       operationId: ListWorkRequestErrors
       parameters:
       - $ref: '#/components/parameters/WorkRequestIdPathParam'
@@ -177,9 +180,7 @@ paths:
       x-related-resource: '#/definitions/WorkRequestErrorCollection'
   /workRequests/{workRequestId}/logs:
     get:
-      description: 'Return a (paginated) list of logs for a given work request.
-
-        '
+      description: Return a (paginated) list of logs for a given work request.
       operationId: ListWorkRequestLogs
       parameters:
       - $ref: '#/components/parameters/WorkRequestIdPathParam'
@@ -229,113 +230,151 @@ paths:
       - ${work-request-tag}
       x-related-resource: '#/definitions/WorkRequestLogEntryCollection'
 components:
-  responses:
-    '400':
-      description: Incorrectly formatted request.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '401':
-      description: 'The required information to complete authentication was not provided or
-
-        was incorrect. Extra detail may be provided in the response body.
+  parameters:
+    WorkRequestLogAndErrorSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timestamp is descending.
 
         '
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timestamp
+        default: timestamp
+    WorkRequestIdPathParam:
+      description: The ID of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous "List" call.
 
-            Oracle about a particular request, please provide the request ID.
+        For important details about how pagination works,
 
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '500':
-      description: Internal Server Error.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+        see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
-            Oracle about a particular request, please provide the request ID.
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 2000
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending or descending order.
 
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+        '
+      in: query
+      name: sortOrder
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    WorkRequestOperationTypeQueryParam:
+      description: A filter to return only resources matching the given operation type.
+      in: query
+      name: operationType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationType'
+      schema:
+        type: string
+        enum:
+        - CREATE_DKIM
+        - DELETE_DKIM
+        - MOVE_DKIM
+        - UPDATE_DKIM
+        - CREATE_EMAIL_DOMAIN
+        - DELETE_EMAIL_DOMAIN
+        - MOVE_EMAIL_DOMAIN
+        - UPDATE_EMAIL_DOMAIN
+        - CREATE_RETURN_PATH
+        - DELETE_RETURN_PATH
+        - UPDATE_RETURN_PATH
+        - CREATE_IP_POOL
+        - UPDATE_IP_POOL
+        - DELETE_IP_POOL
+        - MOVE_IP_POOL
+    RequestIdHeader:
+      description: The request ID for tracing from the system
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    WorkRequestStatusQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given OperationStatus.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - WAITING
+        - NEEDS_ATTENTION
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+    ResourceIdentifierQueryParam:
+      description: The ID of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
 
-            Oracle about a particular request, please provide the request ID.
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
 
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '404':
-      description: Authorization failed or the requested resource was not found.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+        paginated "List" call. `1` is the minimum, `1000` is the maximum. For important details about
 
-            Oracle about a particular request, please provide the request ID.
+        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '429':
-      description: Too Many Requests
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+        '
+      in: query
+      name: limit
+      x-default-description: 'null'
+      schema:
+        type: integer
+        maximum: 1000
+        minimum: 1
+    compartmentIdQueryParam:
+      description: The OCID for the compartment.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
   schemas:
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestError objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
     WorkRequestError:
       description: An error encountered while executing a work request.
       properties:
@@ -355,6 +394,57 @@ components:
       - code
       - message
       - timestamp
+    WorkRequestSummaryCollection:
+      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestSummary objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time the log message was written. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    Error:
+      description: An error has occurred.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
     WorkRequestSummary:
       description: A summary of the status of a work request.
       properties:
@@ -533,57 +623,6 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestLogEntries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    Error:
-      description: An error has occurred.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    WorkRequestSummaryCollection:
-      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestSummary objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
     WorkRequestResource:
       description: A resource created or operated on by a work request.
       properties:
@@ -619,150 +658,112 @@ components:
       - actionType
       - entityType
       - identifier
-  parameters:
-    compartmentIdQueryParam:
-      description: The OCID for the compartment.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    WorkRequestOperationTypeQueryParam:
-      description: A filter to return only resources matching the given operation type.
-      in: query
-      name: operationType
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationType'
-      schema:
-        type: string
-        enum:
-        - CREATE_DKIM
-        - DELETE_DKIM
-        - MOVE_DKIM
-        - UPDATE_DKIM
-        - CREATE_EMAIL_DOMAIN
-        - DELETE_EMAIL_DOMAIN
-        - MOVE_EMAIL_DOMAIN
-        - UPDATE_EMAIL_DOMAIN
-        - CREATE_RETURN_PATH
-        - DELETE_RETURN_PATH
-        - UPDATE_RETURN_PATH
-        - CREATE_IP_POOL
-        - UPDATE_IP_POOL
-        - DELETE_IP_POOL
-        - MOVE_IP_POOL
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestLogEntries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+  responses:
+    '401':
+      description: 'The required information to complete authentication was not provided or
+
+        was incorrect. Extra detail may be provided in the response body.
 
         '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending or descending order.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-        '
-      in: query
-      name: sortOrder
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    WorkRequestIdPathParam:
-      description: The ID of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    WorkRequestStatusQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given OperationStatus.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-      schema:
-        type: string
-        enum:
-        - ACCEPTED
-        - IN_PROGRESS
-        - WAITING
-        - NEEDS_ATTENTION
-        - FAILED
-        - SUCCEEDED
-        - CANCELING
-        - CANCELED
-    WorkRequestLogAndErrorSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timestamp is descending.
+            Oracle about a particular request, please provide the request ID.
 
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timestamp
-        default: timestamp
-    RequestIdHeader:
-      description: The request ID for tracing from the system
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous "List" call.
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too Many Requests
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-        For important details about how pagination works,
+            Oracle about a particular request, please provide the request ID.
 
-        see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 2000
-        minLength: 1
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
+            Oracle about a particular request, please provide the request ID.
 
-        paginated "List" call. `1` is the minimum, `1000` is the maximum. For important details about
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+            Oracle about a particular request, please provide the request ID.
 
-        '
-      in: query
-      name: limit
-      x-default-description: 'null'
-      schema:
-        type: integer
-        maximum: 1000
-        minimum: 1
-    ResourceIdentifierQueryParam:
-      description: The ID of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '400':
+      description: Incorrectly formatted request.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Authorization failed or the requested resource was not found.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

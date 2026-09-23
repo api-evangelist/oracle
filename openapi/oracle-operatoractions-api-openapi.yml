@@ -1,6 +1,8 @@
 openapi: 3.2.0
 info:
-  description: "Operator Access Control enables you to control the time duration and the actions an Oracle operator can perform on your Exadata Cloud@Customer infrastructure.\nUsing logging service, you can view a near real-time audit report of all actions performed by an Oracle operator. \n"
+  description: 'Operator Access Control enables you to control the time duration and the actions an Oracle operator can perform on your Exadata Cloud@Customer infrastructure.
+
+    Using logging service, you can view a near real-time audit report of all actions performed by an Oracle operator.'
   title: Operator Access Control Operator Actions API
   version: '20200630'
   x-provenance:
@@ -23,9 +25,7 @@ tags:
 paths:
   /operatorActions:
     get:
-      description: 'Lists all the OperatorActions available in the system.
-
-        '
+      description: Lists all the OperatorActions available in the system.
       operationId: ListOperatorActions
       parameters:
       - $ref: '#/components/parameters/OperatorActionNameQueryParam'
@@ -74,7 +74,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      summary: Lists all the operator actions available in the system. You need to use these when you define an operator control.
+      summary: Lists all the operator actions available in the system.
       tags:
       - operatorActions
       x-related-resource: '#/definitions/OperatorAction'
@@ -119,37 +119,29 @@ paths:
       x-related-resource: '#/definitions/OperatorAction'
 components:
   schemas:
-    OperatorAction:
-      description: "Details of the operator action. Operator actions are a pre-defined set of commands available to the operator on different layers of the infrastructure. Although the groupings may differ depending on the infrastructure layers, \nthe groups are designed to enable the operator access to commands to resolve a specific set of issues. The infrastructure layers controlled by the Operator Control include Dom0, CellServer, and Control Plane Server (CPS).\n\nThere are five groups available to the operator. x-obmcs-top-level-enum: '#/definitions/OperatorActionCategories' enum: *OPERATORACTIONCATEGORIES\n\nThe following infrastructure layers are controlled by the operator actions x-obmcs-top-level-enum: '#/definitions/InfrastructureLayers' enum: *INFRASTRUCTURELAYERS\n"
+    OperatorActionCollection:
+      description: Results of operator action search, which contains summary of the action.
       properties:
-        component:
-          description: Name of the infrastructure layer associated with the operator action.
-          type: string
-        customerDisplayName:
-          description: Display Name of the operator action.
-          type: string
-        description:
-          description: 'Description of the operator action in terms of associated risk profile, and characteristics of the operating system commands made
-
-            available to the operator under this operator action.
-
-            '
-          type: string
-        id:
-          description: Unique Oracle assigned identifier for the operator action.
-          type: string
-        name:
-          description: Unique name of the operator action.
-          type: string
-        properties:
-          description: Fine grained properties associated with the operator control.
+        items:
+          description: contains OperatorActionSummary
           items:
-            $ref: '#/components/schemas/OperatorActionProperties'
+            $ref: '#/components/schemas/OperatorActionSummary'
           type: array
       required:
-      - id
-      - name
+      - items
       type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     OperatorActionSummary:
       description: Details of the operator action. Operator actions are pre-defined set of commands available to the operator on different layers of the infrastructure.
       properties:
@@ -193,48 +185,53 @@ components:
           description: value of the property
           type: string
       type: object
-    Error:
-      description: Error Information.
+    OperatorAction:
+      description: "Details of the operator action. Operator actions are a pre-defined set of commands available to the operator on different layers of the infrastructure. Although the groupings may differ depending on the infrastructure layers, \nthe groups are designed to enable the operator access to commands to resolve a specific set of issues. The infrastructure layers controlled by the Operator Control include Dom0, CellServer, and Control Plane Server (CPS).\n\nThere are five groups available to the operator. x-obmcs-top-level-enum: '#/definitions/OperatorActionCategories' enum: *OPERATORACTIONCATEGORIES\n\nThe following infrastructure layers are controlled by the operator actions x-obmcs-top-level-enum: '#/definitions/InfrastructureLayers' enum: *INFRASTRUCTURELAYERS\n"
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+        component:
+          description: Name of the infrastructure layer associated with the operator action.
           type: string
-        message:
-          description: A human-readable error string.
+        customerDisplayName:
+          description: Display Name of the operator action.
           type: string
-      required:
-      - code
-      - message
-    OperatorActionCollection:
-      description: Results of operator action search, which contains summary of the action.
-      properties:
-        items:
-          description: contains OperatorActionSummary
+        description:
+          description: 'Description of the operator action in terms of associated risk profile, and characteristics of the operating system commands made
+
+            available to the operator under this operator action.
+
+            '
+          type: string
+        id:
+          description: Unique Oracle assigned identifier for the operator action.
+          type: string
+        name:
+          description: Unique name of the operator action.
+          type: string
+        properties:
+          description: Fine grained properties associated with the operator control.
           items:
-            $ref: '#/components/schemas/OperatorActionSummary'
+            $ref: '#/components/schemas/OperatorActionProperties'
           type: array
       required:
-      - items
+      - id
+      - name
       type: object
   parameters:
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
+    OperatorActionPathParam:
+      description: Unique Oracle supplied identifier associated with the operator action.
+      in: path
+      name: operatorActionId
+      required: true
       schema:
         type: string
-    OperatorActionLifecycleStateQueryParam:
-      description: A filter to return only resources whose lifecycleState matches the given OperatorAction lifecycleState.
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
       in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperatorActionLifecycleStates'
+      name: page
       schema:
         type: string
-        enum:
-        - ACTIVE
-        - INACTIVE
+        maxLength: 1024
+        minLength: 1
     SortOrderQueryParam:
       description: The sort order to use, either 'asc' or 'desc'.
       in: query
@@ -258,14 +255,6 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -275,6 +264,12 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
       in: query
@@ -291,13 +286,18 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    OperatorActionPathParam:
-      description: Unique Oracle supplied identifier associated with the operator action.
-      in: path
-      name: operatorActionId
-      required: true
+    OperatorActionLifecycleStateQueryParam:
+      description: A filter to return only resources whose lifecycleState matches the given OperatorAction lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperatorActionLifecycleStates'
       schema:
         type: string
+        enum:
+        - ACTIVE
+        - INACTIVE
   responses:
     default:
       description: Unknown Error

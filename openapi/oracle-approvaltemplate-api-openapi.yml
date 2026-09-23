@@ -1,11 +1,9 @@
 openapi: 3.2.0
 info:
-  description: 'Use the Managed Access API to approve access requests, create and manage templates, and manage resource approval settings. For more information, see [Managed Access Overview](https://docs.oracle.com/iaas/Content/managed-access/home.htm).
+  description: 'Use the Managed Access API to approve access requests, create and manage templates, and manage resource approval settings. For more information, see Managed Access Overview.
 
 
-    Use the table of contents and search tool to explore the Managed Access API.
-
-    '
+    Use the table of contents and search tool to explore the Managed Access API.'
   title: Managed Access Approval Template API
   version: '20220126'
   x-provenance:
@@ -28,9 +26,7 @@ tags:
 paths:
   /approvalTemplates:
     get:
-      description: 'Retrieves a list of ApprovalTemplateSummary objects in a compartment.
-
-        '
+      description: Retrieves a list of ApprovalTemplateSummary objects in a compartment.
       operationId: ListApprovalTemplates
       parameters:
       - $ref: '#/components/parameters/RequestIdHeader'
@@ -80,14 +76,12 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      summary: Retrieves a list of all approval templates in a compartment.
+      summary: Retrieves a list of all approval templates in a compartment
       tags:
       - approvalTemplate
       x-related-resource: '#/definitions/ApprovalTemplateCollection'
     post:
-      description: 'Creates a new approval template.
-
-        '
+      description: Creates a new approval template.
       operationId: CreateApprovalTemplate
       parameters:
       - $ref: '#/components/parameters/RetryTokenHeader'
@@ -134,7 +128,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      summary: Creates a new approval template.
+      summary: Creates a new approval template
       tags:
       - approvalTemplate
       x-related-resource: '#/definitions/ApprovalTemplate'
@@ -315,7 +309,7 @@ paths:
           $ref: '#/components/responses/429'
         500:
           $ref: '#/components/responses/500'
-      summary: Moves a resource into a different compartment.
+      summary: Moves a resource into a different compartment
       tags:
       - approvalTemplate
       x-related-resource: '#/definitions/ApprovalTemplate'
@@ -328,6 +322,114 @@ paths:
         required: true
 components:
   schemas:
+    ChangeApprovalTemplateCompartmentDetails:
+      description: The information to be updated.
+      properties:
+        compartmentId:
+          description: The unique identifier (OCID) of the compartment where the resource is located.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    ApprovalTemplateCollection:
+      description: Results of approval template search. Contains both ApprovalTemplateSummary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of ApprovalTemplateSummary.
+          items:
+            $ref: '#/components/schemas/ApprovalTemplateSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ApprovalTemplateSummary:
+      description: Summary info for an approval tmeplate.
+      properties:
+        approverLevels:
+          $ref: '#/components/schemas/ApproverLevels'
+        autoApprovalState:
+          description: The auto approval state of the lockbox.
+          enum:
+          - ENABLED
+          - DISABLED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LockboxAutoApprovalState'
+        compartmentId:
+          description: The unique identifier (OCID) of the customer compartment where the approval template is located.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The approval template display name.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The unique identifier (OCID) of the approval template, which can't be changed after creation.
+          type: string
+        lifecycleState:
+          description: The current state of the approval template.
+          type: string
+          x-obmcs-enumref: '#/definitions/ApprovalTemplate/lifecycleState'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time the the approval template was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the approval template was updated. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - compartmentId
+      - timeCreated
+      type: object
     ApproverLevels:
       description: The approver levels.
       properties:
@@ -340,6 +442,38 @@ components:
       required:
       - level1
       type: object
+    ApproverInfo:
+      description: The approver data for this approver level.
+      properties:
+        approverId:
+          description: The group or user ocid of the approver for this approver level.
+          type: string
+        approverType:
+          description: The approver type of this approver level.
+          enum:
+          - GROUP
+          - USER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ApproverType'
+        domainId:
+          description: The identity domain ocid of the approver.
+          type: string
+      required:
+      - approverType
+      - approverId
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     CreateApprovalTemplateDetails:
       description: The configuration details for a new approval template.
       properties:
@@ -391,93 +525,6 @@ components:
       required:
       - compartmentId
       type: object
-    UpdateApprovalTemplateDetails:
-      description: The action to be updated.
-      properties:
-        approverLevels:
-          $ref: '#/components/schemas/ApproverLevels'
-        autoApprovalState:
-          description: The auto approval state of the lockbox.
-          enum:
-          - ENABLED
-          - DISABLED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LockboxAutoApprovalState'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: approval template identifier
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      type: object
-    ChangeApprovalTemplateCompartmentDetails:
-      description: The information to be updated.
-      properties:
-        compartmentId:
-          description: The unique identifier (OCID) of the compartment where the resource is located.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    ApproverInfo:
-      description: The approver data for this approver level.
-      properties:
-        approverId:
-          description: The group or user ocid of the approver for this approver level.
-          type: string
-        approverType:
-          description: The approver type of this approver level.
-          enum:
-          - GROUP
-          - USER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ApproverType'
-        domainId:
-          description: The identity domain ocid of the approver.
-          type: string
-      required:
-      - approverType
-      - approverId
-      type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ApprovalTemplate:
       description: Group/User OCIDs of those who can approve/deny/revoke operator's request to access associated resources.
       properties:
@@ -570,8 +617,8 @@ components:
       - compartmentId
       - timeCreated
       type: object
-    ApprovalTemplateSummary:
-      description: Summary info for an approval tmeplate.
+    UpdateApprovalTemplateDetails:
+      description: The action to be updated.
       properties:
         approverLevels:
           $ref: '#/components/schemas/ApproverLevels'
@@ -582,9 +629,6 @@ components:
           - DISABLED
           type: string
           x-obmcs-top-level-enum: '#/definitions/LockboxAutoApprovalState'
-        compartmentId:
-          description: The unique identifier (OCID) of the customer compartment where the approval template is located.
-          type: string
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -605,7 +649,7 @@ components:
             '
           type: object
         displayName:
-          description: The approval template display name.
+          description: approval template identifier
           type: string
         freeformTags:
           additionalProperties:
@@ -616,58 +660,49 @@ components:
 
             '
           type: object
-        id:
-          description: The unique identifier (OCID) of the approval template, which can't be changed after creation.
-          type: string
-        lifecycleState:
-          description: The current state of the approval template.
-          type: string
-          x-obmcs-enumref: '#/definitions/ApprovalTemplate/lifecycleState'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the the approval template was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the approval template was updated. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - compartmentId
-      - timeCreated
-      type: object
-    ApprovalTemplateCollection:
-      description: Results of approval template search. Contains both ApprovalTemplateSummary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of ApprovalTemplateSummary.
-          items:
-            $ref: '#/components/schemas/ApprovalTemplateSummary'
-          type: array
-      required:
-      - items
       type: object
   parameters:
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    IdentifierQueryParam:
+      description: A generic Id query param used to filter lockbox, access request and approval template by Id.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ApprovalTemplateIdentifierPathParam:
+      description: The unique identifier (OCID) of the approval template.
+      in: path
+      name: approvalTemplateId
+      required: true
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
 
@@ -681,17 +716,29 @@ components:
         - displayName
         - id
         default: timeCreated
-    ApprovalTemplateIdentifierPathParam:
-      description: The unique identifier (OCID) of the approval template.
-      in: path
-      name: approvalTemplateId
-      required: true
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
       schema:
         type: string
-    IdentifierQueryParam:
-      description: A generic Id query param used to filter lockbox, access request and approval template by Id.
+        maxLength: 64
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
       in: query
-      name: id
+      name: displayName
       x-default-description: 'null'
       schema:
         type: string
@@ -726,42 +773,13 @@ components:
       name: opc-request-id
       schema:
         type: string
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
       in: query
-      name: page
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -771,30 +789,6 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

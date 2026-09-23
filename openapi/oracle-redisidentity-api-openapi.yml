@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  description: Use the OCI Cache API to create and manage clusters. A cluster is a memory-based storage solution. For more information, see [OCI Cache](/iaas/Content/ocicache/home.htm).
+  description: Use the OCI Cache API to create and manage clusters. A cluster is a memory-based storage solution. For more information, see OCI Cache.
   title: OCI Cache Redis Identity API
   version: '20220315'
   x-provenance:
@@ -80,13 +80,62 @@ paths:
         description: Details to create the token
         required: true
 components:
+  schemas:
+    CreateIdentityTokenDetails:
+      description: Generate an Identity token for Redis cluster
+      properties:
+        publicKey:
+          description: User public key pair
+          type: string
+        redisUser:
+          description: Redis User generating identity token.
+          type: string
+      required:
+      - publicKey
+      - redisUser
+      type: object
+    Error:
+      description: Specifies details for an error.
+      properties:
+        code:
+          description: A machine-usable code for the error that occured.
+          type: string
+        message:
+          description: A human-readable error string for the error that occured.
+          type: string
+      required:
+      - code
+      - message
+    IdentityTokenDetailsResponse:
+      description: Response an Identity token generated for Redis cluster
+      properties:
+        identityToken:
+          description: Generated Identity token
+          type: string
+        redisUser:
+          description: Redis user for the newly created identity token
+          type: string
+      required:
+      - identityToken
+      - redisUser
+      type: object
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -106,6 +155,19 @@ components:
         type: string
         maxLength: 64
         minLength: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RedisClusterIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
+      in: path
+      name: redisClusterId
+      required: true
+      schema:
+        type: string
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call
 
@@ -123,68 +185,6 @@ components:
       required: false
       schema:
         type: string
-    RedisClusterIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm#Oracle) of the cluster.
-      in: path
-      name: redisClusterId
-      required: true
-      schema:
-        type: string
-  schemas:
-    CreateIdentityTokenDetails:
-      description: Generate an Identity token for Redis cluster
-      properties:
-        publicKey:
-          description: User public key pair
-          type: string
-        redisUser:
-          description: Redis User generating identity token.
-          type: string
-      required:
-      - publicKey
-      - redisUser
-      type: object
-    IdentityTokenDetailsResponse:
-      description: Response an Identity token generated for Redis cluster
-      properties:
-        identityToken:
-          description: Generated Identity token
-          type: string
-        redisUser:
-          description: Redis user for the newly created identity token
-          type: string
-      required:
-      - identityToken
-      - redisUser
-      type: object
-    Error:
-      description: Specifies details for an error.
-      properties:
-        code:
-          description: A machine-usable code for the error that occured.
-          type: string
-        message:
-          description: A human-readable error string for the error that occured.
-          type: string
-      required:
-      - code
-      - message
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

@@ -1,6 +1,8 @@
 openapi: 3.2.0
 info:
-  description: "This service is used to restrict the control plane service apis; so that everybody won't be \nable to access those apis.\nThere are two main resouces defined as a part of this service\n1. PrivilegedApiControl: This is created by the customer which defines which service apis are \n   controlled and who can access it.\n2. PrivilegedApiRequest: This is a request object again created by the customer operators who           seek access to those privileged apis. After a request is obtained based on the                       PrivilegedAccessControl for which the api belongs to, either it can be approved so that the          requested person can execute the service apis or it will wait for the customer to approve it.\n"
+  description: 'This service is used to restrict the control plane service apis; so that everybody won''t be
+
+    able to access those apis.'
   title: Oracle API Access Control Privileged API Work Request API
   version: '20241130'
   x-provenance:
@@ -23,9 +25,7 @@ tags:
 paths:
   /workRequests:
     get:
-      description: 'Lists the work requests in a compartment.
-
-        '
+      description: Lists the work requests in a compartment.
       operationId: ListWorkRequests
       parameters:
       - $ref: '#/components/parameters/CompartmentIdQueryParam'
@@ -159,9 +159,7 @@ paths:
       x-related-resource: '#/definitions/WorkRequest'
   /workRequests/{workRequestId}/errors:
     get:
-      description: 'Lists the errors for a work request.
-
-        '
+      description: Lists the errors for a work request.
       operationId: ListWorkRequestErrors
       parameters:
       - $ref: '#/components/parameters/WorkRequestIdPathParam'
@@ -210,9 +208,7 @@ paths:
       x-related-resource: '#/definitions/WorkRequestError'
   /workRequests/{workRequestId}/logs:
     get:
-      description: 'Lists the logs for a work request.
-
-        '
+      description: Lists the logs for a work request.
       operationId: ListWorkRequestLogs
       parameters:
       - $ref: '#/components/parameters/WorkRequestIdPathParam'
@@ -260,18 +256,148 @@ paths:
       - privilegedApiWorkRequest
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
+  parameters:
+    WorkRequestLogAndErrorSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for `timestamp` is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timestamp
+        default: timestamp
+    WorkRequestIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+        that resource. The resource will be updated or deleted only if the etag you provide
+
+        matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is `DESC` when sorting by time and `ASC` otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    WorkRequestStatusQueryParam:
+      description: A filter to return only the resources that match the given lifecycle state.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - WAITING
+        - NEEDS_ATTENTION
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+    ResourceIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+        paginated "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
   schemas:
-    WorkRequestErrorCollection:
-      description: A list of work request errors. Can contain both errors and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work request errors.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
     WorkRequestError:
       description: An error encountered while performing an operation that is tracked by a work request.
       properties:
@@ -297,6 +423,61 @@ components:
       - code
       - message
       - timestamp
+    WorkRequestSummaryCollection:
+      description: A list of work requests. Can contain both work requests and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work requests.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestLogEntry:
+      description: A log message from performing an operation that is tracked by a work request.
+      properties:
+        message:
+          description: A human-readable log message.
+          type: string
+        timestamp:
+          description: 'The date and time the log message was written, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    Error:
+      description: Error response information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestErrorCollection:
+      description: A list of work request errors. Can contain both errors and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work request errors.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
     WorkRequestSummary:
       description: Summary information about an asynchronous work request.
       properties:
@@ -513,61 +694,6 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    WorkRequestLogEntryCollection:
-      description: A list of work request logs. Can contain both logs and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work request log entries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    Error:
-      description: Error response information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    WorkRequestLogEntry:
-      description: A log message from performing an operation that is tracked by a work request.
-      properties:
-        message:
-          description: A human-readable log message.
-          type: string
-        timestamp:
-          description: 'The date and time the log message was written, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    WorkRequestSummaryCollection:
-      description: A list of work requests. Can contain both work requests and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work requests.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
     WorkRequestResource:
       description: A resource created or operated on by a work request.
       properties:
@@ -611,147 +737,17 @@ components:
       - actionType
       - entityType
       - identifier
-  parameters:
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    SortOrderQueryParam:
-      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is `DESC` when sorting by time and `ASC` otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    WorkRequestIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    WorkRequestStatusQueryParam:
-      description: A filter to return only the resources that match the given lifecycle state.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-      schema:
-        type: string
-        enum:
-        - ACCEPTED
-        - IN_PROGRESS
-        - WAITING
-        - NEEDS_ATTENTION
-        - FAILED
-        - SUCCEEDED
-        - CANCELING
-        - CANCELED
-    WorkRequestLogAndErrorSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for `timestamp` is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timestamp
-        default: timestamp
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    WorkRequestIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    ResourceIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
-
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
+    WorkRequestLogEntryCollection:
+      description: A list of work request logs. Can contain both logs and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work request log entries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
   responses:
     DefaultError:
       description: An error has occurred.

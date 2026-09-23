@@ -1,7 +1,7 @@
 openapi: 3.2.0
 info:
-  description: Use the Fusion Applications Environment Management API to manage the environments where your Fusion Applications run. For more information, see the [Fusion Applications Environment Management documentation](/iaas/Content/fusion-applications/home.htm).
-  title: Fusion Applications Environment Management Scheduled Activity API
+  description: Use the Fusion Applications Environment Management API to manage the environments where your Fusion Applications run. For more information, see the Fusion Applications Environment Management documentation.
+  title: Fusion Applications Environment Management Scheduled…
   version: '20211201'
   x-provenance:
     method: harvested
@@ -23,9 +23,7 @@ tags:
 paths:
   /fusionEnvironments/{fusionEnvironmentId}/scheduledActivities:
     get:
-      description: 'Returns a list of ScheduledActivities.
-
-        '
+      description: Returns a list of ScheduledActivities.
       operationId: ListScheduledActivities
       parameters:
       - $ref: '#/components/parameters/FusionEnvironmentIdentifierPathParam'
@@ -128,26 +126,29 @@ paths:
       - scheduledActivity
 components:
   parameters:
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ScheduledActivityIdentifierPathParam:
-      description: Unique ScheduledActivity identifier.
-      in: path
-      name: scheduledActivityId
-      required: true
-      schema:
-        type: string
-    ScheduledActivityRunCycleQueryParam:
-      description: A filter that returns all resources that match the specified run cycle.
+    ScheduledActivityLifecycleStateQueryParam:
+      description: A filter that returns all resources that match the specified status
       in: query
-      name: runCycle
+      name: lifecycleState
       required: false
-      x-default-description: Returns all states by default
-      x-obmcs-enumref: '#/definitions/ScheduledActivity/runCycle'
+      x-default-description: Returns all lifecycle states by default
+      x-obmcs-enumref: '#/definitions/ScheduledActivity/lifecycleState'
+      schema:
+        type: string
+    ExpectedFinishTimeQueryParam:
+      description: A filter that returns all resources that end before this date
+      in: query
+      name: timeExpectedFinishLessThanOrEqualTo
+      required: false
+      x-default-description: Returns based on other filters by default
+      schema:
+        type: string
+        format: date-time
+    FusionEnvironmentIdentifierPathParam:
+      description: unique FusionEnvironment identifier
+      in: path
+      name: fusionEnvironmentId
+      required: true
       schema:
         type: string
     SortOrderQueryParam:
@@ -161,6 +162,22 @@ components:
         - ASC
         - DESC
         default: DESC
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    ScheduledActivityRunCycleQueryParam:
+      description: A filter that returns all resources that match the specified run cycle.
+      in: query
+      name: runCycle
+      required: false
+      x-default-description: Returns all states by default
+      x-obmcs-enumref: '#/definitions/ScheduledActivity/runCycle'
+      schema:
+        type: string
     ScheduledStartTimeQueryParam:
       description: A filter that returns all resources that are scheduled after this date
       in: query
@@ -170,13 +187,6 @@ components:
       schema:
         type: string
         format: date-time
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
@@ -189,40 +199,6 @@ components:
         - TIME_CREATED
         - DISPLAY_NAME
         default: TIME_CREATED
-    ScheduledActivityLifecycleStateQueryParam:
-      description: A filter that returns all resources that match the specified status
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: Returns all lifecycle states by default
-      x-obmcs-enumref: '#/definitions/ScheduledActivity/lifecycleState'
-      schema:
-        type: string
-    FusionEnvironmentIdentifierPathParam:
-      description: unique FusionEnvironment identifier
-      in: path
-      name: fusionEnvironmentId
-      required: true
-      schema:
-        type: string
-    ExpectedFinishTimeQueryParam:
-      description: A filter that returns all resources that end before this date
-      in: query
-      name: timeExpectedFinishLessThanOrEqualTo
-      required: false
-      x-default-description: Returns based on other filters by default
-      schema:
-        type: string
-        format: date-time
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -232,89 +208,29 @@ components:
         default: 100
         maximum: 100
         minimum: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ScheduledActivityIdentifierPathParam:
+      description: Unique ScheduledActivity identifier.
+      in: path
+      name: scheduledActivityId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
   schemas:
-    ScheduledActivity:
-      description: Details of scheduled activity.
-      properties:
-        actions:
-          description: List of actions
-          items:
-            $ref: '#/components/schemas/Action'
-          type: array
-        delayInHours:
-          description: Cumulative delay hours
-          type: integer
-        displayName:
-          description: scheduled activity display name, can be renamed.
-          type: string
-        fusionEnvironmentId:
-          description: FAaaS Environment Identifier.
-          type: string
-        id:
-          description: Unique identifier that is immutable on creation.
-          type: string
-        lifecycleDetails:
-          description: A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
-          enum:
-          - NONE
-          - ROLLBACKACCEPTED
-          - ROLLBACKINPROGRESS
-          - ROLLBACKSUCCEEDED
-          - ROLLBACKFAILED
-          type: string
-        lifecycleState:
-          description: The current state of the scheduledActivity.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELED
-          type: string
-        runCycle:
-          description: run cadence.
-          enum:
-          - QUARTERLY
-          - MONTHLY
-          - ONEOFF
-          - VERTEX
-          type: string
-        serviceAvailability:
-          description: Service availability / impact during scheduled activity execution up down
-          enum:
-          - AVAILABLE
-          - UNAVAILABLE
-          type: string
-        timeCreated:
-          description: The time the scheduled activity record was created. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeExpectedFinish:
-          description: Current time the scheduled activity is scheduled to end. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeFinished:
-          description: The time the scheduled activity actually completed / cancelled / failed. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeScheduledStart:
-          description: Current time the scheduled activity is scheduled to start. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the scheduled activity record was updated. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - runCycle
-      - fusionEnvironmentId
-      - lifecycleState
-      - timeScheduledStart
-      - timeExpectedFinish
-      - serviceAvailability
-      type: object
     ScheduledActivitySummary:
       description: Summary of the scheduled activity for a Fusion environment.
       properties:
@@ -408,6 +324,18 @@ components:
       - timeExpectedFinish
       - serviceAvailability
       type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     Action:
       description: Action details.
       discriminator:
@@ -439,6 +367,88 @@ components:
       required:
       - actionType
       - description
+    ScheduledActivity:
+      description: Details of scheduled activity.
+      properties:
+        actions:
+          description: List of actions
+          items:
+            $ref: '#/components/schemas/Action'
+          type: array
+        delayInHours:
+          description: Cumulative delay hours
+          type: integer
+        displayName:
+          description: scheduled activity display name, can be renamed.
+          type: string
+        fusionEnvironmentId:
+          description: FAaaS Environment Identifier.
+          type: string
+        id:
+          description: Unique identifier that is immutable on creation.
+          type: string
+        lifecycleDetails:
+          description: A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
+          enum:
+          - NONE
+          - ROLLBACKACCEPTED
+          - ROLLBACKINPROGRESS
+          - ROLLBACKSUCCEEDED
+          - ROLLBACKFAILED
+          type: string
+        lifecycleState:
+          description: The current state of the scheduledActivity.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELED
+          type: string
+        runCycle:
+          description: run cadence.
+          enum:
+          - QUARTERLY
+          - MONTHLY
+          - ONEOFF
+          - VERTEX
+          type: string
+        serviceAvailability:
+          description: Service availability / impact during scheduled activity execution up down
+          enum:
+          - AVAILABLE
+          - UNAVAILABLE
+          type: string
+        timeCreated:
+          description: The time the scheduled activity record was created. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeExpectedFinish:
+          description: Current time the scheduled activity is scheduled to end. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeFinished:
+          description: The time the scheduled activity actually completed / cancelled / failed. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeScheduledStart:
+          description: Current time the scheduled activity is scheduled to start. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the scheduled activity record was updated. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - runCycle
+      - fusionEnvironmentId
+      - lifecycleState
+      - timeScheduledStart
+      - timeExpectedFinish
+      - serviceAvailability
+      type: object
     ScheduledActivityCollection:
       description: Results of a scheduled activity search.
       properties:
@@ -450,18 +460,6 @@ components:
       required:
       - items
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
   responses:
     default:
       description: Unknown Error

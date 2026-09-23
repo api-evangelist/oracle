@@ -20,7 +20,7 @@ info:
 servers:
 - url: http://localhost:9090/
 tags:
-- name: limits
+- name: Limits
 paths:
   /20190729/limitDefinitions:
     get:
@@ -28,9 +28,7 @@ paths:
 
         If the subscription ID is provided, then only resource limits supported by the subscription will be returned.
 
-        If the `areQuotasSupported` property is true, you can create quota policies on top of this limit at the compartment level.
-
-        '
+        If the `areQuotasSupported` property is true, you can create quota policies on top of this limit at the compartment level.'
       operationId: ListLimitDefinitions
       parameters:
       - $ref: '#/components/parameters/RootCompartmentIdQueryParam'
@@ -171,17 +169,15 @@ paths:
                 items:
                   $ref: '#/components/schemas/LimitDefinitionSummary'
                 type: array
-      summary: Get the list of resource limits for a service.
+      summary: Get the list of resource limits for a service
       tags:
-      - limits
+      - Limits
       x-obmcs-client-retries-enabled: true
   /20190729/limitValues:
     get:
       description: 'Includes a full list of resource limits belonging to a given service.
 
-        If the subscription ID is provided, the limit value for the subscription will be returned.
-
-        '
+        If the subscription ID is provided, the limit value for the subscription will be returned.'
       operationId: ListLimitValues
       parameters:
       - $ref: '#/components/parameters/RootCompartmentIdQueryParam'
@@ -344,17 +340,15 @@ paths:
                 items:
                   $ref: '#/components/schemas/LimitValueSummary'
                 type: array
-      summary: Get the full list of resource limit values for the given service.
+      summary: Get the full list of resource limit values for the given service
       tags:
-      - limits
+      - Limits
       x-obmcs-client-retries-enabled: true
   /20190729/services:
     get:
       description: 'Returns the list of supported services. If subscription ID is provided then only services supported by subscription will be returned.
 
-        This includes the programmatic service name, along with the friendly service name.
-
-        '
+        This includes the programmatic service name, along with the friendly service name.'
       operationId: ListServices
       parameters:
       - $ref: '#/components/parameters/RootCompartmentIdQueryParam'
@@ -482,13 +476,21 @@ paths:
                 items:
                   $ref: '#/components/schemas/ServiceSummary'
                 type: array
-      summary: Returns the list of supported services that have resource limits exposed.
+      summary: Returns the list of supported services that have resource limits exposed
       tags:
-      - limits
+      - Limits
       x-obmcs-client-retries-enabled: true
   /20190729/services/{serviceName}/limits/{limitName}/resourceAvailability:
     get:
-      description: "For a given compartmentId, resource limit name, and scope, returns the following:\n  * The number of available resources associated with the given limit.\n  * The usage in the selected compartment for the given limit.\nIf the subscription ID is provided, then usage for resource created in that subscription will be returned.\nNote that not all resource limits support this API. If the value is not available, the API returns a 404 response.\n"
+      description: 'For a given compartmentId, resource limit name, and scope, returns the following:
+
+        * The number of available resources associated with the given limit.
+
+        * The usage in the selected compartment for the given limit.
+
+        If the subscription ID is provided, then usage for resource created in that subscription will be returned.
+
+        Note that not all resource limits support this API. If the value is not available, the API returns a 404 response.'
       operationId: GetResourceAvailability
       parameters:
       - description: The service name of the target quota.
@@ -635,24 +637,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResourceAvailability'
-      summary: 'Get the availability and usage within a compartment for a given resource limit.
-
-        '
+      summary: Get the availability and usage within a compartment for a given resource limit
       tags:
-      - limits
+      - Limits
       x-obmcs-client-retries-enabled: true
 components:
   parameters:
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
-
-        particular request, please provide the request ID.
+    SortByForServicesQueryParam:
+      description: 'The field to sort by.
 
         '
-      in: header
-      name: opc-request-id
+      in: query
+      name: sortBy
+      required: false
       schema:
         type: string
+        enum:
+        - name
+        - description
+        default: name
     ExternalLocationQueryParam:
       description: 'The external cloud provider location.
 
@@ -667,18 +670,17 @@ components:
         type: string
         maxLength: 100
         minLength: 1
-    SortByForLimitValuesQueryParam:
-      description: 'The field to sort by. The sorting is by availabilityDomain, as a second level field, if available.
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` response header from the previous "List" call.
 
         '
       in: query
-      name: sortBy
-      required: false
+      name: page
       schema:
         type: string
-        enum:
-        - name
-        default: name
+        default: 0
+        maxLength: 512
+        minLength: 1
     SortOrderQueryParam:
       description: 'The sort order to use, either ''asc'' or ''desc''. By default, it is ascending.
 
@@ -693,17 +695,30 @@ components:
         - ASC
         - DESC
         default: ASC
-    PaginationTokenQueryParam:
-      description: 'The value of the `opc-next-page` response header from the previous "List" call.
+    SubscriptionIdQueryParam:
+      description: 'The subscription OCID assigned to the tenant.
 
         '
       in: query
-      name: page
+      name: subscriptionId
+      required: false
+      x-default-description: 'Defaults to null.
+
+        '
       schema:
         type: string
-        default: 0
-        maxLength: 512
-        minLength: 1
+    SortByForLimitValuesQueryParam:
+      description: 'The field to sort by. The sorting is by availabilityDomain, as a second level field, if available.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - name
+        default: name
     RootCompartmentIdQueryParam:
       description: 'The OCID of the parent compartment (remember that the tenancy is simply the root compartment).
 
@@ -715,6 +730,17 @@ components:
         type: string
         maxLength: 100
         minLength: 1
+    PaginationLimitForServiceLimitsQueryParam:
+      description: 'The maximum number of items to return in a paginated "List" call.
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     SortByForDefinitionsQueryParam:
       description: 'The field to sort by.
 
@@ -728,43 +754,91 @@ components:
         - name
         - description
         default: name
-    SubscriptionIdQueryParam:
-      description: 'The subscription OCID assigned to the tenant.
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
 
         '
-      in: query
-      name: subscriptionId
-      required: false
-      x-default-description: 'Defaults to null.
-
-        '
+      in: header
+      name: opc-request-id
       schema:
         type: string
-    SortByForServicesQueryParam:
-      description: 'The field to sort by.
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - name
-        - description
-        default: name
-    PaginationLimitForServiceLimitsQueryParam:
-      description: 'The maximum number of items to return in a paginated "List" call.
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
   schemas:
+    ResourceAvailability:
+      description: 'The availability of a given resource limit, based on the usage, tenant service limits, and quotas set for the tenancy.
+
+        Note: We cannot guarantee this data for all the limits. In such cases, these fields will be empty.
+
+        '
+      properties:
+        available:
+          description: 'The count of available resources. To support resources with fractional counts,
+
+            the field rounds down to the nearest integer.
+
+            '
+          format: int64
+          type: integer
+        effectiveQuotaValue:
+          description: 'The effective quota value for the given compartment. This field is only present if there is a
+
+            current quota policy affecting the current resource in the target region or availability domain.
+
+            '
+          type: number
+        fractionalAvailability:
+          description: 'The most accurate count of available resources.
+
+            '
+          type: number
+        fractionalUsage:
+          description: 'The current most accurate usage in the given compartment.
+
+            '
+          type: number
+        used:
+          description: 'The current usage in the given compartment. To support resources with fractional counts,
+
+            the field rounds up to the nearest integer.
+
+            '
+          format: int64
+          type: integer
+      type: object
+    Error:
+      description: Generic error object.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ServiceSummary:
+      description: A specific OCI service supported by resource limits.
+      properties:
+        description:
+          description: The friendly service name.
+          type: string
+        name:
+          description: The service name. Use this when calling other APIs.
+          type: string
+        supportedSubscriptions:
+          description: 'An array of subscription types supported by the service. For example, the type of subscription, such as SAAS, ERP, or CRM.
+
+            '
+          items:
+            type: string
+          type: array
+      type: object
     LimitDefinitionSummary:
       description: The metadata specific to a resource limit definition.
       properties:
@@ -838,80 +912,6 @@ components:
             type: string
           type: array
       type: object
-    ServiceSummary:
-      description: A specific OCI service supported by resource limits.
-      properties:
-        description:
-          description: The friendly service name.
-          type: string
-        name:
-          description: The service name. Use this when calling other APIs.
-          type: string
-        supportedSubscriptions:
-          description: 'An array of subscription types supported by the service. For example, the type of subscription, such as SAAS, ERP, or CRM.
-
-            '
-          items:
-            type: string
-          type: array
-      type: object
-    ResourceAvailability:
-      description: 'The availability of a given resource limit, based on the usage, tenant service limits, and quotas set for the tenancy.
-
-        Note: We cannot guarantee this data for all the limits. In such cases, these fields will be empty.
-
-        '
-      properties:
-        available:
-          description: 'The count of available resources. To support resources with fractional counts,
-
-            the field rounds down to the nearest integer.
-
-            '
-          format: int64
-          type: integer
-        effectiveQuotaValue:
-          description: 'The effective quota value for the given compartment. This field is only present if there is a
-
-            current quota policy affecting the current resource in the target region or availability domain.
-
-            '
-          type: number
-        fractionalAvailability:
-          description: 'The most accurate count of available resources.
-
-            '
-          type: number
-        fractionalUsage:
-          description: 'The current most accurate usage in the given compartment.
-
-            '
-          type: number
-        used:
-          description: 'The current usage in the given compartment. To support resources with fractional counts,
-
-            the field rounds up to the nearest integer.
-
-            '
-          format: int64
-          type: integer
-      type: object
-    Error:
-      description: Generic error object.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     LimitValueSummary:
       description: The value of a specific resource limit.
       properties:
