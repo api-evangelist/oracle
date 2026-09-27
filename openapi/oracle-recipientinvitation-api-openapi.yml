@@ -295,6 +295,119 @@ paths:
       - recipientInvitation
       x-related-resource: '#/definitions/RecipientInvitation'
 components:
+  parameters:
+    LifecycleStateQueryParam:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - ACTIVE
+        - INACTIVE
+        - UPDATING
+        - FAILED
+        - TERMINATED
+    RecipientInvitationStatusQueryParam:
+      description: The status of the recipient invitation.
+      in: query
+      name: status
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/RecipientInvitationStatus'
+      schema:
+        type: string
+        enum:
+        - PENDING
+        - CANCELED
+        - ACCEPTED
+        - IGNORED
+        - EXPIRED
+        - FAILED
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    SenderTenancyIdQueryParam:
+      description: The tenancy that sent the invitation.
+      in: query
+      name: senderTenancyId
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
+
+        server error, without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        will be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   schemas:
     RecipientInvitation:
       description: The invitation model that the recipient owns.
@@ -436,17 +549,6 @@ components:
       - status
       - timeCreated
       - subjects
-    RecipientInvitationCollection:
-      description: Result of a query request for a list of recipient invitations. Contains RecipientInvitationSummary items.
-      properties:
-        items:
-          description: Array containing RecipientInvitationSummary items.
-          items:
-            $ref: '#/components/schemas/RecipientInvitationSummary'
-          type: array
-      required:
-      - items
-      type: object
     Error:
       description: Error information.
       properties:
@@ -459,6 +561,17 @@ components:
       required:
       - code
       - message
+    RecipientInvitationCollection:
+      description: Result of a query request for a list of recipient invitations. Contains RecipientInvitationSummary items.
+      properties:
+        items:
+          description: Array containing RecipientInvitationSummary items.
+          items:
+            $ref: '#/components/schemas/RecipientInvitationSummary'
+          type: array
+      required:
+      - items
+      type: object
     UpdateRecipientInvitationDetails:
       description: The parameters for updating a recipient invitation.
       properties:
@@ -494,13 +607,6 @@ components:
 
             '
           type: object
-    InvitationSubject:
-      description: A subject an invitation can contain.
-      enum:
-      - LINK
-      - GOVERNANCE
-      - EXTENDED_FEATURES
-      type: string
     RecipientInvitationSummary:
       description: The summary of the invitation model that the recipient owns.
       properties:
@@ -641,119 +747,13 @@ components:
       - status
       - timeCreated
       - subjects
-  parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    RecipientInvitationStatusQueryParam:
-      description: The status of the recipient invitation.
-      in: query
-      name: status
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/RecipientInvitationStatus'
-      schema:
-        type: string
-        enum:
-        - PENDING
-        - CANCELED
-        - ACCEPTED
-        - IGNORED
-        - EXPIRED
-        - FAILED
-    LifecycleStateQueryParam:
-      description: The lifecycle state of the resource.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - ACTIVE
-        - INACTIVE
-        - UPDATING
-        - FAILED
-        - TERMINATED
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
-
-        server error, without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        will be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    SenderTenancyIdQueryParam:
-      description: The tenancy that sent the invitation.
-      in: query
-      name: senderTenancyId
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+    InvitationSubject:
+      description: A subject an invitation can contain.
+      enum:
+      - LINK
+      - GOVERNANCE
+      - EXTENDED_FEATURES
+      type: string
 x-anchors:
   x-headers:
     etag:

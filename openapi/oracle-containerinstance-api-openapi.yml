@@ -894,6 +894,43 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntryCollection'
 components:
   schemas:
+    SecurityContext:
+      description: Security context for container.
+      discriminator:
+        propertyName: securityContextType
+      properties:
+        securityContextType:
+          default: LINUX
+          description: The type of security context
+          enum:
+          - LINUX
+          type: string
+    ContainerInstanceShapeSummary:
+      description: 'Details about a shape for a container instance.
+
+        '
+      properties:
+        memoryOptions:
+          $ref: '#/components/schemas/ShapeMemoryOptions'
+        name:
+          description: 'The name identifying the shape.
+
+            '
+          type: string
+        networkingBandwidthOptions:
+          $ref: '#/components/schemas/ShapeNetworkingBandwidthOptions'
+        ocpuOptions:
+          $ref: '#/components/schemas/ShapeOcpuOptions'
+        processorDescription:
+          description: 'A short description of the container instance''s processor (CPU).
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      - processorDescription
     ContainerVolume:
       description: 'A volume represents a directory with data that is accessible across multiple containers in a
 
@@ -921,6 +958,151 @@ components:
       required:
       - name
       - volumeType
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestLogEntries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    ShapeOcpuOptions:
+      description: 'For a flexible shape, the number of OCPUs available for container instances that use this shape.
+
+        '
+      properties:
+        max:
+          description: 'The maximum number of OCPUs.
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+        min:
+          description: 'The minimum number of OCPUs.
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+      required:
+      - min
+      - max
+    WorkRequestSummaryCollection:
+      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestSummary objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
+      properties:
+        compartmentId:
+          description: 'The OCID of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects.
+
+            '
+          type: string
+        id:
+          description: The ID of the work request.
+          type: string
+        operationType:
+          description: Type of work request.
+          enum:
+          - CREATE_CONTAINER_INSTANCE
+          - UPDATE_CONTAINER_INSTANCE
+          - DELETE_CONTAINER_INSTANCE
+          - MOVE_CONTAINER_INSTANCE
+          - START_CONTAINER_INSTANCE
+          - STOP_CONTAINER_INSTANCE
+          - RESTART_CONTAINER_INSTANCE
+          - UPDATE_CONTAINER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    CreateSecurityContextDetails:
+      description: Security context for container.
+      discriminator:
+        propertyName: securityContextType
+      properties:
+        securityContextType:
+          default: LINUX
+          description: The type of security context
+          type: string
+          x-obmcs-enumref: '#/definitions/SecurityContext/securityContextType'
+    ContainerVnic:
+      description: 'An interface to a virtual network available to containers on a container instance.
+
+        '
+      properties:
+        vnicId:
+          description: 'The identifier of the virtual network interface card (VNIC) over which
+
+            the containers accessing this network can communicate with the
+
+            larger virtual cloud network.
+
+            '
+          type: string
+      type: object
     UpdateContainerInstanceDetails:
       description: The information to be updated.
       properties:
@@ -958,8 +1140,148 @@ components:
             '
           type: object
       type: object
-    CreateContainerResourceConfigDetails:
-      description: 'The size and amount of resources available to the container.
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. See [API Errors](https://docs.cloud.oracle.com/Content/API/References/apierrors.htm) for a list of error codes.
+
+            '
+          type: string
+        message:
+          description: A description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    CreateContainerInstanceDetails:
+      description: Information to create a container instance.
+      properties:
+        availabilityDomain:
+          description: The availability domain where the container instance runs.
+          maxLength: 255
+          minLength: 1
+          type: string
+        compartmentId:
+          description: The compartment OCID.
+          maxLength: 255
+          minLength: 1
+          type: string
+        containerRestartPolicy:
+          default: ALWAYS
+          description: Container restart policy
+          type: string
+          x-obmcs-enumref: '#/definitions/ContainerInstance/containerRestartPolicy'
+        containers:
+          description: The containers to create on this container instance.
+          items:
+            $ref: '#/components/schemas/CreateContainerDetails'
+          maxItems: 60
+          minItems: 1
+          type: array
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`.
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`.
+
+            '
+          type: object
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering confidential information. If you don''t provide a name, a name is generated automatically.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        dnsConfig:
+          $ref: '#/components/schemas/CreateContainerDnsConfigDetails'
+        faultDomain:
+          description: 'The fault domain where the container instance runs.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: If you do not specify the fault domain, the system selects one for you.
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        gracefulShutdownTimeoutInSeconds:
+          default: 0
+          description: The amount of time that processes in a container have to gracefully end when the container must be stopped. For example, when you delete a container instance. After the timeout is reached, the processes are sent a signal to be deleted.
+          format: int64
+          maximum: 300
+          minimum: 0
+          type: integer
+        imagePullSecrets:
+          default: null
+          description: The image pulls secrets so you can access private registry to pull container images.
+          items:
+            $ref: '#/components/schemas/CreateImagePullSecretDetails'
+          type: array
+        securityContext:
+          $ref: '#/components/schemas/CreateContainerInstanceSecurityContextDetails'
+        shape:
+          description: The shape of the container instance. The shape determines the resources available to the container instance.
+          type: string
+        shapeConfig:
+          $ref: '#/components/schemas/CreateContainerInstanceShapeConfigDetails'
+        vnics:
+          description: The networks available to containers on this container instance.
+          items:
+            $ref: '#/components/schemas/CreateContainerVnicDetails'
+          maxItems: 1
+          minItems: 1
+          type: array
+        volumes:
+          default: null
+          description: 'A volume is a directory with data that is accessible across multiple containers in a
+
+            container instance.
+
+
+            You can attach up to 32 volumes to single container instance.
+
+            '
+          items:
+            $ref: '#/components/schemas/CreateContainerVolumeDetails'
+          maxItems: 32
+          type: array
+      required:
+      - compartmentId
+      - availabilityDomain
+      - shape
+      - shapeConfig
+      - containers
+      - vnics
+      type: object
+    ContainerResourceConfig:
+      description: 'The resource configuration for a container. The resource configuration determines
+
+        the amount of resources allocated to the container and the maximum allowed resources for a container.
 
         '
       properties:
@@ -967,10 +1289,7 @@ components:
           default: null
           description: 'The maximum amount of memory that can be consumed by the container''s
 
-            process.
-
-
-            If you do not set a value, then the process
+            process. If you do not set a value, then the process
 
             may use all available memory on the instance.
 
@@ -985,66 +1304,17 @@ components:
 
             If you do not set a value, then the process
 
-            can use all available CPU resources on the instance.
+            may use all available CPU resources on the container instance.
 
 
-            CPU usage is defined in terms of logical CPUs. This means that the maximum possible value on
+            CPU usage is defined in terms of logical CPUs. This means that the
 
-            an E3 ContainerInstance with 1 OCPU is 2.0.
-
-
-            A container with a 2.0 vcpusLimit could consume up to 100% of the CPU resources available on the container instance.
-
-            Values can be fractional. A value of "1.5" means that the container
-
-            can consume at most the equivalent of 1 and a half logical CPUs worth of CPU capacity.
+            maximum possible value on an E3 ContainerInstance with 1 OCPU is 2.0.
 
             '
           format: float
           minimum: 0.0
           type: number
-    ContainerInstanceShapeConfig:
-      description: 'The shape configuration for a container instance. The shape configuration determines
-
-        the resources thats are available to the container instance and its containers.
-
-        '
-      properties:
-        memoryInGBs:
-          description: 'The total amount of memory available to the container instance, in gigabytes.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-        networkingBandwidthInGbps:
-          description: 'The networking bandwidth available to the container instance, in gigabits per second.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-        ocpus:
-          description: 'The total number of OCPUs available to the container instance.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-          x-default-description: If you do not provide one, this is calculated from container resource configuration.
-        processorDescription:
-          description: 'A short description of the container instance''s processor (CPU).
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - ocpus
-      - memoryInGBs
-      - processorDescription
-      - networkingBandwidthInGbps
-      type: object
     ContainerInstance:
       description: 'A container instance to host containers.
 
@@ -1223,87 +1493,87 @@ components:
       - containerCount
       - containerRestartPolicy
       type: object
-    CreateContainerHealthCheckDetails:
-      description: 'Container Health Check is used to check and report the status of a container.
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
+
+            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
+
+            work is complete for that resource, at which point it updates to CREATED, UPDATED,
+
+            or DELETED, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - RELATED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type the work request affects.
+          type: string
+        entityUri:
+          description: The URI path that the user can do a GET on to access the resource metadata.
+          type: string
+        identifier:
+          description: The ID of the resource the work request affects.
+          type: string
+      required:
+      - actionType
+      - entityType
+      - identifier
+    CreateImagePullSecretDetails:
+      description: 'The image pull secrets for accessing private registry to pull images for containers
 
         '
       discriminator:
-        propertyName: healthCheckType
+        propertyName: secretType
       properties:
-        failureAction:
-          default: KILL
-          description: 'The action will be triggered when the container health check fails. There are two types of action: KILL or NONE. The default
-
-            action is KILL. If failure action is KILL, the container will be subject to the container restart policy.
-
-            '
+        registryEndpoint:
+          description: The registry endpoint of the container image.
+          type: string
+        secretType:
+          description: The type of ImagePullSecret.
           enum:
-          - KILL
-          - NONE
+          - BASIC
+          - VAULT
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ContainerHealthCheckFailureAction'
-        failureThreshold:
-          default: 3
-          description: Number of consecutive failures at which we consider the check failed.
-          minimum: 1
-          type: integer
-        healthCheckType:
-          description: Container health check type.
-          enum:
-          - HTTP
-          - TCP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ContainerHealthCheckType'
-        initialDelayInSeconds:
-          default: 0
-          description: The initial delay in seconds before start checking container health status.
-          minimum: 0
-          type: integer
-        intervalInSeconds:
-          default: 10
-          description: Number of seconds between two consecutive runs for checking container health.
-          minimum: 1
-          type: integer
-        name:
-          description: Health check name.
-          maxLength: 255
-          minLength: 1
-          type: string
-          x-default-description: A default value will be generated from our backend code
-        successThreshold:
-          default: 1
-          description: Number of consecutive successes at which we consider the check succeeded again after it was in failure state.
-          minimum: 1
-          type: integer
-        timeoutInSeconds:
-          default: 1
-          description: Length of waiting time in seconds before marking health check failed.
-          minimum: 1
-          type: integer
       required:
-      - healthCheckType
-    CreateContainerInstanceShapeConfigDetails:
-      description: 'The size and amount of resources available to the container instance.
+      - secretType
+      - registryEndpoint
+      type: object
+    ContainerInstanceContainer:
+      description: 'A container on a container instance.
 
         '
       properties:
-        memoryInGBs:
-          description: 'The total amount of memory available to the container instance (GB).
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-          x-default-description: A default value is chosen based on the number of OCPUs selected.
-        ocpus:
-          description: 'The total number of OCPUs available to the container instance.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
+        containerId:
+          description: The OCID of the container.
+          type: string
+        displayName:
+          description: Display name for the Container.
+          type: string
       required:
-      - ocpus
+      - containerId
+      type: object
     CreateContainerVolumeDetails:
       description: 'A volume represents a directory with data that is accessible across multiple containers in a
 
@@ -1332,26 +1602,64 @@ components:
       required:
       - name
       - volumeType
-    CreateImagePullSecretDetails:
-      description: 'The image pull secrets for accessing private registry to pull images for containers
+    CreateContainerResourceConfigDetails:
+      description: 'The size and amount of resources available to the container.
 
         '
-      discriminator:
-        propertyName: secretType
       properties:
-        registryEndpoint:
-          description: The registry endpoint of the container image.
+        memoryLimitInGBs:
+          default: null
+          description: 'The maximum amount of memory that can be consumed by the container''s
+
+            process.
+
+
+            If you do not set a value, then the process
+
+            may use all available memory on the instance.
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+        vcpusLimit:
+          default: null
+          description: 'The maximum amount of CPUs that can be consumed by the container''s process.
+
+
+            If you do not set a value, then the process
+
+            can use all available CPU resources on the instance.
+
+
+            CPU usage is defined in terms of logical CPUs. This means that the maximum possible value on
+
+            an E3 ContainerInstance with 1 OCPU is 2.0.
+
+
+            A container with a 2.0 vcpusLimit could consume up to 100% of the CPU resources available on the container instance.
+
+            Values can be fractional. A value of "1.5" means that the container
+
+            can consume at most the equivalent of 1 and a half logical CPUs worth of CPU capacity.
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+    WorkRequestLogEntry:
+      description: A log message from a work request.
+      properties:
+        message:
+          description: Human-readable log message.
           type: string
-        secretType:
-          description: The type of ImagePullSecret.
-          enum:
-          - BASIC
-          - VAULT
+        timestamp:
+          description: The time the log message was written, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+          format: date-time
           type: string
       required:
-      - secretType
-      - registryEndpoint
-      type: object
+      - message
+      - timestamp
     Container:
       description: 'A single container on a container instance.
 
@@ -1572,8 +1880,36 @@ components:
       - containerInstanceId
       - imageUrl
       type: object
-    ContainerHealthCheck:
-      description: Type of container health check which could be either HTTP, TCP, or Command.
+    ContainerInstanceCollection:
+      description: Summary information about a list of container instances.
+      properties:
+        items:
+          description: List of container instances.
+          items:
+            $ref: '#/components/schemas/ContainerInstanceSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ContainerCollection:
+      description: 'A list of containers.
+
+        '
+      properties:
+        items:
+          description: List of containers.
+          items:
+            $ref: '#/components/schemas/ContainerSummary'
+          maxItems: 10
+          minItems: 1
+          type: array
+      required:
+      - items
+      type: object
+    CreateContainerHealthCheckDetails:
+      description: 'Container Health Check is used to check and report the status of a container.
+
+        '
       discriminator:
         propertyName: healthCheckType
       properties:
@@ -1590,7 +1926,9 @@ components:
           type: string
           x-obmcs-top-level-enum: '#/definitions/ContainerHealthCheckFailureAction'
         failureThreshold:
+          default: 3
           description: Number of consecutive failures at which we consider the check failed.
+          minimum: 1
           type: integer
         healthCheckType:
           description: Container health check type.
@@ -1600,37 +1938,357 @@ components:
           type: string
           x-obmcs-top-level-enum: '#/definitions/ContainerHealthCheckType'
         initialDelayInSeconds:
+          default: 0
           description: The initial delay in seconds before start checking container health status.
+          minimum: 0
           type: integer
         intervalInSeconds:
+          default: 10
           description: Number of seconds between two consecutive runs for checking container health.
+          minimum: 1
           type: integer
         name:
           description: Health check name.
-          maxLength: 4096
+          maxLength: 255
           minLength: 1
           type: string
-        status:
-          default: UNKNOWN
-          description: Status of container
-          enum:
-          - HEALTHY
-          - UNHEALTHY
-          - UNKNOWN
-          type: string
-        statusDetails:
-          description: A message describing the current status in more details.
-          maxLength: 4096
-          minLength: 1
-          type: string
+          x-default-description: A default value will be generated from our backend code
         successThreshold:
+          default: 1
           description: Number of consecutive successes at which we consider the check succeeded again after it was in failure state.
+          minimum: 1
           type: integer
         timeoutInSeconds:
+          default: 1
           description: Length of waiting time in seconds before marking health check failed.
+          minimum: 1
           type: integer
       required:
       - healthCheckType
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    CreateVolumeMountDetails:
+      description: 'Defines the mapping from volume to a mount path in a container.
+
+        '
+      properties:
+        isReadOnly:
+          default: false
+          description: Whether the volume was mounted in read-only mode. By default, the volume is not read-only.
+          type: boolean
+        mountPath:
+          description: The volume access path.
+          maxLength: 4096
+          minLength: 1
+          type: string
+        partition:
+          default: 1
+          description: 'If there is more than one partition in the volume, reference this number of partitions.
+
+            Here is an example:
+
+            Number  Start   End     Size    File system  Name                  Flags
+
+            1      1049kB  106MB   105MB   fat16        EFI System Partition  boot, esp
+
+            2      106MB   1180MB  1074MB  xfs
+
+            3      1180MB  50.0GB  48.8GB                                     lvm
+
+            '
+          format: int32
+          maximum: 128
+          minimum: 1
+          type: integer
+        subPath:
+          default: null
+          description: A subpath inside the referenced volume.
+          maxLength: 4096
+          minLength: 1
+          type: string
+        volumeName:
+          description: The name of the volume. Avoid entering confidential information.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+      - mountPath
+      - volumeName
+    ShapeNetworkingBandwidthOptions:
+      description: 'For a flexible shape, the amount of networking bandwidth available for container instances that use this shape.
+
+        '
+      properties:
+        defaultPerOcpuInGbps:
+          description: 'The default amount of networking bandwidth per OCPU, in gigabits per second.
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+        maxInGbps:
+          description: 'The maximum amount of networking bandwidth, in gigabits per second.
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+        minInGbps:
+          description: 'The minimum amount of networking bandwidth, in gigabits per second.
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+      required:
+      - minInGbps
+      - maxInGbps
+      - defaultPerOcpuInGbps
+    CreateContainerInstanceShapeConfigDetails:
+      description: 'The size and amount of resources available to the container instance.
+
+        '
+      properties:
+        memoryInGBs:
+          description: 'The total amount of memory available to the container instance (GB).
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+          x-default-description: A default value is chosen based on the number of OCPUs selected.
+        ocpus:
+          description: 'The total number of OCPUs available to the container instance.
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+      required:
+      - ocpus
+    ContainerSummary:
+      description: 'Summary information about a container.
+
+        '
+      properties:
+        availabilityDomain:
+          description: The availability domain where the container instance that hosts this container runs.
+          maxLength: 255
+          minLength: 1
+          type: string
+        compartmentId:
+          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm).
+          maxLength: 255
+          minLength: 1
+          type: string
+        containerInstanceId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container instance on which the container is running.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`.
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`.
+
+            '
+          type: object
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        faultDomain:
+          description: The fault domain where the container instance that hosts the container runs.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container.
+          maxLength: 255
+          minLength: 1
+          type: string
+        imageUrl:
+          description: 'A URL identifying the image that the container runs in, such as docker.io/library/busybox:latest. If you do not provide a tag, the tag will default to latest.
+
+
+            If no registry is provided, will default the registry to public docker hub `docker.io/library`.
+
+            The registry used for container image must be reachable over the Container Instance''s VNIC.
+
+            '
+          maxLength: 1024
+          minLength: 1
+          type: string
+        isResourcePrincipalDisabled:
+          description: 'Determines whether the container will have access to the container instance resource principal.
+
+
+            This method utilizes resource principal version 2.2. For information on how to use the exposed resource principal elements, see
+
+            https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm#sdk_authentication_methods_resource_principal.
+
+            '
+          type: boolean
+        lifecycleDetails:
+          description: 'A message that describes the current state of the container in more detail. Can be used to provide
+
+            actionable information.
+
+            '
+          type: string
+        lifecycleState:
+          description: The current state of the container.
+          type: string
+          x-obmcs-enumref: '#/definitions/Container/lifecycleState'
+        resourceConfig:
+          $ref: '#/components/schemas/ContainerResourceConfig'
+        securityContext:
+          $ref: '#/components/schemas/SecurityContext'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`.
+
+            '
+          type: object
+        timeCreated:
+          description: The time the the container was created in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the container was updated in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - compartmentId
+      - availabilityDomain
+      - lifecycleState
+      - timeCreated
+      - containerInstanceId
+      - imageUrl
+      type: object
+    VolumeMount:
+      description: 'Define the mapping from volume to a mount path in container.
+
+        '
+      properties:
+        isReadOnly:
+          default: false
+          description: Whether the volume was mounted in read-only mode. By default, the volume is mounted with write access.
+          type: boolean
+        mountPath:
+          description: Describes the volume access path.
+          maxLength: 4096
+          minLength: 1
+          type: string
+        partition:
+          default: 1
+          description: 'If there is more than one partition in the volume, reference this number of partitions.
+
+            Here is an example:
+
+            Number  Start   End     Size    File system  Name                  Flags
+
+            1      1049kB  106MB   105MB   fat16        EFI System Partition  boot, esp
+
+            2      106MB   1180MB  1074MB  xfs
+
+            3      1180MB  50.0GB  48.8GB                                     lvm
+
+            '
+          format: int32
+          maximum: 128
+          minimum: 1
+          type: integer
+        subPath:
+          default: null
+          description: A sub-path inside the referenced volume.
+          maxLength: 4096
+          minLength: 1
+          type: string
+        volumeName:
+          description: The name of the volume.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+      - mountPath
+      - volumeName
+    ContainerInstanceSecurityContext:
+      description: Security context for all containers in a container instance.
+      discriminator:
+        propertyName: securityContextType
+      properties:
+        securityContextType:
+          default: LINUX
+          description: The type of security context
+          enum:
+          - LINUX
+          type: string
+    ContainerDnsConfig:
+      description: DNS settings for containers.
+      properties:
+        nameservers:
+          description: IP address of the name server..
+          items:
+            type: string
+          type: array
+        options:
+          description: Options allows certain internal resolver variables to be modified.
+          items:
+            type: string
+          type: array
+        searches:
+          description: Search list for hostname lookup.
+          items:
+            type: string
+          type: array
+      type: object
     CreateContainerVnicDetails:
       description: 'Information to create a virtual network interface card (VNIC) which gives
 
@@ -1733,29 +2391,16 @@ components:
       required:
       - subnetId
       type: object
-    CreateSecurityContextDetails:
-      description: Security context for container.
-      discriminator:
-        propertyName: securityContextType
+    ContainerInstanceShapeCollection:
+      description: A collection of container instance shapes.
       properties:
-        securityContextType:
-          default: LINUX
-          description: The type of security context
-          type: string
-          x-obmcs-enumref: '#/definitions/SecurityContext/securityContextType'
-    ContainerInstanceContainer:
-      description: 'A container on a container instance.
-
-        '
-      properties:
-        containerId:
-          description: The OCID of the container.
-          type: string
-        displayName:
-          description: Display name for the Container.
-          type: string
+        items:
+          description: A list of shapes.
+          items:
+            $ref: '#/components/schemas/ContainerInstanceShapeSummary'
+          type: array
       required:
-      - containerId
+      - items
       type: object
     ImagePullSecret:
       description: 'The image pull secrets for accessing private registry to pull images for containers
@@ -1777,109 +2422,169 @@ components:
       - secretType
       - registryEndpoint
       type: object
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. See [API Errors](https://docs.cloud.oracle.com/Content/API/References/apierrors.htm) for a list of error codes.
-
-            '
-          type: string
-        message:
-          description: A description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    UpdateContainerDetails:
-      description: The container information to be updated.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`.
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`.
-
-            '
-          type: object
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering confidential information.
-
-            '
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      type: object
-    VolumeMount:
-      description: 'Define the mapping from volume to a mount path in container.
+    ShapeMemoryOptions:
+      description: 'For a flexible shape, the amount of memory available for container instances that use this shape.
 
         '
       properties:
-        isReadOnly:
-          default: false
-          description: Whether the volume was mounted in read-only mode. By default, the volume is mounted with write access.
-          type: boolean
-        mountPath:
-          description: Describes the volume access path.
-          maxLength: 4096
-          minLength: 1
-          type: string
-        partition:
-          default: 1
-          description: 'If there is more than one partition in the volume, reference this number of partitions.
-
-            Here is an example:
-
-            Number  Start   End     Size    File system  Name                  Flags
-
-            1      1049kB  106MB   105MB   fat16        EFI System Partition  boot, esp
-
-            2      106MB   1180MB  1074MB  xfs
-
-            3      1180MB  50.0GB  48.8GB                                     lvm
+        defaultPerOcpuInGBs:
+          description: 'The default amount of memory per OCPU available for this shape (GB).
 
             '
-          format: int32
-          maximum: 128
-          minimum: 1
+          format: float
+          minimum: 0.0
+          type: number
+        maxInGBs:
+          description: 'The maximum amount of memory (GB).
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+        maxPerOcpuInGBs:
+          description: 'The maximum amount of memory per OCPU available for this shape (GB).
+
+            '
+          format: float
+          type: number
+          exclusiveMinimum: 0.0
+        minInGBs:
+          description: 'The minimum amount of memory (GB).
+
+            '
+          format: float
+          minimum: 0.0
+          type: number
+        minPerOcpuInGBs:
+          description: 'The minimum amount of memory per OCPU available for this shape (GB).
+
+            '
+          format: float
+          type: number
+          exclusiveMinimum: 0.0
+      required:
+      - minInGBs
+      - maxInGBs
+      - defaultPerOcpuInGBs
+      - minPerOcpuInGBs
+      - maxPerOcpuInGBs
+    CreateContainerDnsConfigDetails:
+      description: 'Allow customers to define DNS settings for containers. If this is not provided, the containers use
+
+        the default DNS settings of the subnet.
+
+        '
+      properties:
+        nameservers:
+          description: 'IP address of a name server that the resolver should query, either an IPv4 address
+
+            (in dot notation), or an IPv6 address in colon (and possibly dot) notation. If null, uses
+
+            nameservers from subnet dhcpDnsOptions.
+
+            '
+          items:
+            maxLength: 50
+            minLength: 1
+            type: string
+          maxItems: 3
+          type: array
+          uniqueItems: true
+          x-default-description: 'null'
+        options:
+          description: 'Options allows certain internal resolver variables to be modified. Options are a list of objects in
+
+            https://man7.org/linux/man-pages/man5/resolv.conf.5.html. Examples: ["ndots:n", "edns0"].
+
+            '
+          items:
+            maxLength: 25
+            minLength: 1
+            type: string
+          maxItems: 16
+          type: array
+          uniqueItems: true
+          x-default-description: 'null'
+        searches:
+          description: Search list for host-name lookup. If null, we will use searches from subnet dhcpDnsOptios.
+          items:
+            maxLength: 253
+            minLength: 1
+            type: string
+          maxItems: 6
+          type: array
+          uniqueItems: true
+          x-default-description: 'null'
+      type: object
+    CreateContainerInstanceSecurityContextDetails:
+      description: Security context for all containers in a container instance.
+      discriminator:
+        propertyName: securityContextType
+      properties:
+        securityContextType:
+          default: LINUX
+          description: The type of security context
+          type: string
+          x-obmcs-enumref: '#/definitions/ContainerInstanceSecurityContext/securityContextType'
+    ContainerHealthCheck:
+      description: Type of container health check which could be either HTTP, TCP, or Command.
+      discriminator:
+        propertyName: healthCheckType
+      properties:
+        failureAction:
+          default: KILL
+          description: 'The action will be triggered when the container health check fails. There are two types of action: KILL or NONE. The default
+
+            action is KILL. If failure action is KILL, the container will be subject to the container restart policy.
+
+            '
+          enum:
+          - KILL
+          - NONE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ContainerHealthCheckFailureAction'
+        failureThreshold:
+          description: Number of consecutive failures at which we consider the check failed.
           type: integer
-        subPath:
-          default: null
-          description: A sub-path inside the referenced volume.
+        healthCheckType:
+          description: Container health check type.
+          enum:
+          - HTTP
+          - TCP
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ContainerHealthCheckType'
+        initialDelayInSeconds:
+          description: The initial delay in seconds before start checking container health status.
+          type: integer
+        intervalInSeconds:
+          description: Number of seconds between two consecutive runs for checking container health.
+          type: integer
+        name:
+          description: Health check name.
           maxLength: 4096
           minLength: 1
           type: string
-        volumeName:
-          description: The name of the volume.
-          maxLength: 256
+        status:
+          default: UNKNOWN
+          description: Status of container
+          enum:
+          - HEALTHY
+          - UNHEALTHY
+          - UNKNOWN
+          type: string
+        statusDetails:
+          description: A message describing the current status in more details.
+          maxLength: 4096
           minLength: 1
           type: string
+        successThreshold:
+          description: Number of consecutive successes at which we consider the check succeeded again after it was in failure state.
+          type: integer
+        timeoutInSeconds:
+          description: Length of waiting time in seconds before marking health check failed.
+          type: integer
       required:
-      - mountPath
-      - volumeName
+      - healthCheckType
     CreateContainerDetails:
       description: 'Information to create a new container within a container instance.
 
@@ -2035,31 +2740,9 @@ components:
       required:
       - imageUrl
       type: object
-    CreateContainerInstanceDetails:
-      description: Information to create a container instance.
+    UpdateContainerDetails:
+      description: The container information to be updated.
       properties:
-        availabilityDomain:
-          description: The availability domain where the container instance runs.
-          maxLength: 255
-          minLength: 1
-          type: string
-        compartmentId:
-          description: The compartment OCID.
-          maxLength: 255
-          minLength: 1
-          type: string
-        containerRestartPolicy:
-          default: ALWAYS
-          description: Container restart policy
-          type: string
-          x-obmcs-enumref: '#/definitions/ContainerInstance/containerRestartPolicy'
-        containers:
-          description: The containers to create on this container instance.
-          items:
-            $ref: '#/components/schemas/CreateContainerDetails'
-          maxItems: 60
-          minItems: 1
-          type: array
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -2080,22 +2763,10 @@ components:
             '
           type: object
         displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering confidential information. If you don''t provide a name, a name is generated automatically.
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable. Avoid entering confidential information.
 
             '
-          maxLength: 255
-          minLength: 1
           type: string
-        dnsConfig:
-          $ref: '#/components/schemas/CreateContainerDnsConfigDetails'
-        faultDomain:
-          description: 'The fault domain where the container instance runs.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-          x-default-description: If you do not specify the fault domain, the system selects one for you.
         freeformTags:
           additionalProperties:
             type: string
@@ -2105,563 +2776,48 @@ components:
 
             '
           type: object
-        gracefulShutdownTimeoutInSeconds:
-          default: 0
-          description: The amount of time that processes in a container have to gracefully end when the container must be stopped. For example, when you delete a container instance. After the timeout is reached, the processes are sent a signal to be deleted.
-          format: int64
-          maximum: 300
-          minimum: 0
-          type: integer
-        imagePullSecrets:
-          default: null
-          description: The image pulls secrets so you can access private registry to pull container images.
-          items:
-            $ref: '#/components/schemas/CreateImagePullSecretDetails'
-          type: array
-        securityContext:
-          $ref: '#/components/schemas/CreateContainerInstanceSecurityContextDetails'
-        shape:
-          description: The shape of the container instance. The shape determines the resources available to the container instance.
-          type: string
-        shapeConfig:
-          $ref: '#/components/schemas/CreateContainerInstanceShapeConfigDetails'
-        vnics:
-          description: The networks available to containers on this container instance.
-          items:
-            $ref: '#/components/schemas/CreateContainerVnicDetails'
-          maxItems: 1
-          minItems: 1
-          type: array
-        volumes:
-          default: null
-          description: 'A volume is a directory with data that is accessible across multiple containers in a
-
-            container instance.
-
-
-            You can attach up to 32 volumes to single container instance.
-
-            '
-          items:
-            $ref: '#/components/schemas/CreateContainerVolumeDetails'
-          maxItems: 32
-          type: array
-      required:
-      - compartmentId
-      - availabilityDomain
-      - shape
-      - shapeConfig
-      - containers
-      - vnics
       type: object
-    ShapeOcpuOptions:
-      description: 'For a flexible shape, the number of OCPUs available for container instances that use this shape.
+    ContainerInstanceShapeConfig:
+      description: 'The shape configuration for a container instance. The shape configuration determines
+
+        the resources thats are available to the container instance and its containers.
 
         '
       properties:
-        max:
-          description: 'The maximum number of OCPUs.
+        memoryInGBs:
+          description: 'The total amount of memory available to the container instance, in gigabytes.
 
             '
           format: float
           minimum: 0.0
           type: number
-        min:
-          description: 'The minimum number of OCPUs.
+        networkingBandwidthInGbps:
+          description: 'The networking bandwidth available to the container instance, in gigabits per second.
 
             '
           format: float
           minimum: 0.0
           type: number
-      required:
-      - min
-      - max
-    ContainerInstanceSecurityContext:
-      description: Security context for all containers in a container instance.
-      discriminator:
-        propertyName: securityContextType
-      properties:
-        securityContextType:
-          default: LINUX
-          description: The type of security context
-          enum:
-          - LINUX
-          type: string
-    ContainerInstanceShapeCollection:
-      description: A collection of container instance shapes.
-      properties:
-        items:
-          description: A list of shapes.
-          items:
-            $ref: '#/components/schemas/ContainerInstanceShapeSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ContainerInstanceCollection:
-      description: Summary information about a list of container instances.
-      properties:
-        items:
-          description: List of container instances.
-          items:
-            $ref: '#/components/schemas/ContainerInstanceSummary'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestSummaryCollection:
-      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestSummary objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    CreateVolumeMountDetails:
-      description: 'Defines the mapping from volume to a mount path in a container.
-
-        '
-      properties:
-        isReadOnly:
-          default: false
-          description: Whether the volume was mounted in read-only mode. By default, the volume is not read-only.
-          type: boolean
-        mountPath:
-          description: The volume access path.
-          maxLength: 4096
-          minLength: 1
-          type: string
-        partition:
-          default: 1
-          description: 'If there is more than one partition in the volume, reference this number of partitions.
-
-            Here is an example:
-
-            Number  Start   End     Size    File system  Name                  Flags
-
-            1      1049kB  106MB   105MB   fat16        EFI System Partition  boot, esp
-
-            2      106MB   1180MB  1074MB  xfs
-
-            3      1180MB  50.0GB  48.8GB                                     lvm
+        ocpus:
+          description: 'The total number of OCPUs available to the container instance.
 
             '
-          format: int32
-          maximum: 128
-          minimum: 1
-          type: integer
-        subPath:
-          default: null
-          description: A subpath inside the referenced volume.
-          maxLength: 4096
-          minLength: 1
-          type: string
-        volumeName:
-          description: The name of the volume. Avoid entering confidential information.
-          maxLength: 256
+          format: float
+          minimum: 0.0
+          type: number
+          x-default-description: If you do not provide one, this is calculated from container resource configuration.
+        processorDescription:
+          description: 'A short description of the container instance''s processor (CPU).
+
+            '
+          maxLength: 255
           minLength: 1
           type: string
       required:
-      - mountPath
-      - volumeName
-    WorkRequestLogEntry:
-      description: A log message from a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written, in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    ShapeNetworkingBandwidthOptions:
-      description: 'For a flexible shape, the amount of networking bandwidth available for container instances that use this shape.
-
-        '
-      properties:
-        defaultPerOcpuInGbps:
-          description: 'The default amount of networking bandwidth per OCPU, in gigabits per second.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-        maxInGbps:
-          description: 'The maximum amount of networking bandwidth, in gigabits per second.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-        minInGbps:
-          description: 'The minimum amount of networking bandwidth, in gigabits per second.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-      required:
-      - minInGbps
-      - maxInGbps
-      - defaultPerOcpuInGbps
-    ShapeMemoryOptions:
-      description: 'For a flexible shape, the amount of memory available for container instances that use this shape.
-
-        '
-      properties:
-        defaultPerOcpuInGBs:
-          description: 'The default amount of memory per OCPU available for this shape (GB).
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-        maxInGBs:
-          description: 'The maximum amount of memory (GB).
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-        maxPerOcpuInGBs:
-          description: 'The maximum amount of memory per OCPU available for this shape (GB).
-
-            '
-          format: float
-          type: number
-          exclusiveMinimum: 0.0
-        minInGBs:
-          description: 'The minimum amount of memory (GB).
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-        minPerOcpuInGBs:
-          description: 'The minimum amount of memory per OCPU available for this shape (GB).
-
-            '
-          format: float
-          type: number
-          exclusiveMinimum: 0.0
-      required:
-      - minInGBs
-      - maxInGBs
-      - defaultPerOcpuInGBs
-      - minPerOcpuInGBs
-      - maxPerOcpuInGBs
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestError objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
-    ContainerResourceConfig:
-      description: 'The resource configuration for a container. The resource configuration determines
-
-        the amount of resources allocated to the container and the maximum allowed resources for a container.
-
-        '
-      properties:
-        memoryLimitInGBs:
-          default: null
-          description: 'The maximum amount of memory that can be consumed by the container''s
-
-            process. If you do not set a value, then the process
-
-            may use all available memory on the instance.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-        vcpusLimit:
-          default: null
-          description: 'The maximum amount of CPUs that can be consumed by the container''s process.
-
-
-            If you do not set a value, then the process
-
-            may use all available CPU resources on the container instance.
-
-
-            CPU usage is defined in terms of logical CPUs. This means that the
-
-            maximum possible value on an E3 ContainerInstance with 1 OCPU is 2.0.
-
-            '
-          format: float
-          minimum: 0.0
-          type: number
-    WorkRequestSummary:
-      description: A summary of the status of a work request.
-      properties:
-        compartmentId:
-          description: 'The OCID of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects.
-
-            '
-          type: string
-        id:
-          description: The ID of the work request.
-          type: string
-        operationType:
-          description: Type of work request.
-          enum:
-          - CREATE_CONTAINER_INSTANCE
-          - UPDATE_CONTAINER_INSTANCE
-          - DELETE_CONTAINER_INSTANCE
-          - MOVE_CONTAINER_INSTANCE
-          - START_CONTAINER_INSTANCE
-          - STOP_CONTAINER_INSTANCE
-          - RESTART_CONTAINER_INSTANCE
-          - UPDATE_CONTAINER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    ContainerDnsConfig:
-      description: DNS settings for containers.
-      properties:
-        nameservers:
-          description: IP address of the name server..
-          items:
-            type: string
-          type: array
-        options:
-          description: Options allows certain internal resolver variables to be modified.
-          items:
-            type: string
-          type: array
-        searches:
-          description: Search list for hostname lookup.
-          items:
-            type: string
-          type: array
-      type: object
-    WorkRequest:
-      description: A description of the work request status.
-      properties:
-        compartmentId:
-          description: 'The OCID of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects.
-
-            '
-          type: string
-        id:
-          description: The ID of the work request.
-          type: string
-        operationType:
-          description: Type of work request.
-          enum:
-          - CREATE_CONTAINER_INSTANCE
-          - UPDATE_CONTAINER_INSTANCE
-          - DELETE_CONTAINER_INSTANCE
-          - MOVE_CONTAINER_INSTANCE
-          - START_CONTAINER_INSTANCE
-          - STOP_CONTAINER_INSTANCE
-          - RESTART_CONTAINER_INSTANCE
-          - UPDATE_CONTAINER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestLogEntries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work tracked in the work request.
-
-            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
-
-            work is complete for that resource, at which point it updates to CREATED, UPDATED,
-
-            or DELETED, respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type the work request affects.
-          type: string
-        entityUri:
-          description: The URI path that the user can do a GET on to access the resource metadata.
-          type: string
-        identifier:
-          description: The ID of the resource the work request affects.
-          type: string
-      required:
-      - actionType
-      - entityType
-      - identifier
-    ContainerVnic:
-      description: 'An interface to a virtual network available to containers on a container instance.
-
-        '
-      properties:
-        vnicId:
-          description: 'The identifier of the virtual network interface card (VNIC) over which
-
-            the containers accessing this network can communicate with the
-
-            larger virtual cloud network.
-
-            '
-          type: string
-      type: object
-    ContainerCollection:
-      description: 'A list of containers.
-
-        '
-      properties:
-        items:
-          description: List of containers.
-          items:
-            $ref: '#/components/schemas/ContainerSummary'
-          maxItems: 10
-          minItems: 1
-          type: array
-      required:
-      - items
+      - ocpus
+      - memoryInGBs
+      - processorDescription
+      - networkingBandwidthInGbps
       type: object
     ContainerInstanceSummary:
       description: 'A set of details about a single container instance returned by list APIs.
@@ -2794,227 +2950,6 @@ components:
       - containerCount
       - containerRestartPolicy
       type: object
-    ContainerInstanceShapeSummary:
-      description: 'Details about a shape for a container instance.
-
-        '
-      properties:
-        memoryOptions:
-          $ref: '#/components/schemas/ShapeMemoryOptions'
-        name:
-          description: 'The name identifying the shape.
-
-            '
-          type: string
-        networkingBandwidthOptions:
-          $ref: '#/components/schemas/ShapeNetworkingBandwidthOptions'
-        ocpuOptions:
-          $ref: '#/components/schemas/ShapeOcpuOptions'
-        processorDescription:
-          description: 'A short description of the container instance''s processor (CPU).
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - name
-      - processorDescription
-    CreateContainerInstanceSecurityContextDetails:
-      description: Security context for all containers in a container instance.
-      discriminator:
-        propertyName: securityContextType
-      properties:
-        securityContextType:
-          default: LINUX
-          description: The type of security context
-          type: string
-          x-obmcs-enumref: '#/definitions/ContainerInstanceSecurityContext/securityContextType'
-    ContainerSummary:
-      description: 'Summary information about a container.
-
-        '
-      properties:
-        availabilityDomain:
-          description: The availability domain where the container instance that hosts this container runs.
-          maxLength: 255
-          minLength: 1
-          type: string
-        compartmentId:
-          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm).
-          maxLength: 255
-          minLength: 1
-          type: string
-        containerInstanceId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container instance on which the container is running.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`.
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`.
-
-            '
-          type: object
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        faultDomain:
-          description: The fault domain where the container instance that hosts the container runs.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container.
-          maxLength: 255
-          minLength: 1
-          type: string
-        imageUrl:
-          description: 'A URL identifying the image that the container runs in, such as docker.io/library/busybox:latest. If you do not provide a tag, the tag will default to latest.
-
-
-            If no registry is provided, will default the registry to public docker hub `docker.io/library`.
-
-            The registry used for container image must be reachable over the Container Instance''s VNIC.
-
-            '
-          maxLength: 1024
-          minLength: 1
-          type: string
-        isResourcePrincipalDisabled:
-          description: 'Determines whether the container will have access to the container instance resource principal.
-
-
-            This method utilizes resource principal version 2.2. For information on how to use the exposed resource principal elements, see
-
-            https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm#sdk_authentication_methods_resource_principal.
-
-            '
-          type: boolean
-        lifecycleDetails:
-          description: 'A message that describes the current state of the container in more detail. Can be used to provide
-
-            actionable information.
-
-            '
-          type: string
-        lifecycleState:
-          description: The current state of the container.
-          type: string
-          x-obmcs-enumref: '#/definitions/Container/lifecycleState'
-        resourceConfig:
-          $ref: '#/components/schemas/ContainerResourceConfig'
-        securityContext:
-          $ref: '#/components/schemas/SecurityContext'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`.
-
-            '
-          type: object
-        timeCreated:
-          description: The time the the container was created in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the container was updated in the format defined by [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - compartmentId
-      - availabilityDomain
-      - lifecycleState
-      - timeCreated
-      - containerInstanceId
-      - imageUrl
-      type: object
-    CreateContainerDnsConfigDetails:
-      description: 'Allow customers to define DNS settings for containers. If this is not provided, the containers use
-
-        the default DNS settings of the subnet.
-
-        '
-      properties:
-        nameservers:
-          description: 'IP address of a name server that the resolver should query, either an IPv4 address
-
-            (in dot notation), or an IPv6 address in colon (and possibly dot) notation. If null, uses
-
-            nameservers from subnet dhcpDnsOptions.
-
-            '
-          items:
-            maxLength: 50
-            minLength: 1
-            type: string
-          maxItems: 3
-          type: array
-          uniqueItems: true
-          x-default-description: 'null'
-        options:
-          description: 'Options allows certain internal resolver variables to be modified. Options are a list of objects in
-
-            https://man7.org/linux/man-pages/man5/resolv.conf.5.html. Examples: ["ndots:n", "edns0"].
-
-            '
-          items:
-            maxLength: 25
-            minLength: 1
-            type: string
-          maxItems: 16
-          type: array
-          uniqueItems: true
-          x-default-description: 'null'
-        searches:
-          description: Search list for host-name lookup. If null, we will use searches from subnet dhcpDnsOptios.
-          items:
-            maxLength: 253
-            minLength: 1
-            type: string
-          maxItems: 6
-          type: array
-          uniqueItems: true
-          x-default-description: 'null'
-      type: object
     ChangeContainerInstanceCompartmentDetails:
       description: The configuration details for the move operation.
       properties:
@@ -3028,18 +2963,142 @@ components:
       required:
       - compartmentId
       type: object
-    SecurityContext:
-      description: Security context for container.
-      discriminator:
-        propertyName: securityContextType
+    WorkRequest:
+      description: A description of the work request status.
       properties:
-        securityContextType:
-          default: LINUX
-          description: The type of security context
-          enum:
-          - LINUX
+        compartmentId:
+          description: 'The OCID of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects.
+
+            '
           type: string
+        id:
+          description: The ID of the work request.
+          type: string
+        operationType:
+          description: Type of work request.
+          enum:
+          - CREATE_CONTAINER_INSTANCE
+          - UPDATE_CONTAINER_INSTANCE
+          - DELETE_CONTAINER_INSTANCE
+          - MOVE_CONTAINER_INSTANCE
+          - START_CONTAINER_INSTANCE
+          - STOP_CONTAINER_INSTANCE
+          - RESTART_CONTAINER_INSTANCE
+          - UPDATE_CONTAINER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
   parameters:
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IsPreviousLogsQueryParam:
+      description: 'Returns the logs for the previous run of the container in a pod.
+
+        If the container fails, this parameter can help you to determine the root cause of the failure.
+
+        '
+      in: query
+      name: isPrevious
+      required: false
+      schema:
+        type: boolean
+        default: false
+    ContainerInstanceIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container instance.
+      in: query
+      name: containerInstanceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    AvailabilityDomainQueryParam:
+      description: 'The name of the availability domain.
+
+
+        Example: `Uocm:PHX-AD-1`
+
+        '
+      in: query
+      name: availabilityDomain
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use (ASC) or (DESC).
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
     ContainerIdentifierPathParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container.
       in: path
@@ -3047,6 +3106,111 @@ components:
       required: true
       schema:
         type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    CiLifecycleStateQueryParam:
+      description: A filter to only return resources that match the given lifecycle state.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/ContainerInstance/lifecycleState'
+      schema:
+        type: string
+    ResourceIdentifierQueryParam:
+      description: The OCID of the resource affected by the work request.
+      in: query
+      name: resourceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide one sort order. Default order for timeCreated is descending. Default order for displayName is ascending. If you don''t specify a value, timeCreated is the default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    WorkRequestSortOrderQueryParam:
+      description: The sort order to use, either ascending (ASC) or descending (DESC).
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    RequestIdHeader:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    ContainerInstanceIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container instance.
+      in: path
+      name: containerInstanceId
+      required: true
+      schema:
+        type: string
+        pattern: ^\S+$
+    WorkRequestSortByQueryParam:
+      description: The field to sort by. You can provide one sort order. Default order for timeAccepted is descending.
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    WorkRequestStatusQueryParam:
+      description: A filter to return resources with a lifecycleState that matches the given OperationStatus.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
     WorkRequestLogAndErrorSortByQueryParam:
       description: The field to sort by. You can provide one sort order. Default order for timestamp is descending.
       in: query
@@ -3056,14 +3220,22 @@ components:
         enum:
         - timestamp
         default: timestamp
-    ContainerInstanceIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container instance.
-      in: path
-      name: containerInstanceId
-      required: true
+    PaginationLimitQueryParam:
+      description: For list pagination. The maximum number of results per page, or items to return in a paginated "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    PaginationTokenQueryParam:
+      description: For list pagination. The value of the opc-next-page response header from the previous "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+      in: query
+      name: page
       schema:
         type: string
-        pattern: ^\S+$
+        minLength: 1
     WorkRequestIdPathParam:
       description: The ID of the asynchronous request.
       in: path
@@ -3097,178 +3269,6 @@ components:
       required: false
       schema:
         type: string
-    PaginationTokenQueryParam:
-      description: For list pagination. The value of the opc-next-page response header from the previous "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide one sort order. Default order for timeCreated is descending. Default order for displayName is ascending. If you don''t specify a value, timeCreated is the default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use (ASC) or (DESC).
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    RequestIdHeader:
-      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    CiLifecycleStateQueryParam:
-      description: A filter to only return resources that match the given lifecycle state.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/ContainerInstance/lifecycleState'
-      schema:
-        type: string
-    ContainerInstanceIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the container instance.
-      in: query
-      name: containerInstanceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestStatusQueryParam:
-      description: A filter to return resources with a lifecycleState that matches the given OperationStatus.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-      schema:
-        type: string
-        enum:
-        - ACCEPTED
-        - IN_PROGRESS
-        - FAILED
-        - SUCCEEDED
-        - CANCELING
-        - CANCELED
-    AvailabilityDomainQueryParam:
-      description: 'The name of the availability domain.
-
-
-        Example: `Uocm:PHX-AD-1`
-
-        '
-      in: query
-      name: availabilityDomain
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    ResourceIdentifierQueryParam:
-      description: The OCID of the resource affected by the work request.
-      in: query
-      name: resourceId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestSortByQueryParam:
-      description: The field to sort by. You can provide one sort order. Default order for timeAccepted is descending.
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    WorkRequestSortOrderQueryParam:
-      description: The sort order to use, either ascending (ASC) or descending (DESC).
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    PaginationLimitQueryParam:
-      description: For list pagination. The maximum number of results per page, or items to return in a paginated "List" call. For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    IsPreviousLogsQueryParam:
-      description: 'Returns the logs for the previous run of the container in a pod.
-
-        If the container fails, this parameter can help you to determine the root cause of the failure.
-
-        '
-      in: query
-      name: isPrevious
-      required: false
-      schema:
-        type: boolean
-        default: false
   responses:
     default:
       description: Unknown Error

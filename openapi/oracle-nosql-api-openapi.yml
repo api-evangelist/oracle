@@ -1380,11 +1380,11 @@ paths:
       x-related-resource: '#/definitions/WorkRequest'
 components:
   schemas:
-    UpdateTableDetails:
-      description: The information to be updated.
+    CreateIndexDetails:
+      description: Specifications for the new index.
       properties:
         compartmentId:
-          description: 'The OCID of the table''s current compartment.  Required
+          description: 'The OCID of the table''s compartment.  Required
 
             if the tableNameOrId path parameter is a table name.
 
@@ -1396,113 +1396,84 @@ components:
 
             '
           type: string
-        ddlStatement:
-          description: Complete ALTER TABLE DDL statement.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean
+        isIfNotExists:
+          description: 'If true, the operation completes successfully even when the
 
-                types are supported.
+            index exists.  Otherwise, an attempt to create an index
 
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values
-
-              scoped to a namespace.  Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and
-
-            scoped to a namespace.  Example: `{"foo-namespace":
-
-            {"bar-key": "value"}}`
+            that already exists will return an error.
 
             '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined
-
-            name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        tableLimits:
-          $ref: '#/components/schemas/TableLimits'
-      type: object
-    CreateTableDetails:
-      description: Specifications for the new table.
-      properties:
-        compartmentId:
-          description: Compartment Identifier.
-          type: string
-        ddlStatement:
-          description: Complete CREATE TABLE DDL statement.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean
-
-                types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values
-
-              scoped to a namespace.  Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and
-
-            scoped to a namespace.  Example: `{"foo-namespace":
-
-            {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined
-
-            name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        isAutoReclaimable:
-          description: True if table can be reclaimed after an idle period.
           type: boolean
+        keys:
+          description: A set of keys for a secondary index.
+          items:
+            $ref: '#/components/schemas/IndexKey'
+          type: array
         name:
-          description: Table name.
-          maxLength: 256
+          description: Index name.
+          maxLength: 64
           minLength: 1
           type: string
-        tableLimits:
-          $ref: '#/components/schemas/TableLimits'
       required:
       - name
-      - compartmentId
-      - ddlStatement
+      - keys
       type: object
-    RequestUsage:
-      description: The usage metrics for a request.
+    Row:
+      description: The result of GetRow.
       properties:
-        readUnitsConsumed:
-          description: Read Units consumed by this operation.
+        timeOfExpiration:
+          description: 'The expiration time of the row. A zero value indicates that
+
+            the row does not expire. An RFC3339 formatted datetime
+
+            string.
+
+            '
+          format: date-time
+          type: string
+        usage:
+          $ref: '#/components/schemas/RequestUsage'
+        value:
+          additionalProperties:
+            type: object
+          description: The map of values from a row.
+          type: object
+    TableCollection:
+      description: Results of ListTables.
+      properties:
+        autoReclaimableTables:
+          description: The current number of reclaimable tables in the tenancy.
           type: integer
-        writeUnitsConsumed:
-          description: Write Units consumed by this operation.
+        availableReplicationRegions:
+          description: An array of regions that are available for replication.
+          items:
+            type: string
+          type: array
+        items:
+          description: A page of TableSummary objects.
+          items:
+            $ref: '#/components/schemas/TableSummary'
+          type: array
+        maxAutoReclaimableTables:
+          description: The maximum number of reclaimable tables allowed in the tenancy.
           type: integer
+        maxOnDemandCapacityTables:
+          description: The maximum number of on demand capacity tables allowed in the tenancy.
+          type: integer
+        onDemandCapacityTables:
+          description: The current number of on demand capacity tables in the tenancy.
+          type: integer
+      type: object
+    WorkRequestLogEntryCollection:
+      description: Results of ListWorkRequestLogs
+      properties:
+        items:
+          description: A page of WorkRequestLogEntry objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      type: object
     StatementSummary:
       description: Information derived from parsing a NoSQL SQL statement.
       properties:
@@ -1604,608 +1575,6 @@ components:
           type: object
       required:
       - value
-    Row:
-      description: The result of GetRow.
-      properties:
-        timeOfExpiration:
-          description: 'The expiration time of the row. A zero value indicates that
-
-            the row does not expire. An RFC3339 formatted datetime
-
-            string.
-
-            '
-          format: date-time
-          type: string
-        usage:
-          $ref: '#/components/schemas/RequestUsage'
-        value:
-          additionalProperties:
-            type: object
-          description: The map of values from a row.
-          type: object
-    IndexKey:
-      description: Specifies a single key in a secondary index.
-      properties:
-        columnName:
-          description: The name of a column to be included as an index key.
-          type: string
-        jsonFieldType:
-          description: 'If the specified column is of type JSON, jsonFieldType contains
-
-            the type of the field indicated by jsonPath.
-
-            '
-          type: string
-        jsonPath:
-          description: 'If the specified column is of type JSON, jsonPath contains
-
-            a dotted path indicating the field within the JSON object
-
-            that will be the index key.
-
-            '
-          type: string
-      required:
-      - columnName
-      type: object
-    CreateReplicaDetails:
-      description: Specifications for the new replica
-      properties:
-        compartmentId:
-          description: 'The OCID of the table''s compartment.  Required
-
-            if the tableNameOrId path parameter is a table name.
-
-            Optional if tableNameOrId is an OCID.  If tableNameOrId
-
-            is an OCID, and compartmentId is supplied, the latter
-
-            must match the identified table''s compartmentId.
-
-            '
-          type: string
-        maxReadUnits:
-          description: 'Maximum sustained read throughput limit for the new replica table.
-
-            If not specified, the local table''s read limit is used.
-
-            '
-          type: integer
-        maxWriteUnits:
-          description: 'Maximum sustained write throughput limit for the new replica table.
-
-            If not specified, the local table''s write limit is used.
-
-            '
-          type: integer
-        region:
-          description: 'Name of the remote region in standard OCI format, i.e. us-ashburn-1
-
-            '
-          type: string
-      required:
-      - region
-      type: object
-    Column:
-      description: A column of a table.
-      properties:
-        defaultValue:
-          description: The column default value.
-          type: string
-        isAsUuid:
-          description: True if the STRING column was declared AS UUID.
-          type: boolean
-        isGenerated:
-          description: 'True if the STRING AS UUID column is also GENERATED BY DEFAULT.
-
-            '
-          type: boolean
-        isNullable:
-          description: The column nullable flag.
-          type: boolean
-        name:
-          description: The column name.
-          maxLength: 64
-          minLength: 1
-          type: string
-        type:
-          description: The column type.
-          type: string
-      type: object
-    DeleteRowResult:
-      description: The result of a DeleteRow operation.
-      properties:
-        existingValue:
-          additionalProperties:
-            type: object
-          description: The map of values from a row.
-          type: object
-        existingVersion:
-          description: 'The version string associated with the existing row.
-
-            Returned if the delete fails due to options setting in the
-
-            request.
-
-            '
-          format: base64
-          type: string
-        isSuccess:
-          description: Convey the success or failure of the operation.
-          type: boolean
-        usage:
-          $ref: '#/components/schemas/RequestUsage'
-    CreateIndexDetails:
-      description: Specifications for the new index.
-      properties:
-        compartmentId:
-          description: 'The OCID of the table''s compartment.  Required
-
-            if the tableNameOrId path parameter is a table name.
-
-            Optional if tableNameOrId is an OCID.  If tableNameOrId
-
-            is an OCID, and compartmentId is supplied, the latter
-
-            must match the identified table''s compartmentId.
-
-            '
-          type: string
-        isIfNotExists:
-          description: 'If true, the operation completes successfully even when the
-
-            index exists.  Otherwise, an attempt to create an index
-
-            that already exists will return an error.
-
-            '
-          type: boolean
-        keys:
-          description: A set of keys for a secondary index.
-          items:
-            $ref: '#/components/schemas/IndexKey'
-          type: array
-        name:
-          description: Index name.
-          maxLength: 64
-          minLength: 1
-          type: string
-      required:
-      - name
-      - keys
-      type: object
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error
-
-            codes are listed on
-
-            (https://docs.us-phoenix-1.oraclecloud.com/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    TableUsageSummary:
-      description: 'TableUsageSummary represents a single usage record, or slice, that includes
-
-        information about read and write throughput consumed during that period
-
-        as well as the current information regarding storage capacity. In
-
-        addition the count of throttling exceptions for the period is reported.
-
-        '
-      properties:
-        maxShardSizeUsageInPercent:
-          description: 'The percentage of allowed per-shard usage for the table shard with the highest usage.
-
-            '
-          type: integer
-        readThrottleCount:
-          description: 'The number of times reads were throttled due to exceeding
-
-            the read throughput limit.
-
-            '
-          type: integer
-        readUnits:
-          description: Read throughput during the sampling period.
-          type: integer
-        secondsInPeriod:
-          description: The length of the sampling period.
-          type: integer
-        storageInGBs:
-          description: The size of the table, in GB.
-          type: integer
-        storageThrottleCount:
-          description: 'The number of times writes were throttled because the table
-
-            exceeded its size limit.
-
-            '
-          type: integer
-        timeStarted:
-          description: 'The time stamp of this usage record.
-
-            '
-          format: date-time
-          type: string
-        writeThrottleCount:
-          description: 'The number of times writes were throttled due to exceeding
-
-            the write throughput limit.
-
-            '
-          type: integer
-        writeUnits:
-          description: Write throughput during the sampling period.
-          type: integer
-      type: object
-    Identity:
-      description: The identity properties of a table, if any.
-      properties:
-        columnName:
-          description: The name of the identity column.
-          type: string
-        isAlways:
-          description: True if the identity value is GENERATED ALWAYS.
-          type: boolean
-        isNull:
-          description: True if the identity value is GENERATED BY DEFAULT ON NULL.
-          type: boolean
-      type: object
-    TableSummary:
-      description: Summary of the table.
-      properties:
-        compartmentId:
-          description: Compartment Identifier.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean
-
-                types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values
-
-              scoped to a namespace.  Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and
-
-            scoped to a namespace.  Example: `{"foo-namespace":
-
-            {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined
-
-            name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: Unique identifier that is immutable on creation.
-          type: string
-        isAutoReclaimable:
-          description: True if this table can be reclaimed after an idle period.
-          type: boolean
-        isMultiRegion:
-          description: True if this table is currently a member of a replication set.
-          type: boolean
-        lifecycleDetails:
-          description: 'A message describing the current state in more detail.
-
-            '
-          type: string
-        lifecycleState:
-          description: The state of a table.
-          type: string
-          x-obmcs-enumref: '#/definitions/Table/lifecycleState'
-        name:
-          description: Human-friendly table name, also immutable.
-          type: string
-        schemaState:
-          description: 'The current state of this table''s schema. Available states are
-
-            MUTABLE - The schema can be changed. The table is not eligible for replication.
-
-            FROZEN - The schema is immutable. The table is eligible for replication.
-
-            '
-          enum:
-          - MUTABLE
-          - FROZEN
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean
-
-                types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped
-
-              to a namespace.
-
-              '
-            type: object
-          description: 'Read-only system tag. These predefined keys are scoped to
-
-            namespaces.  At present the only supported namespace is
-
-            `"orcl-cloud"`; and the only key in that namespace is
-
-            `"free-tier-retained"`.
-
-            Example: `{"orcl-cloud"": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        tableLimits:
-          $ref: '#/components/schemas/TableLimits'
-        timeCreated:
-          description: 'The time the the table was created. An RFC3339 formatted
-
-            datetime string.
-
-            '
-          format: date-time
-          type: string
-        timeOfExpiration:
-          description: 'If lifecycleState is INACTIVE, indicates when
-
-            this table will be automatically removed.
-
-            An RFC3339 formatted datetime string.
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The time the the table''s metadata was last updated. An
-
-            RFC3339 formatted datetime string.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      type: object
-    ChangeTableCompartmentDetails:
-      description: Specification of both from and to compartments.
-      properties:
-        fromCompartmentId:
-          description: 'The OCID of the table''s current compartment.  Required
-
-            if the tableNameOrId path parameter is a table name.
-
-            Optional if tableNameOrId is an OCID.  If tableNameOrId
-
-            is an OCID, and fromCompartmentId is supplied, the latter
-
-            must match the identified table''s current compartmentId.
-
-            '
-          type: string
-        toCompartmentId:
-          description: The OCID of the table's new compartment.
-          type: string
-      required:
-      - toCompartmentId
-      type: object
-    QueryDetails:
-      description: 'All the information surrounding a query, including the query statement,
-
-        limits, consistency, and so forth.
-
-        '
-      properties:
-        compartmentId:
-          description: 'Compartment OCID, to provide context for a table name in
-
-            the given statement.
-
-            '
-          type: string
-        consistency:
-          default: EVENTUAL
-          description: Consistency requirement for a read operation.
-          enum:
-          - EVENTUAL
-          - ABSOLUTE
-          type: string
-        isPrepared:
-          description: If true, the statement is a prepared statement.
-          type: boolean
-        maxReadInKBs:
-          default: 0
-          description: 'A limit on the total amount of data read during this operation, in KB.
-
-            '
-          type: integer
-        statement:
-          description: 'A NoSQL SQL query statement; or a Base64-encoded prepared statement.
-
-            '
-          type: string
-        timeoutInMs:
-          default: 5000
-          description: Timeout setting for the query.
-          type: integer
-        variables:
-          additionalProperties:
-            type: object
-          description: A map of prepared statement variables to values.
-          type: object
-      required:
-      - compartmentId
-      - statement
-    Index:
-      description: Information about an index.
-      properties:
-        compartmentId:
-          description: Compartment Identifier.
-          type: string
-        keys:
-          description: A set of keys for a secondary index.
-          items:
-            $ref: '#/components/schemas/IndexKey'
-          type: array
-        lifecycleDetails:
-          description: 'A message describing the current state in more detail.
-
-            '
-          type: string
-        lifecycleState:
-          description: The state of an index.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-        name:
-          description: Index name.
-          type: string
-        tableId:
-          description: the OCID of the table to which this index belongs.
-          type: string
-        tableName:
-          description: The name of the table to which this index belongs.
-          type: string
-      type: object
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for
-
-            programmatic parsing.
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    Replica:
-      description: Information about a MR table replica
-      properties:
-        capacityMode:
-          description: 'The capacity mode of the replica.
-
-            '
-          enum:
-          - PROVISIONED
-          - ON_DEMAND
-          type: string
-        lifecycleDetails:
-          description: 'A message describing the current state in more detail.
-
-            '
-          type: string
-        lifecycleState:
-          description: The state of the replica.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - DELETING
-          type: string
-        maxWriteUnits:
-          description: 'Maximum sustained write throughput limit of the replica table.
-
-            '
-          type: integer
-        region:
-          description: A customer-facing region identifier
-          type: string
-        tableId:
-          description: The OCID of the replica table
-          type: string
-    Schema:
-      description: The table schema information as a JSON object.
-      properties:
-        columns:
-          description: The columns of a table.
-          items:
-            $ref: '#/components/schemas/Column'
-          type: array
-        identity:
-          $ref: '#/components/schemas/Identity'
-        primaryKey:
-          description: A list of column names that make up a key.
-          items:
-            type: string
-          type: array
-        shardKey:
-          description: A list of column names that make up a key.
-          items:
-            type: string
-          type: array
-        ttl:
-          description: The default Time-to-Live for the table, in days.
-          type: integer
-      required:
-      - columns
-      - primaryKey
-      - shardKey
-      - ttl
-      type: object
-    WorkRequestErrorCollection:
-      description: Results of ListWorkRequestErrors
-      properties:
-        items:
-          description: A page of WorkRequestError objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      type: object
     WorkRequestSummary:
       description: A description of workrequest status.
       properties:
@@ -2277,15 +1646,66 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    TableUsageCollection:
-      description: Result of GetTableUsage.
+    IndexKey:
+      description: Specifies a single key in a secondary index.
       properties:
-        items:
-          description: A page of TableUsageSummary objects.
-          items:
-            $ref: '#/components/schemas/TableUsageSummary'
-          type: array
+        columnName:
+          description: The name of a column to be included as an index key.
+          type: string
+        jsonFieldType:
+          description: 'If the specified column is of type JSON, jsonFieldType contains
+
+            the type of the field indicated by jsonPath.
+
+            '
+          type: string
+        jsonPath:
+          description: 'If the specified column is of type JSON, jsonPath contains
+
+            a dotted path indicating the field within the JSON object
+
+            that will be the index key.
+
+            '
+          type: string
+      required:
+      - columnName
       type: object
+    Replica:
+      description: Information about a MR table replica
+      properties:
+        capacityMode:
+          description: 'The capacity mode of the replica.
+
+            '
+          enum:
+          - PROVISIONED
+          - ON_DEMAND
+          type: string
+        lifecycleDetails:
+          description: 'A message describing the current state in more detail.
+
+            '
+          type: string
+        lifecycleState:
+          description: The state of the replica.
+          enum:
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - DELETING
+          type: string
+        maxWriteUnits:
+          description: 'Maximum sustained write throughput limit of the replica table.
+
+            '
+          type: integer
+        region:
+          description: A customer-facing region identifier
+          type: string
+        tableId:
+          description: The OCID of the replica table
+          type: string
     IndexCollection:
       description: Results of ListIndexes.
       properties:
@@ -2294,181 +1714,6 @@ components:
           items:
             $ref: '#/components/schemas/IndexSummary'
           type: array
-      type: object
-    WorkRequest:
-      description: A description of workrequest status.
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request.
-
-            '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request.
-          enum:
-          - CREATE_TABLE
-          - UPDATE_TABLE
-          - DELETE_TABLE
-          type: string
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section
-
-            14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    WorkRequestLogEntryCollection:
-      description: Results of ListWorkRequestLogs
-      properties:
-        items:
-          description: A page of WorkRequestLogEntry objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      type: object
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work
-
-            tracked in the work request.  A resource being created,
-
-            updated, or deleted will remain in the IN_PROGRESS state
-
-            until work is complete for that resource at which point it
-
-            will transition to CREATED, UPDATED, or DELETED,
-
-            respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          type: string
-        entityType:
-          description: The resource type the work request affects.
-          type: string
-        entityUri:
-          description: The URI path to access the resource metadata.
-          type: string
-        identifier:
-          description: The identifier of the resource the work request affects.
-          type: string
-      required:
-      - actionType
-      - entityType
-      - identifier
-    TableLimits:
-      description: Throughput and storage limits configuration of a table.
-      properties:
-        capacityMode:
-          description: 'The capacity mode of the table.  If capacityMode = ON_DEMAND,
-
-            maxReadUnits and maxWriteUnits are not used, and both will have
-
-            the value of zero.
-
-            '
-          enum:
-          - PROVISIONED
-          - ON_DEMAND
-          type: string
-        maxReadUnits:
-          description: Maximum sustained read throughput limit for the table.
-          type: integer
-        maxStorageInGBs:
-          description: Maximum size of storage used by the table.
-          type: integer
-        maxWriteUnits:
-          description: Maximum sustained write throughput limit for the table.
-          type: integer
-      required:
-      - maxReadUnits
-      - maxWriteUnits
-      - maxStorageInGBs
-      type: object
-    WorkRequestCollection:
-      description: Results of ListWorkRequests
-      properties:
-        items:
-          description: A page of WorkRequestSummary objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      type: object
-    IndexSummary:
-      description: Information about an index.
-      properties:
-        keys:
-          description: A set of keys for a secondary index.
-          items:
-            $ref: '#/components/schemas/IndexKey'
-          type: array
-        lifecycleDetails:
-          description: 'A message describing the current state in more detail.
-
-            '
-          type: string
-        lifecycleState:
-          description: The state of an index.
-          type: string
-          x-obmcs-enumref: '#/definitions/Index/lifecycleState'
-        name:
-          description: Index name.
-          type: string
       type: object
     Table:
       description: Complete metadata about a table.
@@ -2628,6 +1873,277 @@ components:
       - id
       - compartmentId
       type: object
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. Error
+
+            codes are listed on
+
+            (https://docs.us-phoenix-1.oraclecloud.com/Content/API/References/apierrors.htm)
+
+            '
+          type: string
+        message:
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    UpdateTableDetails:
+      description: The information to be updated.
+      properties:
+        compartmentId:
+          description: 'The OCID of the table''s current compartment.  Required
+
+            if the tableNameOrId path parameter is a table name.
+
+            Optional if tableNameOrId is an OCID.  If tableNameOrId
+
+            is an OCID, and compartmentId is supplied, the latter
+
+            must match the identified table''s compartmentId.
+
+            '
+          type: string
+        ddlStatement:
+          description: Complete ALTER TABLE DDL statement.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean
+
+                types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values
+
+              scoped to a namespace.  Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and
+
+            scoped to a namespace.  Example: `{"foo-namespace":
+
+            {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined
+
+            name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        tableLimits:
+          $ref: '#/components/schemas/TableLimits'
+      type: object
+    CreateTableDetails:
+      description: Specifications for the new table.
+      properties:
+        compartmentId:
+          description: Compartment Identifier.
+          type: string
+        ddlStatement:
+          description: Complete CREATE TABLE DDL statement.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean
+
+                types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values
+
+              scoped to a namespace.  Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and
+
+            scoped to a namespace.  Example: `{"foo-namespace":
+
+            {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined
+
+            name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isAutoReclaimable:
+          description: True if table can be reclaimed after an idle period.
+          type: boolean
+        name:
+          description: Table name.
+          maxLength: 256
+          minLength: 1
+          type: string
+        tableLimits:
+          $ref: '#/components/schemas/TableLimits'
+      required:
+      - name
+      - compartmentId
+      - ddlStatement
+      type: object
+    DeleteRowResult:
+      description: The result of a DeleteRow operation.
+      properties:
+        existingValue:
+          additionalProperties:
+            type: object
+          description: The map of values from a row.
+          type: object
+        existingVersion:
+          description: 'The version string associated with the existing row.
+
+            Returned if the delete fails due to options setting in the
+
+            request.
+
+            '
+          format: base64
+          type: string
+        isSuccess:
+          description: Convey the success or failure of the operation.
+          type: boolean
+        usage:
+          $ref: '#/components/schemas/RequestUsage'
+    CreateReplicaDetails:
+      description: Specifications for the new replica
+      properties:
+        compartmentId:
+          description: 'The OCID of the table''s compartment.  Required
+
+            if the tableNameOrId path parameter is a table name.
+
+            Optional if tableNameOrId is an OCID.  If tableNameOrId
+
+            is an OCID, and compartmentId is supplied, the latter
+
+            must match the identified table''s compartmentId.
+
+            '
+          type: string
+        maxReadUnits:
+          description: 'Maximum sustained read throughput limit for the new replica table.
+
+            If not specified, the local table''s read limit is used.
+
+            '
+          type: integer
+        maxWriteUnits:
+          description: 'Maximum sustained write throughput limit for the new replica table.
+
+            If not specified, the local table''s write limit is used.
+
+            '
+          type: integer
+        region:
+          description: 'Name of the remote region in standard OCI format, i.e. us-ashburn-1
+
+            '
+          type: string
+      required:
+      - region
+      type: object
+    IndexSummary:
+      description: Information about an index.
+      properties:
+        keys:
+          description: A set of keys for a secondary index.
+          items:
+            $ref: '#/components/schemas/IndexKey'
+          type: array
+        lifecycleDetails:
+          description: 'A message describing the current state in more detail.
+
+            '
+          type: string
+        lifecycleState:
+          description: The state of an index.
+          type: string
+          x-obmcs-enumref: '#/definitions/Index/lifecycleState'
+        name:
+          description: Index name.
+          type: string
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for
+
+            programmatic parsing.
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the work
+
+            tracked in the work request.  A resource being created,
+
+            updated, or deleted will remain in the IN_PROGRESS state
+
+            until work is complete for that resource at which point it
+
+            will transition to CREATED, UPDATED, or DELETED,
+
+            respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          type: string
+        entityType:
+          description: The resource type the work request affects.
+          type: string
+        entityUri:
+          description: The URI path to access the resource metadata.
+          type: string
+        identifier:
+          description: The identifier of the resource the work request affects.
+          type: string
+      required:
+      - actionType
+      - entityType
+      - identifier
     UpdateRowResult:
       description: The result of an UpdateRow operation.
       properties:
@@ -2663,31 +2179,218 @@ components:
           description: An opaque version string associated with the row.
           format: base64
           type: string
-    TableCollection:
-      description: Results of ListTables.
+    Index:
+      description: Information about an index.
       properties:
-        autoReclaimableTables:
-          description: The current number of reclaimable tables in the tenancy.
-          type: integer
-        availableReplicationRegions:
-          description: An array of regions that are available for replication.
+        compartmentId:
+          description: Compartment Identifier.
+          type: string
+        keys:
+          description: A set of keys for a secondary index.
           items:
-            type: string
+            $ref: '#/components/schemas/IndexKey'
           type: array
+        lifecycleDetails:
+          description: 'A message describing the current state in more detail.
+
+            '
+          type: string
+        lifecycleState:
+          description: The state of an index.
+          enum:
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+        name:
+          description: Index name.
+          type: string
+        tableId:
+          description: the OCID of the table to which this index belongs.
+          type: string
+        tableName:
+          description: The name of the table to which this index belongs.
+          type: string
+      type: object
+    Identity:
+      description: The identity properties of a table, if any.
+      properties:
+        columnName:
+          description: The name of the identity column.
+          type: string
+        isAlways:
+          description: True if the identity value is GENERATED ALWAYS.
+          type: boolean
+        isNull:
+          description: True if the identity value is GENERATED BY DEFAULT ON NULL.
+          type: boolean
+      type: object
+    RequestUsage:
+      description: The usage metrics for a request.
+      properties:
+        readUnitsConsumed:
+          description: Read Units consumed by this operation.
+          type: integer
+        writeUnitsConsumed:
+          description: Write Units consumed by this operation.
+          type: integer
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time the log message was written. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    ChangeTableCompartmentDetails:
+      description: Specification of both from and to compartments.
+      properties:
+        fromCompartmentId:
+          description: 'The OCID of the table''s current compartment.  Required
+
+            if the tableNameOrId path parameter is a table name.
+
+            Optional if tableNameOrId is an OCID.  If tableNameOrId
+
+            is an OCID, and fromCompartmentId is supplied, the latter
+
+            must match the identified table''s current compartmentId.
+
+            '
+          type: string
+        toCompartmentId:
+          description: The OCID of the table's new compartment.
+          type: string
+      required:
+      - toCompartmentId
+      type: object
+    TableLimits:
+      description: Throughput and storage limits configuration of a table.
+      properties:
+        capacityMode:
+          description: 'The capacity mode of the table.  If capacityMode = ON_DEMAND,
+
+            maxReadUnits and maxWriteUnits are not used, and both will have
+
+            the value of zero.
+
+            '
+          enum:
+          - PROVISIONED
+          - ON_DEMAND
+          type: string
+        maxReadUnits:
+          description: Maximum sustained read throughput limit for the table.
+          type: integer
+        maxStorageInGBs:
+          description: Maximum size of storage used by the table.
+          type: integer
+        maxWriteUnits:
+          description: Maximum sustained write throughput limit for the table.
+          type: integer
+      required:
+      - maxReadUnits
+      - maxWriteUnits
+      - maxStorageInGBs
+      type: object
+    WorkRequestErrorCollection:
+      description: Results of ListWorkRequestErrors
+      properties:
         items:
-          description: A page of TableSummary objects.
+          description: A page of WorkRequestError objects.
           items:
-            $ref: '#/components/schemas/TableSummary'
+            $ref: '#/components/schemas/WorkRequestError'
           type: array
-        maxAutoReclaimableTables:
-          description: The maximum number of reclaimable tables allowed in the tenancy.
+      type: object
+    QueryDetails:
+      description: 'All the information surrounding a query, including the query statement,
+
+        limits, consistency, and so forth.
+
+        '
+      properties:
+        compartmentId:
+          description: 'Compartment OCID, to provide context for a table name in
+
+            the given statement.
+
+            '
+          type: string
+        consistency:
+          default: EVENTUAL
+          description: Consistency requirement for a read operation.
+          enum:
+          - EVENTUAL
+          - ABSOLUTE
+          type: string
+        isPrepared:
+          description: If true, the statement is a prepared statement.
+          type: boolean
+        maxReadInKBs:
+          default: 0
+          description: 'A limit on the total amount of data read during this operation, in KB.
+
+            '
           type: integer
-        maxOnDemandCapacityTables:
-          description: The maximum number of on demand capacity tables allowed in the tenancy.
+        statement:
+          description: 'A NoSQL SQL query statement; or a Base64-encoded prepared statement.
+
+            '
+          type: string
+        timeoutInMs:
+          default: 5000
+          description: Timeout setting for the query.
           type: integer
-        onDemandCapacityTables:
-          description: The current number of on demand capacity tables in the tenancy.
-          type: integer
+        variables:
+          additionalProperties:
+            type: object
+          description: A map of prepared statement variables to values.
+          type: object
+      required:
+      - compartmentId
+      - statement
+    Column:
+      description: A column of a table.
+      properties:
+        defaultValue:
+          description: The column default value.
+          type: string
+        isAsUuid:
+          description: True if the STRING column was declared AS UUID.
+          type: boolean
+        isGenerated:
+          description: 'True if the STRING AS UUID column is also GENERATED BY DEFAULT.
+
+            '
+          type: boolean
+        isNullable:
+          description: The column nullable flag.
+          type: boolean
+        name:
+          description: The column name.
+          maxLength: 64
+          minLength: 1
+          type: string
+        type:
+          description: The column type.
+          type: string
+      type: object
+    TableUsageCollection:
+      description: Result of GetTableUsage.
+      properties:
+        items:
+          description: A page of TableUsageSummary objects.
+          items:
+            $ref: '#/components/schemas/TableUsageSummary'
+          type: array
       type: object
     QueryResultCollection:
       description: The result of a query.
@@ -2702,6 +2405,303 @@ components:
           type: array
         usage:
           $ref: '#/components/schemas/RequestUsage'
+    TableSummary:
+      description: Summary of the table.
+      properties:
+        compartmentId:
+          description: Compartment Identifier.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean
+
+                types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values
+
+              scoped to a namespace.  Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and
+
+            scoped to a namespace.  Example: `{"foo-namespace":
+
+            {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined
+
+            name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: Unique identifier that is immutable on creation.
+          type: string
+        isAutoReclaimable:
+          description: True if this table can be reclaimed after an idle period.
+          type: boolean
+        isMultiRegion:
+          description: True if this table is currently a member of a replication set.
+          type: boolean
+        lifecycleDetails:
+          description: 'A message describing the current state in more detail.
+
+            '
+          type: string
+        lifecycleState:
+          description: The state of a table.
+          type: string
+          x-obmcs-enumref: '#/definitions/Table/lifecycleState'
+        name:
+          description: Human-friendly table name, also immutable.
+          type: string
+        schemaState:
+          description: 'The current state of this table''s schema. Available states are
+
+            MUTABLE - The schema can be changed. The table is not eligible for replication.
+
+            FROZEN - The schema is immutable. The table is eligible for replication.
+
+            '
+          enum:
+          - MUTABLE
+          - FROZEN
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean
+
+                types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped
+
+              to a namespace.
+
+              '
+            type: object
+          description: 'Read-only system tag. These predefined keys are scoped to
+
+            namespaces.  At present the only supported namespace is
+
+            `"orcl-cloud"`; and the only key in that namespace is
+
+            `"free-tier-retained"`.
+
+            Example: `{"orcl-cloud"": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        tableLimits:
+          $ref: '#/components/schemas/TableLimits'
+        timeCreated:
+          description: 'The time the the table was created. An RFC3339 formatted
+
+            datetime string.
+
+            '
+          format: date-time
+          type: string
+        timeOfExpiration:
+          description: 'If lifecycleState is INACTIVE, indicates when
+
+            this table will be automatically removed.
+
+            An RFC3339 formatted datetime string.
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time the the table''s metadata was last updated. An
+
+            RFC3339 formatted datetime string.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      type: object
+    TableUsageSummary:
+      description: 'TableUsageSummary represents a single usage record, or slice, that includes
+
+        information about read and write throughput consumed during that period
+
+        as well as the current information regarding storage capacity. In
+
+        addition the count of throttling exceptions for the period is reported.
+
+        '
+      properties:
+        maxShardSizeUsageInPercent:
+          description: 'The percentage of allowed per-shard usage for the table shard with the highest usage.
+
+            '
+          type: integer
+        readThrottleCount:
+          description: 'The number of times reads were throttled due to exceeding
+
+            the read throughput limit.
+
+            '
+          type: integer
+        readUnits:
+          description: Read throughput during the sampling period.
+          type: integer
+        secondsInPeriod:
+          description: The length of the sampling period.
+          type: integer
+        storageInGBs:
+          description: The size of the table, in GB.
+          type: integer
+        storageThrottleCount:
+          description: 'The number of times writes were throttled because the table
+
+            exceeded its size limit.
+
+            '
+          type: integer
+        timeStarted:
+          description: 'The time stamp of this usage record.
+
+            '
+          format: date-time
+          type: string
+        writeThrottleCount:
+          description: 'The number of times writes were throttled due to exceeding
+
+            the write throughput limit.
+
+            '
+          type: integer
+        writeUnits:
+          description: Write throughput during the sampling period.
+          type: integer
+      type: object
+    Schema:
+      description: The table schema information as a JSON object.
+      properties:
+        columns:
+          description: The columns of a table.
+          items:
+            $ref: '#/components/schemas/Column'
+          type: array
+        identity:
+          $ref: '#/components/schemas/Identity'
+        primaryKey:
+          description: A list of column names that make up a key.
+          items:
+            type: string
+          type: array
+        shardKey:
+          description: A list of column names that make up a key.
+          items:
+            type: string
+          type: array
+        ttl:
+          description: The default Time-to-Live for the table, in days.
+          type: integer
+      required:
+      - columns
+      - primaryKey
+      - shardKey
+      - ttl
+      type: object
+    WorkRequestCollection:
+      description: Results of ListWorkRequests
+      properties:
+        items:
+          description: A page of WorkRequestSummary objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      type: object
+    WorkRequest:
+      description: A description of workrequest status.
+      properties:
+        compartmentId:
+          description: 'The ocid of the compartment that contains the work request.
+
+            '
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request.
+          enum:
+          - CREATE_TABLE
+          - UPDATE_TABLE
+          - DELETE_TABLE
+          type: string
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section
+
+            14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
     PreparedStatement:
       description: The result of query preparation.
       properties:
@@ -2721,6 +2721,71 @@ components:
         usage:
           $ref: '#/components/schemas/RequestUsage'
   parameters:
+    CompartmentIdOptionalQueryParam:
+      description: 'The ID of a table''s compartment. When a table is identified
+
+        by name, the compartmentId is often needed to provide
+
+        context for interpreting the name.
+
+        '
+      in: query
+      name: compartmentId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    LifecycleStateQueryParam:
+      description: Filter list by the lifecycle state of the item.
+      in: query
+      name: lifecycleState
+      required: false
+      schema:
+        type: string
+        enum:
+        - ALL
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - DELETING
+        - DELETED
+        - FAILED
+        - INACTIVE
+        default: ALL
+    KeyQueryParam:
+      description: 'An array of strings, each of the format "column-name:value",
+
+        representing the primary key of the row.
+
+        '
+      in: query
+      name: key
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    IfExistsQueryParam:
+      description: Set as true to select "if exists" behavior.
+      in: query
+      name: isIfExists
+      required: false
+      schema:
+        type: boolean
+        default: false
     TimeoutQueryParam:
       description: Timeout setting for this operation.
       in: query
@@ -2729,6 +2794,139 @@ components:
       schema:
         type: integer
         default: 5000
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried
+
+        in case of a timeout or server error without risk of executing
+
+        that same action again. Retry tokens expire after 24 hours, but
+
+        can be invalidated before then due to conflicting
+
+        operations. For example, if a resource has been deleted and
+
+        purged from the system, then a retry of the original creation
+
+        request might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    IndexNamePathParam:
+      description: The name of a table's index.
+      in: path
+      name: indexName
+      required: true
+      schema:
+        type: string
+    CompartmentIdQueryParam:
+      description: The ID of a table's compartment.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    NameQueryParam:
+      description: A shell-globbing-style (*?[]) filter for names.
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+        default: '*'
+        maxLength: 256
+        minLength: 1
+    ConsistencyQueryParam:
+      description: Consistency requirement for a read operation.
+      in: query
+      name: consistency
+      required: false
+      schema:
+        type: string
+        enum:
+        - EVENTUAL
+        - ABSOLUTE
+        default: EVENTUAL
+    RegionPathParam:
+      description: A customer-facing region identifier
+      in: path
+      name: region
+      required: true
+      schema:
+        type: string
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be
+
+        provided. Default order for timeCreated is descending. Default
+
+        order for name is ascending. If no value is specified
+
+        timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - name
+        default: timeCreated
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    GetReturnRowQueryParam:
+      description: 'If true, and the operation fails due to an option setting
+
+        (ifVersion et al), then the existing row will be returned.
+
+        '
+      in: query
+      name: isGetReturnRow
+      required: false
+      schema:
+        type: boolean
+        default: false
+    TableNameOrIdPathParam:
+      description: A table name within the compartment, or a table OCID.
+      in: path
+      name: tableNameOrId
+      required: true
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 1000
+        maximum: 1000
+        minimum: 1
+    PaginationTokenQueryParam:
+      description: 'The page token representing the page at which to start
+
+        retrieving results. This is usually retrieved from a previous
+
+        list call.
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
     WorkRequestIdPathParam:
       description: The ID of the asynchronous request.
       in: path
@@ -2755,204 +2953,6 @@ components:
         type: string
         format: base64
         default: false
-    IndexNamePathParam:
-      description: The name of a table's index.
-      in: path
-      name: indexName
-      required: true
-      schema:
-        type: string
-    CompartmentIdOptionalQueryParam:
-      description: 'The ID of a table''s compartment. When a table is identified
-
-        by name, the compartmentId is often needed to provide
-
-        context for interpreting the name.
-
-        '
-      in: query
-      name: compartmentId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'The page token representing the page at which to start
-
-        retrieving results. This is usually retrieved from a previous
-
-        list call.
-
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    KeyQueryParam:
-      description: 'An array of strings, each of the format "column-name:value",
-
-        representing the primary key of the row.
-
-        '
-      in: query
-      name: key
-      required: true
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-    GetReturnRowQueryParam:
-      description: 'If true, and the operation fails due to an option setting
-
-        (ifVersion et al), then the existing row will be returned.
-
-        '
-      in: query
-      name: isGetReturnRow
-      required: false
-      schema:
-        type: boolean
-        default: false
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be
-
-        provided. Default order for timeCreated is descending. Default
-
-        order for name is ascending. If no value is specified
-
-        timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - name
-        default: timeCreated
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried
-
-        in case of a timeout or server error without risk of executing
-
-        that same action again. Retry tokens expire after 24 hours, but
-
-        can be invalidated before then due to conflicting
-
-        operations. For example, if a resource has been deleted and
-
-        purged from the system, then a retry of the original creation
-
-        request might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    RegionPathParam:
-      description: A customer-facing region identifier
-      in: path
-      name: region
-      required: true
-      schema:
-        type: string
-    NameQueryParam:
-      description: A shell-globbing-style (*?[]) filter for names.
-      in: query
-      name: name
-      required: false
-      schema:
-        type: string
-        default: '*'
-        maxLength: 256
-        minLength: 1
-    TableNameOrIdPathParam:
-      description: A table name within the compartment, or a table OCID.
-      in: path
-      name: tableNameOrId
-      required: true
-      schema:
-        type: string
-    IfExistsQueryParam:
-      description: Set as true to select "if exists" behavior.
-      in: query
-      name: isIfExists
-      required: false
-      schema:
-        type: boolean
-        default: false
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      required: false
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of a table's compartment.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: Filter list by the lifecycle state of the item.
-      in: query
-      name: lifecycleState
-      required: false
-      schema:
-        type: string
-        enum:
-        - ALL
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - DELETING
-        - DELETED
-        - FAILED
-        - INACTIVE
-        default: ALL
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 1000
-        maximum: 1000
-        minimum: 1
-    ConsistencyQueryParam:
-      description: Consistency requirement for a read operation.
-      in: query
-      name: consistency
-      required: false
-      schema:
-        type: string
-        enum:
-        - EVENTUAL
-        - ABSOLUTE
-        default: EVENTUAL
   responses:
     default:
       description: Unknown Error

@@ -1286,6 +1286,18 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   schemas:
+    CreateOsnDetails:
+      description: The Ordering Service Node details to be added
+      properties:
+        ad:
+          description: Availability Domain to place new OSN
+          type: string
+          x-obmcs-enumref: '#/definitions/AvailabilityDomain/ads'
+        ocpuAllocationParam:
+          $ref: '#/components/schemas/OcpuAllocationNumberParam'
+      required:
+      - ad
+      type: object
     UpdateOsnDetails:
       description: OSN attributes that can be updated.
       properties:
@@ -1294,187 +1306,106 @@ components:
       required:
       - ocpuAllocationParam
       type: object
-    OcpuUtilizationInfo:
-      description: Ocpu utilization for a VM host
+    ScaleStorageDetails:
+      description: storage size to increase
       properties:
-        host:
-          description: Host name of VM
-          type: string
-        ocpuCapacityNumber:
-          description: Number of total OCPU capacity on the host
-          format: float
-          type: number
-        ocpuUtilizationNumber:
-          description: Number of OCPU utilized
-          format: float
-          type: number
-      type: object
-    OcpuAllocationNumberParam:
-      description: OCPU allocation parameter
-      properties:
-        ocpuAllocationNumber:
-          description: Number of OCPU allocation
-          format: float
-          maximum: 64
-          minimum: 0
-          type: number
-      required:
-      - ocpuAllocationNumber
-      type: object
-    UpdatePeerDetails:
-      description: peer to modify ocpu allocation
-      properties:
-        ocpuAllocationParam:
-          $ref: '#/components/schemas/OcpuAllocationNumberParam'
-      required:
-      - ocpuAllocationParam
-      type: object
-    ScaledBlockchainPlatformPreview:
-      description: Blockchain Platform Instance Description Preview after Scaling.
-      properties:
-        compartmentId:
-          description: Compartment Identifier
-          type: string
-        componentDetails:
-          $ref: '#/components/schemas/BlockchainPlatformComponentDetails'
-        componentDetailsPostScaling:
-          $ref: '#/components/schemas/BlockchainPlatformComponentDetails'
-        computeShape:
-          description: Compute shape - STANDARD or ENTERPRISE_SMALL or ENTERPRISE_MEDIUM or ENTERPRISE_LARGE or ENTERPRISE_EXTRA_LARGE or ENTERPRISE_CUSTOM
-          type: string
-        description:
-          description: Platform Instance Description
-          type: string
-        displayName:
-          description: Platform Instance Display name, can be renamed
-          type: string
-        hostOcpuUtilizationInfo:
-          description: List of OcpuUtilization for all hosts
-          items:
-            $ref: '#/components/schemas/OcpuUtilizationInfo'
-          type: array
-        hostOcpuUtilizationInfoPostScaling:
-          description: List of OcpuUtilization for all hosts after scaling
-          items:
-            $ref: '#/components/schemas/OcpuUtilizationInfo'
-          type: array
-        id:
-          description: unique identifier that is immutable on creation
-          type: string
-        meteringPreview:
-          $ref: '#/components/schemas/ScaledPlatformMeteringPreview'
-        newVmCount:
-          description: Number of new VMs that would be created
-          type: integer
-        replicas:
-          $ref: '#/components/schemas/ReplicaDetails'
-        replicasPostScaling:
-          $ref: '#/components/schemas/ReplicaDetails'
-        scalePayload:
-          $ref: '#/components/schemas/ScaleBlockchainPlatformDetails'
         storageSizeInTBs:
           description: Storage size in TBs
-          format: double
-          type: number
-        storageSizeInTBsPostScaling:
-          description: Storage size in TBs post scaling
-          format: double
-          type: number
+          maximum: 96
+          minimum: 1
+          type: integer
       required:
-      - id
-      - compartmentId
-      - displayName
-      - computeShape
+      - storageSizeInTBs
       type: object
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed on
-
-            (https://docs.us-phoenix-1.oraclecloud.com/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    PeerSummary:
-      description: Peer summary information for returning in a list.
-      properties:
-        lifecycleState:
-          description: The current state of the peer.
-          type: string
-          x-obmcs-enumref: '#/definitions/Peer/lifecycleState'
-        peerKey:
-          description: Peer identifier
-          maxLength: 255
-          minLength: 1
-          type: string
-      type: object
-    Peer:
-      description: A Peer details
-      properties:
-        ad:
-          description: Availability Domain of peer
-          type: string
-          x-obmcs-enumref: '#/definitions/AvailabilityDomain/ads'
-        alias:
-          description: peer alias
-          type: string
-        host:
-          description: Host on which the Peer exists
-          type: string
-        lifecycleState:
-          description: The current state of the peer.
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - FAILED
-          type: string
-        ocpuAllocationParam:
-          $ref: '#/components/schemas/OcpuAllocationNumberParam'
-        peerKey:
-          description: peer identifier
-          maxLength: 255
-          minLength: 1
-          type: string
-        role:
-          description: Peer role
-          type: string
-          x-obmcs-enumref: '#/definitions/PeerRole/role'
-      required:
-      - peerKey
-      - role
-      - host
-      - ad
-      type: object
-    PeerCollection:
-      description: Result of a peer list or search. Contains PeerSummary
+    WorkRequestLogEntryCollection:
+      description: Result of a platform lpnist or search. Contains WorkRequestLogEntry
       properties:
         items:
-          description: Collection of PeerSummary
+          description: Collection of WorkRequestLogEntry
           items:
-            $ref: '#/components/schemas/PeerSummary'
+            $ref: '#/components/schemas/WorkRequestLogEntry'
           type: array
       required:
       - items
       type: object
-    OsnCollection:
-      description: Result of a OSN list or search. Contains OsnSummary
+    WorkRequestSummary:
+      description: A description of workrequest status
+      properties:
+        compartmentId:
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: type of the work request
+          enum:
+          - CREATE_PLATFORM
+          - UPDATE_PLATFORM
+          - DELETE_PLATFORM
+          - SCALE_PLATFORM
+          - START_PLATFORM
+          - STOP_PLATFORM
+          - CUSTOMIZE_PLATFORM
+          - SCALE_CHAINCODE_HOSTS
+          type: string
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: status of current work request.
+          type: string
+          x-obmcs-enumref: '#/definitions/WorkRequest/status'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    BlockchainPlatformCollection:
+      description: Result of a platform list or search. Contains BlockchainPlatformSummary
       properties:
         items:
-          description: Collection of OsnSummary
+          description: Collection of BlockchainPlatformSummary
           items:
-            $ref: '#/components/schemas/OsnSummary'
+            $ref: '#/components/schemas/BlockchainPlatformSummary'
           type: array
       required:
       - items
@@ -1603,86 +1534,42 @@ components:
       - platformRole
       - computeShape
       type: object
-    UpdateBlockchainPlatformDetails:
-      description: Blockchain Platform details for updating a service.
+    WorkRequestError:
+      description: An error encountered while executing a work request.
       properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
+        code:
+          description: 'A machine-usable code for the error that occured. Error codes are listed on
 
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
+            (https://docs.us-phoenix-1.oraclecloud.com/Content/API/References/apierrors.htm)
 
             '
-          type: object
-        description:
-          description: Platform Description
           type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        isChaincodeClusterEnabled:
-          description: Enable multiple Chaincode hosts in the platform cluster
-          type: boolean
-        replicas:
-          $ref: '#/components/schemas/ReplicaDetails'
-        storageSizeInTBs:
-          description: Storage size in TBs
-          format: double
-          type: number
-        totalOcpuCapacity:
-          description: Number of total OCPUs to allocate
-          type: integer
-      type: object
-    ScaledPlatformMeteringPreview:
-      description: Blockchain Platform Metering Preview after Scaling
-      properties:
-        extraStorageMeteredUnits:
-          description: Extra Storage units required in TBs
-          format: double
-          type: number
-        storageMeteredUnits:
-          description: Current Storage metered units in TBs
-          format: double
-          type: number
-        storageMeteredUnitsPostScaling:
-          description: Total Post Scaling Storage metered units in TBs
-          format: double
-          type: number
-        totalOcpuAllocation:
-          description: Number of total OCPU allocation for the blockchain platform
-          format: float
-          type: number
-        totalOcpuAllocationPostScaling:
-          description: Number of total OCPU allocation for the blockchain platform after Scaling
-          format: float
-          type: number
-      type: object
-    Osn:
-      description: An Ordering Service Node details
+        message:
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    Peer:
+      description: A Peer details
       properties:
         ad:
-          description: Availability Domain of OSN
+          description: Availability Domain of peer
           type: string
           x-obmcs-enumref: '#/definitions/AvailabilityDomain/ads'
+        alias:
+          description: peer alias
+          type: string
+        host:
+          description: Host on which the Peer exists
+          type: string
         lifecycleState:
-          description: The current state of the OSN.
+          description: The current state of the peer.
           enum:
           - ACTIVE
           - INACTIVE
@@ -1690,235 +1577,85 @@ components:
           type: string
         ocpuAllocationParam:
           $ref: '#/components/schemas/OcpuAllocationNumberParam'
-        osnKey:
-          description: OSN identifier
+        peerKey:
+          description: peer identifier
           maxLength: 255
           minLength: 1
           type: string
+        role:
+          description: Peer role
+          type: string
+          x-obmcs-enumref: '#/definitions/PeerRole/role'
       required:
-      - osnKey
+      - peerKey
+      - role
+      - host
       - ad
       type: object
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
+    ScaledBlockchainPlatformPreview:
+      description: Blockchain Platform Instance Description Preview after Scaling.
       properties:
-        message:
-          description: Human-readable log message.
+        compartmentId:
+          description: Compartment Identifier
           type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string
-          format: date-time
+        componentDetails:
+          $ref: '#/components/schemas/BlockchainPlatformComponentDetails'
+        componentDetailsPostScaling:
+          $ref: '#/components/schemas/BlockchainPlatformComponentDetails'
+        computeShape:
+          description: Compute shape - STANDARD or ENTERPRISE_SMALL or ENTERPRISE_MEDIUM or ENTERPRISE_LARGE or ENTERPRISE_EXTRA_LARGE or ENTERPRISE_CUSTOM
           type: string
-      required:
-      - message
-      - timestamp
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+        description:
+          description: Platform Instance Description
           type: string
-        message:
-          description: A human-readable error string.
+        displayName:
+          description: Platform Instance Display name, can be renamed
           type: string
-      required:
-      - code
-      - message
-    ScaleStorageDetails:
-      description: storage size to increase
-      properties:
+        hostOcpuUtilizationInfo:
+          description: List of OcpuUtilization for all hosts
+          items:
+            $ref: '#/components/schemas/OcpuUtilizationInfo'
+          type: array
+        hostOcpuUtilizationInfoPostScaling:
+          description: List of OcpuUtilization for all hosts after scaling
+          items:
+            $ref: '#/components/schemas/OcpuUtilizationInfo'
+          type: array
+        id:
+          description: unique identifier that is immutable on creation
+          type: string
+        meteringPreview:
+          $ref: '#/components/schemas/ScaledPlatformMeteringPreview'
+        newVmCount:
+          description: Number of new VMs that would be created
+          type: integer
+        replicas:
+          $ref: '#/components/schemas/ReplicaDetails'
+        replicasPostScaling:
+          $ref: '#/components/schemas/ReplicaDetails'
+        scalePayload:
+          $ref: '#/components/schemas/ScaleBlockchainPlatformDetails'
         storageSizeInTBs:
           description: Storage size in TBs
-          maximum: 96
-          minimum: 1
-          type: integer
-      required:
-      - storageSizeInTBs
-      type: object
-    BlockchainPlatformComponentDetails:
-      description: Blockchain Platform component details.
-      properties:
-        osns:
-          description: List of OSNs
-          items:
-            $ref: '#/components/schemas/Osn'
-          type: array
-        peers:
-          description: List of Peers
-          items:
-            $ref: '#/components/schemas/Peer'
-          type: array
-      type: object
-    WorkRequestErrorCollection:
-      description: Result of a platform list or search. Contains WorkRequestError
-      properties:
-        items:
-          description: Collection of WorkRequestError
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequestSummary:
-      description: A description of workrequest status
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: type of the work request
-          enum:
-          - CREATE_PLATFORM
-          - UPDATE_PLATFORM
-          - DELETE_PLATFORM
-          - SCALE_PLATFORM
-          - START_PLATFORM
-          - STOP_PLATFORM
-          - CUSTOMIZE_PLATFORM
-          - SCALE_CHAINCODE_HOSTS
-          type: string
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
+          format: double
           type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: status of current work request.
-          type: string
-          x-obmcs-enumref: '#/definitions/WorkRequest/status'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
+        storageSizeInTBsPostScaling:
+          description: Storage size in TBs post scaling
+          format: double
+          type: number
       required:
-      - operationType
       - id
       - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    WorkRequest:
-      description: A description of workrequest status
+      - displayName
+      - computeShape
+      type: object
+    UpdatePeerDetails:
+      description: peer to modify ocpu allocation
       properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: type of the work request
-          enum:
-          - CREATE_PLATFORM
-          - UPDATE_PLATFORM
-          - DELETE_PLATFORM
-          - SCALE_PLATFORM
-          - START_PLATFORM
-          - STOP_PLATFORM
-          - CUSTOMIZE_PLATFORM
-          - SCALE_CHAINCODE_HOSTS
-          type: string
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
+        ocpuAllocationParam:
+          $ref: '#/components/schemas/OcpuAllocationNumberParam'
       required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    WorkRequestLogEntryCollection:
-      description: Result of a platform lpnist or search. Contains WorkRequestLogEntry
-      properties:
-        items:
-          description: Collection of WorkRequestLogEntry
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
+      - ocpuAllocationParam
       type: object
     WorkRequestResource:
       description: A resource created or operated on by a work request.
@@ -1953,253 +1690,6 @@ components:
       - actionType
       - entityType
       - identifier
-    WorkRequestCollection:
-      description: Result of a platform list or search. Contains WorkRequestSummary
-      properties:
-        items:
-          description: Collection of WorkRequestSummary
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    OsnSummary:
-      description: OSN summary information for returning in a list.
-      properties:
-        lifecycleState:
-          description: The current state of the OSN.
-          type: string
-          x-obmcs-enumref: '#/definitions/Osn/lifecycleState'
-        osnKey:
-          description: OSN identifier
-          maxLength: 255
-          minLength: 1
-          type: string
-      type: object
-    ReplicaDetails:
-      description: Number of replicas of service components like Rest Proxy, CA and Console
-      properties:
-        caCount:
-          description: Number of CA replicas
-          maximum: 10
-          minimum: 1
-          type: integer
-        consoleCount:
-          description: Number of console replicas
-          maximum: 10
-          minimum: 1
-          type: integer
-        proxyCount:
-          description: Number of REST proxy replicas
-          maximum: 10
-          minimum: 1
-          type: integer
-      type: object
-    BlockchainPlatformSummary:
-      description: Blockchain Platform Instance Summary.
-      properties:
-        compartmentId:
-          description: Compartment Identifier
-          type: string
-        computeShape:
-          description: Compute shape - STANDARD or ENTERPRISE_SMALL or ENTERPRISE_MEDIUM or ENTERPRISE_LARGE or ENTERPRISE_EXTRA_LARGE or ENTERPRISE_CUSTOM
-          type: string
-          x-obmcs-enumref: '#/definitions/BlockchainPlatform/computeShape'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: Platform Instance Description
-          type: string
-        displayName:
-          description: Platform Instance Display name, can be renamed
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: unique identifier that is immutable on creation
-          type: string
-        lifecycleDetails:
-          description: An message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
-          type: string
-        lifecycleState:
-          description: The current state of the Platform Instance.
-          type: string
-          x-obmcs-enumref: '#/definitions/BlockchainPlatform/lifecycleState'
-        platformRole:
-          description: Role of platform - founder or participant
-          type: string
-          x-obmcs-enumref: '#/definitions/BlockchainPlatform/platformRole'
-        serviceEndpoint:
-          description: Service endpoint URL, valid post-provisioning
-          type: string
-        timeCreated:
-          description: The time the the Platform Instance was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the Platform Instance was updated. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - displayName
-      - computeShape
-      type: object
-    CreatePeerDetails:
-      description: The Peer details to be added
-      properties:
-        ad:
-          description: Availability Domain to place new peer
-          type: string
-          x-obmcs-enumref: '#/definitions/AvailabilityDomain/ads'
-        alias:
-          description: peer alias
-          maxLength: 16
-          minLength: 1
-          type: string
-        ocpuAllocationParam:
-          $ref: '#/components/schemas/OcpuAllocationNumberParam'
-        role:
-          description: Peer role
-          type: string
-          x-obmcs-enumref: '#/definitions/PeerRole/role'
-      required:
-      - role
-      - ocpuAllocationParam
-      - ad
-      type: object
-    ScaleBlockchainPlatformDetails:
-      description: 'Scale operation details for a blockchain platform. The scale operation payload has multiple options
-
-        - Add one or more Ordering Service Node (addOsns)
-
-        - Add one or more Peers (addPeers)
-
-        - Add more replicas of CA, Console and Rest Proxy (addReplicas)
-
-        - Add more storage to the platform (addStorage)
-
-        - Modify the CPU allocation for Peer Nodes (modifyPeers)
-
-        - Remove one or more replicas of CA, Console and Rest Proxy (removeReplicas)
-
-        - Remove one or more Ordering Service Node (removeOsns)
-
-        - Remove one or more Peers (removePeers).
-
-        The scale operation payload must have at least one of the above options.
-
-        '
-      properties:
-        addOsns:
-          description: new OSNs to add
-          items:
-            $ref: '#/components/schemas/CreateOsnDetails'
-          type: array
-        addPeers:
-          description: new Peers to add
-          items:
-            $ref: '#/components/schemas/CreatePeerDetails'
-          type: array
-        addReplicas:
-          $ref: '#/components/schemas/ReplicaDetails'
-        addStorage:
-          $ref: '#/components/schemas/ScaleStorageDetails'
-        modifyPeers:
-          description: modify ocpu allocation to existing Peers
-          items:
-            $ref: '#/components/schemas/ModifyPeerDetails'
-          type: array
-        removeOsns:
-          description: OSN id list to remove
-          items:
-            type: string
-          type: array
-        removePeers:
-          description: Peer id list to remove
-          items:
-            type: string
-          type: array
-        removeReplicas:
-          $ref: '#/components/schemas/ReplicaDetails'
-      type: object
-    ModifyPeerDetails:
-      description: peer to modify ocpu allocation
-      properties:
-        ocpuAllocationParam:
-          $ref: '#/components/schemas/OcpuAllocationNumberParam'
-        peerName:
-          description: peer identifier
-          maxLength: 64
-          minLength: 1
-          type: string
-      required:
-      - peerName
-      - ocpuAllocationParam
-      type: object
-    CreateOsnDetails:
-      description: The Ordering Service Node details to be added
-      properties:
-        ad:
-          description: Availability Domain to place new OSN
-          type: string
-          x-obmcs-enumref: '#/definitions/AvailabilityDomain/ads'
-        ocpuAllocationParam:
-          $ref: '#/components/schemas/OcpuAllocationNumberParam'
-      required:
-      - ad
-      type: object
-    BlockchainPlatformCollection:
-      description: Result of a platform list or search. Contains BlockchainPlatformSummary
-      properties:
-        items:
-          description: Collection of BlockchainPlatformSummary
-          items:
-            $ref: '#/components/schemas/BlockchainPlatformSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ChangeBlockchainPlatformCompartmentDetails:
-      description: 'Input payload to change a resource''s compartment.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The OCID of the new compartment.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
     CreateBlockchainPlatformDetails:
       description: Blockchain Platform details for creating a new service.
       properties:
@@ -2294,7 +1784,634 @@ components:
       - computeShape
       - idcsAccessToken
       type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    UpdateBlockchainPlatformDetails:
+      description: Blockchain Platform details for updating a service.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: Platform Description
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isChaincodeClusterEnabled:
+          description: Enable multiple Chaincode hosts in the platform cluster
+          type: boolean
+        replicas:
+          $ref: '#/components/schemas/ReplicaDetails'
+        storageSizeInTBs:
+          description: Storage size in TBs
+          format: double
+          type: number
+        totalOcpuCapacity:
+          description: Number of total OCPUs to allocate
+          type: integer
+      type: object
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time the log message was written. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    BlockchainPlatformComponentDetails:
+      description: Blockchain Platform component details.
+      properties:
+        osns:
+          description: List of OSNs
+          items:
+            $ref: '#/components/schemas/Osn'
+          type: array
+        peers:
+          description: List of Peers
+          items:
+            $ref: '#/components/schemas/Peer'
+          type: array
+      type: object
+    ScaleBlockchainPlatformDetails:
+      description: 'Scale operation details for a blockchain platform. The scale operation payload has multiple options
+
+        - Add one or more Ordering Service Node (addOsns)
+
+        - Add one or more Peers (addPeers)
+
+        - Add more replicas of CA, Console and Rest Proxy (addReplicas)
+
+        - Add more storage to the platform (addStorage)
+
+        - Modify the CPU allocation for Peer Nodes (modifyPeers)
+
+        - Remove one or more replicas of CA, Console and Rest Proxy (removeReplicas)
+
+        - Remove one or more Ordering Service Node (removeOsns)
+
+        - Remove one or more Peers (removePeers).
+
+        The scale operation payload must have at least one of the above options.
+
+        '
+      properties:
+        addOsns:
+          description: new OSNs to add
+          items:
+            $ref: '#/components/schemas/CreateOsnDetails'
+          type: array
+        addPeers:
+          description: new Peers to add
+          items:
+            $ref: '#/components/schemas/CreatePeerDetails'
+          type: array
+        addReplicas:
+          $ref: '#/components/schemas/ReplicaDetails'
+        addStorage:
+          $ref: '#/components/schemas/ScaleStorageDetails'
+        modifyPeers:
+          description: modify ocpu allocation to existing Peers
+          items:
+            $ref: '#/components/schemas/ModifyPeerDetails'
+          type: array
+        removeOsns:
+          description: OSN id list to remove
+          items:
+            type: string
+          type: array
+        removePeers:
+          description: Peer id list to remove
+          items:
+            type: string
+          type: array
+        removeReplicas:
+          $ref: '#/components/schemas/ReplicaDetails'
+      type: object
+    ReplicaDetails:
+      description: Number of replicas of service components like Rest Proxy, CA and Console
+      properties:
+        caCount:
+          description: Number of CA replicas
+          maximum: 10
+          minimum: 1
+          type: integer
+        consoleCount:
+          description: Number of console replicas
+          maximum: 10
+          minimum: 1
+          type: integer
+        proxyCount:
+          description: Number of REST proxy replicas
+          maximum: 10
+          minimum: 1
+          type: integer
+      type: object
+    PeerSummary:
+      description: Peer summary information for returning in a list.
+      properties:
+        lifecycleState:
+          description: The current state of the peer.
+          type: string
+          x-obmcs-enumref: '#/definitions/Peer/lifecycleState'
+        peerKey:
+          description: Peer identifier
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    WorkRequestErrorCollection:
+      description: Result of a platform list or search. Contains WorkRequestError
+      properties:
+        items:
+          description: Collection of WorkRequestError
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+    OsnCollection:
+      description: Result of a OSN list or search. Contains OsnSummary
+      properties:
+        items:
+          description: Collection of OsnSummary
+          items:
+            $ref: '#/components/schemas/OsnSummary'
+          type: array
+      required:
+      - items
+      type: object
+    BlockchainPlatformSummary:
+      description: Blockchain Platform Instance Summary.
+      properties:
+        compartmentId:
+          description: Compartment Identifier
+          type: string
+        computeShape:
+          description: Compute shape - STANDARD or ENTERPRISE_SMALL or ENTERPRISE_MEDIUM or ENTERPRISE_LARGE or ENTERPRISE_EXTRA_LARGE or ENTERPRISE_CUSTOM
+          type: string
+          x-obmcs-enumref: '#/definitions/BlockchainPlatform/computeShape'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: Platform Instance Description
+          type: string
+        displayName:
+          description: Platform Instance Display name, can be renamed
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: unique identifier that is immutable on creation
+          type: string
+        lifecycleDetails:
+          description: An message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
+          type: string
+        lifecycleState:
+          description: The current state of the Platform Instance.
+          type: string
+          x-obmcs-enumref: '#/definitions/BlockchainPlatform/lifecycleState'
+        platformRole:
+          description: Role of platform - founder or participant
+          type: string
+          x-obmcs-enumref: '#/definitions/BlockchainPlatform/platformRole'
+        serviceEndpoint:
+          description: Service endpoint URL, valid post-provisioning
+          type: string
+        timeCreated:
+          description: The time the the Platform Instance was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the Platform Instance was updated. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - displayName
+      - computeShape
+      type: object
+    OcpuAllocationNumberParam:
+      description: OCPU allocation parameter
+      properties:
+        ocpuAllocationNumber:
+          description: Number of OCPU allocation
+          format: float
+          maximum: 64
+          minimum: 0
+          type: number
+      required:
+      - ocpuAllocationNumber
+      type: object
+    OsnSummary:
+      description: OSN summary information for returning in a list.
+      properties:
+        lifecycleState:
+          description: The current state of the OSN.
+          type: string
+          x-obmcs-enumref: '#/definitions/Osn/lifecycleState'
+        osnKey:
+          description: OSN identifier
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    CreatePeerDetails:
+      description: The Peer details to be added
+      properties:
+        ad:
+          description: Availability Domain to place new peer
+          type: string
+          x-obmcs-enumref: '#/definitions/AvailabilityDomain/ads'
+        alias:
+          description: peer alias
+          maxLength: 16
+          minLength: 1
+          type: string
+        ocpuAllocationParam:
+          $ref: '#/components/schemas/OcpuAllocationNumberParam'
+        role:
+          description: Peer role
+          type: string
+          x-obmcs-enumref: '#/definitions/PeerRole/role'
+      required:
+      - role
+      - ocpuAllocationParam
+      - ad
+      type: object
+    ChangeBlockchainPlatformCompartmentDetails:
+      description: 'Input payload to change a resource''s compartment.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The OCID of the new compartment.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+    ScaledPlatformMeteringPreview:
+      description: Blockchain Platform Metering Preview after Scaling
+      properties:
+        extraStorageMeteredUnits:
+          description: Extra Storage units required in TBs
+          format: double
+          type: number
+        storageMeteredUnits:
+          description: Current Storage metered units in TBs
+          format: double
+          type: number
+        storageMeteredUnitsPostScaling:
+          description: Total Post Scaling Storage metered units in TBs
+          format: double
+          type: number
+        totalOcpuAllocation:
+          description: Number of total OCPU allocation for the blockchain platform
+          format: float
+          type: number
+        totalOcpuAllocationPostScaling:
+          description: Number of total OCPU allocation for the blockchain platform after Scaling
+          format: float
+          type: number
+      type: object
+    PeerCollection:
+      description: Result of a peer list or search. Contains PeerSummary
+      properties:
+        items:
+          description: Collection of PeerSummary
+          items:
+            $ref: '#/components/schemas/PeerSummary'
+          type: array
+      required:
+      - items
+      type: object
+    Osn:
+      description: An Ordering Service Node details
+      properties:
+        ad:
+          description: Availability Domain of OSN
+          type: string
+          x-obmcs-enumref: '#/definitions/AvailabilityDomain/ads'
+        lifecycleState:
+          description: The current state of the OSN.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - FAILED
+          type: string
+        ocpuAllocationParam:
+          $ref: '#/components/schemas/OcpuAllocationNumberParam'
+        osnKey:
+          description: OSN identifier
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - osnKey
+      - ad
+      type: object
+    ModifyPeerDetails:
+      description: peer to modify ocpu allocation
+      properties:
+        ocpuAllocationParam:
+          $ref: '#/components/schemas/OcpuAllocationNumberParam'
+        peerName:
+          description: peer identifier
+          maxLength: 64
+          minLength: 1
+          type: string
+      required:
+      - peerName
+      - ocpuAllocationParam
+      type: object
+    OcpuUtilizationInfo:
+      description: Ocpu utilization for a VM host
+      properties:
+        host:
+          description: Host name of VM
+          type: string
+        ocpuCapacityNumber:
+          description: Number of total OCPU capacity on the host
+          format: float
+          type: number
+        ocpuUtilizationNumber:
+          description: Number of OCPU utilized
+          format: float
+          type: number
+      type: object
+    WorkRequestCollection:
+      description: Result of a platform list or search. Contains WorkRequestSummary
+      properties:
+        items:
+          description: Collection of WorkRequestSummary
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequest:
+      description: A description of workrequest status
+      properties:
+        compartmentId:
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: type of the work request
+          enum:
+          - CREATE_PLATFORM
+          - UPDATE_PLATFORM
+          - DELETE_PLATFORM
+          - SCALE_PLATFORM
+          - START_PLATFORM
+          - STOP_PLATFORM
+          - CUSTOMIZE_PLATFORM
+          - SCALE_CHAINCODE_HOSTS
+          type: string
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
   parameters:
+    BlockchainPlatformIdQueryParam:
+      description: Unique service identifier.
+      in: query
+      name: blockchainPlatformId
+      required: true
+      schema:
+        type: string
+    OsnIdPathParam:
+      description: OSN identifier.
+      in: path
+      name: osnId
+      required: true
+      schema:
+        type: string
+    DisplayNameQueryParam:
+      description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+        Example: `My new resource`
+
+        '
+      in: query
+      name: displayName
+      x-default-description: A default name is constructed by default
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PeerIdPathParam:
+      description: Peer identifier.
+      in: path
+      name: peerId
+      required: true
+      schema:
+        type: string
+    BlockchainPlatformLifecycleStateQueryParam:
+      description: 'A filter to only return resources that match the given lifecycle state.
+
+        The state value is case-insensitive.
+
+        '
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: By default instances in all states are returned
+      x-obmcs-enumref: '#/definitions/BlockchainPlatform/lifecycleState'
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    BlockchainPlatformIdPathParam:
+      description: Unique service identifier.
+      in: path
+      name: blockchainPlatformId
+      required: true
+      schema:
+        type: string
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for TIMECREATED is descending. Default order for DISPLAYNAME is ascending. If no value is specified TIMECREATED is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
     SortByQueryParamWorkRequests:
       description: 'The field to sort by. Only one sort order may be provided. Default order for TIMESTARTED is descending. Default order for WORKREQUESTID is ascending. If no value is specified TIMESTARTED is default.
 
@@ -2307,13 +2424,15 @@ components:
         - timeStarted
         - workRequestId
         default: timeStarted
-    PeerIdPathParam:
-      description: Peer identifier.
-      in: path
-      name: peerId
-      required: true
+    PaginationTokenQueryParam:
+      description: The page at which to start retrieving results.
+      in: query
+      name: page
+      x-default-description: Values for the parameter should come from an opc-next-page or opc-prev-page header in a previous response.
       schema:
         type: string
+        maxLength: 1024
+        minLength: 1
     WorkRequestIdPathParam:
       description: The ID of the asynchronous request.
       in: path
@@ -2338,125 +2457,6 @@ components:
       required: false
       schema:
         type: string
-    PaginationTokenQueryParam:
-      description: The page at which to start retrieving results.
-      in: query
-      name: page
-      x-default-description: Values for the parameter should come from an opc-next-page or opc-prev-page header in a previous response.
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for TIMECREATED is descending. Default order for DISPLAYNAME is ascending. If no value is specified TIMECREATED is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    DisplayNameQueryParam:
-      description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-        Example: `My new resource`
-
-        '
-      in: query
-      name: displayName
-      x-default-description: A default name is constructed by default
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    BlockchainPlatformIdPathParam:
-      description: Unique service identifier.
-      in: path
-      name: blockchainPlatformId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    BlockchainPlatformIdQueryParam:
-      description: Unique service identifier.
-      in: query
-      name: blockchainPlatformId
-      required: true
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    BlockchainPlatformLifecycleStateQueryParam:
-      description: 'A filter to only return resources that match the given lifecycle state.
-
-        The state value is case-insensitive.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: By default instances in all states are returned
-      x-obmcs-enumref: '#/definitions/BlockchainPlatform/lifecycleState'
-      schema:
-        type: string
-    OsnIdPathParam:
-      description: OSN identifier.
-      in: path
-      name: osnId
-      required: true
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
   responses:
     default:
       description: Unknown Error

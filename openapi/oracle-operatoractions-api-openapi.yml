@@ -119,29 +119,6 @@ paths:
       x-related-resource: '#/definitions/OperatorAction'
 components:
   schemas:
-    OperatorActionCollection:
-      description: Results of operator action search, which contains summary of the action.
-      properties:
-        items:
-          description: contains OperatorActionSummary
-          items:
-            $ref: '#/components/schemas/OperatorActionSummary'
-          type: array
-      required:
-      - items
-      type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     OperatorActionSummary:
       description: Details of the operator action. Operator actions are pre-defined set of commands available to the operator on different layers of the infrastructure.
       properties:
@@ -175,15 +152,28 @@ components:
       - id
       - name
       type: object
-    OperatorActionProperties:
-      description: Details of the properties of operator action.
+    Error:
+      description: Error Information.
       properties:
-        name:
-          description: Name of the property
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
-        value:
-          description: value of the property
+        message:
+          description: A human-readable error string.
           type: string
+      required:
+      - code
+      - message
+    OperatorActionCollection:
+      description: Results of operator action search, which contains summary of the action.
+      properties:
+        items:
+          description: contains OperatorActionSummary
+          items:
+            $ref: '#/components/schemas/OperatorActionSummary'
+          type: array
+      required:
+      - items
       type: object
     OperatorAction:
       description: "Details of the operator action. Operator actions are a pre-defined set of commands available to the operator on different layers of the infrastructure. Although the groupings may differ depending on the infrastructure layers, \nthe groups are designed to enable the operator access to commands to resolve a specific set of issues. The infrastructure layers controlled by the Operator Control include Dom0, CellServer, and Control Plane Server (CPS).\n\nThere are five groups available to the operator. x-obmcs-top-level-enum: '#/definitions/OperatorActionCategories' enum: *OPERATORACTIONCATEGORIES\n\nThe following infrastructure layers are controlled by the operator actions x-obmcs-top-level-enum: '#/definitions/InfrastructureLayers' enum: *INFRASTRUCTURELAYERS\n"
@@ -216,6 +206,16 @@ components:
       - id
       - name
       type: object
+    OperatorActionProperties:
+      description: Details of the properties of operator action.
+      properties:
+        name:
+          description: Name of the property
+          type: string
+        value:
+          description: value of the property
+          type: string
+      type: object
   parameters:
     OperatorActionPathParam:
       description: Unique Oracle supplied identifier associated with the operator action.
@@ -224,25 +224,27 @@ components:
       required: true
       schema:
         type: string
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+    OperatorActionLifecycleStateQueryParam:
+      description: A filter to return only resources whose lifecycleState matches the given OperatorAction lifecycleState.
       in: query
-      name: page
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperatorActionLifecycleStates'
       schema:
         type: string
         enum:
-        - ASC
-        - DESC
-        default: DESC
+        - ACTIVE
+        - INACTIVE
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
@@ -255,15 +257,34 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
+    OperatorActionNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
       in: query
-      name: limit
+      name: name
+      x-default-description: 'null'
       schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
+        type: string
+        maxLength: 255
+        minLength: 1
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
     RequestIdHeader:
       description: The client request ID for tracing.
       in: header
@@ -277,27 +298,6 @@ components:
       required: true
       schema:
         type: string
-    OperatorActionNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: name
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    OperatorActionLifecycleStateQueryParam:
-      description: A filter to return only resources whose lifecycleState matches the given OperatorAction lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperatorActionLifecycleStates'
-      schema:
-        type: string
-        enum:
-        - ACTIVE
-        - INACTIVE
   responses:
     default:
       description: Unknown Error

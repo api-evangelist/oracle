@@ -91,6 +91,36 @@ paths:
         required: true
 components:
   schemas:
+    FieldInfo:
+      description: Contains field schema information.
+      properties:
+        fieldName:
+          description: Field name
+          maxLength: 1024
+          minLength: 1
+          type: string
+        fieldType:
+          description: 'Field type -
+
+            * `STRING`: A sequence of characters.
+
+            * `NUMBER`: Numeric type which can be an integer or floating point.
+
+            * `BOOLEAN`: Either true or false.
+
+            * `ARRAY`: An ordered collection of values.
+
+            '
+          enum:
+          - STRING
+          - NUMBER
+          - BOOLEAN
+          - ARRAY
+          type: string
+      required:
+      - fieldName
+      - fieldType
+      type: object
     Error:
       description: Error response object.
       properties:
@@ -107,16 +137,6 @@ components:
       required:
       - code
       - message
-      type: object
-    SearchResult:
-      description: A log search result entry.
-      properties:
-        data:
-          description: JSON blob containing the search entry with the projected fields.
-          example: '{"ts": "2019-06-19T02:58:33Z", "severity": "ERROR", "msg": "ERROR 2019-06-19 20:58:25,932 Service error"}'
-          type: object
-      required:
-      - data
       type: object
     SearchResponse:
       description: Search response object.
@@ -137,16 +157,6 @@ components:
       - summary
       type: object
       x-example: "{\n  \"results\": [\n    {\n      \"data\": {\"ts\": \"2019-06-19T02:58:33Z\", \"severity\": \"ERROR\", \"msg\": \"ERROR 2019-06-19 02:58:33,932 Service error\"},\n    },\n    {\n      \"data\": {\"ts\": \"2019-06-19T02:59:33Z\", \"severity\": \"ERROR\", \"msg\": \"ERROR 2019-06-19 02:59:33,950 Service error\"},\n    },\n  ],\n  \"fields\": [\n      { \"fieldName\": \"ts\", \"fieldType\": \"STRING\" },\n      { \"fieldName\": \"severity\", \"fieldType\": \"STRING\" },\n      { \"fieldName\": \"msg\", \"fieldType\": \"STRING\" }\n    ]\n  \"summary\": {\n      \"resultCount\": 2,\n      \"fieldCount\": 3\n  }\n}\n"
-    SearchResultSummary:
-      description: Summary of results.
-      properties:
-        fieldCount:
-          description: Total number of field schema information.
-          type: integer
-        resultCount:
-          description: Total number of search results.
-          type: integer
-      type: object
     SearchLogsDetails:
       description: Search request object.
       properties:
@@ -185,37 +195,39 @@ components:
       - searchQuery
       type: object
       x-example: "{\n  \"timeStart\": \"2019-06-19T01:02:29.600Z\",\n  \"timeEnd\": \"2019-06-19T02:02:29.600Z\",\n  \"isReturnFieldInfo\": true,\n  \"searchQuery\": \"search \\\"<var>&lt;compartment_OCID&gt;</var>/<var>&lt;log_group_OCID&gt;</var>/<var>&lt;log_OCID&gt;</var>\\\" | where level = 'ERROR'\";\n}\n"
-    FieldInfo:
-      description: Contains field schema information.
+    SearchResult:
+      description: A log search result entry.
       properties:
-        fieldName:
-          description: Field name
-          maxLength: 1024
-          minLength: 1
-          type: string
-        fieldType:
-          description: 'Field type -
-
-            * `STRING`: A sequence of characters.
-
-            * `NUMBER`: Numeric type which can be an integer or floating point.
-
-            * `BOOLEAN`: Either true or false.
-
-            * `ARRAY`: An ordered collection of values.
-
-            '
-          enum:
-          - STRING
-          - NUMBER
-          - BOOLEAN
-          - ARRAY
-          type: string
+        data:
+          description: JSON blob containing the search entry with the projected fields.
+          example: '{"ts": "2019-06-19T02:58:33Z", "severity": "ERROR", "msg": "ERROR 2019-06-19 20:58:25,932 Service error"}'
+          type: object
       required:
-      - fieldName
-      - fieldType
+      - data
+      type: object
+    SearchResultSummary:
+      description: Summary of results.
+      properties:
+        fieldCount:
+          description: Total number of field schema information.
+          type: integer
+        resultCount:
+          description: Total number of search results.
+          type: integer
       type: object
   parameters:
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return in a response.
+
+        '
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     PaginationTokenQueryParam:
       description: "For list pagination. The value of the opc-next-page response header from the previous \"Search\" call. \nThe input value can be null but an empty string will return an error. \nFor important details about how pagination works, see [List Pagination](/Content/API/Concepts/usingapi.htm#nine).\n"
       in: query
@@ -233,18 +245,6 @@ components:
       required: false
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: 'The maximum number of items to return in a response.
-
-        '
-      in: query
-      name: limit
-      required: false
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
   responses:
     DefaultError:
       description: An error has occurred.

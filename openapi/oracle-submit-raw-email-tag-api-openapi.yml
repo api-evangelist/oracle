@@ -82,12 +82,6 @@ paths:
         required: true
 components:
   parameters:
-    RequestIdHeader:
-      description: The request ID for tracing from the system
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
     RequiredContentTypeHeader:
       description: The media type of the body.
       in: header
@@ -98,6 +92,14 @@ components:
         enum:
         - message/rfc822
         - message/global
+    OptionalContentLengthHeader:
+      description: The content length of the body.
+      in: header
+      name: content-length
+      x-default-description: 'null'
+      schema:
+        type: integer
+        format: int64
     RequiredSenderHeader:
       description: The envelope and the header from email address, that is sending the email. Email address must be an approved sender.
       in: header
@@ -106,6 +108,21 @@ components:
       schema:
         type: string
         maxLength: 256
+        minLength: 1
+    RequestIdHeader:
+      description: The request ID for tracing from the system
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RequiredCompartmentIdHeader:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the approved sender resource.
+      in: header
+      name: compartment-id
+      required: true
+      schema:
+        type: string
+        maxLength: 255
         minLength: 1
     RequiredRecipientsHeader:
       description: "The destination for the email, all recipients including to, cc and bcc addresses. \n"
@@ -120,23 +137,116 @@ components:
           type: string
         maxItems: 50
         minItems: 1
-    RequiredCompartmentIdHeader:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the approved sender resource.
-      in: header
-      name: compartment-id
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    OptionalContentLengthHeader:
-      description: The content length of the body.
-      in: header
-      name: content-length
-      x-default-description: 'null'
-      schema:
-        type: integer
-        format: int64
+  responses:
+    Error:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Authorization failed or the requested resource was not found.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too Many Requests
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '413':
+      description: The request entity is larger than limits defined by server for your tenancy.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'The required information to complete authentication was not provided or
+
+        was incorrect. Extra detail may be provided in the response body.
+
+        '
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '400':
+      description: Incorrectly formatted request. | Limit exceeded. | Related resource not authorized or not found
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   schemas:
     Error:
       description: An error has occurred.
@@ -184,116 +294,6 @@ components:
       - envelopeId
       - suppressedRecipients
       type: object
-  responses:
-    '500':
-      description: Internal Server Error.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '400':
-      description: Incorrectly formatted request. | Limit exceeded. | Related resource not authorized or not found
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Error:
-      description: An error has occurred.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '404':
-      description: Authorization failed or the requested resource was not found.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '401':
-      description: 'The required information to complete authentication was not provided or
-
-        was incorrect. Extra detail may be provided in the response body.
-
-        '
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '429':
-      description: Too Many Requests
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '413':
-      description: The request entity is larger than limits defined by server for your tenancy.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     opc-request-id:

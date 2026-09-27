@@ -372,160 +372,241 @@ paths:
         description: The details for activating the subscription.
         required: true
 components:
-  parameters:
-    ListingIdQueryParam:
-      description: The unique identifier for the listing.
-      in: query
-      name: listingId
-      required: true
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
-
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    CompartmentIdHeader:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment associated with the usage records request.
-      in: header
-      name: compartment-id
-      required: true
-      schema:
-        type: string
-    SortByQueryParam:
-      description: The field to sort by. Only one sort order may be provided.
-      in: query
-      name: sortBy
-      required: false
-      x-default-description: 'The field to sort by. Only one sort order may be provided.
-
-        '
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        - productId
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of running that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and removed from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the given name.
-      in: query
-      name: displayName
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is `DESC` when sorting by time and `ASC` otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    SubscriptionIdPathParam:
-      description: The unique identifier for the subscription.
-      in: path
-      name: subscriptionId
-      required: true
-      schema:
-        type: string
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    OpcRequestIdHeaderParam:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request,
-
-        please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
   schemas:
+    ActivateSubscriptionResult:
+      description: Response model for the activation of a subscription. Includes the details of the activated subscription.
+      properties:
+        displayName:
+          description: The subscription name. Must be unique within the compartment. This value can be updated.
+          example: Premium Cloud Subscription
+          maxLength: 1000
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: 'A message that describes the current state of the Subscription in more detail. For example,
+
+            can be used to provide actionable information for a resource in the Failed state.
+
+            '
+          enum:
+          - CREATED
+          - PENDING_ACTIVATION
+          - PROVISIONING_STARTED
+          - PROVISIONING_COMPLETED
+          - PROVISIONING_FAILED
+          - ACTIVE
+          - EXPIRED
+          - TERMINATED
+          - FAILED
+          - DELETING
+          - UPDATING
+          - DELETED
+          - PENDING_CANCELLATION
+          - SUSPENDED
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+        lifecycleState:
+          description: The current state of the Subscription.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
+        subscriptionId:
+          description: The unique identifier of the activated subscription.
+          type: string
+        timeEnd:
+          description: The end date of the subscription.
+          example: '2025-01-01T00:00:00Z'
+          format: date-time
+          type: string
+        timeStart:
+          description: The start date of the subscription.
+          example: '2024-01-01T00:00:00Z'
+          format: date-time
+          type: string
+      required:
+      - subscriptionId
+      type: object
+    ListingSubscriptionsCollection:
+      description: Results of a subscription search. Contains both SubscriptionSummary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of subscriptions for particular listing.
+          items:
+            $ref: '#/components/schemas/ListingSubscriptionSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UsageDimension:
+      description: A metered usage dimension associated with a usage-based or hybrid pricing plan.
+      properties:
+        dimensionBillingFrequency:
+          description: Specifies the interval at which the usage dimension is billed.
+          enum:
+          - MONTHLY
+          - QUARTERLY
+          - SEMI_ANNUAL
+          - ANNUAL
+          - BIENNIAL
+          - TRIENNIAL
+          - YEARLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/BillingFrequency'
+        dimensionDescription:
+          description: A detailed explanation of the usage dimension.
+          maxLength: 4000
+          minLength: 1
+          type: string
+        dimensionKey:
+          description: The stable key used internally to map this usage dimension to billing details.
+          maxLength: 255
+          minLength: 1
+          type: string
+        dimensionName:
+          description: The name of the usage dimension.
+          maxLength: 1000
+          minLength: 1
+          type: string
+        includedQuantity:
+          description: Quantity included in the base fee for hybrid plans.
+          format: float
+          minimum: 0
+          type: number
+        metricType:
+          description: The metric type in which usage is measured.
+          enum:
+          - OCPU_HOURS
+          - INSTANCE_HOURS
+          - CORE_HOURS
+          - EACH
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MetricType'
+        rates:
+          description: Dimension-level rates in various supported currencies.
+          items:
+            $ref: '#/components/schemas/PricingRate'
+          maxItems: 50
+          type: array
+      required:
+      - dimensionName
+      - dimensionKey
+      - dimensionDescription
+      - metricType
+      - dimensionBillingFrequency
+      - rates
+      type: object
+    PartnerSubscription:
+      description: 'These api for partner to communicate to OCI.
+
+        '
+      properties:
+        additionalDetails:
+          description: Additional details that are specific for this subscription such as activation details.
+          items:
+            $ref: '#/components/schemas/ExtendedMetadata'
+          type: array
+        displayName:
+          description: The subscription name. Must be unique within the compartment. This value can be updated.
+          maxLength: 1000
+          minLength: 1
+          type: string
+        isAutoRenew:
+          description: Whether subscription should be auto-renewed at the end of cycle.
+          type: boolean
+        lifecycleDetails:
+          description: 'A message that describes the current state of the Subscription in more detail. For example,
+
+            can be used to provide actionable information for a resource in the Failed state.
+
+            '
+          enum:
+          - CREATED
+          - PENDING_ACTIVATION
+          - PROVISIONING_STARTED
+          - PROVISIONING_COMPLETED
+          - PROVISIONING_FAILED
+          - ACTIVE
+          - EXPIRED
+          - TERMINATED
+          - FAILED
+          - DELETING
+          - UPDATING
+          - DELETED
+          - PENDING_CANCELLATION
+          - SUSPENDED
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+        lifecycleState:
+          description: The current state of the Subscription.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
+        pricingPlan:
+          $ref: '#/components/schemas/PricingPlan'
+        productId:
+          description: The unique OCID of the product, effectively functioning as the listing ID.
+          maxLength: 255
+          minLength: 1
+          type: string
+        sourceType:
+          description: The type of seller in SELF Service.
+          enum:
+          - OCI_NATIVE
+          - THIRD_PARTY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/SourceType'
+        subscriptionId:
+          description: The unique identifier of the Subscription.
+          type: string
+        timeCreated:
+          description: 'The date and time the Subscription was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeEnded:
+          description: 'The date and time the Subscription was ended, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the Subscription was started, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the Subscription was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - subscriptionId
+      type: object
     PartnerCollection:
       description: Results of listing marketplace publisher partners.
       properties:
@@ -537,19 +618,18 @@ components:
       required:
       - items
       type: object
-    ExtendedMetadata:
-      description: Additional metadata key/value pairs.
+    Error:
+      description: Error information.
       properties:
-        key:
-          description: Additional attribute for extendedMetadata.
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
-        value:
-          description: It contains the value of above key.
+        message:
+          description: A human-readable error message.
           type: string
       required:
-      - key
-      - value
-      type: object
+      - code
+      - message
     SubmitSubscriptionUsageRecordsDetails:
       description: 'Request payload to submit one or more usage records for marketplace offers.
 
@@ -613,8 +693,100 @@ components:
       required:
       - productId
       type: object
-    ResolveSubscriptionDetails:
-      description: Request model used to resolve and retrieve subscription details for a customer subscription, given a selfToken and the productId.
+    PricingPlan:
+      description: A pricing plan details provided by the Publisher.
+      properties:
+        billingFrequency:
+          description: Specifies the interval at which billing occurs for the subscription plan or usage dimension.
+          enum:
+          - MONTHLY
+          - QUARTERLY
+          - SEMI_ANNUAL
+          - ANNUAL
+          - BIENNIAL
+          - TRIENNIAL
+          - YEARLY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/BillingFrequency'
+        dimensions:
+          description: Metered usage dimensions associated with the pricing plan.
+          example:
+          - dimensionBillingFrequency: MONTHLY
+            dimensionDescription: Requests included in the base plan.
+            dimensionKey: included_api_requests
+            dimensionName: Included API Requests
+            includedQuantity: 10000
+            metricType: EACH
+            rates:
+            - currency: USD
+              rate: 0.1
+          - dimensionBillingFrequency: MONTHLY
+            dimensionDescription: Requests billed beyond the included quantity.
+            dimensionKey: overage_api_requests
+            dimensionName: Overage API Requests
+            metricType: EACH
+            rates:
+            - currency: USD
+              rate: 0.02
+          items:
+            $ref: '#/components/schemas/UsageDimension'
+          maxItems: 10
+          type: array
+        planDescription:
+          description: A detailed explanation of the subscription plan.
+          maxLength: 4000
+          minLength: 1
+          type: string
+        planDuration:
+          description: Specifies the duration of the subscription plan.
+          enum:
+          - MONTHLY
+          - QUARTERLY
+          - SEMI_ANNUAL
+          - ANNUAL
+          - BIENNIAL
+          - TRIENNIAL
+          type: string
+        planName:
+          description: The name of the subscription plan used to identify the plan.
+          maxLength: 255
+          minLength: 1
+          type: string
+        planType:
+          description: The type of the subscription plan.
+          enum:
+          - FIXED
+          - USAGE_BASED
+          - HYBRID
+          type: string
+        rates:
+          description: The pricing details of the subscription plan in various supported currencies.
+          items:
+            $ref: '#/components/schemas/PricingRate'
+          type: array
+      required:
+      - planType
+      - planName
+      - billingFrequency
+      - rates
+      type: object
+    ExtendedMetadata:
+      description: Additional metadata key/value pairs.
+      properties:
+        key:
+          description: Additional attribute for extendedMetadata.
+          type: string
+        value:
+          description: It contains the value of above key.
+          type: string
+      required:
+      - key
+      - value
+      type: object
+    ListingSubscriptionSummary:
+      description: 'The summary information about a Subscription.
+
+        '
       properties:
         definedTags:
           additionalProperties:
@@ -639,6 +811,11 @@ components:
 
             '
           type: object
+        displayName:
+          description: The subscription name. Must be unique within the compartment. This value can be updated.
+          maxLength: 1000
+          minLength: 1
+          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -651,19 +828,83 @@ components:
 
             '
           type: object
-        productId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the marketplace product listing.
+        lifecycleDetails:
+          description: 'A message that describes the current state of the Subscription in more detail. For example,
+
+            can be used to provide actionable information for a resource in the Failed state.
 
             '
+          enum:
+          - CREATED
+          - PENDING_ACTIVATION
+          - PROVISIONING_STARTED
+          - PROVISIONING_COMPLETED
+          - PROVISIONING_FAILED
+          - ACTIVE
+          - EXPIRED
+          - TERMINATED
+          - FAILED
+          - DELETING
+          - UPDATING
+          - DELETED
+          - PENDING_CANCELLATION
+          - SUSPENDED
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
+        lifecycleState:
+          description: The current state of the Subscription.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
+        productId:
+          description: The unique identifier of marketplace listing in Oracle Cloud Infrastructure.
           maxLength: 255
           minLength: 1
           type: string
-        selfToken:
-          description: The base 64 encoded JWT token which is mapped to a particular subscription
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
+
+
+              Example: `{"free-tier-retained": "true"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeEnded:
+          description: 'The date and time the Subscription was ended, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the Subscription was started, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            Example: `2016-08-25T21:10:29.600Z`
+
+            '
+          format: date-time
           type: string
       required:
-      - selfToken
-      - productId
+      - displayName
       type: object
     CreateSubscriptionUsageRecordDetails:
       description: 'A single usage record to submit for a marketplace offer. The usage window must have
@@ -864,21 +1105,25 @@ components:
       - compartmentId
       - lifecycleState
       type: object
-    ListingSubscriptionsCollection:
-      description: Results of a subscription search. Contains both SubscriptionSummary items and other information, such as metadata.
+    PricingRate:
+      description: A pricing plan rate provided by the Publisher.
       properties:
-        items:
-          description: List of subscriptions for particular listing.
-          items:
-            $ref: '#/components/schemas/ListingSubscriptionSummary'
-          type: array
+        currency:
+          description: The currency supported, in the format specified by ISO-4217
+          example: USD
+          maxLength: 3
+          minLength: 3
+          type: string
+        rate:
+          description: The amount charged for the plan in the specified currency.
+          format: float
+          type: number
       required:
-      - items
+      - currency
+      - rate
       type: object
-    ListingSubscriptionSummary:
-      description: 'The summary information about a Subscription.
-
-        '
+    ResolveSubscriptionDetails:
+      description: Request model used to resolve and retrieve subscription details for a customer subscription, given a selfToken and the productId.
       properties:
         definedTags:
           additionalProperties:
@@ -903,11 +1148,6 @@ components:
 
             '
           type: object
-        displayName:
-          description: The subscription name. Must be unique within the compartment. This value can be updated.
-          maxLength: 1000
-          minLength: 1
-          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -920,413 +1160,173 @@ components:
 
             '
           type: object
-        lifecycleDetails:
-          description: 'A message that describes the current state of the Subscription in more detail. For example,
-
-            can be used to provide actionable information for a resource in the Failed state.
+        productId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the marketplace product listing.
 
             '
-          enum:
-          - CREATED
-          - PENDING_ACTIVATION
-          - PROVISIONING_STARTED
-          - PROVISIONING_COMPLETED
-          - PROVISIONING_FAILED
-          - ACTIVE
-          - EXPIRED
-          - TERMINATED
-          - FAILED
-          - DELETING
-          - UPDATING
-          - DELETED
-          - PENDING_CANCELLATION
-          - SUSPENDED
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
-        lifecycleState:
-          description: The current state of the Subscription.
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
-        productId:
-          description: The unique identifier of marketplace listing in Oracle Cloud Infrastructure.
           maxLength: 255
           minLength: 1
           type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
-
-
-              Example: `{"free-tier-retained": "true"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeEnded:
-          description: 'The date and time the Subscription was ended, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the Subscription was started, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            Example: `2016-08-25T21:10:29.600Z`
-
-            '
-          format: date-time
+        selfToken:
+          description: The base 64 encoded JWT token which is mapped to a particular subscription
           type: string
       required:
-      - displayName
+      - selfToken
+      - productId
       type: object
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error message.
-          type: string
-      required:
-      - code
-      - message
-    PartnerSubscription:
-      description: 'These api for partner to communicate to OCI.
+  parameters:
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the given name.
+      in: query
+      name: displayName
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    SubscriptionIdPathParam:
+      description: The unique identifier for the subscription.
+      in: path
+      name: subscriptionId
+      required: true
+      schema:
+        type: string
+    ListingIdQueryParam:
+      description: The unique identifier for the listing.
+      in: query
+      name: listingId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is `DESC` when sorting by time and `ASC` otherwise.
 
         '
-      properties:
-        additionalDetails:
-          description: Additional details that are specific for this subscription such as activation details.
-          items:
-            $ref: '#/components/schemas/ExtendedMetadata'
-          type: array
-        displayName:
-          description: The subscription name. Must be unique within the compartment. This value can be updated.
-          maxLength: 1000
-          minLength: 1
-          type: string
-        isAutoRenew:
-          description: Whether subscription should be auto-renewed at the end of cycle.
-          type: boolean
-        lifecycleDetails:
-          description: 'A message that describes the current state of the Subscription in more detail. For example,
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
-            can be used to provide actionable information for a resource in the Failed state.
+        server error without risk of running that same action again. Retry tokens expire after 24
 
-            '
-          enum:
-          - CREATED
-          - PENDING_ACTIVATION
-          - PROVISIONING_STARTED
-          - PROVISIONING_COMPLETED
-          - PROVISIONING_FAILED
-          - ACTIVE
-          - EXPIRED
-          - TERMINATED
-          - FAILED
-          - DELETING
-          - UPDATING
-          - DELETED
-          - PENDING_CANCELLATION
-          - SUSPENDED
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
-        lifecycleState:
-          description: The current state of the Subscription.
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
-        pricingPlan:
-          $ref: '#/components/schemas/PricingPlan'
-        productId:
-          description: The unique OCID of the product, effectively functioning as the listing ID.
-          maxLength: 255
-          minLength: 1
-          type: string
-        sourceType:
-          description: The type of seller in SELF Service.
-          enum:
-          - OCI_NATIVE
-          - THIRD_PARTY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/SourceType'
-        subscriptionId:
-          description: The unique identifier of the Subscription.
-          type: string
-        timeCreated:
-          description: 'The date and time the Subscription was created, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
 
+        has been deleted and removed from the system, then a retry of the original creation request
 
-            Example: `2016-08-25T21:10:29.600Z`
+        might be rejected.
 
-            '
-          format: date-time
-          type: string
-        timeEnded:
-          description: 'The date and time the Subscription was ended, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
+    OpcRequestIdHeaderParam:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request,
 
+        please provide the request ID.
 
-            Example: `2016-08-25T21:10:29.600Z`
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    SortByQueryParam:
+      description: The field to sort by. Only one sort order may be provided.
+      in: query
+      name: sortBy
+      required: false
+      x-default-description: 'The field to sort by. Only one sort order may be provided.
 
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the Subscription was started, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+        '
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        - productId
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
+        Oracle about a particular request, please provide the request ID.
 
-            Example: `2016-08-25T21:10:29.600Z`
+        The only valid characters for request IDs are letters, numbers,
 
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the Subscription was updated, in the format defined by [RFC 3339](https://tools.ietf.org/html/rfc3339).
+        underscore, and dash.
 
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
 
-            Example: `2016-08-25T21:10:29.600Z`
+        paginated "List" call. For important details about how pagination works, see
 
-            '
-          format: date-time
-          type: string
-      required:
-      - subscriptionId
-      type: object
-    ActivateSubscriptionResult:
-      description: Response model for the activation of a subscription. Includes the details of the activated subscription.
-      properties:
-        displayName:
-          description: The subscription name. Must be unique within the compartment. This value can be updated.
-          example: Premium Cloud Subscription
-          maxLength: 1000
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: 'A message that describes the current state of the Subscription in more detail. For example,
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
-            can be used to provide actionable information for a resource in the Failed state.
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    CompartmentIdHeader:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment associated with the usage records request.
+      in: header
+      name: compartment-id
+      required: true
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
 
-            '
-          enum:
-          - CREATED
-          - PENDING_ACTIVATION
-          - PROVISIONING_STARTED
-          - PROVISIONING_COMPLETED
-          - PROVISIONING_FAILED
-          - ACTIVE
-          - EXPIRED
-          - TERMINATED
-          - FAILED
-          - DELETING
-          - UPDATING
-          - DELETED
-          - PENDING_CANCELLATION
-          - SUSPENDED
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleDetailsEnum'
-        lifecycleState:
-          description: The current state of the Subscription.
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleStateEnum'
-        subscriptionId:
-          description: The unique identifier of the activated subscription.
-          type: string
-        timeEnd:
-          description: The end date of the subscription.
-          example: '2025-01-01T00:00:00Z'
-          format: date-time
-          type: string
-        timeStart:
-          description: The start date of the subscription.
-          example: '2024-01-01T00:00:00Z'
-          format: date-time
-          type: string
-      required:
-      - subscriptionId
-      type: object
-    PricingPlan:
-      description: A pricing plan details provided by the Publisher.
-      properties:
-        billingFrequency:
-          description: Specifies the interval at which billing occurs for the subscription plan or usage dimension.
-          enum:
-          - MONTHLY
-          - QUARTERLY
-          - SEMI_ANNUAL
-          - ANNUAL
-          - BIENNIAL
-          - TRIENNIAL
-          - YEARLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/BillingFrequency'
-        dimensions:
-          description: Metered usage dimensions associated with the pricing plan.
-          example:
-          - dimensionBillingFrequency: MONTHLY
-            dimensionDescription: Requests included in the base plan.
-            dimensionKey: included_api_requests
-            dimensionName: Included API Requests
-            includedQuantity: 10000
-            metricType: EACH
-            rates:
-            - currency: USD
-              rate: 0.1
-          - dimensionBillingFrequency: MONTHLY
-            dimensionDescription: Requests billed beyond the included quantity.
-            dimensionKey: overage_api_requests
-            dimensionName: Overage API Requests
-            metricType: EACH
-            rates:
-            - currency: USD
-              rate: 0.02
-          items:
-            $ref: '#/components/schemas/UsageDimension'
-          maxItems: 10
-          type: array
-        planDescription:
-          description: A detailed explanation of the subscription plan.
-          maxLength: 4000
-          minLength: 1
-          type: string
-        planDuration:
-          description: Specifies the duration of the subscription plan.
-          enum:
-          - MONTHLY
-          - QUARTERLY
-          - SEMI_ANNUAL
-          - ANNUAL
-          - BIENNIAL
-          - TRIENNIAL
-          type: string
-        planName:
-          description: The name of the subscription plan used to identify the plan.
-          maxLength: 255
-          minLength: 1
-          type: string
-        planType:
-          description: The type of the subscription plan.
-          enum:
-          - FIXED
-          - USAGE_BASED
-          - HYBRID
-          type: string
-        rates:
-          description: The pricing details of the subscription plan in various supported currencies.
-          items:
-            $ref: '#/components/schemas/PricingRate'
-          type: array
-      required:
-      - planType
-      - planName
-      - billingFrequency
-      - rates
-      type: object
-    PricingRate:
-      description: A pricing plan rate provided by the Publisher.
-      properties:
-        currency:
-          description: The currency supported, in the format specified by ISO-4217
-          example: USD
-          maxLength: 3
-          minLength: 3
-          type: string
-        rate:
-          description: The amount charged for the plan in the specified currency.
-          format: float
-          type: number
-      required:
-      - currency
-      - rate
-      type: object
-    UsageDimension:
-      description: A metered usage dimension associated with a usage-based or hybrid pricing plan.
-      properties:
-        dimensionBillingFrequency:
-          description: Specifies the interval at which the usage dimension is billed.
-          enum:
-          - MONTHLY
-          - QUARTERLY
-          - SEMI_ANNUAL
-          - ANNUAL
-          - BIENNIAL
-          - TRIENNIAL
-          - YEARLY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/BillingFrequency'
-        dimensionDescription:
-          description: A detailed explanation of the usage dimension.
-          maxLength: 4000
-          minLength: 1
-          type: string
-        dimensionKey:
-          description: The stable key used internally to map this usage dimension to billing details.
-          maxLength: 255
-          minLength: 1
-          type: string
-        dimensionName:
-          description: The name of the usage dimension.
-          maxLength: 1000
-          minLength: 1
-          type: string
-        includedQuantity:
-          description: Quantity included in the base fee for hybrid plans.
-          format: float
-          minimum: 0
-          type: number
-        metricType:
-          description: The metric type in which usage is measured.
-          enum:
-          - OCPU_HOURS
-          - INSTANCE_HOURS
-          - CORE_HOURS
-          - EACH
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MetricType'
-        rates:
-          description: Dimension-level rates in various supported currencies.
-          items:
-            $ref: '#/components/schemas/PricingRate'
-          maxItems: 50
-          type: array
-      required:
-      - dimensionName
-      - dimensionKey
-      - dimensionDescription
-      - metricType
-      - dimensionBillingFrequency
-      - rates
-      type: object
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+        that resource. The resource will be updated or deleted only if the etag you provide
+
+        matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   responses:
     default:
       description: Unknown Error

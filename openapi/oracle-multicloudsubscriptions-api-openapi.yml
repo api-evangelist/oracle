@@ -81,22 +81,6 @@ paths:
         '
 components:
   schemas:
-    Error:
-      description: Error response information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     MulticloudSubscriptionSummary:
       description: A Multicloud subscription.
       properties:
@@ -237,6 +221,22 @@ components:
       - partnerCloudAccountIdentifier
       - timeCreated
       type: object
+    Error:
+      description: Error response information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     MulticloudSubscriptionCollection:
       description: 'Properties that define activated Multicloud subscriptions in the indicated compartment.
 
@@ -255,19 +255,42 @@ components:
       - items
       type: object
   parameters:
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
 
-        "List" call. For important details about how pagination works, see
+        paginated "List" call. For important details about how pagination works, see
 
         [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
         '
       in: query
-      name: page
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    RequiredCompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
       schema:
         type: string
-        minLength: 1
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+
+        is descending. Default order for `displayName` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
     SortOrderQueryParam:
       description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`).
 
@@ -285,35 +308,19 @@ components:
         enum:
         - ASC
         - DESC
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
 
-        is descending. Default order for `displayName` is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. For important details about how pagination works, see
+        "List" call. For important details about how pagination works, see
 
         [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
         '
       in: query
-      name: limit
+      name: page
       schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
+        type: string
+        minLength: 1
     DisplayNameQueryParam:
       description: A filter to return only resources that match the given display name exactly.
       in: query
@@ -335,13 +342,6 @@ components:
         '
       in: header
       name: opc-request-id
-      schema:
-        type: string
-    RequiredCompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
       schema:
         type: string
   responses:

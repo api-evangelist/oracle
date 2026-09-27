@@ -229,6 +229,24 @@ paths:
       x-related-resource: '#/definitions/LinkWithTenancyNames'
 components:
   schemas:
+    LinkWithTenancyNames:
+      allOf:
+      - $ref: '#/components/schemas/Link'
+      - properties:
+          childTenancyName:
+            description: Name of the child tenancy.
+            maxLength: 255
+            minLength: 1
+            type: string
+          parentTenancyName:
+            description: Name of the parent tenancy.
+            maxLength: 255
+            minLength: 1
+            type: string
+        required:
+        - parentTenancyName
+        - childTenancyName
+      description: A link between a parent tenancy and a child tenancy, including the parent and child tenancy names.
     Link:
       description: A link between a parent tenancy and a child tenancy.
       properties:
@@ -297,6 +315,17 @@ components:
       required:
       - code
       - message
+    LinkCollection:
+      description: Result of a query request for a list of links. Contains Link items.
+      properties:
+        items:
+          description: Array containing LinkSummary items.
+          items:
+            $ref: '#/components/schemas/LinkSummary'
+          type: array
+      required:
+      - items
+      type: object
     LinkSummary:
       description: The summary of a link between a parent tenancy and a child tenancy.
       properties:
@@ -372,36 +401,31 @@ components:
       - parentTenancyId
       - childTenancyId
       - timeCreated
-    LinkCollection:
-      description: Result of a query request for a list of links. Contains Link items.
-      properties:
-        items:
-          description: Array containing LinkSummary items.
-          items:
-            $ref: '#/components/schemas/LinkSummary'
-          type: array
-      required:
-      - items
-      type: object
-    LinkWithTenancyNames:
-      allOf:
-      - $ref: '#/components/schemas/Link'
-      - properties:
-          childTenancyName:
-            description: Name of the child tenancy.
-            maxLength: 255
-            minLength: 1
-            type: string
-          parentTenancyName:
-            description: Name of the parent tenancy.
-            maxLength: 255
-            minLength: 1
-            type: string
-        required:
-        - parentTenancyName
-        - childTenancyName
-      description: A link between a parent tenancy and a child tenancy, including the parent and child tenancy names.
   parameters:
+    LifecycleStateQueryParam:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - ACTIVE
+        - INACTIVE
+        - UPDATING
+        - FAILED
+        - TERMINATED
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     FeatureQueryParam:
       description: The feature associated with this link.
       in: query
@@ -430,21 +454,12 @@ components:
       schema:
         type: string
         minLength: 1
-    LifecycleStateQueryParam:
-      description: The lifecycle state of the resource.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
-        enum:
-        - CREATING
-        - ACTIVE
-        - INACTIVE
-        - UPDATING
-        - FAILED
-        - TERMINATED
     ChildTenancyIdQueryParam:
       description: The ID of the child tenancy this link is associated with.
       in: query
@@ -454,15 +469,6 @@ components:
       schema:
         type: string
         maxLength: 255
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
     ParentTenancyIdQueryParam:
       description: The ID of the parent tenancy this link is associated with.
       in: query
@@ -472,12 +478,6 @@ components:
       schema:
         type: string
         maxLength: 255
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call
 

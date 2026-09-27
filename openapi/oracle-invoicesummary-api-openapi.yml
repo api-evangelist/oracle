@@ -140,6 +140,25 @@ paths:
       - invoiceSummary
 components:
   parameters:
+    InvoicingDateFromQueryParam:
+      description: 'Initial date to filter invoice data in SPM (Subscription Plan Management).
+
+        '
+      in: query
+      name: timeFrom
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
+    ARCustomerTransactionIdQueryParam:
+      description: Accounts receivable unique identifier for an invoice.
+      in: query
+      name: arCustomerTransactionId
+      required: true
+      x-default-description: 'null'
+      schema:
+        type: string
     InvoicingDateToQueryParam:
       description: 'Final date to filter invoice data in SPM (Subscription Plan Management).
 
@@ -151,36 +170,41 @@ components:
       schema:
         type: string
         format: date-time
-    PaginationTokenQueryParam:
-      description: 'The value of the ''opc-next-page'' response header from the previous "List" call.
+    ComputedUsagesSortByQueryParam:
+      description: 'The field to sort by invoiced computed usages. You can provide one sort order (`sortOrder`).
 
         '
       in: query
-      name: page
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - meteredOnDate
+        default: timeCreated
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending (''ASC'') or descending (''DESC'').
+
+        '
+      in: query
+      name: sortOrder
       required: false
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 512
-        minLength: 1
-    ARCustomerTransactionIdQueryParam:
-      description: Accounts receivable unique identifier for an invoice.
+        enum:
+        - ASC
+        - DESC
+    CompartmentIdQueryParam:
+      description: The OCID of the root compartment.
       in: query
-      name: arCustomerTransactionId
+      name: compartmentId
       required: true
-      x-default-description: 'null'
       schema:
         type: string
-    OpcRequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
+        maxLength: 255
+        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. You can provide one sort order (''sortOrder'').
 
@@ -216,52 +240,16 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending (''ASC'') or descending (''DESC'').
+    OpcRequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
 
         '
-      in: query
-      name: sortOrder
+      in: header
+      name: opc-request-id
       required: false
       x-default-description: 'null'
       schema:
         type: string
-        enum:
-        - ASC
-        - DESC
-    ComputedUsagesSortByQueryParam:
-      description: 'The field to sort by invoiced computed usages. You can provide one sort order (`sortOrder`).
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - meteredOnDate
-        default: timeCreated
-    CompartmentIdQueryParam:
-      description: The OCID of the root compartment.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    InvoicingDateFromQueryParam:
-      description: 'Initial date to filter invoice data in SPM (Subscription Plan Management).
-
-        '
-      in: query
-      name: timeFrom
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
     PaginationLimitQueryParam:
       description: 'The maximum number of items to return in a paginated "List" call. Default: (`50`)
 
@@ -277,214 +265,19 @@ components:
         type: integer
         maximum: 1000
         minimum: 1
+    PaginationTokenQueryParam:
+      description: 'The value of the ''opc-next-page'' response header from the previous "List" call.
+
+        '
+      in: query
+      name: page
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 512
+        minLength: 1
   schemas:
-    InvoicingCurrency:
-      description: 'Currency details.
-
-        '
-      properties:
-        isoCode:
-          description: 'Currency code.
-
-            '
-          example: USD
-          type: string
-        name:
-          description: 'Currency name.
-
-            '
-          example: US Dollar
-          type: string
-        stdPrecision:
-          description: 'Standard precision of the currency.
-
-            '
-          example: 2
-          format: int64
-          type: integer
-      required:
-      - isoCode
-      type: object
-    InvoiceLineSummary:
-      description: 'Invoice line.
-
-        '
-      properties:
-        arInvoiceNumber:
-          description: 'Accounts receivable invoice number for invoice line.
-
-            '
-          example: '8173868'
-          type: string
-        dataCenter:
-          description: 'Data center attribute.
-
-            '
-          example: US001
-          type: string
-        id:
-          description: 'SPM (Subscription Plan Management) invoice line internal identifier.
-
-            '
-          type: string
-        product:
-          $ref: '#/components/schemas/InvoicingProduct'
-        timeEnd:
-          description: 'Usage end time.
-
-            '
-          format: date-time
-          type: string
-        timeStart:
-          description: 'Usage start time.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - product
-      - timeStart
-      - timeEnd
-      - dataCenter
-      type: object
-    InvoicingOrganization:
-      description: 'Organization details.
-
-        '
-      properties:
-        name:
-          description: 'Organization name.
-
-            '
-          example: Oracle India Private Limited
-          type: string
-        number:
-          description: 'Organization ID.
-
-            '
-          example: 1080544
-          format: double
-          type: number
-      required:
-      - name
-      - number
-      type: object
-    InvoicingUser:
-      description: 'User.
-
-        '
-      properties:
-        email:
-          description: 'Email.
-
-            '
-          format: email
-          type: string
-        firstName:
-          description: 'First name.
-
-            '
-          type: string
-        lastName:
-          description: 'Last name.
-
-            '
-          type: string
-        name:
-          description: 'Name.
-
-            '
-          type: string
-        tcaContactId:
-          description: 'TCA (Trading Community Architecture) contact ID.
-
-            '
-          format: int64
-          type: integer
-        tcaCustAccntSiteId:
-          description: 'TCA customer account site ID.
-
-            '
-          format: int64
-          type: integer
-        tcaPartyId:
-          description: 'TCA party ID.
-
-            '
-          format: int64
-          type: integer
-        userName:
-          description: 'User name.
-
-            '
-          type: string
-      type: object
-    InvoicelineComputedUsageSummary:
-      description: 'Computed usage summary object.
-
-        '
-      properties:
-        cost:
-          description: 'Sum of usage/service billing line net amount.
-
-            '
-          example: 10
-          format: double
-          type: number
-        costRounded:
-          description: 'Computed rounded line amount.
-
-            '
-          format: double
-          type: number
-        netUnitPrice:
-          description: 'Net unit price for the product in consideration, price actual.
-
-            '
-          format: double
-          type: number
-        parentProduct:
-          $ref: '#/components/schemas/InvoicingProduct'
-        product:
-          $ref: '#/components/schemas/InvoicingProduct'
-        quantity:
-          description: 'Total quantity that was used for computation.
-
-            '
-          format: double
-          type: number
-        timeMeteredOn:
-          description: 'Metered service date.
-
-            '
-          format: date-time
-          type: string
-        type:
-          description: 'Usage compute type in SPM (Subscription Plan Management).
-
-            '
-          enum:
-          - PROMOTION
-          - DO_NOT_BILL
-          - USAGE
-          - COMMIT
-          - OVERAGE
-          - PAY_AS_YOU_GO
-          - MONTHLY_MINIMUM
-          - DELAYED_USAGE_INVOICE_TIMING
-          - DELAYED_USAGE_COMMITMENT_EXP
-          - ON_ACCOUNT_CREDIT
-          - SERVICE_CREDIT
-          type: string
-      required:
-      - parentProduct
-      - quantity
-      - netUnitPrice
-      - timeMeteredOn
-      - type
-      - costRounded
-      type: object
     InvoiceSummary:
       description: 'Invoice details.
 
@@ -595,6 +388,93 @@ components:
       - subscriptionNumber
       - timeInvoiceDate
       type: object
+    InvoicelineComputedUsageSummary:
+      description: 'Computed usage summary object.
+
+        '
+      properties:
+        cost:
+          description: 'Sum of usage/service billing line net amount.
+
+            '
+          example: 10
+          format: double
+          type: number
+        costRounded:
+          description: 'Computed rounded line amount.
+
+            '
+          format: double
+          type: number
+        netUnitPrice:
+          description: 'Net unit price for the product in consideration, price actual.
+
+            '
+          format: double
+          type: number
+        parentProduct:
+          $ref: '#/components/schemas/InvoicingProduct'
+        product:
+          $ref: '#/components/schemas/InvoicingProduct'
+        quantity:
+          description: 'Total quantity that was used for computation.
+
+            '
+          format: double
+          type: number
+        timeMeteredOn:
+          description: 'Metered service date.
+
+            '
+          format: date-time
+          type: string
+        type:
+          description: 'Usage compute type in SPM (Subscription Plan Management).
+
+            '
+          enum:
+          - PROMOTION
+          - DO_NOT_BILL
+          - USAGE
+          - COMMIT
+          - OVERAGE
+          - PAY_AS_YOU_GO
+          - MONTHLY_MINIMUM
+          - DELAYED_USAGE_INVOICE_TIMING
+          - DELAYED_USAGE_COMMITMENT_EXP
+          - ON_ACCOUNT_CREDIT
+          - SERVICE_CREDIT
+          type: string
+      required:
+      - parentProduct
+      - quantity
+      - netUnitPrice
+      - timeMeteredOn
+      - type
+      - costRounded
+      type: object
+    InvoicingOrganization:
+      description: 'Organization details.
+
+        '
+      properties:
+        name:
+          description: 'Organization name.
+
+            '
+          example: Oracle India Private Limited
+          type: string
+        number:
+          description: 'Organization ID.
+
+            '
+          example: 1080544
+          format: double
+          type: number
+      required:
+      - name
+      - number
+      type: object
     Error:
       description: Error object model.
       properties:
@@ -664,50 +544,6 @@ components:
       required:
       - name
       type: object
-    InvoicingProduct:
-      description: 'Product description.
-
-        '
-      properties:
-        billingCategory:
-          description: 'Metered service billing category.
-
-            '
-          example: Metered Subscription Commitment
-          type: string
-        name:
-          description: 'Product name.
-
-            '
-          type: string
-        partNumber:
-          description: 'Product part number.
-
-            '
-          type: string
-        productCategory:
-          description: 'Product category.
-
-            '
-          example: CLOUDPAAS
-          type: string
-        ucmRateCardPartType:
-          description: 'Rate card part type of product.
-
-            '
-          example: Free Pricing Tier - Consumption
-          type: string
-        unitOfMeasure:
-          description: 'Unit of measure.
-
-            '
-          type: string
-      required:
-      - partNumber
-      - name
-      - unitOfMeasure
-      - ucmRateCardPartType
-      type: object
     InvoicingLocation:
       description: 'Address location.
 
@@ -749,6 +585,107 @@ components:
             '
           format: int64
           type: integer
+      type: object
+    InvoicingAddress:
+      description: 'Address.
+
+        '
+      properties:
+        billSiteUseId:
+          description: 'Bill to site use ID.
+
+            '
+          format: int64
+          type: integer
+        isBillTo:
+          description: 'Identify as the customer''s billing address.
+
+            '
+          type: boolean
+        isShipTo:
+          description: 'Identify as the customer''s shipping address.
+
+            '
+          type: boolean
+        location:
+          $ref: '#/components/schemas/InvoicingLocation'
+        name:
+          description: 'Address name identifier.
+
+            '
+          type: string
+        phone:
+          description: 'Phone.
+
+            '
+          type: string
+        service2SiteUseId:
+          description: 'Service to site use ID.
+
+            '
+          format: int64
+          type: integer
+        tcaCustAcctSiteId:
+          description: 'TCA (Trading Community Architecture) customer account site ID.
+
+            '
+          format: int64
+          type: integer
+        tcaPartySiteNumber:
+          description: 'Party site number.
+
+            '
+          type: string
+      type: object
+    InvoicingUser:
+      description: 'User.
+
+        '
+      properties:
+        email:
+          description: 'Email.
+
+            '
+          format: email
+          type: string
+        firstName:
+          description: 'First name.
+
+            '
+          type: string
+        lastName:
+          description: 'Last name.
+
+            '
+          type: string
+        name:
+          description: 'Name.
+
+            '
+          type: string
+        tcaContactId:
+          description: 'TCA (Trading Community Architecture) contact ID.
+
+            '
+          format: int64
+          type: integer
+        tcaCustAccntSiteId:
+          description: 'TCA customer account site ID.
+
+            '
+          format: int64
+          type: integer
+        tcaPartyId:
+          description: 'TCA party ID.
+
+            '
+          format: int64
+          type: integer
+        userName:
+          description: 'User name.
+
+            '
+          type: string
       type: object
     InvoicingBusinessPartner:
       description: 'Business partner.
@@ -803,56 +740,119 @@ components:
             '
           type: string
       type: object
-    InvoicingAddress:
-      description: 'Address.
+    InvoicingProduct:
+      description: 'Product description.
 
         '
       properties:
-        billSiteUseId:
-          description: 'Bill to site use ID.
+        billingCategory:
+          description: 'Metered service billing category.
 
             '
-          format: int64
-          type: integer
-        isBillTo:
-          description: 'Identify as the customer''s billing address.
-
-            '
-          type: boolean
-        isShipTo:
-          description: 'Identify as the customer''s shipping address.
-
-            '
-          type: boolean
-        location:
-          $ref: '#/components/schemas/InvoicingLocation'
+          example: Metered Subscription Commitment
+          type: string
         name:
-          description: 'Address name identifier.
+          description: 'Product name.
 
             '
           type: string
-        phone:
-          description: 'Phone.
+        partNumber:
+          description: 'Product part number.
 
             '
           type: string
-        service2SiteUseId:
-          description: 'Service to site use ID.
+        productCategory:
+          description: 'Product category.
 
             '
+          example: CLOUDPAAS
+          type: string
+        ucmRateCardPartType:
+          description: 'Rate card part type of product.
+
+            '
+          example: Free Pricing Tier - Consumption
+          type: string
+        unitOfMeasure:
+          description: 'Unit of measure.
+
+            '
+          type: string
+      required:
+      - partNumber
+      - name
+      - unitOfMeasure
+      - ucmRateCardPartType
+      type: object
+    InvoiceLineSummary:
+      description: 'Invoice line.
+
+        '
+      properties:
+        arInvoiceNumber:
+          description: 'Accounts receivable invoice number for invoice line.
+
+            '
+          example: '8173868'
+          type: string
+        dataCenter:
+          description: 'Data center attribute.
+
+            '
+          example: US001
+          type: string
+        id:
+          description: 'SPM (Subscription Plan Management) invoice line internal identifier.
+
+            '
+          type: string
+        product:
+          $ref: '#/components/schemas/InvoicingProduct'
+        timeEnd:
+          description: 'Usage end time.
+
+            '
+          format: date-time
+          type: string
+        timeStart:
+          description: 'Usage start time.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - product
+      - timeStart
+      - timeEnd
+      - dataCenter
+      type: object
+    InvoicingCurrency:
+      description: 'Currency details.
+
+        '
+      properties:
+        isoCode:
+          description: 'Currency code.
+
+            '
+          example: USD
+          type: string
+        name:
+          description: 'Currency name.
+
+            '
+          example: US Dollar
+          type: string
+        stdPrecision:
+          description: 'Standard precision of the currency.
+
+            '
+          example: 2
           format: int64
           type: integer
-        tcaCustAcctSiteId:
-          description: 'TCA (Trading Community Architecture) customer account site ID.
-
-            '
-          format: int64
-          type: integer
-        tcaPartySiteNumber:
-          description: 'Party site number.
-
-            '
-          type: string
+      required:
+      - isoCode
       type: object
   responses:
     default:

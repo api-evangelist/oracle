@@ -566,30 +566,154 @@ paths:
       - Organization
       x-related-resource: '#/definitions/OrganizationTenancy'
 components:
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
+
+        server error, without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        will be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   schemas:
-    OrganizationTenancyCollection:
-      description: Result of a query request for a list of organization tenancies. Contains OrganizationTenancySummary items.
+    CreateChildTenancyDetails:
+      description: The parameters for creating a child tenancy.
       properties:
-        items:
-          description: Array containing OrganizationTenancySummary items.
+        adminEmail:
+          description: Email address of the child tenancy administrator.
+          maxLength: 255
+          minLength: 6
+          type: string
+        compartmentId:
+          description: The tenancy ID of the parent tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+        features:
+          description: List of features that the child and parent tenancies will have links for. Link with feature CORE will always be created.
+          example:
+          - CORE
           items:
-            $ref: '#/components/schemas/OrganizationTenancySummary'
+            maxLength: 64
+            minLength: 1
+            type: string
+          maxItems: 10
           type: array
-      required:
-      - items
-      type: object
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+          uniqueItems: true
+        governanceStatus:
+          default: OPTED_OUT
+          description: The governance status of the child tenancy.
+          enum:
+          - OPTED_IN
+          - OPTED_OUT
+          example: OPTED_IN
           type: string
-        message:
-          description: A human-readable error string.
+          x-obmcs-top-level-enum: '#/definitions/GovernanceStatus'
+        homeRegion:
+          description: The home region to use for the child tenancy. This must be a region where the parent tenancy is subscribed.
+          example: us-ashburn-1
+          maxLength: 24
+          minLength: 1
+          type: string
+        policyName:
+          description: The name to use for the administrator policy in the child tenancy. Must contain only letters and underscores.
+          example: admin_policy
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: <tenancyName>_admin_policy
+        subscriptionId:
+          description: OCID of the subscription that needs to be assigned to the child tenancy.
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: Newly create child tenancy will be mapped to the current default subscription of the organization.
+        tenancyName:
+          description: The tenancy name to use for the child tenancy.
+          example: oracle-account
+          maxLength: 255
+          minLength: 1
           type: string
       required:
-      - code
-      - message
+      - compartmentId
+      - tenancyName
+      - homeRegion
+      - adminEmail
     OrganizationTenancySummary:
       description: An organization tenancy summary entity.
       properties:
@@ -667,17 +791,6 @@ components:
       required:
       - tenancyId
       - governanceStatus
-    OrganizationCollection:
-      description: Result of a query request for a list of organizations. Contains OrganizationSummary items.
-      properties:
-        items:
-          description: Array containing OrganizationSummary items.
-          items:
-            $ref: '#/components/schemas/OrganizationSummary'
-          type: array
-      required:
-      - items
-      type: object
     OrganizationTenancy:
       description: The information about the organization tenancy.
       properties:
@@ -736,61 +849,18 @@ components:
       required:
       - tenancyId
       - governanceStatus
-    Organization:
-      description: An organization entity.
+    Error:
+      description: Error information.
       properties:
-        compartmentId:
-          description: OCID of the compartment containing the organization. Always a tenancy OCID.
-          maxLength: 255
-          minLength: 1
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
-        defaultUcmSubscriptionId:
-          description: OCID of the default Universal Credits Model subscription. Any tenancy joining the organization will automatically get assigned this subscription, if a subscription is not explictly assigned.
-          maxLength: 255
-          minLength: 1
-          type: string
-        displayName:
-          description: A display name for the organization. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        id:
-          description: OCID of the organization.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: Lifecycle state of the organization.
-          enum:
-          - CREATING
-          - ACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          - FAILED
-          example: ACTIVE
-          type: string
-        parentName:
-          description: The name of the tenancy that is the organization parent.
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeCreated:
-          description: Date and time when the organization was created.
-          example: 2016-08-29 09:12:33.001000+00:00
-          format: date-time
-          type: string
-        timeUpdated:
-          description: Date and time when the organization was last updated.
-          example: 2016-08-29 09:12:33.001000+00:00
-          format: date-time
+        message:
+          description: A human-readable error string.
           type: string
       required:
-      - id
-      - compartmentId
-      - defaultUcmSubscriptionId
-      - timeCreated
-      - lifecycleState
+      - code
+      - message
     UpdateOrganizationDetails:
       description: The parameters for updating an organization.
       properties:
@@ -799,69 +869,6 @@ components:
           maxLength: 255
           minLength: 1
           type: string
-    CreateChildTenancyDetails:
-      description: The parameters for creating a child tenancy.
-      properties:
-        adminEmail:
-          description: Email address of the child tenancy administrator.
-          maxLength: 255
-          minLength: 6
-          type: string
-        compartmentId:
-          description: The tenancy ID of the parent tenancy.
-          maxLength: 255
-          minLength: 1
-          type: string
-        features:
-          description: List of features that the child and parent tenancies will have links for. Link with feature CORE will always be created.
-          example:
-          - CORE
-          items:
-            maxLength: 64
-            minLength: 1
-            type: string
-          maxItems: 10
-          type: array
-          uniqueItems: true
-        governanceStatus:
-          default: OPTED_OUT
-          description: The governance status of the child tenancy.
-          enum:
-          - OPTED_IN
-          - OPTED_OUT
-          example: OPTED_IN
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/GovernanceStatus'
-        homeRegion:
-          description: The home region to use for the child tenancy. This must be a region where the parent tenancy is subscribed.
-          example: us-ashburn-1
-          maxLength: 24
-          minLength: 1
-          type: string
-        policyName:
-          description: The name to use for the administrator policy in the child tenancy. Must contain only letters and underscores.
-          example: admin_policy
-          maxLength: 255
-          minLength: 1
-          type: string
-          x-default-description: <tenancyName>_admin_policy
-        subscriptionId:
-          description: OCID of the subscription that needs to be assigned to the child tenancy.
-          maxLength: 255
-          minLength: 1
-          type: string
-          x-default-description: Newly create child tenancy will be mapped to the current default subscription of the organization.
-        tenancyName:
-          description: The tenancy name to use for the child tenancy.
-          example: oracle-account
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      - tenancyName
-      - homeRegion
-      - adminEmail
     OrganizationSummary:
       description: An organization entity.
       properties:
@@ -930,90 +937,83 @@ components:
       - defaultUcmSubscriptionId
       - timeCreated
       - lifecycleState
-  parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
-
-        server error, without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        will be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+    OrganizationCollection:
+      description: Result of a query request for a list of organizations. Contains OrganizationSummary items.
+      properties:
+        items:
+          description: Array containing OrganizationSummary items.
+          items:
+            $ref: '#/components/schemas/OrganizationSummary'
+          type: array
+      required:
+      - items
+      type: object
+    Organization:
+      description: An organization entity.
+      properties:
+        compartmentId:
+          description: OCID of the compartment containing the organization. Always a tenancy OCID.
+          maxLength: 255
+          minLength: 1
+          type: string
+        defaultUcmSubscriptionId:
+          description: OCID of the default Universal Credits Model subscription. Any tenancy joining the organization will automatically get assigned this subscription, if a subscription is not explictly assigned.
+          maxLength: 255
+          minLength: 1
+          type: string
+        displayName:
+          description: A display name for the organization. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        id:
+          description: OCID of the organization.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: Lifecycle state of the organization.
+          enum:
+          - CREATING
+          - ACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - FAILED
+          example: ACTIVE
+          type: string
+        parentName:
+          description: The name of the tenancy that is the organization parent.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: Date and time when the organization was created.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+        timeUpdated:
+          description: Date and time when the organization was last updated.
+          example: 2016-08-29 09:12:33.001000+00:00
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - defaultUcmSubscriptionId
+      - timeCreated
+      - lifecycleState
+    OrganizationTenancyCollection:
+      description: Result of a query request for a list of organization tenancies. Contains OrganizationTenancySummary items.
+      properties:
+        items:
+          description: Array containing OrganizationTenancySummary items.
+          items:
+            $ref: '#/components/schemas/OrganizationTenancySummary'
+          type: array
+      required:
+      - items
+      type: object
 x-anchors:
   x-headers:
     etag:

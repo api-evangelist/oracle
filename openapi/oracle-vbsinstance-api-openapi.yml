@@ -524,119 +524,103 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   schemas:
-    VbsInstance:
-      description: Visual Builder Studio service instance
+    WorkRequestLogEntryCollection:
+      description: A list of log messages from the execution of a work request.
       properties:
-        compartmentId:
-          description: Compartment of the service instance
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: Service instance display name
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: Unique identifier that is immutable on creation
-          type: string
-        isResourceUsageAgreementGranted:
-          description: Whether the VBS service instance owner explicitly approved VBS to create and use resources in the customer tenancy
-          type: boolean
-        lifecycleState:
-          description: The current state of the VbsInstance.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        lifecyleDetails:
-          description: A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
-          type: string
-        name:
-          description: Service instance name (unique identifier)
-          type: string
-        resourceCompartmentId:
-          description: Compartment where VBS may create additional resources for the service instance
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the VbsInstance was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the VbsInstance was updated. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        vbsAccessUrl:
-          description: Public web URL for accessing the VBS service instance
-          type: string
+        items:
+          description: The log messages.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
       required:
-      - id
-      - name
-      - displayName
-      - compartmentId
+      - items
       type: object
-    ChangeVbsInstanceCompartmentDetails:
-      description: The information to be updated.
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
       properties:
         compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
 
-            into which the resource should be moved.
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
 
             '
-          maxLength: 255
-          minLength: 1
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_VBS_INSTANCE
+          - UPDATE_VBS_INSTANCE
+          - DELETE_VBS_INSTANCE
+          - MOVE_VBS_INSTANCE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
           type: string
       required:
+      - operationType
+      - status
+      - id
       - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequestSummaryCollection:
+      description: A list of VBS instance related work requests.
+      properties:
+        items:
+          description: List of workRequestSummary objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
       type: object
     WorkRequestError:
       description: An error encountered while executing a work request.
@@ -752,17 +736,6 @@ components:
       - displayName
       - compartmentId
       type: object
-    WorkRequestSummaryCollection:
-      description: A list of VBS instance related work requests.
-      properties:
-        items:
-          description: List of workRequestSummary objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
     UpdateVbsInstanceDetails:
       description: The information to be updated.
       properties:
@@ -806,6 +779,52 @@ components:
           description: Compartment where VBS may create additional resources for the service instance
           type: string
       type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
+
+            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
+
+            work is complete for that resource at which point it will transition to CREATED, UPDATED,
+
+            or DELETED, respectively.
+
+            '
+          enum:
+          - CREATED
+          - UPDATED
+          - DELETED
+          - IN_PROGRESS
+          - RELATED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type the work request affects.
+          type: string
+        entityUri:
+          description: The URI path that the user can do a GET on to access the resource metadata
+          type: string
+        identifier:
+          description: The identifier of the resource the work request affects.
+          type: string
+      required:
+      - actionType
+      - entityType
+      - identifier
     WorkRequestLogEntry:
       description: A log message from the execution of a work request.
       properties:
@@ -819,18 +838,6 @@ components:
       required:
       - message
       - timestamp
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     CreateVbsInstanceDetails:
       description: The information about new VbsInstance.
       properties:
@@ -902,6 +909,21 @@ components:
       required:
       - items
       type: object
+    ChangeVbsInstanceCompartmentDetails:
+      description: The information to be updated.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
     VbsInstanceSummaryCollection:
       description: Wrapped list of Visual Builder Studio service instances
       properties:
@@ -913,82 +935,6 @@ components:
       required:
       - items
       type: object
-    WorkRequestSummary:
-      description: A summary of the status of a work request.
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - CREATE_VBS_INSTANCE
-          - UPDATE_VBS_INSTANCE
-          - DELETE_VBS_INSTANCE
-          - MOVE_VBS_INSTANCE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
     WorkRequest:
       description: A VBS Instance related work request
       properties:
@@ -1065,52 +1011,241 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
+    VbsInstance:
+      description: Visual Builder Studio service instance
       properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work tracked in the work request.
+        compartmentId:
+          description: Compartment of the service instance
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
 
-            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
 
-            work is complete for that resource at which point it will transition to CREATED, UPDATED,
+              Example: `{"bar-key": "value"}`
 
-            or DELETED, respectively.
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
 
             '
+          type: object
+        displayName:
+          description: Service instance display name
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: Unique identifier that is immutable on creation
+          type: string
+        isResourceUsageAgreementGranted:
+          description: Whether the VBS service instance owner explicitly approved VBS to create and use resources in the customer tenancy
+          type: boolean
+        lifecycleState:
+          description: The current state of the VbsInstance.
           enum:
-          - CREATED
-          - UPDATED
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - DELETING
           - DELETED
-          - IN_PROGRESS
-          - RELATED
+          - FAILED
           type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type the work request affects.
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        lifecyleDetails:
+          description: A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
           type: string
-        entityUri:
-          description: The URI path that the user can do a GET on to access the resource metadata
+        name:
+          description: Service instance name (unique identifier)
           type: string
-        identifier:
-          description: The identifier of the resource the work request affects.
+        resourceCompartmentId:
+          description: Compartment where VBS may create additional resources for the service instance
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time the VbsInstance was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the VbsInstance was updated. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        vbsAccessUrl:
+          description: Public web URL for accessing the VBS service instance
           type: string
       required:
-      - actionType
-      - entityType
-      - identifier
-    WorkRequestLogEntryCollection:
-      description: A list of log messages from the execution of a work request.
-      properties:
-        items:
-          description: The log messages.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
+      - id
+      - name
+      - displayName
+      - compartmentId
       type: object
   parameters:
+    IdcsAccessTokenHeader:
+      description: IDCS personal acceess token identifying IDCS user and stripe for the VBS service
+      in: header
+      name: idcs-access-token
+      x-default-description: 'null'
+      schema:
+        type: string
+    LifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - DELETING
+        - DELETED
+        - FAILED
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    VbsInstanceIdentifierPathParam:
+      description: unique VbsInstance identifier
+      in: path
+      name: vbsInstanceId
+      required: true
+      schema:
+        type: string
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    VbsInstanceNameQueryParam:
+      description: A filter to return only resources that match the entire name given.
+      in: query
+      name: name
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    VbsInstanceIdentifierQueryParam:
+      description: unique VbsInstance identifier
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
     WorkRequestIdPathParam:
       description: The ID of the asynchronous request.
       in: path
@@ -1135,141 +1270,6 @@ components:
       required: false
       schema:
         type: string
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    VbsInstanceNameQueryParam:
-      description: A filter to return only resources that match the entire name given.
-      in: query
-      name: name
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    VbsInstanceIdentifierQueryParam:
-      description: unique VbsInstance identifier
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    VbsInstanceIdentifierPathParam:
-      description: unique VbsInstance identifier
-      in: path
-      name: vbsInstanceId
-      required: true
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - DELETING
-        - DELETED
-        - FAILED
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    IdcsAccessTokenHeader:
-      description: IDCS personal acceess token identifying IDCS user and stripe for the VBS service
-      in: header
-      name: idcs-access-token
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
   responses:
     default:
       description: Unknown Error

@@ -336,6 +336,24 @@ paths:
         required: true
 components:
   parameters:
+    DisplayNameQueryParam:
+      description: A case-sensitive filter that returns resources that match the entire display name specified.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    DashboardLifecycleStateQueryParam:
+      description: A filter that returns dashboard resources that match the lifecycle state specified.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/Dashboard/lifecycleState'
+      schema:
+        type: string
     DashboardGroupIdQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dashboard group that the dashboard belongs to.
       in: query
@@ -343,6 +361,84 @@ components:
       required: true
       schema:
         type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends on `sortBy`. In general, the default value
+
+        is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    RetryTokenHeader:
+      description: "A token that uniquely identifies a request so it can be retried in case of a timeout or server \nerror without risk of executing that same action again. \nRetry tokens expire after 24 hours, but can be invalidated before then due to conflicting operations \n(for example, if a resource has been deleted and purged from the system, \nthen a retry of the original creation request may be rejected).\n"
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    DashboardIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dashboard.
+      in: path
+      name: dashboardId
+      required: true
+      schema:
+        type: string
+    DashboardIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dashboard.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortByQueryParam:
+      description: "The field to sort by. You can provide one sort order (`sortOrder`). \nDefault order for TIMECREATED is descending. \nDefault order for DISPLAYNAME is ascending. \nThe DISPLAYNAME sort order is case sensitive.\n"
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    RequestIdHeader:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    CrossRegionIdentifierHeader:
+      description: "To identify if the call is cross-regional. In CRUD calls for a resource, to\nidentify that the call originates from different region, set the\n`CrossRegionIdentifierHeader` parameter to a region name (ex - `US-ASHBURN-1`)\nThe call will be served from a Replicated bucket. \nFor same-region calls, the value is unassigned.\n"
+      in: header
+      name: opc-cross-region
+      required: false
+      x-default-description: when unspecified the call will be assumed to not be cross regional
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This value is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call
 
@@ -360,114 +456,35 @@ components:
       required: false
       schema:
         type: string
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This value is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    SortByQueryParam:
-      description: "The field to sort by. You can provide one sort order (`sortOrder`). \nDefault order for TIMECREATED is descending. \nDefault order for DISPLAYNAME is ascending. \nThe DISPLAYNAME sort order is case sensitive.\n"
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    DashboardIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dashboard.
-      in: path
-      name: dashboardId
-      required: true
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: "A token that uniquely identifies a request so it can be retried in case of a timeout or server \nerror without risk of executing that same action again. \nRetry tokens expire after 24 hours, but can be invalidated before then due to conflicting operations \n(for example, if a resource has been deleted and purged from the system, \nthen a retry of the original creation request may be rejected).\n"
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A case-sensitive filter that returns resources that match the entire display name specified.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SortOrderQueryParam:
-      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends on `sortBy`. In general, the default value
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-        is ''DESC'' when sorting by time and ''ASC'' otherwise.
+            Oracle about a particular request, please provide the request ID.
 
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    RequestIdHeader:
-      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    CrossRegionIdentifierHeader:
-      description: "To identify if the call is cross-regional. In CRUD calls for a resource, to\nidentify that the call originates from different region, set the\n`CrossRegionIdentifierHeader` parameter to a region name (ex - `US-ASHBURN-1`)\nThe call will be served from a Replicated bucket. \nFor same-region calls, the value is unassigned.\n"
-      in: header
-      name: opc-cross-region
-      required: false
-      x-default-description: when unspecified the call will be assumed to not be cross regional
-      schema:
-        type: string
-    DashboardIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dashboard.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
-    DashboardLifecycleStateQueryParam:
-      description: A filter that returns dashboard resources that match the lifecycle state specified.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/Dashboard/lifecycleState'
-      schema:
-        type: string
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   schemas:
-    DashboardCollection:
-      description: Results of a dashboard search. Contains `DashboardSummary` items.
+    Error:
+      description: Details about erros encountered.
       properties:
-        items:
-          description: A list of dashboards.
-          items:
-            $ref: '#/components/schemas/DashboardSummary'
-          type: array
+        code:
+          description: A machine-usable code for the error that occured.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
       required:
-      - items
-      type: object
+      - code
+      - message
     DashboardSummary:
       description: Summary information about the dashboard.
       properties:
@@ -574,6 +591,102 @@ components:
       - freeformTags
       - definedTags
       type: object
+    CreateDashboardDetails:
+      description: 'The base schema for creating a dashboard.
+
+        Derived schemas have configurations and widgets specific to the  `schemaVersion`.
+
+        '
+      discriminator:
+        propertyName: schemaVersion
+      properties:
+        dashboardGroupId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dashboard group that the dashbaord is associated with.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: 'A short description of the dashboard. It can be changed. Avoid entering confidential information.
+
+            The following special characters are not allowed: <>()=/''"&\
+
+            '
+          maxLength: 400
+          minLength: 0
+          type: string
+        displayName:
+          description: 'A user-friendly name for the dashboard. Does not have to be unique, and it can be changed. Avoid entering confidential information.
+
+            Leading and trailing spaces and the following special characters are not allowed: <>()=/''"&\
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        schemaVersion:
+          description: 'The schema describing how to interpret the dashboard configuration and widgets.
+
+            '
+          type: string
+          x-obmcs-enumref: '#/definitions/Dashboard/schemaVersion'
+      required:
+      - dashboardGroupId
+      - schemaVersion
+      type: object
+    DashboardCollection:
+      description: Results of a dashboard search. Contains `DashboardSummary` items.
+      properties:
+        items:
+          description: A list of dashboards.
+          items:
+            $ref: '#/components/schemas/DashboardSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ChangeDashboardGroupDetails:
+      description: The information to be updated.
+      properties:
+        dashboardGroupId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the dashboardGroup
+
+            into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - dashboardGroupId
+      type: object
     UpdateDashboardDetails:
       description: 'The base schema for updating a dashboard.
 
@@ -638,18 +751,6 @@ components:
       required:
       - schemaVersion
       type: object
-    Error:
-      description: Details about erros encountered.
-      properties:
-        code:
-          description: A machine-usable code for the error that occured.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     Dashboard:
       description: 'The base schema for a dashboard.
 
@@ -772,107 +873,6 @@ components:
       - freeformTags
       - definedTags
       type: object
-    CreateDashboardDetails:
-      description: 'The base schema for creating a dashboard.
-
-        Derived schemas have configurations and widgets specific to the  `schemaVersion`.
-
-        '
-      discriminator:
-        propertyName: schemaVersion
-      properties:
-        dashboardGroupId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dashboard group that the dashbaord is associated with.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: 'A short description of the dashboard. It can be changed. Avoid entering confidential information.
-
-            The following special characters are not allowed: <>()=/''"&\
-
-            '
-          maxLength: 400
-          minLength: 0
-          type: string
-        displayName:
-          description: 'A user-friendly name for the dashboard. Does not have to be unique, and it can be changed. Avoid entering confidential information.
-
-            Leading and trailing spaces and the following special characters are not allowed: <>()=/''"&\
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        schemaVersion:
-          description: 'The schema describing how to interpret the dashboard configuration and widgets.
-
-            '
-          type: string
-          x-obmcs-enumref: '#/definitions/Dashboard/schemaVersion'
-      required:
-      - dashboardGroupId
-      - schemaVersion
-      type: object
-    ChangeDashboardGroupDetails:
-      description: The information to be updated.
-      properties:
-        dashboardGroupId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the dashboardGroup
-
-            into which the resource should be moved.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - dashboardGroupId
-      type: object
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

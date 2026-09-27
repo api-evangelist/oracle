@@ -444,16 +444,18 @@ components:
       - privilegedOperationList
       - resourceType
       type: object
-    PrivilegedApiControlCollection:
-      description: Results of a privilegedApiControl search. Contains both PrivilegedApiControlSummary items and other information, such as metadata.
+    ChangePrivilegedApiControlCompartmentDetails:
+      description: The configuration details for the move operation.
       properties:
-        items:
-          description: List of privilegedApiControls.
-          items:
-            $ref: '#/components/schemas/PrivilegedApiControlSummary'
-          type: array
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the PrivilegedApiControl to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
       required:
-      - items
+      - compartmentId
       type: object
     UpdatePrivilegedApiControlDetails:
       description: The data to update a PrivilegedApiControl.
@@ -531,19 +533,6 @@ components:
           items:
             type: string
           type: array
-      type: object
-    ChangePrivilegedApiControlCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the PrivilegedApiControl to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
       type: object
     PrivilegedApiControlSummary:
       description: Summary information about a PrivilegedApiControl.
@@ -663,6 +652,33 @@ components:
       - displayName
       - freeformTags
       - definedTags
+      type: object
+    Error:
+      description: Error response information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    PrivilegedApiControlCollection:
+      description: Results of a privilegedApiControl search. Contains both PrivilegedApiControlSummary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of privilegedApiControls.
+          items:
+            $ref: '#/components/schemas/PrivilegedApiControlSummary'
+          type: array
+      required:
+      - items
       type: object
     PrivilegedApiControl:
       description: 'A PrivilegedApiControl is a kind of Policy definition which provides details about which operations needs to be secure; who can approve a privilegedApiRequest requesting for a particular operation, whether the operations needs to be approved by customer or is it preApproved.
@@ -839,22 +855,6 @@ components:
       - definedTags
       - state
       type: object
-    Error:
-      description: Error response information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     PrivilegedApiDetails:
       description: It represents the api details of the service
       properties:
@@ -882,26 +882,26 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
-
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the given display name exactly.
+      in: query
+      name: displayName
+      x-default-description: 'null'
       schema:
         type: string
-    PrivilegedApiControlIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the PrivilegedApiControl.
-      in: path
-      name: privilegedApiControlId
-      required: true
+        maxLength: 255
+        minLength: 1
+    LifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/PrivilegedApiControl/lifecycleState'
       schema:
         type: string
     PrivilegedApiControlIdentifierQueryParam:
@@ -911,33 +911,28 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
+    PrivilegedApiControlIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the PrivilegedApiControl.
+      in: path
+      name: privilegedApiControlId
+      required: true
       schema:
         type: string
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+    SortOrderQueryParam:
+      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
 
-        is descending. Default order for `displayName` is ascending.
+        in general is `DESC` when sorting by time and `ASC` otherwise.
 
         '
-      in: query
-      name: sortBy
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
       schema:
         type: string
         enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
+        - ASC
+        - DESC
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -957,39 +952,27 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the given display name exactly.
+    CompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
       in: query
-      name: displayName
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
-    DeletePrivilegedApiDescQueryParam:
-      description: reason for deletion of PrivilegedApiControl.
-      in: query
-      name: description
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 0
-    SortOrderQueryParam:
-      description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
 
-        in general is `DESC` when sorting by time and `ASC` otherwise.
+        is descending. Default order for `displayName` is ascending.
 
         '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      in: query
+      name: sortBy
       schema:
         type: string
         enum:
-        - ASC
-        - DESC
+        - timeCreated
+        - displayName
+        default: timeCreated
     RequestIdHeader:
       description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
@@ -1002,26 +985,6 @@ components:
         '
       in: header
       name: opc-request-id
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
-    LifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/PrivilegedApiControl/lifecycleState'
       schema:
         type: string
     PaginationLimitQueryParam:
@@ -1039,6 +1002,43 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
+    DeletePrivilegedApiDescQueryParam:
+      description: reason for deletion of PrivilegedApiControl.
+      in: query
+      name: description
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 0
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+        that resource. The resource will be updated or deleted only if the etag you provide
+
+        matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
   responses:
     DefaultError:
       description: An error has occurred.

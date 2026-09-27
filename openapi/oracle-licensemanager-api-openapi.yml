@@ -1108,41 +1108,121 @@ paths:
       tags:
       - LicenseManager
 components:
+  parameters:
+    IfMatchHeaderParam:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the `if-match`
+
+        parameter to the value of the etag from a previous GET or POST response for that resource.  The resource
+
+        will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      schema:
+        type: string
+    CompartmentIdInSubtreeQueryParam:
+      description: Indicates if the given compartment is the root compartment.
+      in: query
+      name: isCompartmentIdInSubtree
+      schema:
+        type: boolean
+        default: false
+    ResourceUnitTypeQueryParam:
+      description: A filter to return only resources whose unit matches the given resource unit.
+      in: query
+      name: resourceUnitType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/ResourceUnit'
+      schema:
+        type: string
+        enum:
+        - OCPU
+        - ECPU
+    OpcRetryTokenHeaderParam:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or server error without
+
+        risk of executing that same action again. Retry tokens expire after 24 hours, but can be invalidated before
+
+        then due to conflicting operations (for example, if a resource has been deleted and purged from the system,
+
+        then a retry of the original creation request might be rejected).
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+    CompartmentIdQueryParam:
+      description: 'The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) used for the license record, product license, and configuration.
+
+        '
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    OpcRequestIdHeaderParam:
+      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    ProductLicenseIdentifierQueryParam:
+      description: Unique product license identifier.
+      in: query
+      name: productLicenseId
+      required: true
+      schema:
+        type: string
+    ProductLicenseIdentifierPathParam:
+      description: Unique product license identifier.
+      in: path
+      name: productLicenseId
+      required: true
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    LicenseRecordIdentifierPathParam:
+      description: Unique license record identifier.
+      in: path
+      name: licenseRecordId
+      required: true
+      schema:
+        type: string
   schemas:
-    Product:
-      description: Details of product.
+    UpdateLicenseRecordDetails:
+      allOf:
+      - $ref: '#/components/schemas/CreateLicenseRecordDetails'
+      description: The details about updates in the license record.
+    CreateLicenseRecordDetails:
+      description: The details about the new license record.
       properties:
-        category:
-          description: Product category base or option.
-          enum:
-          - BASE
-          - OPTION
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ProductCategory'
-        count:
-          default: 0.0
-          description: Units required for the missing product.
-          format: double
-          minimum: 0.0
-          type: number
-        name:
-          description: Name of the product.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - name
-      - count
-      - category
-      type: object
-    LicenseRecordSummary:
-      description: The license record summary.
-      properties:
-        compartmentId:
-          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where the license record is created.
-          maxLength: 255
-          minLength: 1
-          type: string
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -1163,14 +1243,14 @@ components:
             '
           type: object
         displayName:
-          description: 'License record display name. Avoid entering confidential information.
+          description: 'License record name.
 
             '
           maxLength: 255
           minLength: 1
           type: string
         expirationDate:
-          description: 'The license record end date in [RFC 3339](https://tools.ietf.org/html/rfc3339) format.
+          description: 'The license record end date in [RFC 3339](https://tools.ietf.org/html/rfc3339)
 
             date format.
 
@@ -1188,9 +1268,6 @@ components:
 
             '
           type: object
-        id:
-          description: The license record [OCID](/iaas/Content/General/Concepts/identifiers.htm).
-          type: string
         isPerpetual:
           default: false
           description: Specifies if the license record term is perpertual.
@@ -1201,45 +1278,19 @@ components:
           type: boolean
         licenseCount:
           default: 1
-          description: 'The number of license record units added by the user for the given license record.
+          description: 'The number of license units added by a user in a license record.
 
             Default 1
 
             '
           type: integer
-        licenseUnit:
-          description: The product license unit.
-          enum:
-          - OCPU
-          - NAMED_USER_PLUS
-          - PROCESSORS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LicenseUnit'
-        lifecycleState:
-          description: The current license record state.
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifeCycleState'
         productId:
           description: The license record product ID.
           maxLength: 255
           minLength: 1
           type: string
-        productLicense:
-          description: The product license name with which the license record is associated.
-          maxLength: 255
-          minLength: 1
-          type: string
-        productLicenseId:
-          description: The product license [OCID](/iaas/Content/General/Concepts/identifiers.htm) with which the license record is associated.
-          maxLength: 255
-          minLength: 1
-          type: string
         supportEndDate:
-          description: 'The license record support end date in [RFC 3339](https://tools.ietf.org/html/rfc3339) format.
+          description: 'The license record support end date in [RFC 3339](https://tools.ietf.org/html/rfc3339)
 
             date format.
 
@@ -1248,35 +1299,7 @@ components:
             '
           format: date-time
           type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the license record was created. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the license record was updated. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
-          format: date-time
-          type: string
       required:
-      - id
       - displayName
       - isPerpetual
       - isUnlimited
@@ -1377,863 +1400,6 @@ components:
       - isBaseLicenseAvailable
       - areAllOptionsAvailable
       - missingProducts
-      type: object
-    ImageResponse:
-      description: The collection of image details for the product license.
-      properties:
-        id:
-          description: The image ID associated with the product license.
-          type: string
-        listingId:
-          description: The image listing ID.
-          type: string
-        listingName:
-          description: The listing name associated with the product license.
-          type: string
-        packageVersion:
-          description: The image package version.
-          type: string
-        publisher:
-          description: The image publisher.
-          type: string
-      type: object
-    BulkUploadFailedRecordInfo:
-      description: Error information for a valid license record that could not be uploaded.
-      properties:
-        error:
-          description: Failed license record error information.
-          type: string
-        productName:
-          description: Product name of the failed row.
-          maxLength: 255
-          minLength: 1
-          type: string
-        rowNumber:
-          default: 0
-          description: Refers to the license record number as provided in the bulk upload file.
-          minimum: 0
-          type: integer
-      required:
-      - rowNumber
-      - productName
-      - error
-      type: object
-    TopUtilizedProductLicenseCollection:
-      description: A collection of top utilized product licenses.
-      properties:
-        items:
-          description: Collection of top utilized product licenses.
-          items:
-            $ref: '#/components/schemas/TopUtilizedProductLicenseSummary'
-          type: array
-      required:
-      - items
-      type: object
-    Configuration:
-      description: Details of the compartment-specific configuration.
-      properties:
-        compartmentId:
-          description: 'The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) to which the configuration is specified.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        emailIds:
-          description: The list of associated configuration email IDs.
-          items:
-            type: string
-          type: array
-        timeCreated:
-          description: The time the configuration was created. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the configuration was updated. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - compartmentId
-      - emailIds
-      type: object
-    UpdateConfigurationDetails:
-      description: The compartment-specific configuration.
-      properties:
-        emailIds:
-          description: List of email IDs associated with the configuration.
-          items:
-            type: string
-          type: array
-      required:
-      - emailIds
-      type: object
-    ImageDetails:
-      description: Image details associated with the product license.
-      properties:
-        listingId:
-          description: Marketplace image listing ID.
-          type: string
-        packageVersion:
-          description: Image package version.
-          type: string
-      required:
-      - listingId
-      - packageVersion
-      type: object
-    CreateProductLicenseDetails:
-      description: Details for creating a new product license.
-      properties:
-        compartmentId:
-          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where product licenses are created.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'Name of the product license.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        images:
-          description: The image details associated with the product license.
-          items:
-            $ref: '#/components/schemas/ImageDetails'
-          maxItems: 100
-          type: array
-        isVendorOracle:
-          default: false
-          description: Specifies if the product license vendor is Oracle or a third party.
-          type: boolean
-        licenseUnit:
-          description: The product license unit.
-          enum:
-          - OCPU
-          - NAMED_USER_PLUS
-          - PROCESSORS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LicenseUnit'
-        vendorName:
-          description: 'The product license vendor name, for example: Microsoft, RHEL, and so on.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      - isVendorOracle
-      - licenseUnit
-      - displayName
-      type: object
-    CreateLicenseRecordDetails:
-      description: The details about the new license record.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'License record name.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        expirationDate:
-          description: 'The license record end date in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-            date format.
-
-            Example: `2018-09-12`
-
-            '
-          format: date-time
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        isPerpetual:
-          default: false
-          description: Specifies if the license record term is perpertual.
-          type: boolean
-        isUnlimited:
-          default: false
-          description: Specifies if the license count is unlimited.
-          type: boolean
-        licenseCount:
-          default: 1
-          description: 'The number of license units added by a user in a license record.
-
-            Default 1
-
-            '
-          type: integer
-        productId:
-          description: The license record product ID.
-          maxLength: 255
-          minLength: 1
-          type: string
-        supportEndDate:
-          description: 'The license record support end date in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-            date format.
-
-            Example: `2018-09-12`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - displayName
-      - isPerpetual
-      - isUnlimited
-      type: object
-    TopUtilizedResourceSummary:
-      description: 'A summary of a top utlized resource.
-
-        '
-      properties:
-        resourceCompartmentId:
-          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) that contains the resource.
-          maximum: 255
-          minimum: 1
-          type: string
-        resourceCompartmentName:
-          description: The display name of the compartment that contains the resource.
-          type: string
-        resourceId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource.
-          maxLength: 255
-          minLength: 1
-          type: string
-        resourceName:
-          description: Resource canonical name.
-          maxLength: 1024
-          minLength: 1
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        totalUnits:
-          default: 0.0
-          description: Number of license units consumed by the resource.
-          format: double
-          minimum: 0.0
-          type: number
-        unitType:
-          description: The resource unit.
-          enum:
-          - OCPU
-          - ECPU
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ResourceUnit'
-      required:
-      - resourceId
-      - resourceName
-      - resourceCompartmentId
-      - resourceCompartmentName
-      - totalUnits
-      - unitType
-      type: object
-    ProductLicense:
-      description: The product license details.
-      properties:
-        activeLicenseRecordCount:
-          default: 0
-          description: The number of active license records associated with the product license.
-          minimum: 0
-          type: integer
-        compartmentId:
-          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where the product license is created.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'License record name
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The product license [OCID](/iaas/Content/General/Concepts/identifiers.htm).
-          type: string
-        images:
-          description: The images associated with the product license.
-          items:
-            $ref: '#/components/schemas/ImageResponse'
-          type: array
-        isOverSubscribed:
-          default: false
-          description: Specifies whether or not the product license is oversubscribed.
-          type: boolean
-        isUnlimited:
-          default: false
-          description: Specifies if the license unit count is unlimited.
-          type: boolean
-        isVendorOracle:
-          default: false
-          description: Specifies whether the vendor is Oracle or a third party.
-          type: boolean
-        licenseUnit:
-          description: The product license unit.
-          enum:
-          - OCPU
-          - NAMED_USER_PLUS
-          - PROCESSORS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LicenseUnit'
-        lifecycleState:
-          description: The current product license state.
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifeCycleState'
-        status:
-          description: The current product license status.
-          enum:
-          - INCOMPLETE
-          - ISSUES_FOUND
-          - WARNING
-          - OK
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/Status'
-        statusDescription:
-          description: 'Status description for the current product license status.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the product license was created. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the product license was updated. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
-          format: date-time
-          type: string
-        totalActiveLicenseUnitCount:
-          default: 0
-          description: The total number of licenses available for the product license, calculated by adding up all the license counts for active license records associated with the product license.
-          minimum: 0
-          type: integer
-        totalLicenseRecordCount:
-          default: 0
-          description: 'The number of license records associated with the product license.
-
-            '
-          minimum: 0
-          type: integer
-        totalLicenseUnitsConsumed:
-          default: 0.0
-          description: 'The number of license units consumed. Updated after each allocation run.
-
-            '
-          format: double
-          minimum: 0.0
-          type: number
-        vendorName:
-          description: 'The vendor of the ProductLicense
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - id
-      - compartmentId
-      - isVendorOracle
-      - licenseUnit
-      - displayName
-      - status
-      type: object
-    TopUtilizedResourceCollection:
-      description: The collection of top utilized resources.
-      properties:
-        items:
-          description: The top utilized resource summary collection.
-          items:
-            $ref: '#/components/schemas/TopUtilizedResourceSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateLicenseRecordDetails:
-      allOf:
-      - $ref: '#/components/schemas/CreateLicenseRecordDetails'
-      description: The details about updates in the license record.
-    BulkUploadResponse:
-      description: The bulk upload response.
-      properties:
-        failedLicenseRecordInfo:
-          description: Error information corresponding to the supported records which are valid but could not be created.
-          items:
-            $ref: '#/components/schemas/BulkUploadFailedRecordInfo'
-          type: array
-        message:
-          description: Response message for bulk upload.
-          type: string
-        totalSupportedDuplicateRecords:
-          default: 0
-          description: The number of supported license records that were valid but not uploaded since they were duplicates.
-          minimum: 0
-          type: integer
-        totalSupportedFailedLicenseRecords:
-          default: 0
-          description: The number of supported license records that were valid but failed with errors during upload.
-          minimum: 0
-          type: integer
-        totalSupportedInvalidRecords:
-          default: 0
-          description: The number of supported license records that could not be uploaded since they were invalid.
-          minimum: 0
-          type: integer
-        totalSupportedRecords:
-          default: 0
-          description: The number of license records which were supported.
-          minimum: 0
-          type: integer
-        totalSupportedRecordsSaved:
-          default: 0
-          description: The number of supported license records that were uploaded successfully.
-          minimum: 0
-          type: integer
-        validationErrorInfo:
-          description: Detailed error information corresponding to each supported but invalid row for the uploaded file.
-          items:
-            $ref: '#/components/schemas/BulkUploadValidationErrorInfo'
-          type: array
-      required:
-      - totalSupportedRecords
-      - totalSupportedRecordsSaved
-      - totalSupportedDuplicateRecords
-      - totalSupportedFailedLicenseRecords
-      - totalSupportedInvalidRecords
-      - validationErrorInfo
-      - failedLicenseRecordInfo
-      - message
-      type: object
-    BulkUploadValidationErrorInfo:
-      description: Detailed error information corresponding to each column for a particular supported license record that could not be uploaded.
-      properties:
-        productName:
-          description: Product name of invalid row.
-          maxLength: 255
-          minLength: 1
-          type: string
-        rowError:
-          description: Error information corresponding to each column.
-          items:
-            $ref: '#/components/schemas/BulkUploadCellInfo'
-          type: array
-        rowNumber:
-          default: 0
-          description: Refers to the license record number as provided in the bulk upload file.
-          minimum: 0
-          type: integer
-      required:
-      - rowNumber
-      - productName
-      - rowError
-      type: object
-    Error:
-      description: An error has occurred.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-      type: object
-    UpdateProductLicenseDetails:
-      description: Updates the product license object (only allows image updates).
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        images:
-          description: The image details associated with the product license.
-          items:
-            $ref: '#/components/schemas/ImageDetails'
-          maxItems: 100
-          type: array
-      required:
-      - images
-      type: object
-    LicenseRecord:
-      description: License record summary.
-      properties:
-        compartmentId:
-          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where the license record is created.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: 'The license record display name. Avoid entering confidential information.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        expirationDate:
-          description: 'The license record end date in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-            date format.
-
-            Example: `2018-09-12`
-
-            '
-          format: date-time
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The license record [OCID](/iaas/Content/General/Concepts/identifiers.htm).
-          type: string
-        isPerpetual:
-          default: false
-          description: Specifies if the license record term is perpertual.
-          type: boolean
-        isUnlimited:
-          default: false
-          description: Specifies if the license count is unlimited.
-          type: boolean
-        licenseCount:
-          default: 1
-          description: 'The number of license units added by the user for the given license record.
-
-            Default 1
-
-            '
-          type: integer
-        licenseUnit:
-          description: The product license unit.
-          enum:
-          - OCPU
-          - NAMED_USER_PLUS
-          - PROCESSORS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LicenseUnit'
-        lifecycleState:
-          description: The current license record state.
-          enum:
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifeCycleState'
-        productId:
-          description: The license record product ID.
-          maxLength: 255
-          minLength: 1
-          type: string
-        productLicense:
-          description: The product license name with which the license record is associated.
-          maxLength: 255
-          minLength: 1
-          type: string
-        productLicenseId:
-          description: The product license [OCID](/iaas/Content/General/Concepts/identifiers.htm) with which the license record is associated.
-          maxLength: 255
-          minLength: 1
-          type: string
-        supportEndDate:
-          description: 'The license record support end date in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-            date format.
-
-            Example: `2018-09-12`
-
-            '
-          format: date-time
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer, and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the license record was created. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the license record was updated. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - isPerpetual
-      - isUnlimited
-      - lifecycleState
-      type: object
-    LicenseRecordCollection:
-      description: The license record summary collection.
-      properties:
-        items:
-          description: The license record summary collection.
-          items:
-            $ref: '#/components/schemas/LicenseRecordSummary'
-          type: array
-      required:
-      - items
-      type: object
-    LicenseMetric:
-      description: Overview of product license and resources usage.
-      properties:
-        licenseRecordExpiringSoonCount:
-          default: 0
-          description: 'Total number of license records that will expire within 90 days in a particular compartment.
-
-            '
-          minimum: 0
-          type: integer
-        totalByolInstanceCount:
-          default: 0
-          description: 'Total number of BYOL instances in a particular compartment.
-
-            '
-          minimum: 0
-          type: integer
-        totalLicenseIncludedInstanceCount:
-          default: 0
-          description: 'Total number of License Included (LI) instances in a particular compartment.
-
-            '
-          minimum: 0
-          type: integer
-        totalProductLicenseCount:
-          default: 0
-          description: 'Total number of product licenses in a particular compartment.
-
-            '
-          minimum: 0
-          type: integer
-      required:
-      - totalProductLicenseCount
-      - totalByolInstanceCount
-      - totalLicenseIncludedInstanceCount
-      - licenseRecordExpiringSoonCount
-      type: object
-    BulkUploadLicenseRecordsDetails:
-      description: Details required for bulk uploading of license records.
-      properties:
-        compartmentId:
-          description: 'The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where license records are created.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        fileContent:
-          description: The file to be uploaded.
-          format: bytes
-          type: string
-        fileName:
-          description: Name of the file that is being uploaded.
-          type: string
-      required:
-      - compartmentId
-      - fileName
-      - fileContent
-      type: object
-    BulkUploadCellInfo:
-      description: Error information corresponding to each column that was required but was invalid.
-      properties:
-        columnIndex:
-          description: Column index as in the given bulk upload file.
-          type: string
-        errorInfo:
-          description: Error information corresponding to a particular column.
-          type: string
-      required:
-      - columnIndex
-      - errorInfo
       type: object
     ProductLicenseSummary:
       description: The product license summary.
@@ -2397,38 +1563,6 @@ components:
       - displayName
       - status
       type: object
-    ProductLicenseCollection:
-      description: The product license summary collection.
-      properties:
-        items:
-          description: The product license summary collection.
-          items:
-            $ref: '#/components/schemas/ProductLicenseSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ProductLicenseConsumerCollection:
-      description: Collection of resources which have consumed licenses.
-      properties:
-        items:
-          description: Collection of product license consumers.
-          items:
-            $ref: '#/components/schemas/ProductLicenseConsumerSummary'
-          type: array
-      required:
-      - items
-      type: object
-    BulkUploadTemplate:
-      description: The bulk upload template file.
-      properties:
-        template:
-          description: The bulk upload template.
-          format: bytes
-          type: string
-      required:
-      - template
-      type: object
     TopUtilizedProductLicenseSummary:
       description: 'A summary of the top utilized product licenses.
 
@@ -2504,113 +1638,979 @@ components:
       - isUnlimited
       - status
       type: object
-  parameters:
-    OpcRetryTokenHeaderParam:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or server error without
-
-        risk of executing that same action again. Retry tokens expire after 24 hours, but can be invalidated before
-
-        then due to conflicting operations (for example, if a resource has been deleted and purged from the system,
-
-        then a retry of the original creation request might be rejected).
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-    LicenseRecordIdentifierPathParam:
-      description: Unique license record identifier.
-      in: path
-      name: licenseRecordId
-      required: true
-      schema:
-        type: string
-    IfMatchHeaderParam:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the `if-match`
-
-        parameter to the value of the etag from a previous GET or POST response for that resource.  The resource
-
-        will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+    BulkUploadValidationErrorInfo:
+      description: Detailed error information corresponding to each column for a particular supported license record that could not be uploaded.
+      properties:
+        productName:
+          description: Product name of invalid row.
+          maxLength: 255
+          minLength: 1
+          type: string
+        rowError:
+          description: Error information corresponding to each column.
+          items:
+            $ref: '#/components/schemas/BulkUploadCellInfo'
+          type: array
+        rowNumber:
+          default: 0
+          description: Refers to the license record number as provided in the bulk upload file.
+          minimum: 0
+          type: integer
+      required:
+      - rowNumber
+      - productName
+      - rowError
+      type: object
+    TopUtilizedResourceSummary:
+      description: 'A summary of a top utlized resource.
 
         '
-      in: header
-      name: if-match
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    ResourceUnitTypeQueryParam:
-      description: A filter to return only resources whose unit matches the given resource unit.
-      in: query
-      name: resourceUnitType
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/ResourceUnit'
-      schema:
-        type: string
-        enum:
-        - OCPU
-        - ECPU
-    CompartmentIdInSubtreeQueryParam:
-      description: Indicates if the given compartment is the root compartment.
-      in: query
-      name: isCompartmentIdInSubtree
-      schema:
-        type: boolean
-        default: false
-    CompartmentIdQueryParam:
-      description: 'The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) used for the license record, product license, and configuration.
+      properties:
+        resourceCompartmentId:
+          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) that contains the resource.
+          maximum: 255
+          minimum: 1
+          type: string
+        resourceCompartmentName:
+          description: The display name of the compartment that contains the resource.
+          type: string
+        resourceId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource.
+          maxLength: 255
+          minLength: 1
+          type: string
+        resourceName:
+          description: Resource canonical name.
+          maxLength: 1024
+          minLength: 1
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
 
-        '
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ProductLicenseIdentifierQueryParam:
-      description: Unique product license identifier.
-      in: query
-      name: productLicenseId
-      required: true
-      schema:
-        type: string
-    OpcRequestIdHeaderParam:
-      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
 
-        particular request, please provide the request ID.
+              Example: `{"bar-key": "value"}`
 
-        '
-      in: header
-      name: opc-request-id
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    ProductLicenseIdentifierPathParam:
-      description: Unique product license identifier.
-      in: path
-      name: productLicenseId
-      required: true
-      schema:
-        type: string
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        totalUnits:
+          default: 0.0
+          description: Number of license units consumed by the resource.
+          format: double
+          minimum: 0.0
+          type: number
+        unitType:
+          description: The resource unit.
+          enum:
+          - OCPU
+          - ECPU
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ResourceUnit'
+      required:
+      - resourceId
+      - resourceName
+      - resourceCompartmentId
+      - resourceCompartmentName
+      - totalUnits
+      - unitType
+      type: object
+    LicenseRecordSummary:
+      description: The license record summary.
+      properties:
+        compartmentId:
+          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where the license record is created.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'License record display name. Avoid entering confidential information.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        expirationDate:
+          description: 'The license record end date in [RFC 3339](https://tools.ietf.org/html/rfc3339) format.
+
+            date format.
+
+            Example: `2018-09-12`
+
+            '
+          format: date-time
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The license record [OCID](/iaas/Content/General/Concepts/identifiers.htm).
+          type: string
+        isPerpetual:
+          default: false
+          description: Specifies if the license record term is perpertual.
+          type: boolean
+        isUnlimited:
+          default: false
+          description: Specifies if the license count is unlimited.
+          type: boolean
+        licenseCount:
+          default: 1
+          description: 'The number of license record units added by the user for the given license record.
+
+            Default 1
+
+            '
+          type: integer
+        licenseUnit:
+          description: The product license unit.
+          enum:
+          - OCPU
+          - NAMED_USER_PLUS
+          - PROCESSORS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LicenseUnit'
+        lifecycleState:
+          description: The current license record state.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifeCycleState'
+        productId:
+          description: The license record product ID.
+          maxLength: 255
+          minLength: 1
+          type: string
+        productLicense:
+          description: The product license name with which the license record is associated.
+          maxLength: 255
+          minLength: 1
+          type: string
+        productLicenseId:
+          description: The product license [OCID](/iaas/Content/General/Concepts/identifiers.htm) with which the license record is associated.
+          maxLength: 255
+          minLength: 1
+          type: string
+        supportEndDate:
+          description: 'The license record support end date in [RFC 3339](https://tools.ietf.org/html/rfc3339) format.
+
+            date format.
+
+            Example: `2018-09-12`
+
+            '
+          format: date-time
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time the license record was created. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the license record was updated. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - isPerpetual
+      - isUnlimited
+      type: object
+    TopUtilizedProductLicenseCollection:
+      description: A collection of top utilized product licenses.
+      properties:
+        items:
+          description: Collection of top utilized product licenses.
+          items:
+            $ref: '#/components/schemas/TopUtilizedProductLicenseSummary'
+          type: array
+      required:
+      - items
+      type: object
+    CreateProductLicenseDetails:
+      description: Details for creating a new product license.
+      properties:
+        compartmentId:
+          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where product licenses are created.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'Name of the product license.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        images:
+          description: The image details associated with the product license.
+          items:
+            $ref: '#/components/schemas/ImageDetails'
+          maxItems: 100
+          type: array
+        isVendorOracle:
+          default: false
+          description: Specifies if the product license vendor is Oracle or a third party.
+          type: boolean
+        licenseUnit:
+          description: The product license unit.
+          enum:
+          - OCPU
+          - NAMED_USER_PLUS
+          - PROCESSORS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LicenseUnit'
+        vendorName:
+          description: 'The product license vendor name, for example: Microsoft, RHEL, and so on.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      - isVendorOracle
+      - licenseUnit
+      - displayName
+      type: object
+    TopUtilizedResourceCollection:
+      description: The collection of top utilized resources.
+      properties:
+        items:
+          description: The top utilized resource summary collection.
+          items:
+            $ref: '#/components/schemas/TopUtilizedResourceSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ProductLicense:
+      description: The product license details.
+      properties:
+        activeLicenseRecordCount:
+          default: 0
+          description: The number of active license records associated with the product license.
+          minimum: 0
+          type: integer
+        compartmentId:
+          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where the product license is created.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'License record name
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The product license [OCID](/iaas/Content/General/Concepts/identifiers.htm).
+          type: string
+        images:
+          description: The images associated with the product license.
+          items:
+            $ref: '#/components/schemas/ImageResponse'
+          type: array
+        isOverSubscribed:
+          default: false
+          description: Specifies whether or not the product license is oversubscribed.
+          type: boolean
+        isUnlimited:
+          default: false
+          description: Specifies if the license unit count is unlimited.
+          type: boolean
+        isVendorOracle:
+          default: false
+          description: Specifies whether the vendor is Oracle or a third party.
+          type: boolean
+        licenseUnit:
+          description: The product license unit.
+          enum:
+          - OCPU
+          - NAMED_USER_PLUS
+          - PROCESSORS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LicenseUnit'
+        lifecycleState:
+          description: The current product license state.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifeCycleState'
+        status:
+          description: The current product license status.
+          enum:
+          - INCOMPLETE
+          - ISSUES_FOUND
+          - WARNING
+          - OK
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/Status'
+        statusDescription:
+          description: 'Status description for the current product license status.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time the product license was created. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the product license was updated. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+          format: date-time
+          type: string
+        totalActiveLicenseUnitCount:
+          default: 0
+          description: The total number of licenses available for the product license, calculated by adding up all the license counts for active license records associated with the product license.
+          minimum: 0
+          type: integer
+        totalLicenseRecordCount:
+          default: 0
+          description: 'The number of license records associated with the product license.
+
+            '
+          minimum: 0
+          type: integer
+        totalLicenseUnitsConsumed:
+          default: 0.0
+          description: 'The number of license units consumed. Updated after each allocation run.
+
+            '
+          format: double
+          minimum: 0.0
+          type: number
+        vendorName:
+          description: 'The vendor of the ProductLicense
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - compartmentId
+      - isVendorOracle
+      - licenseUnit
+      - displayName
+      - status
+      type: object
+    Error:
+      description: An error has occurred.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    ProductLicenseCollection:
+      description: The product license summary collection.
+      properties:
+        items:
+          description: The product license summary collection.
+          items:
+            $ref: '#/components/schemas/ProductLicenseSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ImageResponse:
+      description: The collection of image details for the product license.
+      properties:
+        id:
+          description: The image ID associated with the product license.
+          type: string
+        listingId:
+          description: The image listing ID.
+          type: string
+        listingName:
+          description: The listing name associated with the product license.
+          type: string
+        packageVersion:
+          description: The image package version.
+          type: string
+        publisher:
+          description: The image publisher.
+          type: string
+      type: object
+    BulkUploadTemplate:
+      description: The bulk upload template file.
+      properties:
+        template:
+          description: The bulk upload template.
+          format: bytes
+          type: string
+      required:
+      - template
+      type: object
+    BulkUploadCellInfo:
+      description: Error information corresponding to each column that was required but was invalid.
+      properties:
+        columnIndex:
+          description: Column index as in the given bulk upload file.
+          type: string
+        errorInfo:
+          description: Error information corresponding to a particular column.
+          type: string
+      required:
+      - columnIndex
+      - errorInfo
+      type: object
+    BulkUploadResponse:
+      description: The bulk upload response.
+      properties:
+        failedLicenseRecordInfo:
+          description: Error information corresponding to the supported records which are valid but could not be created.
+          items:
+            $ref: '#/components/schemas/BulkUploadFailedRecordInfo'
+          type: array
+        message:
+          description: Response message for bulk upload.
+          type: string
+        totalSupportedDuplicateRecords:
+          default: 0
+          description: The number of supported license records that were valid but not uploaded since they were duplicates.
+          minimum: 0
+          type: integer
+        totalSupportedFailedLicenseRecords:
+          default: 0
+          description: The number of supported license records that were valid but failed with errors during upload.
+          minimum: 0
+          type: integer
+        totalSupportedInvalidRecords:
+          default: 0
+          description: The number of supported license records that could not be uploaded since they were invalid.
+          minimum: 0
+          type: integer
+        totalSupportedRecords:
+          default: 0
+          description: The number of license records which were supported.
+          minimum: 0
+          type: integer
+        totalSupportedRecordsSaved:
+          default: 0
+          description: The number of supported license records that were uploaded successfully.
+          minimum: 0
+          type: integer
+        validationErrorInfo:
+          description: Detailed error information corresponding to each supported but invalid row for the uploaded file.
+          items:
+            $ref: '#/components/schemas/BulkUploadValidationErrorInfo'
+          type: array
+      required:
+      - totalSupportedRecords
+      - totalSupportedRecordsSaved
+      - totalSupportedDuplicateRecords
+      - totalSupportedFailedLicenseRecords
+      - totalSupportedInvalidRecords
+      - validationErrorInfo
+      - failedLicenseRecordInfo
+      - message
+      type: object
+    LicenseMetric:
+      description: Overview of product license and resources usage.
+      properties:
+        licenseRecordExpiringSoonCount:
+          default: 0
+          description: 'Total number of license records that will expire within 90 days in a particular compartment.
+
+            '
+          minimum: 0
+          type: integer
+        totalByolInstanceCount:
+          default: 0
+          description: 'Total number of BYOL instances in a particular compartment.
+
+            '
+          minimum: 0
+          type: integer
+        totalLicenseIncludedInstanceCount:
+          default: 0
+          description: 'Total number of License Included (LI) instances in a particular compartment.
+
+            '
+          minimum: 0
+          type: integer
+        totalProductLicenseCount:
+          default: 0
+          description: 'Total number of product licenses in a particular compartment.
+
+            '
+          minimum: 0
+          type: integer
+      required:
+      - totalProductLicenseCount
+      - totalByolInstanceCount
+      - totalLicenseIncludedInstanceCount
+      - licenseRecordExpiringSoonCount
+      type: object
+    BulkUploadLicenseRecordsDetails:
+      description: Details required for bulk uploading of license records.
+      properties:
+        compartmentId:
+          description: 'The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where license records are created.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        fileContent:
+          description: The file to be uploaded.
+          format: bytes
+          type: string
+        fileName:
+          description: Name of the file that is being uploaded.
+          type: string
+      required:
+      - compartmentId
+      - fileName
+      - fileContent
+      type: object
+    LicenseRecordCollection:
+      description: The license record summary collection.
+      properties:
+        items:
+          description: The license record summary collection.
+          items:
+            $ref: '#/components/schemas/LicenseRecordSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateConfigurationDetails:
+      description: The compartment-specific configuration.
+      properties:
+        emailIds:
+          description: List of email IDs associated with the configuration.
+          items:
+            type: string
+          type: array
+      required:
+      - emailIds
+      type: object
+    ImageDetails:
+      description: Image details associated with the product license.
+      properties:
+        listingId:
+          description: Marketplace image listing ID.
+          type: string
+        packageVersion:
+          description: Image package version.
+          type: string
+      required:
+      - listingId
+      - packageVersion
+      type: object
+    Configuration:
+      description: Details of the compartment-specific configuration.
+      properties:
+        compartmentId:
+          description: 'The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) to which the configuration is specified.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        emailIds:
+          description: The list of associated configuration email IDs.
+          items:
+            type: string
+          type: array
+        timeCreated:
+          description: The time the configuration was created. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the configuration was updated. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - compartmentId
+      - emailIds
+      type: object
+    BulkUploadFailedRecordInfo:
+      description: Error information for a valid license record that could not be uploaded.
+      properties:
+        error:
+          description: Failed license record error information.
+          type: string
+        productName:
+          description: Product name of the failed row.
+          maxLength: 255
+          minLength: 1
+          type: string
+        rowNumber:
+          default: 0
+          description: Refers to the license record number as provided in the bulk upload file.
+          minimum: 0
+          type: integer
+      required:
+      - rowNumber
+      - productName
+      - error
+      type: object
+    Product:
+      description: Details of product.
+      properties:
+        category:
+          description: Product category base or option.
+          enum:
+          - BASE
+          - OPTION
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ProductCategory'
+        count:
+          default: 0.0
+          description: Units required for the missing product.
+          format: double
+          minimum: 0.0
+          type: number
+        name:
+          description: Name of the product.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      - count
+      - category
+      type: object
+    LicenseRecord:
+      description: License record summary.
+      properties:
+        compartmentId:
+          description: The compartment [OCID](/iaas/Content/General/Concepts/identifiers.htm) where the license record is created.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: 'The license record display name. Avoid entering confidential information.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        expirationDate:
+          description: 'The license record end date in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            date format.
+
+            Example: `2018-09-12`
+
+            '
+          format: date-time
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The license record [OCID](/iaas/Content/General/Concepts/identifiers.htm).
+          type: string
+        isPerpetual:
+          default: false
+          description: Specifies if the license record term is perpertual.
+          type: boolean
+        isUnlimited:
+          default: false
+          description: Specifies if the license count is unlimited.
+          type: boolean
+        licenseCount:
+          default: 1
+          description: 'The number of license units added by the user for the given license record.
+
+            Default 1
+
+            '
+          type: integer
+        licenseUnit:
+          description: The product license unit.
+          enum:
+          - OCPU
+          - NAMED_USER_PLUS
+          - PROCESSORS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LicenseUnit'
+        lifecycleState:
+          description: The current license record state.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifeCycleState'
+        productId:
+          description: The license record product ID.
+          maxLength: 255
+          minLength: 1
+          type: string
+        productLicense:
+          description: The product license name with which the license record is associated.
+          maxLength: 255
+          minLength: 1
+          type: string
+        productLicenseId:
+          description: The product license [OCID](/iaas/Content/General/Concepts/identifiers.htm) with which the license record is associated.
+          maxLength: 255
+          minLength: 1
+          type: string
+        supportEndDate:
+          description: 'The license record support end date in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            date format.
+
+            Example: `2018-09-12`
+
+            '
+          format: date-time
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time the license record was created. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the license record was updated. An [RFC 3339](https://tools.ietf.org/html/rfc3339)-formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - isPerpetual
+      - isUnlimited
+      - lifecycleState
+      type: object
+    ProductLicenseConsumerCollection:
+      description: Collection of resources which have consumed licenses.
+      properties:
+        items:
+          description: Collection of product license consumers.
+          items:
+            $ref: '#/components/schemas/ProductLicenseConsumerSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateProductLicenseDetails:
+      description: Updates the product license object (only allows image updates).
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer, and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type, or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        images:
+          description: The image details associated with the product license.
+          items:
+            $ref: '#/components/schemas/ImageDetails'
+          maxItems: 100
+          type: array
+      required:
+      - images
+      type: object
   responses:
     DefaultError:
       description: An error has occurred.
