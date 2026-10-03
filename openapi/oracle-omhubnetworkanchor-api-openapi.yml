@@ -157,6 +157,24 @@ paths:
         '
 components:
   schemas:
+    OciNetworkSubnet:
+      description: Oracle Cloud Infrastructure network subnet object.
+      properties:
+        label:
+          description: Subnet label. CSP can set this property
+          type: string
+        subnetId:
+          description: OCID for existing the subnet. CSP can not set this property.
+          type: string
+        type:
+          description: Defines if the subnet is the primary or backup for the network
+          enum:
+          - CLIENT
+          - BACKUP
+          type: string
+      required:
+      - type
+      type: object
     OciVcn:
       description: Oracle Cloud Infrastructure VCN basic information object. It is optional and planned to used for future for network anchor
       properties:
@@ -203,73 +221,6 @@ components:
         vcnName:
           description: Name of the VCN associated to the Network Anchor.
           type: string
-      type: object
-    Error:
-      description: Error response information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    OciDns:
-      description: Oracle Cloud Infrastructure network anchor related meta data items
-      properties:
-        customDomainName:
-          description: Full custom domain name. If this field is passed dnsLabel will be ignored
-          type: string
-      type: object
-    CloudServiceProviderNetworkMetadataItem:
-      description: "Cloud Service Provider metadata item.\nWarning - In future this object can change to generic object with future Cloud Service Provider based on \nCloudServiceProvider field. This can be one of CSP provider type Azure, GCP and AWS\n"
-      properties:
-        cidrBlocks:
-          description: An Azure/GCP/AWS cidrBlocks
-          items:
-            type: string
-          type: array
-        cspAdditionalProperties:
-          additionalProperties:
-            type: string
-          description: CSP Specific Additional Properties, AzureSubnetId for Azure
-          type: object
-        dnsForwardingConfig:
-          description: DNS domain ip mapping forwarding configuration
-          items:
-            additionalProperties:
-              type: string
-            type: object
-          type: array
-        networkAnchorUri:
-          description: CSP network anchor Uri
-          type: string
-        odbNetworkId:
-          description: CSP oracle database network anchor unique ID/name
-          type: string
-        region:
-          description: Azure/GCP/AWS region
-          type: string
-      required:
-      - region
-      - odbNetworkId
-      type: object
-    NetworkAnchorCollection:
-      description: Results of a networkAnchor search. Contains both NetworkAnchorSummary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of networkAnchors.
-          items:
-            $ref: '#/components/schemas/NetworkAnchorSummary'
-          type: array
-      required:
-      - items
       type: object
     NetworkAnchor:
       description: 'A NetworkAnchor is a description of a NetworkAnchor.
@@ -418,6 +369,62 @@ components:
       - displayName
       - freeformTags
       - definedTags
+      type: object
+    OciDns:
+      description: Oracle Cloud Infrastructure network anchor related meta data items
+      properties:
+        customDomainName:
+          description: Full custom domain name. If this field is passed dnsLabel will be ignored
+          type: string
+      type: object
+    Error:
+      description: Error response information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    CloudServiceProviderNetworkMetadataItem:
+      description: "Cloud Service Provider metadata item.\nWarning - In future this object can change to generic object with future Cloud Service Provider based on \nCloudServiceProvider field. This can be one of CSP provider type Azure, GCP and AWS\n"
+      properties:
+        cidrBlocks:
+          description: An Azure/GCP/AWS cidrBlocks
+          items:
+            type: string
+          type: array
+        cspAdditionalProperties:
+          additionalProperties:
+            type: string
+          description: CSP Specific Additional Properties, AzureSubnetId for Azure
+          type: object
+        dnsForwardingConfig:
+          description: DNS domain ip mapping forwarding configuration
+          items:
+            additionalProperties:
+              type: string
+            type: object
+          type: array
+        networkAnchorUri:
+          description: CSP network anchor Uri
+          type: string
+        odbNetworkId:
+          description: CSP oracle database network anchor unique ID/name
+          type: string
+        region:
+          description: Azure/GCP/AWS region
+          type: string
+      required:
+      - region
+      - odbNetworkId
       type: object
     OciNetworkMetadata:
       description: Oracle Cloud Infrastructure network anchor related meta data items
@@ -618,42 +625,18 @@ components:
       - freeformTags
       - definedTags
       type: object
-    OciNetworkSubnet:
-      description: Oracle Cloud Infrastructure network subnet object.
+    NetworkAnchorCollection:
+      description: Results of a networkAnchor search. Contains both NetworkAnchorSummary items and other information, such as metadata.
       properties:
-        label:
-          description: Subnet label. CSP can set this property
-          type: string
-        subnetId:
-          description: OCID for existing the subnet. CSP can not set this property.
-          type: string
-        type:
-          description: Defines if the subnet is the primary or backup for the network
-          enum:
-          - CLIENT
-          - BACKUP
-          type: string
+        items:
+          description: List of networkAnchors.
+          items:
+            $ref: '#/components/schemas/NetworkAnchorSummary'
+          type: array
       required:
-      - type
+      - items
       type: object
   parameters:
-    RequiredSubscriptionIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
-      in: query
-      name: subscriptionId
-      required: true
-      schema:
-        type: string
-    ExternalLocationNameQueryParam:
-      description: The cloud service provider region.
-      in: query
-      name: externalLocation
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     NetworkAnchorCompartmentIdInSubtreeQueryParam:
       description: If set to true, a list operation will return NetworkAnchors from all child compartments in the provided compartmentId parameter.
       in: query
@@ -662,15 +645,6 @@ components:
       schema:
         type: boolean
         default: false
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the given display name exactly.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     SubscriptionServiceNameQueryParam:
       description: The cloud service provider.
       in: query
@@ -683,139 +657,6 @@ components:
         - ORACLEDBATAZURE
         - ORACLEDBATGOOGLE
         - ORACLEDBATAWS
-    NetworkAnchorIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the NetworkAnchor.
-      in: path
-      name: networkAnchorId
-      required: true
-      schema:
-        type: string
-    NetworkAnchorOciSubnetIdQueryParam:
-      description: A filter to return only NetworkAnchor resources that match the given OCI subnet Id.
-      in: query
-      name: networkAnchorOciSubnetId
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`).
-
-        In general, the sort order is `DESC` when sorting by time and `ASC` otherwise.
-
-        '
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends on `sortBy`.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    BaseAndSubCompartmentIdQueryParam:
-      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud base compartment or sub-compartment in which to list resources.
-
-        A Multicloud base compartment is an OCI compartment that maps to a subscription in a cloud service provider (such as Azure or AWS).
-
-        '
-      in: query
-      name: compartmentId
-      required: false
-      schema:
-        type: string
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
-
-        is descending. Default order for `displayName` is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    SubscriptionIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
-      in: query
-      name: subscriptionId
-      x-default-description: 'null'
-      schema:
-        type: string
-    ShouldFetchVcnName:
-      description: Whether to fetch and include the vcn display name, which may introduce additional latency.
-      in: query
-      name: shouldFetchVcnName
-      required: false
-      schema:
-        type: boolean
-        default: false
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    NetworkAnchorLifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: networkAnchorLifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/NetworkAnchor/networkAnchorLifecycleState'
-      schema:
-        type: string
-    NetworkAnchorOciVcnIdQueryParam:
-      description: A filter to return only NetworkAnchor resources that match the given OCI Vcn Id.
-      in: query
-      name: networkAnchorOciVcnId
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
     NetworkAnchorIdentifierQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the NetworkAnchor.
       in: query
@@ -835,6 +676,165 @@ components:
         - ORACLEDBATAZURE
         - ORACLEDBATGOOGLE
         - ORACLEDBATAWS
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the given display name exactly.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+
+        is descending. Default order for `displayName` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    ShouldFetchVcnName:
+      description: Whether to fetch and include the vcn display name, which may introduce additional latency.
+      in: query
+      name: shouldFetchVcnName
+      required: false
+      schema:
+        type: boolean
+        default: false
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`).
+
+        In general, the sort order is `DESC` when sorting by time and `ASC` otherwise.
+
+        '
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends on `sortBy`.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    SubscriptionIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
+      in: query
+      name: subscriptionId
+      x-default-description: 'null'
+      schema:
+        type: string
+    ExternalLocationNameQueryParam:
+      description: The cloud service provider region.
+      in: query
+      name: externalLocation
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    NetworkAnchorLifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
+      in: query
+      name: networkAnchorLifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/NetworkAnchor/networkAnchorLifecycleState'
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    RequiredSubscriptionIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
+      in: query
+      name: subscriptionId
+      required: true
+      schema:
+        type: string
+    NetworkAnchorOciSubnetIdQueryParam:
+      description: A filter to return only NetworkAnchor resources that match the given OCI subnet Id.
+      in: query
+      name: networkAnchorOciSubnetId
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+        paginated "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    NetworkAnchorOciVcnIdQueryParam:
+      description: A filter to return only NetworkAnchor resources that match the given OCI Vcn Id.
+      in: query
+      name: networkAnchorOciVcnId
+      x-default-description: 'null'
+      schema:
+        type: string
+    BaseAndSubCompartmentIdQueryParam:
+      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud base compartment or sub-compartment in which to list resources.
+
+        A Multicloud base compartment is an OCI compartment that maps to a subscription in a cloud service provider (such as Azure or AWS).
+
+        '
+      in: query
+      name: compartmentId
+      required: false
+      schema:
+        type: string
+    NetworkAnchorIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the NetworkAnchor.
+      in: path
+      name: networkAnchorId
+      required: true
+      schema:
+        type: string
   responses:
     DefaultError:
       description: An error has occurred.

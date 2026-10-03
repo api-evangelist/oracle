@@ -228,25 +228,113 @@ paths:
       x-obmcs-client-retries-enabled: true
       x-related-resource: '#/definitions/LinkWithTenancyNames'
 components:
+  parameters:
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    FeatureQueryParam:
+      description: The feature associated with this link.
+      in: query
+      name: feature
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 64
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    ParentTenancyIdQueryParam:
+      description: The ID of the parent tenancy this link is associated with.
+      in: query
+      name: parentTenancyId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    SortOrderQueryParam:
+      description: The sort order to use, whether 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-default-description: The default order depends on what parameter is being sorted by.
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    ChildTenancyIdQueryParam:
+      description: The ID of the child tenancy this link is associated with.
+      in: query
+      name: childTenancyId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    LifecycleStateQueryParam:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - ACTIVE
+        - INACTIVE
+        - UPDATING
+        - FAILED
+        - TERMINATED
   schemas:
-    LinkWithTenancyNames:
-      allOf:
-      - $ref: '#/components/schemas/Link'
-      - properties:
-          childTenancyName:
-            description: Name of the child tenancy.
-            maxLength: 255
-            minLength: 1
-            type: string
-          parentTenancyName:
-            description: Name of the parent tenancy.
-            maxLength: 255
-            minLength: 1
-            type: string
-        required:
-        - parentTenancyName
-        - childTenancyName
-      description: A link between a parent tenancy and a child tenancy, including the parent and child tenancy names.
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     Link:
       description: A link between a parent tenancy and a child tenancy.
       properties:
@@ -303,29 +391,6 @@ components:
       - parentTenancyId
       - childTenancyId
       - timeCreated
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    LinkCollection:
-      description: Result of a query request for a list of links. Contains Link items.
-      properties:
-        items:
-          description: Array containing LinkSummary items.
-          items:
-            $ref: '#/components/schemas/LinkSummary'
-          type: array
-      required:
-      - items
-      type: object
     LinkSummary:
       description: The summary of a link between a parent tenancy and a child tenancy.
       properties:
@@ -401,100 +466,35 @@ components:
       - parentTenancyId
       - childTenancyId
       - timeCreated
-  parameters:
-    LifecycleStateQueryParam:
-      description: The lifecycle state of the resource.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - ACTIVE
-        - INACTIVE
-        - UPDATING
-        - FAILED
-        - TERMINATED
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    FeatureQueryParam:
-      description: The feature associated with this link.
-      in: query
-      name: feature
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 64
-    SortOrderQueryParam:
-      description: The sort order to use, whether 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-default-description: The default order depends on what parameter is being sorted by.
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ChildTenancyIdQueryParam:
-      description: The ID of the child tenancy this link is associated with.
-      in: query
-      name: childTenancyId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    ParentTenancyIdQueryParam:
-      description: The ID of the parent tenancy this link is associated with.
-      in: query
-      name: parentTenancyId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
+    LinkCollection:
+      description: Result of a query request for a list of links. Contains Link items.
+      properties:
+        items:
+          description: Array containing LinkSummary items.
+          items:
+            $ref: '#/components/schemas/LinkSummary'
+          type: array
+      required:
+      - items
+      type: object
+    LinkWithTenancyNames:
+      allOf:
+      - $ref: '#/components/schemas/Link'
+      - properties:
+          childTenancyName:
+            description: Name of the child tenancy.
+            maxLength: 255
+            minLength: 1
+            type: string
+          parentTenancyName:
+            description: Name of the parent tenancy.
+            maxLength: 255
+            minLength: 1
+            type: string
+        required:
+        - parentTenancyName
+        - childTenancyName
+      description: A link between a parent tenancy and a child tenancy, including the parent and child tenancy names.
   responses:
     default:
       description: Unknown Error

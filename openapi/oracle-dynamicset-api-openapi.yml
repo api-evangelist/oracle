@@ -670,24 +670,224 @@ paths:
       x-related-resource: '#/definitions/DynamicSet'
 components:
   schemas:
-    InstallPackagesOnDynamicSetDetails:
-      description: Provides the information used to install software packages on a dynamic set.
+    Id:
+      description: Id and name of a resource to simplify the display for the user.
+      properties:
+        displayName:
+          description: User-friendly name.
+          type: string
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource that is immutable on creation.
+          type: string
+      required:
+      - displayName
+      - id
+    DynamicSetCollection:
+      description: 'The set of dynamic sets returned for the [ListDynamicSets](#/en/osmh/latest/DynamicSet/ListDynamicSets) operation.
+
+        '
+      properties:
+        items:
+          description: List of dynamic sets.
+          items:
+            $ref: '#/components/schemas/DynamicSetSummary'
+          type: array
+      required:
+      - items
+      type: object
+    MatchingRule:
+      description: An object that defines the set of rules that identifies the target instances in a dynamic set.
+      minProperties: 2
+      properties:
+        architectures:
+          description: The list of managed instance architectures.
+          items:
+            enum:
+            - X86_64
+            - AARCH64
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/CpuArchType'
+          maxItems: 2
+          type: array
+          uniqueItems: true
+        displayNames:
+          description: The list of managed instance display names.
+          items:
+            type: string
+          maxItems: 25
+          type: array
+          uniqueItems: true
+        isRebootRequired:
+          description: Indicates if the managed instance needs to be rebooted.
+          type: boolean
+        locations:
+          description: The list of managed instance locations.
+          items:
+            enum:
+            - ON_PREMISE
+            - OCI_COMPUTE
+            - AZURE
+            - EC2
+            - GCP
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
+          maxItems: 5
+          type: array
+          uniqueItems: true
+        managedInstanceGroupIds:
+          description: The list of managed instance group IDs.
+          items:
+            type: string
+          maxItems: 255
+          type: array
+          uniqueItems: true
+        managedInstanceIds:
+          description: The list of managed instance ids.
+          items:
+            type: string
+          maxItems: 255
+          type: array
+          uniqueItems: true
+        osFamilies:
+          description: The list of managed instance OS families.
+          items:
+            enum:
+            - ORACLE_LINUX_10
+            - ORACLE_LINUX_9
+            - ORACLE_LINUX_8
+            - ORACLE_LINUX_7
+            - ORACLE_LINUX_6
+            - WINDOWS_SERVER_2016
+            - WINDOWS_SERVER_2019
+            - WINDOWS_SERVER_2022
+            - WINDOWS_SERVER_2025
+            - WINDOWS_11
+            - ALL
+            - UBUNTU_20_04
+            - UBUNTU_22_04
+            - UBUNTU_24_04
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/OsFamily'
+          maxItems: 12
+          type: array
+          uniqueItems: true
+        osNames:
+          description: The list of managed instance OS names.
+          items:
+            enum:
+            - ORACLE_LINUX
+            - UBUNTU
+            - WINDOWS_SERVER
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/OsName'
+          maxItems: 5
+          type: array
+          uniqueItems: true
+        statuses:
+          description: The list of managed instance statuses.
+          items:
+            enum:
+            - NORMAL
+            - UNREACHABLE
+            - ERROR
+            - WARNING
+            - REGISTRATION_ERROR
+            - DELETING
+            - ONBOARDING
+            - REBOOTING
+            type: string
+            x-obmcs-top-level-enum: '#/definitions/ManagedInstanceStatus'
+          maxItems: 8
+          type: array
+          uniqueItems: true
+        tags:
+          description: The list of the managed instance tags.
+          items:
+            $ref: '#/components/schemas/Tag'
+          maxItems: 25
+          type: array
+          uniqueItems: true
+      type: object
+    WorkRequestDetails:
+      description: Provides the name and description of the job.
+      properties:
+        description:
+          description: User-specified information about the job. Avoid entering confidential information.
+          maxLength: 400
+          minLength: 0
+          type: string
+        displayName:
+          description: A user-friendly name for the job. The name does not have to be unique. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    ChangeDynamicSetCompartmentDetails:
+      description: 'Provides the information used to move the dynamic set to another compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment](/iaas/Content/Identity/Tasks/managingcompartments.htm#moveRes).
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to move the group to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    UpdatePackagesOnDynamicSetDetails:
+      description: Provides the information used to update software packages on a dynamic set.
       properties:
         managedInstances:
           description: The list of managed instance OCIDs to be attached/detached.
           items:
             type: string
           type: array
-        packageNames:
-          description: The list of package names.
+        updateTypes:
+          description: The types of updates to be applied.
           items:
+            enum:
+            - SECURITY
+            - BUGFIX
+            - ENHANCEMENT
+            - OTHER
+            - KSPLICE_KERNEL
+            - KSPLICE_USERSPACE
+            - ALL
             type: string
-          maxItems: 255
+            x-obmcs-top-level-enum: '#/definitions/UpdateTypes'
           type: array
+          uniqueItems: true
         workRequestDetails:
           $ref: '#/components/schemas/WorkRequestDetails'
+      type: object
+    TargetCompartmentDetails:
+      description: Details of the compartment.
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          type: string
+        doesIncludeChildren:
+          default: false
+          description: 'Indicates if the child compartments are included in the matching rule.
+
+            '
+          type: boolean
       required:
-      - packageNames
+      - compartmentId
+      - doesIncludeChildren
+      type: object
+    AutonomousSettings:
+      description: Settings for the Autonomous Linux service.
+      properties:
+        isDataCollectionAuthorized:
+          description: Indicates whether Autonomous Linux will collect crash files. This setting can be changed by the user.
+          type: boolean
+        scheduledJobId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the restricted scheduled job associated with this instance. This value cannot be deleted by the user.
+          type: string
       type: object
     CreateDynamicSetDetails:
       description: Details for creating a dynamic set.
@@ -764,6 +964,127 @@ components:
       - matchType
       - targetCompartments
       - matchingRule
+      type: object
+    ManagedInstanceSummary:
+      description: Provides summary information for a managed instance.
+      properties:
+        agentVersion:
+          description: The version of osmh-agent running on the managed instance
+          type: string
+        architecture:
+          description: The CPU architecture type of the managed instance.
+          enum:
+          - X86_64
+          - AARCH64
+          - I686
+          - NOARCH
+          - SRC
+          - I386
+          - AMD64
+          - ARM64
+          - ALL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ArchType'
+        autonomousSettings:
+          $ref: '#/components/schemas/AutonomousSettings'
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the managed instance.
+
+            '
+          type: string
+        description:
+          description: User-specified description of the managed instance.
+          type: string
+        displayName:
+          description: User-friendly name for the managed instance.
+          type: string
+        id:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance.
+
+            '
+          type: string
+        isManagedByAutonomousLinux:
+          description: Indicates whether Autonomous Linux manages this instance.
+          type: boolean
+        isManagementStation:
+          description: Whether this managed instance is acting as an on-premises management station.
+          type: boolean
+        isRebootRequired:
+          description: Indicates whether a reboot is required to complete installation of updates.
+          type: boolean
+        lifecycleEnvironment:
+          $ref: '#/components/schemas/Id'
+        lifecycleStage:
+          $ref: '#/components/schemas/Id'
+        location:
+          description: The location of the managed instance.
+          enum:
+          - ON_PREMISE
+          - OCI_COMPUTE
+          - AZURE
+          - EC2
+          - GCP
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
+        managedInstanceGroup:
+          $ref: '#/components/schemas/Id'
+        notificationTopicId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the Oracle Notifications service (ONS) topic. ONS is the channel used to send notifications to the customer.
+
+            '
+          type: string
+        osFamily:
+          description: The operating system type of the managed instance.
+          enum:
+          - ORACLE_LINUX_10
+          - ORACLE_LINUX_9
+          - ORACLE_LINUX_8
+          - ORACLE_LINUX_7
+          - ORACLE_LINUX_6
+          - WINDOWS_SERVER_2016
+          - WINDOWS_SERVER_2019
+          - WINDOWS_SERVER_2022
+          - WINDOWS_SERVER_2025
+          - WINDOWS_11
+          - ALL
+          - UBUNTU_20_04
+          - UBUNTU_22_04
+          - UBUNTU_24_04
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OsFamily'
+        status:
+          description: Current status of the managed instance.
+          enum:
+          - NORMAL
+          - UNREACHABLE
+          - ERROR
+          - WARNING
+          - REGISTRATION_ERROR
+          - DELETING
+          - ONBOARDING
+          - REBOOTING
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceStatus'
+        tenancyId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenancy this managed instance resides in.
+
+            '
+          type: string
+        timeLastBoot:
+          description: 'Time that the instance last booted (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
+
+            '
+          format: date-time
+          type: string
+        updatesAvailable:
+          description: Number of updates available for installation.
+          type: integer
+      required:
+      - id
+      - displayName
+      - tenancyId
+      - compartmentId
+      - status
       type: object
     DynamicSet:
       description: An object that defines the dynamic set.
@@ -891,118 +1212,18 @@ components:
       - freeformTags
       - definedTags
       type: object
-    MatchingRule:
-      description: An object that defines the set of rules that identifies the target instances in a dynamic set.
-      minProperties: 2
+    ManagedInstanceCollection:
+      description: 'The set of managed instances returned for the [ListManagedInstances](#/en/osmh/latest/ManagedInstance/ListManagedInstances) operation.
+
+        '
       properties:
-        architectures:
-          description: The list of managed instance architectures.
+        items:
+          description: List of managed instances.
           items:
-            enum:
-            - X86_64
-            - AARCH64
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/CpuArchType'
-          maxItems: 2
+            $ref: '#/components/schemas/ManagedInstanceSummary'
           type: array
-          uniqueItems: true
-        displayNames:
-          description: The list of managed instance display names.
-          items:
-            type: string
-          maxItems: 25
-          type: array
-          uniqueItems: true
-        isRebootRequired:
-          description: Indicates if the managed instance needs to be rebooted.
-          type: boolean
-        locations:
-          description: The list of managed instance locations.
-          items:
-            enum:
-            - ON_PREMISE
-            - OCI_COMPUTE
-            - AZURE
-            - EC2
-            - GCP
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
-          maxItems: 5
-          type: array
-          uniqueItems: true
-        managedInstanceGroupIds:
-          description: The list of managed instance group IDs.
-          items:
-            type: string
-          maxItems: 255
-          type: array
-          uniqueItems: true
-        managedInstanceIds:
-          description: The list of managed instance ids.
-          items:
-            type: string
-          maxItems: 255
-          type: array
-          uniqueItems: true
-        osFamilies:
-          description: The list of managed instance OS families.
-          items:
-            enum:
-            - ORACLE_LINUX_10
-            - ORACLE_LINUX_9
-            - ORACLE_LINUX_8
-            - ORACLE_LINUX_7
-            - ORACLE_LINUX_6
-            - WINDOWS_SERVER_2016
-            - WINDOWS_SERVER_2019
-            - WINDOWS_SERVER_2022
-            - WINDOWS_SERVER_2025
-            - WINDOWS_11
-            - ALL
-            - UBUNTU_20_04
-            - UBUNTU_22_04
-            - UBUNTU_24_04
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/OsFamily'
-          maxItems: 12
-          type: array
-          uniqueItems: true
-        osNames:
-          description: The list of managed instance OS names.
-          items:
-            enum:
-            - ORACLE_LINUX
-            - UBUNTU
-            - WINDOWS_SERVER
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/OsName'
-          maxItems: 5
-          type: array
-          uniqueItems: true
-        statuses:
-          description: The list of managed instance statuses.
-          items:
-            enum:
-            - NORMAL
-            - UNREACHABLE
-            - ERROR
-            - WARNING
-            - REGISTRATION_ERROR
-            - DELETING
-            - ONBOARDING
-            - REBOOTING
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/ManagedInstanceStatus'
-          maxItems: 8
-          type: array
-          uniqueItems: true
-        tags:
-          description: The list of the managed instance tags.
-          items:
-            $ref: '#/components/schemas/Tag'
-          maxItems: 25
-          type: array
-          uniqueItems: true
+      required:
+      - items
       type: object
     Error:
       description: Provides the information for an error.
@@ -1016,51 +1237,24 @@ components:
       required:
       - code
       - message
-    WorkRequestDetails:
-      description: Provides the name and description of the job.
-      properties:
-        description:
-          description: User-specified information about the job. Avoid entering confidential information.
-          maxLength: 400
-          minLength: 0
-          type: string
-        displayName:
-          description: A user-friendly name for the job. The name does not have to be unique. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-      type: object
-    ChangeDynamicSetCompartmentDetails:
-      description: 'Provides the information used to move the dynamic set to another compartment within the same tenancy. For information about moving resources between compartments, see [Moving Resources to a Different Compartment](/iaas/Content/Identity/Tasks/managingcompartments.htm#moveRes).
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to move the group to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    RebootDynamicSetDetails:
-      description: Provides the information used for the reboot job.
+    InstallPackagesOnDynamicSetDetails:
+      description: Provides the information used to install software packages on a dynamic set.
       properties:
         managedInstances:
           description: The list of managed instance OCIDs to be attached/detached.
           items:
             type: string
           type: array
-        rebootTimeoutInMins:
-          default: 20
-          description: "The number of minutes the service waits for the reboot to complete. If the instances in the group don't reboot \nwithin this time, the reboot job status is set to failed.\n"
-          maximum: 240
-          minimum: 5
-          type: integer
+        packageNames:
+          description: The list of package names.
+          items:
+            type: string
+          maxItems: 255
+          type: array
         workRequestDetails:
           $ref: '#/components/schemas/WorkRequestDetails'
+      required:
+      - packageNames
       type: object
     RemovePackagesFromDynamicSetDetails:
       description: Provides the information used to remove software packages from a dynamic set.
@@ -1080,294 +1274,6 @@ components:
           $ref: '#/components/schemas/WorkRequestDetails'
       required:
       - packageNames
-      type: object
-    UpdateDynamicSetDetails:
-      description: Provides the information used to update a dynamic set.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: User-specified description of the dynamic set. Avoid entering confidential information.
-          maxLength: 400
-          minLength: 0
-          type: string
-        displayName:
-          description: User-friendly name for the dynamic set.
-          format: x-obmcs-ascii-identifier
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        matchType:
-          description: Include either any or all attributes.
-          enum:
-          - ANY
-          - ALL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MatchType'
-        matchingRule:
-          $ref: '#/components/schemas/MatchingRule'
-        targetCompartments:
-          description: The list of compartment details.
-          items:
-            $ref: '#/components/schemas/TargetCompartmentDetails'
-          minItems: 1
-          type: array
-          uniqueItems: true
-      type: object
-    TargetCompartmentDetails:
-      description: Details of the compartment.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          type: string
-        doesIncludeChildren:
-          default: false
-          description: 'Indicates if the child compartments are included in the matching rule.
-
-            '
-          type: boolean
-      required:
-      - compartmentId
-      - doesIncludeChildren
-      type: object
-    UpdatePackagesOnDynamicSetDetails:
-      description: Provides the information used to update software packages on a dynamic set.
-      properties:
-        managedInstances:
-          description: The list of managed instance OCIDs to be attached/detached.
-          items:
-            type: string
-          type: array
-        updateTypes:
-          description: The types of updates to be applied.
-          items:
-            enum:
-            - SECURITY
-            - BUGFIX
-            - ENHANCEMENT
-            - OTHER
-            - KSPLICE_KERNEL
-            - KSPLICE_USERSPACE
-            - ALL
-            type: string
-            x-obmcs-top-level-enum: '#/definitions/UpdateTypes'
-          type: array
-          uniqueItems: true
-        workRequestDetails:
-          $ref: '#/components/schemas/WorkRequestDetails'
-      type: object
-    ManagedInstanceCollection:
-      description: 'The set of managed instances returned for the [ListManagedInstances](#/en/osmh/latest/ManagedInstance/ListManagedInstances) operation.
-
-        '
-      properties:
-        items:
-          description: List of managed instances.
-          items:
-            $ref: '#/components/schemas/ManagedInstanceSummary'
-          type: array
-      required:
-      - items
-      type: object
-    Id:
-      description: Id and name of a resource to simplify the display for the user.
-      properties:
-        displayName:
-          description: User-friendly name.
-          type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource that is immutable on creation.
-          type: string
-      required:
-      - displayName
-      - id
-    Tag:
-      description: Metadata tag assigned to a resource.
-      discriminator:
-        propertyName: type
-      properties:
-        key:
-          description: 'The key of the tag.
-
-            '
-          type: string
-        type:
-          description: 'The type of the tag. Common values include `defined` or `freeform`.
-
-            '
-          enum:
-          - DEFINED
-          - FREEFORM
-          type: string
-        value:
-          description: 'The value associated with the tag key.
-
-            '
-          type: string
-      required:
-      - type
-      type: object
-    AutonomousSettings:
-      description: Settings for the Autonomous Linux service.
-      properties:
-        isDataCollectionAuthorized:
-          description: Indicates whether Autonomous Linux will collect crash files. This setting can be changed by the user.
-          type: boolean
-        scheduledJobId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the restricted scheduled job associated with this instance. This value cannot be deleted by the user.
-          type: string
-      type: object
-    ManagedInstanceSummary:
-      description: Provides summary information for a managed instance.
-      properties:
-        agentVersion:
-          description: The version of osmh-agent running on the managed instance
-          type: string
-        architecture:
-          description: The CPU architecture type of the managed instance.
-          enum:
-          - X86_64
-          - AARCH64
-          - I686
-          - NOARCH
-          - SRC
-          - I386
-          - AMD64
-          - ARM64
-          - ALL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ArchType'
-        autonomousSettings:
-          $ref: '#/components/schemas/AutonomousSettings'
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the managed instance.
-
-            '
-          type: string
-        description:
-          description: User-specified description of the managed instance.
-          type: string
-        displayName:
-          description: User-friendly name for the managed instance.
-          type: string
-        id:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance.
-
-            '
-          type: string
-        isManagedByAutonomousLinux:
-          description: Indicates whether Autonomous Linux manages this instance.
-          type: boolean
-        isManagementStation:
-          description: Whether this managed instance is acting as an on-premises management station.
-          type: boolean
-        isRebootRequired:
-          description: Indicates whether a reboot is required to complete installation of updates.
-          type: boolean
-        lifecycleEnvironment:
-          $ref: '#/components/schemas/Id'
-        lifecycleStage:
-          $ref: '#/components/schemas/Id'
-        location:
-          description: The location of the managed instance.
-          enum:
-          - ON_PREMISE
-          - OCI_COMPUTE
-          - AZURE
-          - EC2
-          - GCP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
-        managedInstanceGroup:
-          $ref: '#/components/schemas/Id'
-        notificationTopicId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) for the Oracle Notifications service (ONS) topic. ONS is the channel used to send notifications to the customer.
-
-            '
-          type: string
-        osFamily:
-          description: The operating system type of the managed instance.
-          enum:
-          - ORACLE_LINUX_10
-          - ORACLE_LINUX_9
-          - ORACLE_LINUX_8
-          - ORACLE_LINUX_7
-          - ORACLE_LINUX_6
-          - WINDOWS_SERVER_2016
-          - WINDOWS_SERVER_2019
-          - WINDOWS_SERVER_2022
-          - WINDOWS_SERVER_2025
-          - WINDOWS_11
-          - ALL
-          - UBUNTU_20_04
-          - UBUNTU_22_04
-          - UBUNTU_24_04
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OsFamily'
-        status:
-          description: Current status of the managed instance.
-          enum:
-          - NORMAL
-          - UNREACHABLE
-          - ERROR
-          - WARNING
-          - REGISTRATION_ERROR
-          - DELETING
-          - ONBOARDING
-          - REBOOTING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceStatus'
-        tenancyId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the tenancy this managed instance resides in.
-
-            '
-          type: string
-        timeLastBoot:
-          description: 'Time that the instance last booted (in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) format).
-
-            '
-          format: date-time
-          type: string
-        updatesAvailable:
-          description: Number of updates available for installation.
-          type: integer
-      required:
-      - id
-      - displayName
-      - tenancyId
-      - compartmentId
-      - status
       type: object
     PreviewManagedInstancesDetails:
       description: PreviewManagedInstancesDetails.
@@ -1425,18 +1331,48 @@ components:
       - matchType
       - matchingRule
       type: object
-    DynamicSetCollection:
-      description: 'The set of dynamic sets returned for the [ListDynamicSets](#/en/osmh/latest/DynamicSet/ListDynamicSets) operation.
-
-        '
+    Tag:
+      description: Metadata tag assigned to a resource.
+      discriminator:
+        propertyName: type
       properties:
-        items:
-          description: List of dynamic sets.
-          items:
-            $ref: '#/components/schemas/DynamicSetSummary'
-          type: array
+        key:
+          description: 'The key of the tag.
+
+            '
+          type: string
+        type:
+          description: 'The type of the tag. Common values include `defined` or `freeform`.
+
+            '
+          enum:
+          - DEFINED
+          - FREEFORM
+          type: string
+        value:
+          description: 'The value associated with the tag key.
+
+            '
+          type: string
       required:
-      - items
+      - type
+      type: object
+    RebootDynamicSetDetails:
+      description: Provides the information used for the reboot job.
+      properties:
+        managedInstances:
+          description: The list of managed instance OCIDs to be attached/detached.
+          items:
+            type: string
+          type: array
+        rebootTimeoutInMins:
+          default: 20
+          description: "The number of minutes the service waits for the reboot to complete. If the instances in the group don't reboot \nwithin this time, the reboot job status is set to failed.\n"
+          maximum: 240
+          minimum: 5
+          type: integer
+        workRequestDetails:
+          $ref: '#/components/schemas/WorkRequestDetails'
       type: object
     DynamicSetSummary:
       description: Provides summary information for a dynamic set.
@@ -1529,30 +1465,97 @@ components:
       - displayName
       - compartmentId
       type: object
+    UpdateDynamicSetDetails:
+      description: Provides the information used to update a dynamic set.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: User-specified description of the dynamic set. Avoid entering confidential information.
+          maxLength: 400
+          minLength: 0
+          type: string
+        displayName:
+          description: User-friendly name for the dynamic set.
+          format: x-obmcs-ascii-identifier
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_](-?[a-zA-Z_0-9])*$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        matchType:
+          description: Include either any or all attributes.
+          enum:
+          - ANY
+          - ALL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MatchType'
+        matchingRule:
+          $ref: '#/components/schemas/MatchingRule'
+        targetCompartments:
+          description: The list of compartment details.
+          items:
+            $ref: '#/components/schemas/TargetCompartmentDetails'
+          minItems: 1
+          type: array
+          uniqueItems: true
+      type: object
   parameters:
-    RemovePackagesFromDynamicSetDetailsParam:
-      description: Details about packages to be removed on a dynamic set.
+    RebootDynamicSetParam:
+      description: "The timeout to be set for the reboot job. The timeout is the amount of time in minutes that the service waits for \nthe reboot to complete before marking the job as failed.\n"
       in: body
-      name: RemovePackagesFromDynamicSetDetails
+      name: RebootDynamicSetDetails
       required: true
       schema:
-        $ref: '#/components/schemas/RemovePackagesFromDynamicSetDetails'
-    CompartmentIdInSubTreeQueryParam:
-      description: Indicates whether to include subcompartments in the returned results. Default is false.
-      in: query
-      name: compartmentIdInSubtree
-      required: false
-      x-default-description: false
+        $ref: '#/components/schemas/RebootDynamicSetDetails'
+    InstallPackagesOnDynamicSetDetailsParam:
+      description: Details about packages to be installed on a dynamic set.
+      in: body
+      name: InstallPackagesOnDynamicSetDetails
+      required: true
       schema:
-        type: boolean
-    DynamicSetIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dynamic set. This filter returns resources associated with this dynamic set.
+        $ref: '#/components/schemas/InstallPackagesOnDynamicSetDetails'
+    DynamicSetSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+
+        '
       in: query
-      name: dynamicSetId
-      required: false
-      x-default-description: 'null'
+      name: sortBy
       schema:
         type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
     DisplayNameQueryParam:
       description: A filter to return resources that match the given user-friendly name.
       in: query
@@ -1562,6 +1565,23 @@ components:
         type: string
         maxLength: 255
         minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
     DisplayNameContainsQueryParam:
       description: A filter to return resources that may partially match the given display name.
       in: query
@@ -1571,13 +1591,6 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    UpdatePackagesOnDynamicSetDetailsParam:
-      description: Details about packages to be updated on a dynamic set.
-      in: body
-      name: UpdatePackagesOnDynamicSetDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdatePackagesOnDynamicSetDetails'
     SortOrderQueryParam:
       description: The sort order to use, either 'ASC' or 'DESC'.
       in: query
@@ -1593,6 +1606,41 @@ components:
         enum:
         - ASC
         - DESC
+    DynamicSetIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dynamic set. This filter returns resources associated with this dynamic set.
+      in: query
+      name: dynamicSetId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    UpdatePackagesOnDynamicSetDetailsParam:
+      description: Details about packages to be updated on a dynamic set.
+      in: body
+      name: UpdatePackagesOnDynamicSetDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/UpdatePackagesOnDynamicSetDetails'
+    RequestIdHeader:
+      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RemovePackagesFromDynamicSetDetailsParam:
+      description: Details about packages to be removed on a dynamic set.
+      in: body
+      name: RemovePackagesFromDynamicSetDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/RemovePackagesFromDynamicSetDetails'
+    DynamicSetIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dynamic set. This filter returns resources associated with this dynamic set.
+      in: path
+      name: dynamicSetId
+      required: true
+      schema:
+        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1612,27 +1660,22 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    CompartmentIdQueryParam:
-      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `3`
+
+        '
       in: query
-      name: compartmentId
+      name: page
       x-default-description: 'null'
       schema:
         type: string
-    ChangeDynamicSetCompartmentDetailsParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the group to.
-      in: body
-      name: ChangeDynamicSetCompartmentDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/ChangeDynamicSetCompartmentDetails'
-    RequestIdHeader:
-      description: Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    DynamicSetSortByQueryParam:
+        minLength: 1
+    ManagedInstanceSortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
 
         '
@@ -1644,6 +1687,13 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment that contains the resources to list. This filter returns only resources contained within the specified compartment.
+      in: query
+      name: compartmentId
+      x-default-description: 'null'
+      schema:
+        type: string
     PaginationLimitQueryParam:
       description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
 
@@ -1660,71 +1710,21 @@ components:
         default: 10
         maximum: 100
         minimum: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
+    ChangeDynamicSetCompartmentDetailsParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the group to.
+      in: body
+      name: ChangeDynamicSetCompartmentDetails
+      required: true
+      schema:
+        $ref: '#/components/schemas/ChangeDynamicSetCompartmentDetails'
+    CompartmentIdInSubTreeQueryParam:
+      description: Indicates whether to include subcompartments in the returned results. Default is false.
+      in: query
+      name: compartmentIdInSubtree
       required: false
+      x-default-description: false
       schema:
-        type: string
-    InstallPackagesOnDynamicSetDetailsParam:
-      description: Details about packages to be installed on a dynamic set.
-      in: body
-      name: InstallPackagesOnDynamicSetDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/InstallPackagesOnDynamicSetDetails'
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `3`
-
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    DynamicSetIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dynamic set. This filter returns resources associated with this dynamic set.
-      in: path
-      name: dynamicSetId
-      required: true
-      schema:
-        type: string
-    ManagedInstanceSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RebootDynamicSetParam:
-      description: "The timeout to be set for the reboot job. The timeout is the amount of time in minutes that the service waits for \nthe reboot to complete before marking the job as failed.\n"
-      in: body
-      name: RebootDynamicSetDetails
-      required: true
-      schema:
-        $ref: '#/components/schemas/RebootDynamicSetDetails'
+        type: boolean
   responses:
     default:
       description: Unknown Error

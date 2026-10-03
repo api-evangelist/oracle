@@ -116,6 +116,98 @@ paths:
         description: The information needed to activate an order in a tenancy.
         required: true
 components:
+  schemas:
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    Sku:
+      description: A single subscription SKU.
+      properties:
+        name:
+          description: SKU name.
+          type: string
+        number:
+          description: SKU number.
+          type: string
+        quantity:
+          description: SKU quantity.
+          type: integer
+    Order:
+      description: Order details.
+      properties:
+        adminEmail:
+          description: Email address of the administrator who owns the subscription.
+          maxLength: 255
+          minLength: 6
+          type: string
+        dataCenterRegion:
+          description: Order's data center region.
+          example: global
+          type: string
+        orderNumber:
+          description: Immutable and unique order number holding customer subscription information.
+          type: string
+        orderState:
+          description: State of the order.
+          type: string
+        subscriptions:
+          description: Array of subscriptions associated with the order.
+          items:
+            $ref: '#/components/schemas/SubscriptionInfo'
+          type: array
+      required:
+      - orderNumber
+      - adminEmail
+      - orderState
+      - subscriptions
+    SubscriptionInfo:
+      description: A single subscription's details.
+      properties:
+        endDate:
+          description: Subscription end date. An RFC 3339-formatted date and time string.
+          format: date-time
+          type: string
+        service:
+          description: Subscription service name.
+          example: CLOUDCM
+          type: string
+        skus:
+          description: List of SKUs the subscription contains.
+          items:
+            $ref: '#/components/schemas/Sku'
+          type: array
+        spmSubscriptionId:
+          description: Subscription ID.
+          type: string
+        startDate:
+          description: Subscription start date. An RFC 3339-formatted date and time string.
+          format: date-time
+          type: string
+      required:
+      - spmSubscriptionId
+      - service
+      - startDate
+      - endDate
+      - skus
+    ActivateOrderDetails:
+      description: The parameters for activating an order subscription in a tenancy.
+      properties:
+        compartmentId:
+          description: Tenant ID to activate the order.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
   parameters:
     OrderActivationToken:
       description: 'Activation token containing an order ID. A JWT RFC 7519-formatted string.
@@ -151,98 +243,6 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-  schemas:
-    SubscriptionInfo:
-      description: A single subscription's details.
-      properties:
-        endDate:
-          description: Subscription end date. An RFC 3339-formatted date and time string.
-          format: date-time
-          type: string
-        service:
-          description: Subscription service name.
-          example: CLOUDCM
-          type: string
-        skus:
-          description: List of SKUs the subscription contains.
-          items:
-            $ref: '#/components/schemas/Sku'
-          type: array
-        spmSubscriptionId:
-          description: Subscription ID.
-          type: string
-        startDate:
-          description: Subscription start date. An RFC 3339-formatted date and time string.
-          format: date-time
-          type: string
-      required:
-      - spmSubscriptionId
-      - service
-      - startDate
-      - endDate
-      - skus
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    ActivateOrderDetails:
-      description: The parameters for activating an order subscription in a tenancy.
-      properties:
-        compartmentId:
-          description: Tenant ID to activate the order.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-    Order:
-      description: Order details.
-      properties:
-        adminEmail:
-          description: Email address of the administrator who owns the subscription.
-          maxLength: 255
-          minLength: 6
-          type: string
-        dataCenterRegion:
-          description: Order's data center region.
-          example: global
-          type: string
-        orderNumber:
-          description: Immutable and unique order number holding customer subscription information.
-          type: string
-        orderState:
-          description: State of the order.
-          type: string
-        subscriptions:
-          description: Array of subscriptions associated with the order.
-          items:
-            $ref: '#/components/schemas/SubscriptionInfo'
-          type: array
-      required:
-      - orderNumber
-      - adminEmail
-      - orderState
-      - subscriptions
-    Sku:
-      description: A single subscription SKU.
-      properties:
-        name:
-          description: SKU name.
-          type: string
-        number:
-          description: SKU number.
-          type: string
-        quantity:
-          description: SKU quantity.
-          type: integer
   responses:
     default:
       description: Unknown Error

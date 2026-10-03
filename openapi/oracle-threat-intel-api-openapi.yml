@@ -277,6 +277,116 @@ paths:
       x-related-resource: '#/definitions/ThreatTypesCollection'
 components:
   schemas:
+    IndicatorSourceSummary:
+      description: Information about the source of threat indicator data.
+      properties:
+        name:
+          description: The name of the source.
+          type: string
+      required:
+      - name
+      type: object
+    IndicatorCountDimensions:
+      description: The indicator dimension that was counted, such as the indicator type.
+      properties:
+        compartmentId:
+          description: The compartment OCID that contains the indicator type.
+          type: string
+        type:
+          description: The indicator type that was counted.
+          enum:
+          - DOMAIN_NAME
+          - FILE_NAME
+          - MD5_HASH
+          - SHA1_HASH
+          - SHA256_HASH
+          - IP_ADDRESS
+          - URL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/IndicatorType'
+      type: object
+    GeodataDetails:
+      description: Geodata information for a given IP address
+      properties:
+        adminDiv:
+          description: State/Province/subdivision within the country
+          type: string
+        city:
+          description: City of origin
+          type: string
+        countryCode:
+          description: Two-letter abbreviation for country of origin
+          type: string
+        geoId:
+          description: Unique Identifier (optional)
+          type: string
+        label:
+          description: Information on source providing the information
+          type: string
+        latitude:
+          description: Latitude
+          type: string
+        longitude:
+          description: Longitude
+          type: string
+        origin:
+          description: ASN entry
+          type: string
+        routedPrefix:
+          description: Encompassing assigned prefix for the IP
+          type: string
+      required:
+      - origin
+      - countryCode
+      - adminDiv
+      - city
+      - latitude
+      - longitude
+      - label
+      type: object
+    IndicatorRelationship:
+      description: A relationship name and list of releated entities.
+      properties:
+        attribution:
+          description: The array of attribution data that support this relationship.
+          items:
+            $ref: '#/components/schemas/DataAttribution'
+          type: array
+        name:
+          description: The name of the attribute.
+          type: string
+        relatedEntity:
+          $ref: '#/components/schemas/EntityReference'
+      required:
+      - name
+      - relatedEntity
+      - attribution
+    DataAttribution:
+      description: The confidence, source information, and visibility for a particular sighting or observation of some data associated with a threat indicator. This associated data can be the indicator's threat type, attribute, or relationship.
+      properties:
+        confidence:
+          description: An integer from 0 to 100 that provides a measure of our certainty in the maliciousness of data attributed to an indicator. For example, if the source of the data being attributed is the Tor Project, our confidence that the associated indicator is a tor exit node would be 100.
+          maximum: 100
+          minimum: 0
+          type: integer
+        source:
+          $ref: '#/components/schemas/IndicatorSourceSummary'
+        timeFirstSeen:
+          description: The date and time the attribution data was first seen for this entity. If the data source does not provide this information, it is set to the last time it was seen. An RFC3339 formatted string.
+          format: date-time
+          type: string
+        timeLastSeen:
+          description: The last date and time the attribution data was seen for this entity. An RFC3339 formatted string.
+          format: date-time
+          type: string
+        visibility:
+          $ref: '#/components/schemas/DataVisibility'
+      required:
+      - confidence
+      - source
+      - visibility
+      - timeLastSeen
+      type: object
     IndicatorAttributeSummary:
       description: An attribute name and list of values.
       properties:
@@ -289,6 +399,24 @@ components:
       required:
       - name
       - value
+    IndicatorAttribute:
+      description: An attribute name and list of values with attribution.
+      properties:
+        attribution:
+          description: The array of attribution data that support this attribute.
+          items:
+            $ref: '#/components/schemas/DataAttribution'
+          type: array
+        name:
+          description: The name of the attribute.
+          type: string
+        value:
+          description: The value of the attribute.
+          type: string
+      required:
+      - name
+      - value
+      - attribution
     SummarizeIndicatorsDetails:
       description: Query parameters to filter indicators
       properties:
@@ -367,136 +495,6 @@ components:
           type: string
       type: object
       x-example: "{ \n  \"items\": [\n    {\n      \"attributes\": [\n        {\n          \"name\": \"MaliciousConfidence\",\n          \"value\": \"low\"\n        },\n        {\n          \"name\": \"CSD\",\n          \"value\": \"csa-220906\"\n        },\n        {\n          \"name\": \"ThreatActor\",\n          \"value\": \"solarspider\"\n        },\n        {\n          \"name\": \"Malware\",\n          \"value\": \"jsoutprox\"\n        }\n      ],\n\"compartmentId\": \"ocid1.compartment.oc1..uniqueID\",\n\"confidence\": 55,\n\"geodata\": {\n  \"adminDiv\": \"on\",\n  \"city\": \"toronto\",\n  \"countryCode\": \"ca\",\n  \"geoId\": \"\",\n  \"label\": \"globaltelehost corp.\",\n  \"latitude\": \"43.66\",\n  \"longitude\": \"-79.36\",\n  \"origin\": \"62563\",\n  \"routedPrefix\": \"\"\n},\n\"id\": \"ocid1.threatentity.oc1..uniqueID\",\n\"lifecycleState\": \"ACTIVE\",\n\"threatTypes\": [\n  \"Criminal\",\n  \"RAT\"\n],\n\"timeCreated\": \"2022-08-30T19:15:09.237Z\",\n\"timeLastSeen\": \"2022-08-30T19:07:13.000Z\",\n\"timeUpdated\": \"2022-09-06T07:11:23.503Z\",\n\"type\": \"IP_ADDRESS\",\n\"value\": \"192.168.10.10\"\n    }\n  ]\n} \n"
-    GeodataDetails:
-      description: Geodata information for a given IP address
-      properties:
-        adminDiv:
-          description: State/Province/subdivision within the country
-          type: string
-        city:
-          description: City of origin
-          type: string
-        countryCode:
-          description: Two-letter abbreviation for country of origin
-          type: string
-        geoId:
-          description: Unique Identifier (optional)
-          type: string
-        label:
-          description: Information on source providing the information
-          type: string
-        latitude:
-          description: Latitude
-          type: string
-        longitude:
-          description: Longitude
-          type: string
-        origin:
-          description: ASN entry
-          type: string
-        routedPrefix:
-          description: Encompassing assigned prefix for the IP
-          type: string
-      required:
-      - origin
-      - countryCode
-      - adminDiv
-      - city
-      - latitude
-      - longitude
-      - label
-      type: object
-    DataVisibility:
-      description: The visibility level of attribution data, including its [Traffic Light Protocol (TLP)](https://www.cisa.gov/tlp) color.
-      properties:
-        name:
-          description: The name of the visibility level.
-          type: string
-        tlpName:
-          description: The Traffic Light Protocol (TLP) color of the visibility level.
-          enum:
-          - TLP_INTERNAL_AUDIT
-          - TLP_WHITE
-          - TLP_GREEN
-          - TLP_AMBER
-          - TLP_RED
-          type: string
-      required:
-      - name
-      - tlpName
-      type: object
-    IndicatorCountSummary:
-      description: A group of indicators with the same dimensions, such as the same indicator type.
-      properties:
-        count:
-          description: The count of indicators in the group.
-          type: integer
-        dimensions:
-          $ref: '#/components/schemas/IndicatorCountDimensions'
-      required:
-      - dimensions
-      - count
-      type: object
-    EntityReference:
-      description: A reference to a resource or other entity.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: The type of the referenced entity.
-          enum:
-          - INDICATOR
-          type: string
-      required:
-      - type
-    ThreatTypesCollection:
-      description: List of threat types that can be associated with threat indicators.
-      properties:
-        items:
-          description: The list of threat types that can be used to search for threat indicators.
-          items:
-            $ref: '#/components/schemas/ThreatTypeSummary'
-          type: array
-      required:
-      - items
-      type: object
-    IndicatorAttribute:
-      description: An attribute name and list of values with attribution.
-      properties:
-        attribution:
-          description: The array of attribution data that support this attribute.
-          items:
-            $ref: '#/components/schemas/DataAttribution'
-          type: array
-        name:
-          description: The name of the attribute.
-          type: string
-        value:
-          description: The value of the attribute.
-          type: string
-      required:
-      - name
-      - value
-      - attribution
-    ThreatType:
-      description: A threat type along with attribution data that associates it to a threat indicator.
-      properties:
-        attribution:
-          description: The list of supporting attribution information.
-          items:
-            $ref: '#/components/schemas/DataAttribution'
-          type: array
-        id:
-          description: The OCID of the threat type.
-          type: string
-        name:
-          description: The name of the threat type.
-          type: string
-      required:
-      - id
-      - name
-      - attribution
-      type: object
     Error:
       description: Error Information.
       properties:
@@ -509,82 +507,6 @@ components:
       required:
       - code
       - message
-    DataAttribution:
-      description: The confidence, source information, and visibility for a particular sighting or observation of some data associated with a threat indicator. This associated data can be the indicator's threat type, attribute, or relationship.
-      properties:
-        confidence:
-          description: An integer from 0 to 100 that provides a measure of our certainty in the maliciousness of data attributed to an indicator. For example, if the source of the data being attributed is the Tor Project, our confidence that the associated indicator is a tor exit node would be 100.
-          maximum: 100
-          minimum: 0
-          type: integer
-        source:
-          $ref: '#/components/schemas/IndicatorSourceSummary'
-        timeFirstSeen:
-          description: The date and time the attribution data was first seen for this entity. If the data source does not provide this information, it is set to the last time it was seen. An RFC3339 formatted string.
-          format: date-time
-          type: string
-        timeLastSeen:
-          description: The last date and time the attribution data was seen for this entity. An RFC3339 formatted string.
-          format: date-time
-          type: string
-        visibility:
-          $ref: '#/components/schemas/DataVisibility'
-      required:
-      - confidence
-      - source
-      - visibility
-      - timeLastSeen
-      type: object
-    IndicatorSourceSummary:
-      description: Information about the source of threat indicator data.
-      properties:
-        name:
-          description: The name of the source.
-          type: string
-      required:
-      - name
-      type: object
-    IndicatorCountCollection:
-      description: A list of indicator counts by indicator type.
-      properties:
-        items:
-          description: The list of aggregated indicator counts.
-          items:
-            $ref: '#/components/schemas/IndicatorCountSummary'
-          type: array
-      required:
-      - items
-      type: object
-    IndicatorSummaryCollection:
-      description: List of indicator summary objects.
-      properties:
-        items:
-          description: The list of indicator summaries.
-          items:
-            $ref: '#/components/schemas/IndicatorSummary'
-          type: array
-      required:
-      - items
-      type: object
-    IndicatorCountDimensions:
-      description: The indicator dimension that was counted, such as the indicator type.
-      properties:
-        compartmentId:
-          description: The compartment OCID that contains the indicator type.
-          type: string
-        type:
-          description: The indicator type that was counted.
-          enum:
-          - DOMAIN_NAME
-          - FILE_NAME
-          - MD5_HASH
-          - SHA1_HASH
-          - SHA256_HASH
-          - IP_ADDRESS
-          - URL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/IndicatorType'
-      type: object
     IndicatorSummary:
       description: Summary of a data signature observed on a network or host that indicates a potential security threat.
       properties:
@@ -659,6 +581,37 @@ components:
       - timeCreated
       - timeUpdated
       - timeLastSeen
+      type: object
+    IndicatorCountSummary:
+      description: A group of indicators with the same dimensions, such as the same indicator type.
+      properties:
+        count:
+          description: The count of indicators in the group.
+          type: integer
+        dimensions:
+          $ref: '#/components/schemas/IndicatorCountDimensions'
+      required:
+      - dimensions
+      - count
+      type: object
+    DataVisibility:
+      description: The visibility level of attribution data, including its [Traffic Light Protocol (TLP)](https://www.cisa.gov/tlp) color.
+      properties:
+        name:
+          description: The name of the visibility level.
+          type: string
+        tlpName:
+          description: The Traffic Light Protocol (TLP) color of the visibility level.
+          enum:
+          - TLP_INTERNAL_AUDIT
+          - TLP_WHITE
+          - TLP_GREEN
+          - TLP_AMBER
+          - TLP_RED
+          type: string
+      required:
+      - name
+      - tlpName
       type: object
     Indicator:
       description: A data signature observed on a network or host that indicates a potential security threat. Indicators can be plain text or computed (hashed) values.
@@ -758,23 +711,25 @@ components:
       - timeUpdated
       - timeLastSeen
       type: object
-    IndicatorRelationship:
-      description: A relationship name and list of releated entities.
+    ThreatType:
+      description: A threat type along with attribution data that associates it to a threat indicator.
       properties:
         attribution:
-          description: The array of attribution data that support this relationship.
+          description: The list of supporting attribution information.
           items:
             $ref: '#/components/schemas/DataAttribution'
           type: array
-        name:
-          description: The name of the attribute.
+        id:
+          description: The OCID of the threat type.
           type: string
-        relatedEntity:
-          $ref: '#/components/schemas/EntityReference'
+        name:
+          description: The name of the threat type.
+          type: string
       required:
+      - id
       - name
-      - relatedEntity
       - attribution
+      type: object
     ThreatTypeSummary:
       description: The name of a threat type and its ID.
       properties:
@@ -788,7 +743,94 @@ components:
       - id
       - name
       type: object
+    ThreatTypesCollection:
+      description: List of threat types that can be associated with threat indicators.
+      properties:
+        items:
+          description: The list of threat types that can be used to search for threat indicators.
+          items:
+            $ref: '#/components/schemas/ThreatTypeSummary'
+          type: array
+      required:
+      - items
+      type: object
+    EntityReference:
+      description: A reference to a resource or other entity.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: The type of the referenced entity.
+          enum:
+          - INDICATOR
+          type: string
+      required:
+      - type
+    IndicatorCountCollection:
+      description: A list of indicator counts by indicator type.
+      properties:
+        items:
+          description: The list of aggregated indicator counts.
+          items:
+            $ref: '#/components/schemas/IndicatorCountSummary'
+          type: array
+      required:
+      - items
+      type: object
+    IndicatorSummaryCollection:
+      description: List of indicator summary objects.
+      properties:
+        items:
+          description: The list of indicator summaries.
+          items:
+            $ref: '#/components/schemas/IndicatorSummary'
+          type: array
+      required:
+      - items
+      type: object
   parameters:
+    ConfidenceGreaterThanOrEqualToQueryParam:
+      description: The minimum confidence score of entities to be returned.
+      in: query
+      name: confidenceGreaterThanOrEqualTo
+      required: false
+      x-default-description: When absent, the response will not be filtered by confidence.
+      schema:
+        type: integer
+        default: 0
+        maximum: 100
+        minimum: 0
+    TimeLastSeenLessThanQueryParam:
+      description: Return indicators last seen before the provided time.
+      in: query
+      name: timeLastSeenLessThan
+      required: false
+      x-default-description: When absent, the response will not be filtered by last seen time.
+      schema:
+        type: string
+        format: date-time
+    IndicatorIdentifierPathParam:
+      description: The unique identifier (OCID) of the threat indicator.
+      in: path
+      name: indicatorId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
     TimeCreatedGreaterThanOrEqualToQueryParam:
       description: The oldest created/first seen time of entities to be returned.
       in: query
@@ -798,6 +840,12 @@ components:
       schema:
         type: string
         format: date-time
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
     IndicatorValueQueryParam:
       description: The indicator value of entities to be returned.
       in: query
@@ -806,21 +854,12 @@ components:
       x-default-description: When absent, the response will not be filtered by indicator value.
       schema:
         type: string
-    TimeCreatedLessThanQueryParam:
-      description: Return indicators created/first seen before the provided time.
+    TimeUpdatedLessThanQueryParam:
+      description: Return indicators updated before the provided time.
       in: query
-      name: timeCreatedLessThan
+      name: timeUpdatedLessThan
       required: false
-      x-default-description: When absent, the response will not be filtered by created/first seen time.
-      schema:
-        type: string
-        format: date-time
-    TimeLastSeenGreaterThanOrEqualToQueryParam:
-      description: The oldest last seen time of entities to be returned.
-      in: query
-      name: timeLastSeenGreaterThanOrEqualTo
-      required: false
-      x-default-description: When absent, the response will not be filtered by last seen time.
+      x-default-description: When absent, the response will not be filtered by update time.
       schema:
         type: string
         format: date-time
@@ -838,28 +877,41 @@ components:
         - timeUpdated
         - timeLastSeen
         default: timeUpdated
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
+    TimeLastSeenGreaterThanOrEqualToQueryParam:
+      description: The oldest last seen time of entities to be returned.
       in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      name: timeLastSeenGreaterThanOrEqualTo
+      required: false
+      x-default-description: When absent, the response will not be filtered by last seen time.
       schema:
         type: string
-        enum:
-        - ASC
-        - DESC
-    CompartmentIdQueryParam:
-      description: The OCID of the tenancy (root compartment) that is used to filter results.
+        format: date-time
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
       in: query
-      name: compartmentId
-      required: true
+      name: page
+      x-default-description: When absent, the response will be the first page of the result set.
       schema:
         type: string
+        minLength: 1
+    TimeUpdatedGreaterThanOrEqualToQueryParam:
+      description: The oldest update time of entities to be returned.
+      in: query
+      name: timeUpdatedGreaterThanOrEqualTo
+      required: false
+      x-default-description: When absent, the response will not be filtered by update time.
+      schema:
+        type: string
+        format: date-time
+    TimeCreatedLessThanQueryParam:
+      description: Return indicators created/first seen before the provided time.
+      in: query
+      name: timeCreatedLessThan
+      required: false
+      x-default-description: When absent, the response will not be filtered by created/first seen time.
+      schema:
+        type: string
+        format: date-time
     IndicatorTypeQueryParam:
       description: The indicator type of entities to be returned.
       in: query
@@ -877,30 +929,22 @@ components:
         - SHA256_HASH
         - IP_ADDRESS
         - URL
-    TimeUpdatedGreaterThanOrEqualToQueryParam:
-      description: The oldest update time of entities to be returned.
+    CompartmentIdQueryParam:
+      description: The OCID of the tenancy (root compartment) that is used to filter results.
       in: query
-      name: timeUpdatedGreaterThanOrEqualTo
-      required: false
-      x-default-description: When absent, the response will not be filtered by update time.
+      name: compartmentId
+      required: true
       schema:
         type: string
-        format: date-time
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    TimeUpdatedLessThanQueryParam:
-      description: Return indicators updated before the provided time.
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: timeUpdatedLessThan
-      required: false
-      x-default-description: When absent, the response will not be filtered by update time.
+      name: limit
       schema:
-        type: string
-        format: date-time
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
     ThreatTypeNameQueryParam:
       description: The threat type of entites to be returned. To filter for multiple threat types, repeat this parameter.
       in: query
@@ -914,50 +958,6 @@ components:
         items:
           type: string
         default: []
-    TimeLastSeenLessThanQueryParam:
-      description: Return indicators last seen before the provided time.
-      in: query
-      name: timeLastSeenLessThan
-      required: false
-      x-default-description: When absent, the response will not be filtered by last seen time.
-      schema:
-        type: string
-        format: date-time
-    ConfidenceGreaterThanOrEqualToQueryParam:
-      description: The minimum confidence score of entities to be returned.
-      in: query
-      name: confidenceGreaterThanOrEqualTo
-      required: false
-      x-default-description: When absent, the response will not be filtered by confidence.
-      schema:
-        type: integer
-        default: 0
-        maximum: 100
-        minimum: 0
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    IndicatorIdentifierPathParam:
-      description: The unique identifier (OCID) of the threat indicator.
-      in: path
-      name: indicatorId
-      required: true
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: When absent, the response will be the first page of the result set.
-      schema:
-        type: string
-        minLength: 1
   responses:
     default:
       description: Unknown Error

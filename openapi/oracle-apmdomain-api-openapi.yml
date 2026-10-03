@@ -769,6 +769,17 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   schemas:
+    ChangeApmDomainCompartmentDetails:
+      description: The information needed for the change compartment operation.
+      properties:
+        compartmentId:
+          description: The OCID of the destination compartment for the APM domain.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
     BaseKeyDetails:
       description: The information about a Data Key.
       properties:
@@ -791,17 +802,211 @@ components:
       - name
       - type
       type: object
-    DataKeySummary:
+    ApmDomain:
       allOf:
-      - $ref: '#/components/schemas/BaseKeyDetails'
+      - $ref: '#/components/schemas/BaseDomainDetails'
       - properties:
-          value:
-            description: Value of the Data Key.
-            maxLength: 255
-            minLength: 1
+          dataUploadEndpoint:
+            description: The endpoint where the APM agents upload their observations and metrics.
             type: string
         type: object
-      description: Summary of Data Key.
+      description: Details of an APM domain.
+    UpdateApmDomainDetails:
+      description: The information that can be updated by update APM domain operation.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: Description of the APM domain.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: Display name of the APM domain.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        logGroupId:
+          description: The OCID of the Log Analytics log group to which the data uploaded to this APM domain will be mapped to.
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    CreateApmDomainDetails:
+      description: The information about the new APM domain.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment corresponding to the APM domain.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: Description of the APM domain.
+          maxLength: 400
+          minLength: 1
+          type: string
+        displayName:
+          description: Display name of the APM domain.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        isFreeTier:
+          default: false
+          description: Indicates whether this is an "Always Free" resource. The default value is false.
+          type: boolean
+        logGroupId:
+          description: The OCID of the Log Analytics log group to which the data uploaded to this APM domain will be mapped to.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - displayName
+      - compartmentId
+      type: object
+    ApmDomainSummary:
+      allOf:
+      - $ref: '#/components/schemas/BaseDomainDetails'
+      - type: object
+      description: Summary of an APM domain.
+    WorkRequest:
+      description: A description of work request.
+      properties:
+        compartmentId:
+          description: 'The OCID of the compartment that contains the work request.
+
+            '
+          type: string
+        id:
+          description: The ID of the work request.
+          type: string
+        operationType:
+          description: The type of the work request.
+          enum:
+          - CREATE_APM_DOMAIN
+          - UPDATE_APM_DOMAIN
+          - DELETE_APM_DOMAIN
+          - GENERATE_DATA_KEYS
+          - REMOVE_DATA_KEYS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationTypes'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by the work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    Error:
+      description: The details of an error that occurred.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     WorkRequestError:
       description: An error encountered while executing a work request.
       properties:
@@ -821,76 +1026,6 @@ components:
           type: string
       required:
       - code
-      - message
-      - timestamp
-    ChangeApmDomainCompartmentDetails:
-      description: The information needed for the change compartment operation.
-      properties:
-        compartmentId:
-          description: The OCID of the destination compartment for the APM domain.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    Error:
-      description: The details of an error that occurred.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    WorkRequestResource:
-      description: The details of the resource that the work request affects.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the work tracked in the work request.
-
-            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
-
-            work is complete for that resource at which point it will transition to CREATED, UPDATED,
-
-            or DELETED, respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionTypes'
-        entityType:
-          description: The resource type the work request affects.
-          type: string
-        entityUri:
-          description: The URI path that the user can do a GET on to access the resource metadata.
-          type: string
-        identifier:
-          description: The identifier of the resource the work request affects.
-          type: string
-      required:
-      - actionType
-      - entityType
-      - identifier
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the error occurred, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
-          format: date-time
-          type: string
-      required:
       - message
       - timestamp
     BaseDomainDetails:
@@ -1001,205 +1136,77 @@ components:
       required:
       - name
       type: object
-    ApmDomainSummary:
+    DataKeySummary:
       allOf:
-      - $ref: '#/components/schemas/BaseDomainDetails'
-      - type: object
-      description: Summary of an APM domain.
-    UpdateApmDomainDetails:
-      description: The information that can be updated by update APM domain operation.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: Description of the APM domain.
-          maxLength: 400
-          minLength: 1
-          type: string
-        displayName:
-          description: Display name of the APM domain.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
+      - $ref: '#/components/schemas/BaseKeyDetails'
+      - properties:
+          value:
+            description: Value of the Data Key.
+            maxLength: 255
+            minLength: 1
             type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        logGroupId:
-          description: The OCID of the Log Analytics log group to which the data uploaded to this APM domain will be mapped to.
-          maxLength: 255
-          minLength: 1
-          type: string
-      type: object
+        type: object
+      description: Summary of Data Key.
     GenerateDataKeyDetails:
       allOf:
       - $ref: '#/components/schemas/BaseKeyDetails'
       - type: object
       description: Details of the Data Key to be generated.
-    CreateApmDomainDetails:
-      description: The information about the new APM domain.
+    WorkRequestResource:
+      description: The details of the resource that the work request affects.
       properties:
-        compartmentId:
-          description: The OCID of the compartment corresponding to the APM domain.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
+        actionType:
+          description: 'The way in which this resource is affected by the work tracked in the work request.
 
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+            A resource being created, updated, or deleted will remain in the IN_PROGRESS state until
 
-              Example: `{"bar-key": "value"}`
+            work is complete for that resource at which point it will transition to CREATED, UPDATED,
 
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
+            or DELETED, respectively.
 
             '
-          type: object
-        description:
-          description: Description of the APM domain.
-          maxLength: 400
-          minLength: 1
-          type: string
-        displayName:
-          description: Display name of the APM domain.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        isFreeTier:
-          default: false
-          description: Indicates whether this is an "Always Free" resource. The default value is false.
-          type: boolean
-        logGroupId:
-          description: The OCID of the Log Analytics log group to which the data uploaded to this APM domain will be mapped to.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - displayName
-      - compartmentId
-      type: object
-    ApmDomain:
-      allOf:
-      - $ref: '#/components/schemas/BaseDomainDetails'
-      - properties:
-          dataUploadEndpoint:
-            description: The endpoint where the APM agents upload their observations and metrics.
-            type: string
-        type: object
-      description: Details of an APM domain.
-    WorkRequest:
-      description: A description of work request.
-      properties:
-        compartmentId:
-          description: 'The OCID of the compartment that contains the work request.
-
-            '
-          type: string
-        id:
-          description: The ID of the work request.
-          type: string
-        operationType:
-          description: The type of the work request.
           enum:
-          - CREATE_APM_DOMAIN
-          - UPDATE_APM_DOMAIN
-          - DELETE_APM_DOMAIN
-          - GENERATE_DATA_KEYS
-          - REMOVE_DATA_KEYS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationTypes'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by the work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
+          - CREATED
+          - UPDATED
+          - DELETED
           - IN_PROGRESS
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
+          - RELATED
           type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
+          x-obmcs-top-level-enum: '#/definitions/ActionTypes'
+        entityType:
+          description: The resource type the work request affects.
           type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
+        entityUri:
+          description: The URI path that the user can do a GET on to access the resource metadata.
           type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
+        identifier:
+          description: The identifier of the resource the work request affects.
+          type: string
+      required:
+      - actionType
+      - entityType
+      - identifier
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time the error occurred, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
           format: date-time
           type: string
       required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
+      - message
+      - timestamp
   parameters:
+    ApmDomainIdentifierPathParam:
+      description: The OCID of the APM domain.
+      in: path
+      name: apmDomainId
+      required: true
+      schema:
+        type: string
     DisplayNameQueryParam:
       description: A filter to return only resources that match the entire display name given.
       in: query
@@ -1209,13 +1216,44 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    ApmDomainIdentifierPathParam:
-      description: The OCID of the APM domain.
-      in: path
-      name: apmDomainId
-      required: true
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified, timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
       schema:
         type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. Set the `if-match` parameter
+
+        to the value of the etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
     LifecycleStateQueryParam:
       description: A filter to return only resources that match the given life-cycle state.
       in: query
@@ -1231,17 +1269,24 @@ components:
         - DELETING
         - DELETED
         - FAILED
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
+    DataKeyTypeQueryParam:
+      description: Data key type.
       in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      name: dataKeyType
+      required: false
+      x-default-description: When not specified, all Data Key types are included.
+      x-obmcs-top-level-enum: '#/definitions/DataKeyTypes'
       schema:
         type: string
         enum:
-        - ASC
-        - DESC
-        default: ASC
+        - PRIVATE
+        - PUBLIC
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
     WorkRequestIdPathParam:
       description: The ID of the asynchronous request.
       in: path
@@ -1268,41 +1313,18 @@ components:
         type: string
         maxLength: 64
         minLength: 1
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
       in: query
       name: compartmentId
       required: true
-      schema:
-        type: string
-    DataKeyTypeQueryParam:
-      description: Data key type.
-      in: query
-      name: dataKeyType
-      required: false
-      x-default-description: When not specified, all Data Key types are included.
-      x-obmcs-top-level-enum: '#/definitions/DataKeyTypes'
-      schema:
-        type: string
-        enum:
-        - PRIVATE
-        - PUBLIC
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified, timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
       schema:
         type: string
     PaginationLimitQueryParam:
@@ -1314,28 +1336,6 @@ components:
         default: 100
         maximum: 1000
         minimum: 1
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. Set the `if-match` parameter
-
-        to the value of the etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

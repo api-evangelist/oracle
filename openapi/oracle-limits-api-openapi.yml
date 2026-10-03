@@ -642,145 +642,32 @@ paths:
       - Limits
       x-obmcs-client-retries-enabled: true
 components:
-  parameters:
-    ExternalLocationQueryParam:
-      description: 'The external cloud provider location.
-
-        '
-      in: query
-      name: externalLocation
-      required: false
-      x-default-description: 'Defaults to null.
-
-        '
-      schema:
-        type: string
-        maxLength: 100
-        minLength: 1
-    PaginationLimitForServiceLimitsQueryParam:
-      description: 'The maximum number of items to return in a paginated "List" call.
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    SortByForDefinitionsQueryParam:
-      description: 'The field to sort by.
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - name
-        - description
-        default: name
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ''asc'' or ''desc''. By default, it is ascending.
-
-        '
-      in: query
-      name: sortOrder
-      required: false
-      x-obmcs-inline-enum: true
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    SubscriptionIdQueryParam:
-      description: 'The subscription OCID assigned to the tenant.
-
-        '
-      in: query
-      name: subscriptionId
-      required: false
-      x-default-description: 'Defaults to null.
-
-        '
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'The value of the `opc-next-page` response header from the previous "List" call.
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        default: 0
-        maxLength: 512
-        minLength: 1
-    RootCompartmentIdQueryParam:
-      description: 'The OCID of the parent compartment (remember that the tenancy is simply the root compartment).
-
-        '
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 100
-        minLength: 1
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
-
-        particular request, please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    SortByForServicesQueryParam:
-      description: 'The field to sort by.
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - name
-        - description
-        default: name
-    SortByForLimitValuesQueryParam:
-      description: 'The field to sort by. The sorting is by availabilityDomain, as a second level field, if available.
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - name
-        default: name
   schemas:
-    Error:
-      description: Generic error object.
+    LimitValueSummary:
+      description: The value of a specific resource limit.
       properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
+        availabilityDomain:
+          description: If present, the returned value is only specific to this availability domain.
+          type: string
+        name:
+          description: 'The resource limit name. To be used for writing policies (in case of quotas) or other programmatic calls.
 
             '
           type: string
-        message:
-          description: A human-readable error string.
+        scopeType:
+          description: 'The scope type of the limit.
+
+            '
+          enum:
+          - GLOBAL
+          - REGION
+          - AD
           type: string
-      required:
-      - code
-      - message
+        value:
+          description: The resource limit value.
+          format: int64
+          type: integer
+      type: object
     LimitDefinitionSummary:
       description: The metadata specific to a resource limit definition.
       properties:
@@ -854,48 +741,22 @@ components:
             type: string
           type: array
       type: object
-    LimitValueSummary:
-      description: The value of a specific resource limit.
+    Error:
+      description: Generic error object.
       properties:
-        availabilityDomain:
-          description: If present, the returned value is only specific to this availability domain.
-          type: string
-        name:
-          description: 'The resource limit name. To be used for writing policies (in case of quotas) or other programmatic calls.
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
 
             '
           type: string
-        scopeType:
-          description: 'The scope type of the limit.
-
-            '
-          enum:
-          - GLOBAL
-          - REGION
-          - AD
+        message:
+          description: A human-readable error string.
           type: string
-        value:
-          description: The resource limit value.
-          format: int64
-          type: integer
-      type: object
-    ServiceSummary:
-      description: A specific OCI service supported by resource limits.
-      properties:
-        description:
-          description: The friendly service name.
-          type: string
-        name:
-          description: The service name. Use this when calling other APIs.
-          type: string
-        supportedSubscriptions:
-          description: 'An array of subscription types supported by the service. For example, the type of subscription, such as SAAS, ERP, or CRM.
-
-            '
-          items:
-            type: string
-          type: array
-      type: object
+      required:
+      - code
+      - message
     ResourceAvailability:
       description: 'The availability of a given resource limit, based on the usage, tenant service limits, and quotas set for the tenancy.
 
@@ -937,6 +798,145 @@ components:
           format: int64
           type: integer
       type: object
+    ServiceSummary:
+      description: A specific OCI service supported by resource limits.
+      properties:
+        description:
+          description: The friendly service name.
+          type: string
+        name:
+          description: The service name. Use this when calling other APIs.
+          type: string
+        supportedSubscriptions:
+          description: 'An array of subscription types supported by the service. For example, the type of subscription, such as SAAS, ERP, or CRM.
+
+            '
+          items:
+            type: string
+          type: array
+      type: object
+  parameters:
+    SortByForLimitValuesQueryParam:
+      description: 'The field to sort by. The sorting is by availabilityDomain, as a second level field, if available.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - name
+        default: name
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` response header from the previous "List" call.
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        default: 0
+        maxLength: 512
+        minLength: 1
+    SortByForServicesQueryParam:
+      description: 'The field to sort by.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - name
+        - description
+        default: name
+    ExternalLocationQueryParam:
+      description: 'The external cloud provider location.
+
+        '
+      in: query
+      name: externalLocation
+      required: false
+      x-default-description: 'Defaults to null.
+
+        '
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 1
+    RootCompartmentIdQueryParam:
+      description: 'The OCID of the parent compartment (remember that the tenancy is simply the root compartment).
+
+        '
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 1
+    PaginationLimitForServiceLimitsQueryParam:
+      description: 'The maximum number of items to return in a paginated "List" call.
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    SortByForDefinitionsQueryParam:
+      description: 'The field to sort by.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - name
+        - description
+        default: name
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ''asc'' or ''desc''. By default, it is ascending.
+
+        '
+      in: query
+      name: sortOrder
+      required: false
+      x-obmcs-inline-enum: true
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    SubscriptionIdQueryParam:
+      description: 'The subscription OCID assigned to the tenant.
+
+        '
+      in: query
+      name: subscriptionId
+      required: false
+      x-default-description: 'Defaults to null.
+
+        '
+      schema:
+        type: string
 x-anchors:
   x-headers:
     etag:

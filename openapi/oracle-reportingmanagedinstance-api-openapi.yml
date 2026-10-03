@@ -229,17 +229,10 @@ paths:
       x-related-resource: '#/definitions/ManagedInstance'
 components:
   parameters:
-    ManagedInstanceIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance.
-      in: path
-      name: managedInstanceId
-      required: true
-      schema:
-        type: string
-    MultiOsFamilyQueryParam:
-      description: A filter to return only resources that match the given operating system family.
+    MultiManagedInstanceStatusQueryParam:
+      description: A filter to return only managed instances whose status matches the status provided.
       in: query
-      name: osFamily
+      name: status
       required: false
       x-default-description: 'null'
       style: form
@@ -248,55 +241,51 @@ components:
         type: array
         items:
           enum:
-          - ORACLE_LINUX_10
-          - ORACLE_LINUX_9
-          - ORACLE_LINUX_8
-          - ORACLE_LINUX_7
-          - ORACLE_LINUX_6
-          - WINDOWS_SERVER_2016
-          - WINDOWS_SERVER_2019
-          - WINDOWS_SERVER_2022
-          - WINDOWS_SERVER_2025
-          - WINDOWS_11
-          - ALL
-          - UBUNTU_20_04
-          - UBUNTU_22_04
-          - UBUNTU_24_04
+          - NORMAL
+          - UNREACHABLE
+          - ERROR
+          - WARNING
+          - REGISTRATION_ERROR
+          - DELETING
+          - ONBOARDING
+          - REBOOTING
           type: string
-          x-obmcs-top-level-enum: '#/definitions/OsFamily'
+          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceStatus'
         maxItems: 5
         uniqueItems: true
-    CompartmentIdInSubTreeQueryParam:
-      description: Indicates whether to include subcompartments in the returned results. Default is false.
+    ReportTypeParam:
+      description: The type of the report the user wants to download. Default is ALL.
       in: query
-      name: compartmentIdInSubtree
-      required: false
-      x-default-description: false
-      schema:
-        type: boolean
-    AdvisoryNameContainsQueryParam:
-      description: A filter to return resources that may partially match the erratum advisory name given.
-      in: query
-      name: advisoryNameContains
-      required: false
-      x-default-description: 'null'
+      name: reportType
       schema:
         type: string
-    DynamicSetIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dynamic set. This filter returns resources associated with this dynamic set.
+        enum:
+        - SECURITY
+        - BUGFIX
+        - ACTIVITY
+        - OTHER
+        - ALL
+        default: ALL
+    MultiLocationQueryParam:
+      description: A filter to return only resources whose location matches the given value.
       in: query
-      name: dynamicSetId
-      required: false
+      name: location
       x-default-description: 'null'
+      style: form
+      explode: true
       schema:
-        type: string
-    ReportCompartmentIdQueryParam:
-      description: "The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment. \nThis filter returns only resources contained within the specified compartment.\n"
-      in: query
-      name: compartmentId
-      x-default-description: 'null'
-      schema:
-        type: string
+        type: array
+        items:
+          enum:
+          - ON_PREMISE
+          - OCI_COMPUTE
+          - AZURE
+          - EC2
+          - GCP
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
+        maxItems: 5
+        uniqueItems: true
     IsManagedByAutonomousLinuxQueryParam:
       description: 'Indicates whether to list only resources managed by the Autonomous Linux service.
 
@@ -307,23 +296,69 @@ components:
       x-default-description: 'null'
       schema:
         type: boolean
-    LifecycleEnvironmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle environment. This filter returns only resource contained with the specified lifecycle environment.
+    MultiVulnerabilityTypeQueryParam:
+      description: A filter to return only vulnerabilities matching the given types.
       in: query
-      name: lifecycleEnvironmentId
+      name: vulnerabilityType
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          - OTHER
+          - ALL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/VulnerabilityTypes'
+        uniqueItems: true
+    AdvisoryNameContainsQueryParam:
+      description: A filter to return resources that may partially match the erratum advisory name given.
+      in: query
+      name: advisoryNameContains
       required: false
       x-default-description: 'null'
       schema:
         type: string
-    DisplayNameContainsQueryParam:
-      description: A filter to return resources that may partially match the given display name.
+    ReportFormatParam:
+      description: The format of the report to download. Default is CSV.
       in: query
-      name: displayNameContains
+      name: reportFormat
+      schema:
+        type: string
+        enum:
+        - csv
+        - json
+        - xml
+        default: csv
+    ReportCompartmentIdQueryParam:
+      description: "The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment. \nThis filter returns only resources contained within the specified compartment.\n"
+      in: query
+      name: compartmentId
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
+    AdvisoryNameQueryParam:
+      description: 'The assigned erratum name. It''s unique and not changeable.
+
+
+        Example: `ELSA-2020-5804`
+
+        '
+      in: query
+      name: advisoryName
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        maxItems: 51
     MultiMetricNameQueryParam:
       description: A filter to return only metrics whose name matches the given metric names.
       in: query
@@ -356,10 +391,31 @@ components:
           type: string
           x-obmcs-top-level-enum: '#/definitions/MetricName'
         uniqueItems: true
-    BugUpdatesAvailableGreaterThan:
-      description: A filter to return instances that have more available bug updates than the number specified.
+    MultiVulnerabilityNameQueryParam:
+      description: A filter to return vulnerabilities that match the given name. For Linux instances, this refers to the advisory name. For Windows instances, this refers to the Windows update display name.
       in: query
-      name: bugUpdatesAvailableGreaterThan
+      name: vulnerabilityName
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+        uniqueItems: true
+    DisplayNameContainsQueryParam:
+      description: A filter to return resources that may partially match the given display name.
+      in: query
+      name: displayNameContains
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    OtherUpdatesAvailableEqualsTo:
+      description: A filter to return instances that have the specified number of available other updates.
+      in: query
+      name: otherUpdatesAvailableEqualsTo
       required: false
       x-default-description: 'null'
       schema:
@@ -379,6 +435,32 @@ components:
         enum:
         - ASC
         - DESC
+    DynamicSetIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the dynamic set. This filter returns resources associated with this dynamic set.
+      in: query
+      name: dynamicSetId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    MultiAdvisoryTypeQueryParam:
+      description: A filter to return only errata that match the given advisory types.
+      in: query
+      name: advisoryType
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - SECURITY
+          - BUGFIX
+          - ENHANCEMENT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AdvisoryTypes'
+        maxItems: 5
+        uniqueItems: true
     MultiLocationNotEqualToQueryParam:
       description: A filter to return only resources whose location does not match the given value.
       in: query
@@ -399,59 +481,6 @@ components:
           x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
         maxItems: 5
         uniqueItems: true
-    SecurityUpdatesAvailableEqualsTo:
-      description: A filter to return instances that have the specified number of available security updates.
-      in: query
-      name: securityUpdatesAvailableEqualsTo
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: integer
-    MultiAdvisoryTypeQueryParam:
-      description: A filter to return only errata that match the given advisory types.
-      in: query
-      name: advisoryType
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/AdvisoryTypes'
-        maxItems: 5
-        uniqueItems: true
-    BugUpdatesAvailableEqualsTo:
-      description: A filter to return instances that have the specified number of available bug updates.
-      in: query
-      name: bugUpdatesAvailableEqualsTo
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: integer
-    ReportFormatParam:
-      description: The format of the report to download. Default is CSV.
-      in: query
-      name: reportFormat
-      schema:
-        type: string
-        enum:
-        - csv
-        - json
-        - xml
-        default: csv
-    SecurityUpdatesAvailableGreaterThan:
-      description: A filter to return instances that have more available security updates than the number specified.
-      in: query
-      name: securityUpdatesAvailableGreaterThan
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: integer
     ManagedInstanceGroupIdQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance group. This filter returns resources associated with this group.
       in: query
@@ -485,156 +514,42 @@ components:
       name: opc-request-id
       schema:
         type: string
-    MultiDisplayNameQueryParam:
-      description: A filter to return resources that match the given display names.
+    SecurityUpdatesAvailableEqualsTo:
+      description: A filter to return instances that have the specified number of available security updates.
       in: query
-      name: displayName
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          maxLength: 255
-          minLength: 1
-          type: string
-        maxItems: 5
-        uniqueItems: true
-    OtherUpdatesAvailableEqualsTo:
-      description: A filter to return instances that have the specified number of available other updates.
-      in: query
-      name: otherUpdatesAvailableEqualsTo
+      name: securityUpdatesAvailableEqualsTo
       required: false
       x-default-description: 'null'
       schema:
         type: integer
-    MultiLocationQueryParam:
-      description: A filter to return only resources whose location matches the given value.
+    LifecycleEnvironmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the lifecycle environment. This filter returns only resource contained with the specified lifecycle environment.
       in: query
-      name: location
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - ON_PREMISE
-          - OCI_COMPUTE
-          - AZURE
-          - EC2
-          - GCP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceLocation'
-        maxItems: 5
-        uniqueItems: true
-    AdvisoryNameQueryParam:
-      description: 'The assigned erratum name. It''s unique and not changeable.
-
-
-        Example: `ELSA-2020-5804`
-
-        '
-      in: query
-      name: advisoryName
+      name: lifecycleEnvironmentId
       required: false
       x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        maxItems: 51
-    ReportTypeParam:
-      description: The type of the report the user wants to download. Default is ALL.
-      in: query
-      name: reportType
       schema:
         type: string
-        enum:
-        - SECURITY
-        - BUGFIX
-        - ACTIVITY
-        - OTHER
-        - ALL
-        default: ALL
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
-
-        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-
-        Example: `50`
-
-        '
+    SecurityUpdatesAvailableGreaterThan:
+      description: A filter to return instances that have more available security updates than the number specified.
       in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
-    MultiVulnerabilityTypeQueryParam:
-      description: A filter to return only vulnerabilities matching the given types.
-      in: query
-      name: vulnerabilityType
-      required: true
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          enum:
-          - SECURITY
-          - BUGFIX
-          - ENHANCEMENT
-          - OTHER
-          - ALL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/VulnerabilityTypes'
-        uniqueItems: true
-    MultiVulnerabilityNameQueryParam:
-      description: A filter to return vulnerabilities that match the given name. For Linux instances, this refers to the advisory name. For Windows instances, this refers to the Windows update display name.
-      in: query
-      name: vulnerabilityName
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-        uniqueItems: true
-    MultiManagedInstanceStatusQueryParam:
-      description: A filter to return only managed instances whose status matches the status provided.
-      in: query
-      name: status
+      name: securityUpdatesAvailableGreaterThan
       required: false
       x-default-description: 'null'
-      style: form
-      explode: true
       schema:
-        type: array
-        items:
-          enum:
-          - NORMAL
-          - UNREACHABLE
-          - ERROR
-          - WARNING
-          - REGISTRATION_ERROR
-          - DELETING
-          - ONBOARDING
-          - REBOOTING
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagedInstanceStatus'
-        maxItems: 5
-        uniqueItems: true
+        type: integer
     VulnerabilityNameContainsQueryParam:
       description: A filter to return vulnerabilities that partially match the given name. For Linux instances, this refers to the advisory name. For Windows instances, this refers to the Windows update display name.
       in: query
       name: vulnerabilityNameContains
       x-default-description: 'null'
+      schema:
+        type: string
+    ManagedInstanceIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the managed instance.
+      in: path
+      name: managedInstanceId
+      required: true
       schema:
         type: string
     PaginationTokenQueryParam:
@@ -652,6 +567,83 @@ components:
       schema:
         type: string
         minLength: 1
+    MultiDisplayNameQueryParam:
+      description: A filter to return resources that match the given display names.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          maxLength: 255
+          minLength: 1
+          type: string
+        maxItems: 5
+        uniqueItems: true
+    BugUpdatesAvailableEqualsTo:
+      description: A filter to return instances that have the specified number of available bug updates.
+      in: query
+      name: bugUpdatesAvailableEqualsTo
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: integer
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated "List" call.
+
+        For important details about how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+
+        Example: `50`
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    MultiOsFamilyQueryParam:
+      description: A filter to return only resources that match the given operating system family.
+      in: query
+      name: osFamily
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          enum:
+          - ORACLE_LINUX_10
+          - ORACLE_LINUX_9
+          - ORACLE_LINUX_8
+          - ORACLE_LINUX_7
+          - ORACLE_LINUX_6
+          - WINDOWS_SERVER_2016
+          - WINDOWS_SERVER_2019
+          - WINDOWS_SERVER_2022
+          - WINDOWS_SERVER_2025
+          - WINDOWS_11
+          - ALL
+          - UBUNTU_20_04
+          - UBUNTU_22_04
+          - UBUNTU_24_04
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OsFamily'
+        maxItems: 5
+        uniqueItems: true
+    BugUpdatesAvailableGreaterThan:
+      description: A filter to return instances that have more available bug updates than the number specified.
+      in: query
+      name: bugUpdatesAvailableGreaterThan
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: integer
     OtherUpdatesAvailableGreaterThan:
       description: A filter to return instances that have more available other updates than the number specified.
       in: query
@@ -660,6 +652,14 @@ components:
       x-default-description: 'null'
       schema:
         type: integer
+    CompartmentIdInSubTreeQueryParam:
+      description: Indicates whether to include subcompartments in the returned results. Default is false.
+      in: query
+      name: compartmentIdInSubtree
+      required: false
+      x-default-description: false
+      schema:
+        type: boolean
   schemas:
     ManagedInstanceAnalyticCollection:
       description: A set of managed instance metrics returned for the [SummarizeManagedInstanceAnalytics](#/en/osmh/latest/ManagedInstanceAnalyticCollection/SummarizeManagedInstanceAnalytics) operation.
@@ -672,18 +672,6 @@ components:
       required:
       - items
       type: object
-    Error:
-      description: Provides the information for an error.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ManagedInstanceAnalyticSummary:
       description: A metric emitted by managed instance resource.
       properties:
@@ -732,6 +720,18 @@ components:
       - dimensions
       - count
       type: object
+    Error:
+      description: Provides the information for an error.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
   responses:
     default:
       description: Unknown Error

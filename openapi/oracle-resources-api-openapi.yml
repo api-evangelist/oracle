@@ -186,6 +186,31 @@ components:
           example: COMMITMENT
           type: string
       type: object
+    Error:
+      description: Error object model.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    ResourcesCollection:
+      description: The resources of a service.
+      properties:
+        items:
+          description: The list of resource details for a service.
+          items:
+            $ref: '#/components/schemas/ResourceSummary'
+          maxItems: 2000
+          minItems: 0
+          type: array
+      required:
+      - items
     ResourceQuotumCollection:
       description: The quota details of resources in a tenancy.
       properties:
@@ -203,60 +228,6 @@ components:
       required:
       - items
       - isAllowed
-    Error:
-      description: Error object model.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-      type: object
-    ResourceQuotumSummary:
-      description: 'The resource quota balance details.
-
-        '
-      properties:
-        affectedResource:
-          description: The affected resource name.
-          type: string
-        balance:
-          description: The quota balance.
-          example: 0
-          format: double
-          type: number
-        isAllowed:
-          default: true
-          description: Indicates if further quota consumption is allowed.
-          type: boolean
-        isDependency:
-          description: Indicates any resource dependencies.
-          type: boolean
-        isOverage:
-          description: Indicates if overages have been incurred.
-          type: boolean
-        limit:
-          description: The quota limit.
-          example: 5
-          format: double
-          type: number
-        name:
-          description: The resource name.
-          type: string
-        purchasedLimit:
-          description: The purchased quota limit.
-          example: 5
-          format: double
-          type: number
-        service:
-          description: The service name.
-          example: Compute
-          type: string
-      type: object
     ResourceSummary:
       description: 'The details of a resource under a service.
 
@@ -311,49 +282,48 @@ components:
           - POINT_DATA
           type: string
       type: object
-    ResourcesCollection:
-      description: The resources of a service.
+    ResourceQuotumSummary:
+      description: 'The resource quota balance details.
+
+        '
       properties:
-        items:
-          description: The list of resource details for a service.
-          items:
-            $ref: '#/components/schemas/ResourceSummary'
-          maxItems: 2000
-          minItems: 0
-          type: array
-      required:
-      - items
+        affectedResource:
+          description: The affected resource name.
+          type: string
+        balance:
+          description: The quota balance.
+          example: 0
+          format: double
+          type: number
+        isAllowed:
+          default: true
+          description: Indicates if further quota consumption is allowed.
+          type: boolean
+        isDependency:
+          description: Indicates any resource dependencies.
+          type: boolean
+        isOverage:
+          description: Indicates if overages have been incurred.
+          type: boolean
+        limit:
+          description: The quota limit.
+          example: 5
+          format: double
+          type: number
+        name:
+          description: The resource name.
+          type: string
+        purchasedLimit:
+          description: The purchased quota limit.
+          example: 5
+          format: double
+          type: number
+        service:
+          description: The service name.
+          example: Compute
+          type: string
+      type: object
   parameters:
-    ServiceNameQueryParam:
-      description: Service name.
-      in: query
-      name: serviceName
-      required: true
-      schema:
-        type: string
-    PaginationTokenParam:
-      description: The value of the 'opc-next-page' response header from the previous call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 512
-        minLength: 1
-    ServiceEntitlementIdQueryParam:
-      description: Service entitlement ID.
-      in: query
-      name: serviceEntitlement
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: Unique, Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
     SortByParam:
       description: The field to sort by. Supports one sort order.
       in: query
@@ -373,6 +343,39 @@ components:
         default: 50
         maximum: 1000
         minimum: 1
+    PaginationTokenParam:
+      description: The value of the 'opc-next-page' response header from the previous call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 512
+        minLength: 1
+    RequestIdHeader:
+      description: Unique, Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request, please provide the request ID.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    SortOrderParam:
+      description: The sort order to use, which can be ascending (ASC) or descending (DESC).
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    ServiceEntitlementIdQueryParam:
+      description: Service entitlement ID.
+      in: query
+      name: serviceEntitlement
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
     EntitlementIdQueryParam:
       description: Subscription or entitlement ID.
       in: query
@@ -390,16 +393,13 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    SortOrderParam:
-      description: The sort order to use, which can be ascending (ASC) or descending (DESC).
+    ServiceNameQueryParam:
+      description: Service name.
       in: query
-      name: sortOrder
+      name: serviceName
+      required: true
       schema:
         type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
 x-anchors:
   x-headers:
     opc-next-page:

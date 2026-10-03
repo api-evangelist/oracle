@@ -272,225 +272,183 @@ paths:
         description: Management appliance information to be updated.
         required: true
 components:
+  parameters:
+    SddcIdentifierQueryParam:
+      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the SDDC.
+
+        '
+      in: query
+      name: sddcId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ManagementApplianceLifecycleStateQueryParam:
+      description: The lifecycle state of the management appliance.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/ManagementApplianceLifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - NEEDS_ATTENTION
+        - DELETING
+        - DELETED
+        - FAILED
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the given display name exactly.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide one sort order (`sortOrder`). Default order for
+
+        TIMECREATED is descending. Default order for DISPLAYNAME is ascending. The DISPLAYNAME
+
+        sort order is case sensitive.
+
+
+        **Note:** In general, some "List" operations (for example, `ListInstances`) let you
+
+        optionally filter by availability domain if the scope of the resource type is within a
+
+        single availability domain. If you call one of these "List" operations without specifying
+
+        an availability domain, the resources are grouped by availability domain, then sorted.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The DISPLAYNAME sort order
+
+        is case sensitive.
+
+        '
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    RequestIdHeader:
+      description: 'Unique identifier for the request. If you need to contact Oracle about a particular
+
+        request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations (for example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        may be rejected).
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List"
+
+        call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      x-default-description: 'null'
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    ManagementApplianceIdentifierQueryParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the management appliance.
+      in: query
+      name: managementApplianceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ManagementApplianceIdentifierPathParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the management appliance.
+      in: path
+      name: managementApplianceId
+      required: true
+      schema:
+        type: string
   schemas:
-    ManagementAppliance:
-      description: Information about management appliance.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of compartment in OCI, that this appliance is going to be created in.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        computeInstanceId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of compute instance of management appliance in OCI.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        configuration:
-          $ref: '#/components/schemas/ManagementApplianceConfiguration'
-        connections:
-          description: Array of connections for management appliance.
-          items:
-            $ref: '#/components/schemas/ManagementApplianceConnection'
-          type: array
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a
-
-            namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A descriptive name for the management appliance. It must be unique, start with a letter, and contain only letters, digits, whitespaces, dashes and underscores. Avoid entering confidential information.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        heartbeatConnectionStates:
-          description: Current states of connections.
-          items:
-            $ref: '#/components/schemas/ManagementApplianceConnectionStatus'
-          type: array
-        id:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of management appliance.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: Information about current lifecycleState. For FAILED and NEEDS_ATTENTION contains explanations. For other states may contain some details about their progress.
-          enum:
-          - HEALTHY
-          - UPDATING
-          - DELETING
-          - DELETED
-          - FAILED
-          - CREATING
-          - WAITING_FOR_HEARTBEAT
-          - HEARTBEAT_TIMEOUT
-          - CAN_NOT_CONNECT_TO_VCENTER
-          - UI_PLUGIN_IS_NOT_REGISTERED
-          - UNKNOWN_DETAILS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceLifecycleDetails'
-        lifecycleState:
-          description: Current state of the management appliance.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - NEEDS_ATTENTION
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceLifecycleState'
-        managementAgentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of management agent, that this appliance is running in.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        pluginVersion:
-          description: "Current version of OCVS management plugin installed by Management Agent. \nAs soon as OCVS service team publishes a new version OCVS management plugin (ocvs-ma-plugin-<version>.zip) to Management Agent service, \nthe service distributes it to Management Appliances owned by customers. \nThis field shows which version of the OCVS management plugin is currently installed and running for this customer.\n"
-          maxLength: 255
-          minLength: 1
-          type: string
-        sddcId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of SDDC in OCI, that this appliance is going to be registered in.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{orcl-cloud: {free-tier-retain: true}}`
-
-            '
-          type: object
-        timeConfigurationUpdated:
-          description: The date and time the configuration of management appliance was last updated in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-          format: date-time
-          type: string
-        timeCreated:
-          description: The date and time the management appliance was created in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-          format: date-time
-          type: string
-        timeLastHeartbeat:
-          description: The date and time the management appliance has last received heartbeat in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The date and time the management appliance was last updated in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - sddcId
-      - displayName
-      - lifecycleState
-      - configuration
-      - connections
-      - timeCreated
-      type: object
-    ManagementApplianceConnectionStatus:
-      description: Current state of management appliance connection.
-      properties:
-        details:
-          description: Information about current connection status.
-          maxLength: 255
-          minLength: 1
-          type: string
-        state:
-          description: Current connection status.
-          enum:
-          - INACTIVE
-          - HEALTHY
-          - UNHEALTHY
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceConnectionState'
-        type:
-          description: Type of connection.
-          enum:
-          - VCENTER
-          - ADMIN_VCENTER
-          - UI_PLUGIN_REGISTRATION
-          - NSX
-          - EXPORT_METRICS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceHeartbeatConnectionType'
-      required:
-      - type
-      - state
-      type: object
-    ManagementApplianceConnection:
-      description: Management appliance connection.
-      properties:
-        credentialsSecretId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of secret in OCI vault, that is used for storage of username and password in JSON format.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        type:
-          description: Type of connection.
-          enum:
-          - VCENTER
-          - ADMIN_VCENTER
-          - NSX
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceConnectionType'
-      required:
-      - type
-      - credentialsSecretId
-      type: object
     CreateManagementApplianceDetails:
       description: Information about management appliance to be created.
       properties:
@@ -564,22 +522,6 @@ components:
       - connections
       - displayName
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ManagementApplianceConfiguration:
       description: Configuration of management appliance.
       properties:
@@ -609,69 +551,6 @@ components:
       required:
       - isMetricsCollectionEnabled
       - isLogIngestionEnabled
-      type: object
-    UpdateManagementApplianceDetails:
-      description: Information about management appliance to be updated.
-      properties:
-        configuration:
-          $ref: '#/components/schemas/ManagementApplianceConfiguration'
-        connections:
-          description: Array of connections for management appliance.
-          items:
-            $ref: '#/components/schemas/ManagementApplianceConnection'
-          maxItems: 4
-          type: array
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a
-
-            namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A descriptive name for the management appliance. It must be unique, start with a letter, and contain only letters, digits, whitespaces, dashes and underscores. Avoid entering confidential information.
-          maxLength: 32
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-      type: object
-    ManagementApplianceCollection:
-      description: A list of management appliances.
-      properties:
-        items:
-          description: A list of management appliances.
-          items:
-            $ref: '#/components/schemas/ManagementApplianceSummary'
-          type: array
-      required:
-      - items
       type: object
     ManagementApplianceSummary:
       description: Information about management appliance.
@@ -839,182 +718,303 @@ components:
       - connections
       - timeCreated
       type: object
-  parameters:
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the given display name exactly.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ManagementApplianceLifecycleStateQueryParam:
-      description: The lifecycle state of the management appliance.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/ManagementApplianceLifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - NEEDS_ATTENTION
-        - DELETING
-        - DELETED
-        - FAILED
-    SddcIdentifierQueryParam:
-      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the SDDC.
+    UpdateManagementApplianceDetails:
+      description: Information about management appliance to be updated.
+      properties:
+        configuration:
+          $ref: '#/components/schemas/ManagementApplianceConfiguration'
+        connections:
+          description: Array of connections for management appliance.
+          items:
+            $ref: '#/components/schemas/ManagementApplianceConnection'
+          maxItems: 4
+          type: array
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
 
-        '
-      in: query
-      name: sddcId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The DISPLAYNAME sort order
-
-        is case sensitive.
-
-        '
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations (for example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        may be rejected).
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    CompartmentIdQueryParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide one sort order (`sortOrder`). Default order for
-
-        TIMECREATED is descending. Default order for DISPLAYNAME is ascending. The DISPLAYNAME
-
-        sort order is case sensitive.
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
 
 
-        **Note:** In general, some "List" operations (for example, `ListInstances`) let you
+              Example: `{"CostCenter": "42"}`
 
-        optionally filter by availability domain if the scope of the resource type is within a
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a
 
-        single availability domain. If you call one of these "List" operations without specifying
+            namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
 
-        an availability domain, the resources are grouped by availability domain, then sorted.
 
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RequestIdHeader:
-      description: 'Unique identifier for the request. If you need to contact Oracle about a particular
+            Example: `{"Operations": {"CostCenter": "42"}}`
 
-        request, please provide the request ID.
+            '
+          type: object
+        displayName:
+          description: A descriptive name for the management appliance. It must be unique, start with a letter, and contain only letters, digits, whitespaces, dashes and underscores. Avoid entering confidential information.
+          maxLength: 32
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no
 
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated
+            predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
 
-        "List" call. For important details about how pagination works, see
 
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+            Example: `{"Department": "Finance"}`
 
-        '
-      in: query
-      name: limit
-      x-default-description: 'null'
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    ManagementApplianceIdentifierQueryParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the management appliance.
-      in: query
-      name: managementApplianceId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List"
+            '
+          type: object
+      type: object
+    ManagementAppliance:
+      description: Information about management appliance.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of compartment in OCI, that this appliance is going to be created in.
 
-        call. For important details about how pagination works, see
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        computeInstanceId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of compute instance of management appliance in OCI.
 
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        configuration:
+          $ref: '#/components/schemas/ManagementApplianceConfiguration'
+        connections:
+          description: Array of connections for management appliance.
+          items:
+            $ref: '#/components/schemas/ManagementApplianceConnection'
+          type: array
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
 
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    ManagementApplianceIdentifierPathParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the management appliance.
-      in: path
-      name: managementApplianceId
-      required: true
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
 
-        for a resource, set the `if-match` parameter to the value of the
 
-        etag from a previous GET or POST response for that resource.
+              Example: `{"CostCenter": "42"}`
 
-        The resource will be updated or deleted only if the etag you
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a
 
-        provide matches the resource''s current etag value.
+            namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
 
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: A descriptive name for the management appliance. It must be unique, start with a letter, and contain only letters, digits, whitespaces, dashes and underscores. Avoid entering confidential information.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no
+
+            predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        heartbeatConnectionStates:
+          description: Current states of connections.
+          items:
+            $ref: '#/components/schemas/ManagementApplianceConnectionStatus'
+          type: array
+        id:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of management appliance.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: Information about current lifecycleState. For FAILED and NEEDS_ATTENTION contains explanations. For other states may contain some details about their progress.
+          enum:
+          - HEALTHY
+          - UPDATING
+          - DELETING
+          - DELETED
+          - FAILED
+          - CREATING
+          - WAITING_FOR_HEARTBEAT
+          - HEARTBEAT_TIMEOUT
+          - CAN_NOT_CONNECT_TO_VCENTER
+          - UI_PLUGIN_IS_NOT_REGISTERED
+          - UNKNOWN_DETAILS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceLifecycleDetails'
+        lifecycleState:
+          description: Current state of the management appliance.
+          enum:
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - NEEDS_ATTENTION
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceLifecycleState'
+        managementAgentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of management agent, that this appliance is running in.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        pluginVersion:
+          description: "Current version of OCVS management plugin installed by Management Agent. \nAs soon as OCVS service team publishes a new version OCVS management plugin (ocvs-ma-plugin-<version>.zip) to Management Agent service, \nthe service distributes it to Management Appliances owned by customers. \nThis field shows which version of the OCVS management plugin is currently installed and running for this customer.\n"
+          maxLength: 255
+          minLength: 1
+          type: string
+        sddcId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of SDDC in OCI, that this appliance is going to be registered in.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+            '
+          type: object
+        timeConfigurationUpdated:
+          description: The date and time the configuration of management appliance was last updated in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+        timeCreated:
+          description: The date and time the management appliance was created in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+        timeLastHeartbeat:
+          description: The date and time the management appliance has last received heartbeat in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The date and time the management appliance was last updated in the format defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - sddcId
+      - displayName
+      - lifecycleState
+      - configuration
+      - connections
+      - timeCreated
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ManagementApplianceConnectionStatus:
+      description: Current state of management appliance connection.
+      properties:
+        details:
+          description: Information about current connection status.
+          maxLength: 255
+          minLength: 1
+          type: string
+        state:
+          description: Current connection status.
+          enum:
+          - INACTIVE
+          - HEALTHY
+          - UNHEALTHY
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceConnectionState'
+        type:
+          description: Type of connection.
+          enum:
+          - VCENTER
+          - ADMIN_VCENTER
+          - UI_PLUGIN_REGISTRATION
+          - NSX
+          - EXPORT_METRICS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceHeartbeatConnectionType'
+      required:
+      - type
+      - state
+      type: object
+    ManagementApplianceCollection:
+      description: A list of management appliances.
+      properties:
+        items:
+          description: A list of management appliances.
+          items:
+            $ref: '#/components/schemas/ManagementApplianceSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ManagementApplianceConnection:
+      description: Management appliance connection.
+      properties:
+        credentialsSecretId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of secret in OCI vault, that is used for storage of username and password in JSON format.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        type:
+          description: Type of connection.
+          enum:
+          - VCENTER
+          - ADMIN_VCENTER
+          - NSX
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ManagementApplianceConnectionType'
+      required:
+      - type
+      - credentialsSecretId
+      type: object
   responses:
     default:
       description: Unknown Error

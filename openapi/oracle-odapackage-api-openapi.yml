@@ -468,22 +468,22 @@ paths:
       - odapackage
 components:
   parameters:
-    PackageIdentifierPathParam:
-      description: Unique Digital Assistant package identifier.
+    OdaInstanceIdentifierPathParam:
+      description: Unique Digital Assistant instance identifier.
       in: path
-      name: packageId
+      name: odaInstanceId
       required: true
       schema:
         type: string
         maxLength: 255
         minLength: 1
-    ResourceTypeQueryParam:
-      description: Resource type identifier. Used to limit query results to the items which are applicable to the given type.
+    PackageCompartmentIdQueryParam:
+      description: List the packages that belong to this compartment.
       in: query
-      name: resourceType
+      name: compartmentId
+      required: false
       schema:
         type: string
-        default: oracle_da_skills
         maxLength: 255
         minLength: 1
     DisplayNameQueryParam:
@@ -500,13 +500,63 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    IsLatestVersionOnlyQueryParam:
-      description: Should we return only the latest version of a package (instead of all versions)?
+    NameQueryParam:
+      description: 'List only the information for the package with this name. Package names are unique to a publisher and may not change.
+
+
+        Example: `My Package`
+
+        '
       in: query
-      name: isLatestVersionOnly
+      name: name
+      x-default-description: 'null'
       schema:
-        type: boolean
-        default: false
+        type: string
+        maxLength: 255
+        minLength: 1
+    ResourceTypeQueryParam:
+      description: Resource type identifier. Used to limit query results to the items which are applicable to the given type.
+      in: query
+      name: resourceType
+      schema:
+        type: string
+        default: oracle_da_skills
+        maxLength: 255
+        minLength: 1
+    SortByQueryParam:
+      description: 'Sort on this field. You can specify one sort order only. The default sort field is `TIMECREATED`.
+
+
+        The default sort order for `TIMECREATED` is descending, and the default sort order for `DISPLAYNAME` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIMECREATED
+        - DISPLAYNAME
+        default: TIMECREATED
+    IfMatchHeader:
+      description: 'For optimistic concurrency control in a PUT or DELETE call for
+
+        a Digital Assistant instance, set the `if-match` query parameter
+
+        to the value of the `ETAG` header from a previous GET or POST
+
+        response for that instance. The service updates or deletes the
+
+        instance only if the etag that you provide matches the instance''s
+
+        current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
     SortOrderQueryParam:
       description: Sort the results in this order, use either `ASC` (ascending) or `DESC` (descending).
       in: query
@@ -521,6 +571,39 @@ components:
         enum:
         - ASC
         - DESC
+    IsLatestVersionOnlyQueryParam:
+      description: Should we return only the latest version of a package (instead of all versions)?
+      in: query
+      name: isLatestVersionOnly
+      schema:
+        type: boolean
+        default: false
+    RequestIdHeader:
+      description: The client request ID for tracing. This value is included in the opc-request-id response header.
+      in: header
+      name: opc-request-id
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    OdaInstanceQueryParam:
+      description: List only the information for this Digital Assistant instance.
+      in: query
+      name: odaInstanceId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IsReplaceSkillsQueryParmm:
+      description: Should old skills be replaced by new skills if packageId differs from already imported package?
+      in: query
+      name: isReplaceSkills
+      schema:
+        type: boolean
+        default: false
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so that you can retry the request if there''s
 
@@ -541,72 +624,6 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    NameQueryParam:
-      description: 'List only the information for the package with this name. Package names are unique to a publisher and may not change.
-
-
-        Example: `My Package`
-
-        '
-      in: query
-      name: name
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SortByQueryParam:
-      description: 'Sort on this field. You can specify one sort order only. The default sort field is `TIMECREATED`.
-
-
-        The default sort order for `TIMECREATED` is descending, and the default sort order for `DISPLAYNAME` is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - TIMECREATED
-        - DISPLAYNAME
-        default: TIMECREATED
-    RequestIdHeader:
-      description: The client request ID for tracing. This value is included in the opc-request-id response header.
-      in: header
-      name: opc-request-id
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    OdaInstanceIdentifierPathParam:
-      description: Unique Digital Assistant instance identifier.
-      in: path
-      name: odaInstanceId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return per page.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    OdaInstanceQueryParam:
-      description: List only the information for this Digital Assistant instance.
-      in: query
-      name: odaInstanceId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     PaginationTokenQueryParam:
       description: 'The page at which to start retrieving results.
 
@@ -626,64 +643,44 @@ components:
         type: string
         maxLength: 1024
         minLength: 1
-    IsReplaceSkillsQueryParmm:
-      description: Should old skills be replaced by new skills if packageId differs from already imported package?
-      in: query
-      name: isReplaceSkills
-      schema:
-        type: boolean
-        default: false
-    PackageCompartmentIdQueryParam:
-      description: List the packages that belong to this compartment.
-      in: query
-      name: compartmentId
-      required: false
+    PackageIdentifierPathParam:
+      description: Unique Digital Assistant package identifier.
+      in: path
+      name: packageId
+      required: true
       schema:
         type: string
         maxLength: 255
         minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control in a PUT or DELETE call for
-
-        a Digital Assistant instance, set the `if-match` query parameter
-
-        to the value of the `ETAG` header from a previous GET or POST
-
-        response for that instance. The service updates or deletes the
-
-        instance only if the etag that you provide matches the instance''s
-
-        current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return per page.
+      in: query
+      name: limit
       schema:
-        type: string
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
   schemas:
-    ResourceTypeImportContract:
-      description: The contract guiding the import experience for the consumer and behavior of the resource provider for a single resourceType.
+    ResourceTypeMetadata:
+      description: Describes resources of a given type within a package.
       properties:
-        parameters:
-          description: A list of definitions for parameters that are required to import this package into a target instance.
+        properties:
+          description: Any properties needed to describe the content and its usage for this resource type, and within the containing package.
           items:
-            $ref: '#/components/schemas/ParameterDefinition'
+            $ref: '#/components/schemas/MetadataProperty'
           maxItems: 1000
           minItems: 0
           type: array
         resourceType:
-          description: The type of resource to which this resourceType-specific contract applies
+          description: The type of the resource described by this metadata object.
           type: string
-      required:
-      - resourceType
-      - parameters
       type: object
-    UpdateImportedPackageDetails:
-      description: Payload for updating an imported package
+    CreateImportedPackageDetails:
+      description: Payload for creating an imported package
       properties:
         currentPackageId:
-          description: ID of the new package (i.e. version) to import, replacing the old imported package. Leave null if no new package resources are required. The name of the new package must must match the name of the already-imported package.
+          description: ID of the package to import.
           maxLength: 255
           minLength: 1
           type: string
@@ -718,17 +715,14 @@ components:
         parameterValues:
           additionalProperties:
             type: string
-          description: A list of the updated parameter values to apply to this imported package.
+          description: A list of parameter values to use when importing the given package. Must match those defined in the import contract.
           type: object
       required:
       - currentPackageId
-      - parameterValues
       type: object
-    Package:
-      description: Details of `Package` object.
+    PackageSummary:
+      description: Summary of `Package` object.
       properties:
-        defaultParameterValues:
-          $ref: '#/components/schemas/DefaultParameterValues'
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -772,8 +766,6 @@ components:
           maxLength: 255
           minLength: 1
           type: string
-        importContract:
-          $ref: '#/components/schemas/ImportContract'
         name:
           description: Name of package.
           maxLength: 255
@@ -811,10 +803,6 @@ components:
           description: When the package was last published. A date-time string as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
           format: date-time
           type: string
-        timeUploaded:
-          description: When the package was uploaded. A date-time string as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-          format: date-time
-          type: string
         version:
           description: Version of the package.
           maxLength: 255
@@ -827,13 +815,27 @@ components:
       - displayName
       - version
       - timePublished
-      - timeUploaded
       - description
       - resourceTypes
       - resourceTypesMetadata
       - publisherMetadata
-      - importContract
-      - defaultParameterValues
+      type: object
+    MetadataProperty:
+      description: Property to describe and object.
+      properties:
+        name:
+          description: Name of property.
+          maxLength: 255
+          minLength: 1
+          type: string
+        value:
+          description: Value for the property.
+          maxLength: 2048
+          minLength: 1
+          type: string
+      required:
+      - name
+      - value
       type: object
     ParameterDefinition:
       description: A parameter to a resource.
@@ -976,33 +978,20 @@ components:
       - timeCreated
       - timeUpdated
       type: object
-    MetadataProperty:
-      description: Property to describe and object.
+    ResourceTypeDefaultParameterValues:
+      description: Default values needed to import a resource type for a package.
       properties:
-        name:
-          description: Name of property.
-          maxLength: 255
-          minLength: 1
-          type: string
-        value:
-          description: Value for the property.
-          maxLength: 2048
-          minLength: 1
+        parameterValues:
+          additionalProperties:
+            type: string
+          description: A list of parameter values used to import the package.
+          type: object
+        resourceType:
+          description: The type of resource to which these resourceType-specific parameter values apply
           type: string
       required:
-      - name
-      - value
-      type: object
-    ImportContract:
-      description: The contract guiding the import experience for the consumer and behavior of the resource providers for all resource types in a package.
-      properties:
-        importContract:
-          description: A list of resource type specific import contracts, one for each resource type listed in the package definition.
-          items:
-            $ref: '#/components/schemas/ResourceTypeImportContract'
-          maxItems: 100
-          minItems: 1
-          type: array
+      - resourceType
+      - parameterValues
       type: object
     ImportedPackage:
       description: An imported/instantiated package within an instance.
@@ -1097,20 +1086,23 @@ components:
       - statusMessage
       - parameterValues
       type: object
-    DefaultParameterValues:
-      description: Default values for parameters required to import a package
+    ErrorBody:
+      description: Error Information.
       properties:
-        resourceTypesDefaultParameterValues:
-          description: A list of resource type specific default parameter values, one set for each resource type listed in the package definition.
-          items:
-            $ref: '#/components/schemas/ResourceTypeDefaultParameterValues'
-          maxItems: 100
-          minItems: 1
-          type: array
-      type: object
-    PackageSummary:
-      description: Summary of `Package` object.
+        code:
+          description: A short error code that defines the error, which is useful for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    Package:
+      description: Details of `Package` object.
       properties:
+        defaultParameterValues:
+          $ref: '#/components/schemas/DefaultParameterValues'
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -1154,6 +1146,8 @@ components:
           maxLength: 255
           minLength: 1
           type: string
+        importContract:
+          $ref: '#/components/schemas/ImportContract'
         name:
           description: Name of package.
           maxLength: 255
@@ -1191,6 +1185,10 @@ components:
           description: When the package was last published. A date-time string as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
           format: date-time
           type: string
+        timeUploaded:
+          description: When the package was uploaded. A date-time string as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+          format: date-time
+          type: string
         version:
           description: Version of the package.
           maxLength: 255
@@ -1203,28 +1201,58 @@ components:
       - displayName
       - version
       - timePublished
+      - timeUploaded
       - description
       - resourceTypes
       - resourceTypesMetadata
       - publisherMetadata
+      - importContract
+      - defaultParameterValues
       type: object
-    ErrorBody:
-      description: Error Information.
+    ImportContract:
+      description: The contract guiding the import experience for the consumer and behavior of the resource providers for all resource types in a package.
       properties:
-        code:
-          description: A short error code that defines the error, which is useful for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
+        importContract:
+          description: A list of resource type specific import contracts, one for each resource type listed in the package definition.
+          items:
+            $ref: '#/components/schemas/ResourceTypeImportContract'
+          maxItems: 100
+          minItems: 1
+          type: array
+      type: object
+    ResourceTypeImportContract:
+      description: The contract guiding the import experience for the consumer and behavior of the resource provider for a single resourceType.
+      properties:
+        parameters:
+          description: A list of definitions for parameters that are required to import this package into a target instance.
+          items:
+            $ref: '#/components/schemas/ParameterDefinition'
+          maxItems: 1000
+          minItems: 0
+          type: array
+        resourceType:
+          description: The type of resource to which this resourceType-specific contract applies
           type: string
       required:
-      - code
-      - message
-    CreateImportedPackageDetails:
-      description: Payload for creating an imported package
+      - resourceType
+      - parameters
+      type: object
+    DefaultParameterValues:
+      description: Default values for parameters required to import a package
+      properties:
+        resourceTypesDefaultParameterValues:
+          description: A list of resource type specific default parameter values, one set for each resource type listed in the package definition.
+          items:
+            $ref: '#/components/schemas/ResourceTypeDefaultParameterValues'
+          maxItems: 100
+          minItems: 1
+          type: array
+      type: object
+    UpdateImportedPackageDetails:
+      description: Payload for updating an imported package
       properties:
         currentPackageId:
-          description: ID of the package to import.
+          description: ID of the new package (i.e. version) to import, replacing the old imported package. Leave null if no new package resources are required. The name of the new package must must match the name of the already-imported package.
           maxLength: 255
           minLength: 1
           type: string
@@ -1259,39 +1287,11 @@ components:
         parameterValues:
           additionalProperties:
             type: string
-          description: A list of parameter values to use when importing the given package. Must match those defined in the import contract.
+          description: A list of the updated parameter values to apply to this imported package.
           type: object
       required:
       - currentPackageId
-      type: object
-    ResourceTypeDefaultParameterValues:
-      description: Default values needed to import a resource type for a package.
-      properties:
-        parameterValues:
-          additionalProperties:
-            type: string
-          description: A list of parameter values used to import the package.
-          type: object
-        resourceType:
-          description: The type of resource to which these resourceType-specific parameter values apply
-          type: string
-      required:
-      - resourceType
       - parameterValues
-      type: object
-    ResourceTypeMetadata:
-      description: Describes resources of a given type within a package.
-      properties:
-        properties:
-          description: Any properties needed to describe the content and its usage for this resource type, and within the containing package.
-          items:
-            $ref: '#/components/schemas/MetadataProperty'
-          maxItems: 1000
-          minItems: 0
-          type: array
-        resourceType:
-          description: The type of the resource described by this metadata object.
-          type: string
       type: object
   responses:
     default:

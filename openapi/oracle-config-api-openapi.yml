@@ -696,25 +696,6 @@ paths:
         required: true
 components:
   schemas:
-    RetrieveNamespaceMetricsDetails:
-      description: The request body used to retrieve metrics for the specified namespace.
-      properties:
-        name:
-          description: Name of the namespace.
-          type: string
-      required:
-      - name
-      type: object
-    ConfigCollection:
-      description: A collection of configuration items.
-      properties:
-        items:
-          items:
-            $ref: '#/components/schemas/ConfigSummary'
-          type: array
-      required:
-      - items
-      type: object
     Config:
       description: 'A configuration item, which has a number of mutually exclusive properties that can be used to set specific
 
@@ -821,26 +802,33 @@ components:
       required:
       - configType
       type: object
-    ExportConfigurationDetails:
-      description: Array of configuration items with its dependencies to export.
+    CopyConfigurationDetails:
+      description: Array of configuration items with dependencies to copy to a destination domain.
       properties:
         configurationMap:
           additionalProperties:
             type: string
-          description: 'Simple key-value pair that has parameters related to the export process (ConfigurationId, Skip, …) and more.
-
-            Example: `{"parameter-key": "parameter-value"}`
-
-            Supported parameters:
-
-            — List of the Configuration Type or Groups to Export to a destination domain.
-
-            '
+          description: "Simple key-value pair that has parameters related to the import process (EnableOcidSubstitution, DestinationDomainID, …) and more.\nExample: `{\"parameter-key\": \"parameter-value\"}`\nSupported parameters: \n— Enable the OCIDs in instructions to be replaced, if set to \"true\" The Config Service replace any OCIDs it finds \nin the instructions.\n— Destination APM Domain ID where the configuration Item(s) will be fast imported to.\n— List of Configuration Type or Groups to be fast imported.\n— the compartment Id we will fast import to, \nif the compartment Id is not provided it will be the default destination domain compartmentId.\n"
           example:
             bar-key: value
           type: object
       required:
       - configurationMap
+      type: object
+    TestOutput:
+      description: The result of running a test.
+      discriminator:
+        propertyName: testType
+      properties:
+        testType:
+          description: The kind of test output.
+          enum:
+          - SPAN_ENRICHMENT
+          example: SPAN_ENRICHMENT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/TestTypes'
+      required:
+      - testType
       type: object
     ImportConfigurationFailedItemSummary:
       description: A configuration item that failed to be imported.
@@ -875,18 +863,15 @@ components:
           maxLength: 255
           minLength: 1
           type: string
-    CopyConfigurationDetails:
-      description: Array of configuration items with dependencies to copy to a destination domain.
+    ConfigCollection:
+      description: A collection of configuration items.
       properties:
-        configurationMap:
-          additionalProperties:
-            type: string
-          description: "Simple key-value pair that has parameters related to the import process (EnableOcidSubstitution, DestinationDomainID, …) and more.\nExample: `{\"parameter-key\": \"parameter-value\"}`\nSupported parameters: \n— Enable the OCIDs in instructions to be replaced, if set to \"true\" The Config Service replace any OCIDs it finds \nin the instructions.\n— Destination APM Domain ID where the configuration Item(s) will be fast imported to.\n— List of Configuration Type or Groups to be fast imported.\n— the compartment Id we will fast import to, \nif the compartment Id is not provided it will be the default destination domain compartmentId.\n"
-          example:
-            bar-key: value
-          type: object
+        items:
+          items:
+            $ref: '#/components/schemas/ConfigSummary'
+          type: array
       required:
-      - configurationMap
+      - items
       type: object
     Namespace:
       description: Namespaces represent a product level subdivision by name.
@@ -896,30 +881,17 @@ components:
           type: string
       required:
       - name
-    NamespaceMetric:
-      description: Metric associated with a namespace.
+    NamespaceCollection:
+      description: Collection of available namespaces.
       properties:
-        name:
-          description: Name of the metric.
-          maxLength: 255
-          minLength: 1
-          type: string
-        type:
-          description: Type of metric.
-          enum:
-          - COUNTER
-          - GAUGE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/MetricTypes'
-        unit:
-          description: Unit of the metric.
-          example: kb, ms
-          maxLength: 255
-          minLength: 1
-          type: string
+        items:
+          description: The list of available namespaces.
+          items:
+            $ref: '#/components/schemas/Namespace'
+          type: array
+          uniqueItems: true
       required:
-      - name
-      - type
+      - items
     ImportConfigurationFailedItemsCollection:
       description: List of configuration items that failed to be imported.
       properties:
@@ -931,18 +903,6 @@ components:
       required:
       - items
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     CreateConfigDetails:
       description: 'The request body used to create new configuration items. It must specify the configuration type of the item,
 
@@ -998,31 +958,60 @@ components:
       required:
       - configType
       type: object
-    TestDetails:
-      description: The request body used to execute a test.
-      discriminator:
-        propertyName: testType
+    Error:
+      description: Error Information.
       properties:
-        testType:
-          description: The kind of test to run.
-          enum:
-          - SPAN_ENRICHMENT
-          example: SPAN_ENRICHMENT
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
-          x-obmcs-top-level-enum: '#/definitions/TestTypes'
+        message:
+          description: A human-readable error string.
+          type: string
       required:
-      - testType
-      type: object
-    ExportConfigurationResponseDetails:
-      description: Array of configuration items with its dependencies to export.
+      - code
+      - message
+    NamespaceMetric:
+      description: Metric associated with a namespace.
+      properties:
+        name:
+          description: Name of the metric.
+          maxLength: 255
+          minLength: 1
+          type: string
+        type:
+          description: Type of metric.
+          enum:
+          - COUNTER
+          - GAUGE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/MetricTypes'
+        unit:
+          description: Unit of the metric.
+          example: kb, ms
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      - type
+    ImportConfigurationDetails:
+      description: Array of configuration items with dependencies to import.
       properties:
         configurationItems:
           description: A list of Configurations Details .
           items:
             $ref: '#/components/schemas/ExportImportConfigSummary'
           type: array
+        configurationMap:
+          additionalProperties:
+            type: string
+          description: "Simple key-value pair that has parameters related to the import process (EnableOcidSubstitution, Skip, …) and more.\nExample: `{\"parameter-key\": \"parameter-value\"}`\nSupported parameters: \n— Enable the OCIDs in instructions to be replaced, if set to \"true\" The Config Service replace any OCIDs it finds \nin the instructions, if set to true the Config Service will replace.\n— Compartment Id we want to import the configuration Items,\nif the compartment Id is not provided it will be the default destination domain compartmentId.\n"
+          example:
+            bar-key: value
+          type: object
       required:
       - configurationItems
+      - configurationMap
       type: object
     UpdateConfigDetails:
       description: 'The request body used to update the configuration item. It must specify the data to update the item with.
@@ -1088,23 +1077,40 @@ components:
           uniqueItems: true
       required:
       - items
-    ImportConfigurationDetails:
-      description: Array of configuration items with dependencies to import.
+    TestDetails:
+      description: The request body used to execute a test.
+      discriminator:
+        propertyName: testType
       properties:
-        configurationItems:
-          description: A list of Configurations Details .
-          items:
-            $ref: '#/components/schemas/ExportImportConfigSummary'
-          type: array
+        testType:
+          description: The kind of test to run.
+          enum:
+          - SPAN_ENRICHMENT
+          example: SPAN_ENRICHMENT
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/TestTypes'
+      required:
+      - testType
+      type: object
+    ExportConfigurationDetails:
+      description: Array of configuration items with its dependencies to export.
+      properties:
         configurationMap:
           additionalProperties:
             type: string
-          description: "Simple key-value pair that has parameters related to the import process (EnableOcidSubstitution, Skip, …) and more.\nExample: `{\"parameter-key\": \"parameter-value\"}`\nSupported parameters: \n— Enable the OCIDs in instructions to be replaced, if set to \"true\" The Config Service replace any OCIDs it finds \nin the instructions, if set to true the Config Service will replace.\n— Compartment Id we want to import the configuration Items,\nif the compartment Id is not provided it will be the default destination domain compartmentId.\n"
+          description: 'Simple key-value pair that has parameters related to the export process (ConfigurationId, Skip, …) and more.
+
+            Example: `{"parameter-key": "parameter-value"}`
+
+            Supported parameters:
+
+            — List of the Configuration Type or Groups to Export to a destination domain.
+
+            '
           example:
             bar-key: value
           type: object
       required:
-      - configurationItems
       - configurationMap
       type: object
     ConfigSummary:
@@ -1230,21 +1236,6 @@ components:
       required:
       - configType
       type: object
-    TestOutput:
-      description: The result of running a test.
-      discriminator:
-        propertyName: testType
-      properties:
-        testType:
-          description: The kind of test output.
-          enum:
-          - SPAN_ENRICHMENT
-          example: SPAN_ENRICHMENT
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/TestTypes'
-      required:
-      - testType
-      type: object
     ValidateSpanFilterPatternDetails:
       description: The request body used to validate a Span Filter pattern.
       properties:
@@ -1258,6 +1249,15 @@ components:
           type: string
       required:
       - filterText
+      type: object
+    RetrieveNamespaceMetricsDetails:
+      description: The request body used to retrieve metrics for the specified namespace.
+      properties:
+        name:
+          description: Name of the namespace.
+          type: string
+      required:
+      - name
       type: object
     ExportImportConfigSummary:
       description: 'A description of a configuration item or dependency. It specifies all the properties that define the configuration item or dependency that will be exported.
@@ -1322,18 +1322,43 @@ components:
       required:
       - configType
       type: object
-    NamespaceCollection:
-      description: Collection of available namespaces.
+    ExportConfigurationResponseDetails:
+      description: Array of configuration items with its dependencies to export.
       properties:
-        items:
-          description: The list of available namespaces.
+        configurationItems:
+          description: A list of Configurations Details .
           items:
-            $ref: '#/components/schemas/Namespace'
+            $ref: '#/components/schemas/ExportImportConfigSummary'
           type: array
-          uniqueItems: true
       required:
-      - items
+      - configurationItems
+      type: object
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
+    DisplayNameQueryParam:
+      description: A filter to return resources that match the given display name.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     FilterByFreeformTagExistsQueryParam:
       description: 'A list of tag existence filters to apply.  Only resources for which the specified freeform tags exist the value will be returned.
 
@@ -1353,6 +1378,60 @@ components:
         items:
           maxLength: 106
           type: string
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide one "sortBy" value. The default order for displayName, timeCreated
+
+        and timeUpdated is ascending. The displayName sort by is case-sensitive.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - displayName
+        - timeCreated
+        - timeUpdated
+        default: displayName
+    ApmDomainIdQueryParam:
+      description: 'The APM Domain ID the request is intended for.
+
+        '
+      in: query
+      name: apmDomainId
+      required: true
+      schema:
+        type: string
+    ConfigTypeQueryParam:
+      description: 'A filter to match configuration items of a given type.
+
+        Supported values are SPAN_FILTER, METRIC_GROUP, APDEX, AGENT and MACS_APM_EXTENSION.
+
+        '
+      in: query
+      name: configType
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
     DryRunHeader:
       description: 'Indicates that the request is a dry run, if set to "true". A dry run request does not modify the
 
@@ -1365,6 +1444,58 @@ components:
       schema:
         type: string
         default: 'false'
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The displayName sort order
+
+        is case-sensitive.
+
+        '
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    FilterByFreeformTagEqualsQueryParam:
+      description: 'A list of tag filters to apply.  Only resources with a freeform tag matching the value will be returned.
+
+        The key for each tag is "{tagName}.{value}".  All inputs are case-insensitive.
+
+        Multiple values for the same tag name are interpreted as "OR".  Values for different tag names are interpreted as "AND".
+
+        '
+      in: query
+      name: freeformTagEquals
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: array
+        items:
+          maxLength: 357
+          type: string
+    RequestIdHeader:
+      description: 'Unique identifier for the request.
+
+        If you need to contact Oracle about a particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    ConfigIdPathParam:
+      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the configuration item.
+
+        '
+      in: path
+      name: configId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
     FilterByDefinedTagEqualsQueryParam:
       description: 'A list of tag filters to apply.  Only resources with a defined tag matching the value will be returned.
 
@@ -1384,37 +1515,6 @@ components:
         items:
           maxLength: 458
           type: string
-    DisplayNameQueryParam:
-      description: A filter to return resources that match the given display name.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The displayName sort order
-
-        is case-sensitive.
-
-        '
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    ApmTargetDomainIdQueryParam:
-      description: The Target APM Domain ID the request is intended for.
-      in: query
-      name: apmTargetDomainId
-      required: true
-      schema:
-        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1434,90 +1534,27 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    ConfigIdPathParam:
-      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the configuration item.
+    PaginationTokenQueryParam:
+      description: 'The maximum number of results per page, or items to return in a paginated "List" call. For information on
+
+        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        Example: `50`
 
         '
-      in: path
-      name: configId
+      in: query
+      name: page
+      schema:
+        type: string
+        default: '50'
+        maxLength: 1024
+    ApmTargetDomainIdQueryParam:
+      description: The Target APM Domain ID the request is intended for.
+      in: query
+      name: apmTargetDomainId
       required: true
       schema:
         type: string
-        maxLength: 255
-    FilterByFreeformTagEqualsQueryParam:
-      description: 'A list of tag filters to apply.  Only resources with a freeform tag matching the value will be returned.
-
-        The key for each tag is "{tagName}.{value}".  All inputs are case-insensitive.
-
-        Multiple values for the same tag name are interpreted as "OR".  Values for different tag names are interpreted as "AND".
-
-        '
-      in: query
-      name: freeformTagEquals
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: array
-        items:
-          maxLength: 357
-          type: string
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide one "sortBy" value. The default order for displayName, timeCreated
-
-        and timeUpdated is ascending. The displayName sort by is case-sensitive.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - displayName
-        - timeCreated
-        - timeUpdated
-        default: displayName
-    OptionsGroupQueryParam:
-      description: A filter to return OPTIONS resources that match the given group.
-      in: query
-      name: optionsGroup
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 128
-        minLength: 1
-    ApmDomainIdQueryParam:
-      description: 'The APM Domain ID the request is intended for.
-
-        '
-      in: query
-      name: apmDomainId
-      required: true
-      schema:
-        type: string
-    RequestIdHeader:
-      description: 'Unique identifier for the request.
-
-        If you need to contact Oracle about a particular request, please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    ConfigTypeQueryParam:
-      description: 'A filter to match configuration items of a given type.
-
-        Supported values are SPAN_FILTER, METRIC_GROUP, APDEX, AGENT and MACS_APM_EXTENSION.
-
-        '
-      in: query
-      name: configType
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
     FilterByDefinedTagExistsQueryParam:
       description: 'A list of tag existence filters to apply.  Only resources for which the specified defined tags exist will be returned.
 
@@ -1541,6 +1578,16 @@ components:
         items:
           maxLength: 207
           type: string
+    OptionsGroupQueryParam:
+      description: A filter to return OPTIONS resources that match the given group.
+      in: query
+      name: optionsGroup
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 128
+        minLength: 1
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -1550,53 +1597,6 @@ components:
         default: 100
         maximum: 1000
         minimum: 1
-    PaginationTokenQueryParam:
-      description: 'The maximum number of results per page, or items to return in a paginated "List" call. For information on
-
-        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        Example: `50`
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        default: '50'
-        maxLength: 1024
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
 x-anchors:
   x-common-splat-settings:
   - allowCrossTenancy: true

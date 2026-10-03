@@ -549,23 +549,61 @@ paths:
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
   schemas:
-    WorkRequestLogEntryCollection:
-      description: A list of work request logs. Can contain both logs and other information, such as metadata.
+    WorkRequestSummaryCollection:
+      description: A list of work requests. Can contain both work requests and other information, such as metadata.
       properties:
         items:
-          description: A list of work request log entries.
+          description: A list of work requests.
           items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
+            $ref: '#/components/schemas/WorkRequestSummary'
           type: array
       required:
       - items
       type: object
-    CancelMacOrderDetails:
-      description: The data to cancel a MacOrder.
+    MacOrderCollection:
+      description: Results of a MacOrder search. Contains both MacOrderSummary items and other information, such as metadata.
       properties:
-        cancelReason:
-          description: The reason for the MacOrder cancellation.
+        items:
+          description: List of MacOrders.
+          items:
+            $ref: '#/components/schemas/MacOrderSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateMacOrderDetails:
+      description: The data to update a MacOrder.
+      properties:
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+
+            Example: `My new resource`
+
+            '
+          maxLength: 255
+          minLength: 1
           type: string
+        ipRange:
+          description: The IP Range specified by the customer for this order.
+          type: string
+        orderDescription:
+          description: 'A user-friendly description. To provide some insight about the resource.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 400
+          type: string
+        orderSize:
+          description: Number of macs requested in this MacOrder.
+          type: integer
+        shape:
+          description: The shape of the Mac.
+          type: string
+          x-obmcs-enumref: '#/definitions/MacOrder/shape'
       type: object
     WorkRequestSummary:
       description: Summary information about an asynchronous work request.
@@ -654,209 +692,110 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    WorkRequestSummaryCollection:
-      description: A list of work requests. Can contain both work requests and other information, such as metadata.
+    WorkRequestLogEntryCollection:
+      description: A list of work request logs. Can contain both logs and other information, such as metadata.
       properties:
         items:
-          description: A list of work requests.
+          description: A list of work request log entries.
           items:
-            $ref: '#/components/schemas/WorkRequestSummary'
+            $ref: '#/components/schemas/WorkRequestLogEntry'
           type: array
       required:
       - items
       type: object
-    WorkRequestError:
-      description: An error encountered while performing an operation that is tracked by a work request.
+    WorkRequest:
+      description: 'An asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
+
+        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
+
+        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
+
+        '
       properties:
-        code:
-          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
-
-            [API Errors](/iaas/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error message.
-          type: string
-        timestamp:
-          description: 'The date and time the error occurred, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error message.
-          type: string
-      required:
-      - code
-      - message
-    WorkRequestResource:
-      description: A resource created or operated on by a work request.
-      properties:
-        actionType:
-          description: 'The way in which this resource is affected by the operation tracked in the work request.
-
-            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
-
-            work is complete for that resource, at which point it transitions to CREATED, UPDATED,
-
-            or DELETED, respectively.
-
-            '
-          enum:
-          - CREATED
-          - UPDATED
-          - DELETED
-          - IN_PROGRESS
-          - RELATED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ActionType'
-        entityType:
-          description: The resource type that the work request affects.
-          type: string
-        entityUri:
-          description: The URI path that you can use for a GET request to access the resource metadata.
-          type: string
-        identifier:
-          description: An [OCID](/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource.
-          type: string
-        metadata:
-          additionalProperties:
-            type: string
-          description: Additional information that helps to explain the resource.
-          enum:
-          - IS_DRY_RUN
-          type: object
-          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
-      required:
-      - actionType
-      - entityType
-      - identifier
-    WorkRequestLogEntry:
-      description: A log message from performing an operation that is tracked by a work request.
-      properties:
-        message:
-          description: A human-readable log message.
-          type: string
-        timestamp:
-          description: 'The date and time the log message was written, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    WorkRequestErrorCollection:
-      description: A list of work request errors. Can contain both errors and other information, such as metadata.
-      properties:
-        items:
-          description: A list of work request errors.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
-    CreateMacOrderDetails:
-      description: The data to create a new MacOrder.
-      properties:
-        commitmentTerm:
-          default: YEARS_3
-          description: Enum that indicates the agreed commitment term for the MacDevices.
-          type: string
-          x-obmcs-enumref: '#/definitions/MacOrder/commitmentTerm'
         compartmentId:
-          description: OCID of the compartment to which the resource belongs to.
-          maxLength: 255
-          minLength: 1
-          type: string
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Avoid entering confidential information.
-
-
-            Example: `My new resource`
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
 
             '
-          maxLength: 255
-          minLength: 1
           type: string
-        ipRange:
-          description: The IP Range specified by the customer for this order.
+        id:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
           type: string
-        orderDescription:
-          description: 'A user-friendly description. To provide some insight about the resource.
+        operationType:
+          description: The asynchronous operation tracked by this work request.
+          enum:
+          - CREATE_MAC_ORDER
+          - UPDATE_MAC_ORDER
+          - CANCEL_MAC_ORDER
+          - DELETE_MAC_ORDER
+          - DELETE_MAC_DEVICE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
 
-            Avoid entering confidential information.
+            that must be performed.
 
             '
-          maxLength: 400
+          format: float
+          type: number
+        resources:
+          description: The resources that are affected by the work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: The status of the work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - NEEDS_ATTENTION
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
           type: string
-        orderSize:
-          description: Number of macs requested in this MacOrder.
-          type: integer
-        shape:
-          description: The requested shape of the MacDevices in the MacOrder.
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the work request was created, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
           type: string
-          x-obmcs-enumref: '#/definitions/MacOrder/shape'
+        timeFinished:
+          description: 'The date and time the work request was finished, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the work request was started, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The date and time the work request was updated, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
       required:
+      - operationType
+      - status
+      - id
       - compartmentId
-      - orderDescription
-      - orderSize
-      - commitmentTerm
-      - shape
-      type: object
-    UpdateMacOrderDetails:
-      description: The data to update a MacOrder.
-      properties:
-        displayName:
-          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
-
-            Avoid entering confidential information.
-
-
-            Example: `My new resource`
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        ipRange:
-          description: The IP Range specified by the customer for this order.
-          type: string
-        orderDescription:
-          description: 'A user-friendly description. To provide some insight about the resource.
-
-            Avoid entering confidential information.
-
-            '
-          maxLength: 400
-          type: string
-        orderSize:
-          description: Number of macs requested in this MacOrder.
-          type: integer
-        shape:
-          description: The shape of the Mac.
-          type: string
-          x-obmcs-enumref: '#/definitions/MacOrder/shape'
-      type: object
+      - resources
+      - percentComplete
+      - timeAccepted
     MacOrder:
       description: 'A description of a MacOrder resource.
 
@@ -979,17 +918,93 @@ components:
       - timeCreated
       - lifecycleState
       type: object
-    MacOrderCollection:
-      description: Results of a MacOrder search. Contains both MacOrderSummary items and other information, such as metadata.
+    CreateMacOrderDetails:
+      description: The data to create a new MacOrder.
       properties:
-        items:
-          description: List of MacOrders.
-          items:
-            $ref: '#/components/schemas/MacOrderSummary'
-          type: array
+        commitmentTerm:
+          default: YEARS_3
+          description: Enum that indicates the agreed commitment term for the MacDevices.
+          type: string
+          x-obmcs-enumref: '#/definitions/MacOrder/commitmentTerm'
+        compartmentId:
+          description: OCID of the compartment to which the resource belongs to.
+          maxLength: 255
+          minLength: 1
+          type: string
+        displayName:
+          description: 'A user-friendly name. Does not have to be unique, and it''s changeable.
+
+            Avoid entering confidential information.
+
+
+            Example: `My new resource`
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        ipRange:
+          description: The IP Range specified by the customer for this order.
+          type: string
+        orderDescription:
+          description: 'A user-friendly description. To provide some insight about the resource.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 400
+          type: string
+        orderSize:
+          description: Number of macs requested in this MacOrder.
+          type: integer
+        shape:
+          description: The requested shape of the MacDevices in the MacOrder.
+          type: string
+          x-obmcs-enumref: '#/definitions/MacOrder/shape'
       required:
-      - items
+      - compartmentId
+      - orderDescription
+      - orderSize
+      - commitmentTerm
+      - shape
       type: object
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestError:
+      description: An error encountered while performing an operation that is tracked by a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occurred. For a list of error codes, see
+
+            [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+        timestamp:
+          description: 'The date and time the error occurred, in the format defined by
+
+            [RFC 3339](https://tools.ietf.org/html/rfc3339).
+
+            '
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
     MacOrderSummary:
       description: Summary information about a MacOrder.
       properties:
@@ -1083,100 +1098,106 @@ components:
       - timeCreated
       - lifecycleState
       type: object
-    WorkRequest:
-      description: 'An asynchronous work request. Work requests help you monitor long-running operations. When you start a long-running operation,
-
-        the service creates a work request. A work request is an activity log that lets you track each step in the operation''s
-
-        progress. Each work request has an OCID that lets you interact with it programmatically and use it for automation.
-
-        '
+    CancelMacOrderDetails:
+      description: The data to cancel a MacOrder.
       properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment that contains the work request.
-
-            '
+        cancelReason:
+          description: The reason for the MacOrder cancellation.
           type: string
-        id:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the work request.
-          type: string
-        operationType:
-          description: The asynchronous operation tracked by this work request.
-          enum:
-          - CREATE_MAC_ORDER
-          - UPDATE_MAC_ORDER
-          - CANCEL_MAC_ORDER
-          - DELETE_MAC_ORDER
-          - DELETE_MAC_DEVICE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: 'Shows the progress of the operation tracked by the work request, as a percentage of the total work
-
-            that must be performed.
-
-            '
-          format: float
-          type: number
-        resources:
-          description: The resources that are affected by the work request.
+      type: object
+    WorkRequestErrorCollection:
+      description: A list of work request errors. Can contain both errors and other information, such as metadata.
+      properties:
+        items:
+          description: A list of work request errors.
           items:
-            $ref: '#/components/schemas/WorkRequestResource'
+            $ref: '#/components/schemas/WorkRequestError'
           type: array
-        status:
-          description: The status of the work request.
+      required:
+      - items
+      type: object
+    WorkRequestResource:
+      description: A resource created or operated on by a work request.
+      properties:
+        actionType:
+          description: 'The way in which this resource is affected by the operation tracked in the work request.
+
+            A resource being created, updated, or deleted remains in the IN_PROGRESS state until
+
+            work is complete for that resource, at which point it transitions to CREATED, UPDATED,
+
+            or DELETED, respectively.
+
+            '
           enum:
-          - ACCEPTED
+          - CREATED
+          - UPDATED
+          - DELETED
           - IN_PROGRESS
-          - WAITING
-          - NEEDS_ATTENTION
+          - RELATED
           - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
           type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the work request was created, in the format defined by
+          x-obmcs-top-level-enum: '#/definitions/ActionType'
+        entityType:
+          description: The resource type that the work request affects.
+          type: string
+        entityUri:
+          description: The URI path that you can use for a GET request to access the resource metadata.
+          type: string
+        identifier:
+          description: An [OCID](/iaas/Content/General/Concepts/identifiers.htm) or other unique identifier for the resource.
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: Additional information that helps to explain the resource.
+          enum:
+          - IS_DRY_RUN
+          type: object
+          x-obmcs-top-level-enum: '#/definitions/WorkRequestResourceMetadataKey'
+      required:
+      - actionType
+      - entityType
+      - identifier
+    WorkRequestLogEntry:
+      description: A log message from performing an operation that is tracked by a work request.
+      properties:
+        message:
+          description: A human-readable log message.
+          type: string
+        timestamp:
+          description: 'The date and time the log message was written, in the format defined by
 
             [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the work request was finished, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the work request was started, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/html/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The date and time the work request was updated, in the format defined by
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
 
             '
           format: date-time
           type: string
       required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
+      - message
+      - timestamp
   parameters:
+    ResourceIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    WorkRequestIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    MacOrderIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the MacOrder.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
     MacOrderIdentifierPathParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the MacOrder.
       in: path
@@ -1193,19 +1214,57 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    LifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
+    WorkRequestLogAndErrorSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for `timestamp` is descending.
 
         '
       in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/MacOrder/lifecycleState'
+      name: sortBy
       schema:
         type: string
+        enum:
+        - timestamp
+        default: timestamp
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+
+        is descending. Default order for `displayName` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+        that resource. The resource will be updated or deleted only if the etag you provide
+
+        matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
     SortOrderQueryParam:
       description: The sort order to use, either ascending (`ASC`) or descending (`DESC`).
       in: query
@@ -1221,11 +1280,38 @@ components:
         enum:
         - ASC
         - DESC
-    WorkRequestIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+    LifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
       in: query
-      name: workRequestId
+      name: lifecycleState
+      required: false
       x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/MacOrder/lifecycleState'
+      schema:
+        type: string
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    WorkRequestIdPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
+      in: path
+      name: workRequestId
+      required: true
       schema:
         type: string
     RetryTokenHeader:
@@ -1247,6 +1333,19 @@ components:
         type: string
         maxLength: 64
         minLength: 1
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
     CompartmentIdQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
       in: query
@@ -1254,59 +1353,21 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    MacOrderIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the MacOrder.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    ResourceIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
 
-        is descending. Default order for `displayName` is ascending.
+        paginated "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
 
         '
       in: query
-      name: sortBy
+      name: limit
       schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for `timeAccepted` is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
     WorkRequestStatusQueryParam:
       description: A filter to return only the resources that match the given lifecycle state.
       in: query
@@ -1325,67 +1386,6 @@ components:
         - SUCCEEDED
         - CANCELING
         - CANCELED
-    WorkRequestLogAndErrorSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for `timestamp` is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timestamp
-        default: timestamp
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    WorkRequestIdPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the asynchronous work request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
-
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
   responses:
     default:
       description: Unknown Error

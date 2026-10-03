@@ -300,22 +300,197 @@ paths:
         description: The parameters of the request to update the read replica.
         required: true
 components:
+  parameters:
+    OpcRequestIdHeader:
+      description: 'Customer-defined unique identifier for the request. If you need to
+
+        contact Oracle about a specific request, please provide the request
+
+        ID that you supplied in this header with the request.
+
+        '
+      in: header
+      name: opc-request-id
+      required: false
+      schema:
+        type: string
+    FilterByDbSystemIdQueryParam:
+      description: The DB System [OCID](/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: dbSystemId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a
+
+        resource, set the `If-Match` header to the value of the etag from a
+
+        previous GET or POST response for that resource. The resource will be
+
+        updated or deleted only if the etag you provide matches the resource''s
+
+        current etag value.
+
+        '
+      in: header
+      name: if-match
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use (ASC or DESC).
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    IfNoneMatchHeader:
+      description: 'For conditional requests. In the GET call for a resource, set the
+
+        `If-None-Match` header to the value of the ETag from a previous GET (or
+
+        POST or PUT) response for that resource. The server will return with
+
+        either a 304 Not Modified response if the resource has not changed, or a
+
+        200 OK response with the updated representation.
+
+        '
+      in: header
+      name: if-none-match
+      x-default-description: No conditional request is made.
+      schema:
+        type: string
+    FilterByConfigurationIdQueryParam:
+      description: The requested Configuration instance.
+      in: query
+      name: configurationId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    FilterByReplicaIdQueryParam:
+      description: The read replica [OCID](/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: replicaId
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    OpcRetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case
+
+        of a timeout or server error without risk of executing that same action
+
+        again. Retry tokens expire after 24 hours, but can be invalidated before
+
+        then due to conflicting operations (for example, if a resource has been
+
+        deleted and purged from the system, then a retry of the original
+
+        creation request may be rejected).
+
+        '
+      in: header
+      name: opc-retry-token
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    ReplicaIdPathParam:
+      description: The Replica [OCID](/Content/General/Concepts/identifiers.htm).
+      in: path
+      name: replicaId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` or `opc-prev-page` response header from
+
+        the previous list call. For information about pagination, see [List
+
+        Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 4096
+        minLength: 1
+    FilterByReplicaLifecycleStateQueryParam:
+      description: The LifecycleState of the read replica.
+      in: query
+      name: lifecycleState
+      required: false
+      x-obmcs-enumref: '#/definitions/ReplicaSummary/lifecycleState'
+      schema:
+        type: string
+    SortByReplicaFieldQueryParam:
+      description: 'The field to sort by. You can sort by one field only. By default, the Time field is sorted in descending order and the Display Name field in ascending order.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    FilterByDisplayNameQueryParam:
+      description: A filter to return only the resource matching the given display name exactly.
+      in: query
+      name: displayName
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return in a paginated list call. For information about pagination, see
+
+        [List Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    FilterByConfigurationUpToDateQueryParam:
+      description: 'Filter instances if they are using the latest revision of the
+
+        Configuration they are associated with.
+
+        '
+      in: query
+      name: isUpToDate
+      required: false
+      schema:
+        type: boolean
+        default: false
+    FilterByCompartmentIdQueryParam:
+      description: The compartment [OCID](/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
   responses:
-    401-Unauthorized:
-      description: Unauthorized
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     404-NotFound:
       description: Not Found
       headers:
@@ -331,8 +506,55 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    400-BadRequest:
-      description: Bad Request
+    304-NotModified:
+      description: The resource with the given ETag has not changed.
+      headers:
+        etag:
+          description: 'For optimistic concurrency control. See `if-match`.
+
+            '
+          schema:
+            type: string
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+    500-ServerError:
+      description: Internal Server Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    401-Unauthorized:
+      description: Unauthorized
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    DefaultError:
+      description: An error has occurred.
       headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
@@ -365,25 +587,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    304-NotModified:
-      description: The resource with the given ETag has not changed.
-      headers:
-        etag:
-          description: 'For optimistic concurrency control. See `if-match`.
-
-            '
-          schema:
-            type: string
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-    409-Conflict:
-      description: Conflict
+    400-BadRequest:
+      description: Bad Request
       headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
@@ -397,8 +602,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    DefaultError:
-      description: An error has occurred.
+    409-Conflict:
+      description: Conflict
       headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
@@ -427,251 +632,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    500-ServerError:
-      description: Internal Server Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  parameters:
-    FilterByReplicaIdQueryParam:
-      description: The read replica [OCID](/Content/General/Concepts/identifiers.htm).
-      in: query
-      name: replicaId
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    FilterByCompartmentIdQueryParam:
-      description: The compartment [OCID](/Content/General/Concepts/identifiers.htm).
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SortOrderQueryParam:
-      description: The sort order to use (ASC or DESC).
-      in: query
-      name: sortOrder
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    IfNoneMatchHeader:
-      description: 'For conditional requests. In the GET call for a resource, set the
-
-        `If-None-Match` header to the value of the ETag from a previous GET (or
-
-        POST or PUT) response for that resource. The server will return with
-
-        either a 304 Not Modified response if the resource has not changed, or a
-
-        200 OK response with the updated representation.
-
-        '
-      in: header
-      name: if-none-match
-      x-default-description: No conditional request is made.
-      schema:
-        type: string
-    SortByReplicaFieldQueryParam:
-      description: 'The field to sort by. You can sort by one field only. By default, the Time field is sorted in descending order and the Display Name field in ascending order.
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    FilterByConfigurationIdQueryParam:
-      description: The requested Configuration instance.
-      in: query
-      name: configurationId
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    FilterByDisplayNameQueryParam:
-      description: A filter to return only the resource matching the given display name exactly.
-      in: query
-      name: displayName
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-    OpcRetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case
-
-        of a timeout or server error without risk of executing that same action
-
-        again. Retry tokens expire after 24 hours, but can be invalidated before
-
-        then due to conflicting operations (for example, if a resource has been
-
-        deleted and purged from the system, then a retry of the original
-
-        creation request may be rejected).
-
-        '
-      in: header
-      name: opc-retry-token
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    FilterByReplicaLifecycleStateQueryParam:
-      description: The LifecycleState of the read replica.
-      in: query
-      name: lifecycleState
-      required: false
-      x-obmcs-enumref: '#/definitions/ReplicaSummary/lifecycleState'
-      schema:
-        type: string
-    OpcRequestIdHeader:
-      description: 'Customer-defined unique identifier for the request. If you need to
-
-        contact Oracle about a specific request, please provide the request
-
-        ID that you supplied in this header with the request.
-
-        '
-      in: header
-      name: opc-request-id
-      required: false
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'The maximum number of items to return in a paginated list call. For information about pagination, see
-
-        [List Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    PaginationTokenQueryParam:
-      description: 'The value of the `opc-next-page` or `opc-prev-page` response header from
-
-        the previous list call. For information about pagination, see [List
-
-        Pagination](../../../#API/Concepts/usingapi.htm#List_Pagination).
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        maxLength: 4096
-        minLength: 1
-    FilterByDbSystemIdQueryParam:
-      description: The DB System [OCID](/Content/General/Concepts/identifiers.htm).
-      in: query
-      name: dbSystemId
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a
-
-        resource, set the `If-Match` header to the value of the etag from a
-
-        previous GET or POST response for that resource. The resource will be
-
-        updated or deleted only if the etag you provide matches the resource''s
-
-        current etag value.
-
-        '
-      in: header
-      name: if-match
-      schema:
-        type: string
-    ReplicaIdPathParam:
-      description: The Replica [OCID](/Content/General/Concepts/identifiers.htm).
-      in: path
-      name: replicaId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    FilterByConfigurationUpToDateQueryParam:
-      description: 'Filter instances if they are using the latest revision of the
-
-        Configuration they are associated with.
-
-        '
-      in: query
-      name: isUpToDate
-      required: false
-      schema:
-        type: boolean
-        default: false
   schemas:
-    Replica:
-      allOf:
-      - $ref: '#/components/schemas/ReplicaSummary'
-      - properties:
-          encryptData:
-            $ref: '#/components/schemas/EncryptDataDetails'
-          secureConnections:
-            $ref: '#/components/schemas/SecureConnectionDetails'
-      description: A DB System read replica.
-    LoggingDestinationConfiguration:
-      description: Configuration parameters for a given destination.
-      properties:
-        destination:
-          description: Type of destination where MySQL telemetry is exposed to.
-          enum:
-          - LOG_ANALYTICS
-          - OPEN_TELEMETRY
-          type: string
-        destinationConfigurations:
-          description: List of configuration variables for a given destination type.
-          items:
-            $ref: '#/components/schemas/DestinationConfiguration'
-          maxItems: 10
-          type: array
-        logTypes:
-          description: List of MySQL telemetry types that can be exposed on a telemetry destination
-          items:
-            enum:
-            - ERROR_LOG
-            - GENERAL_LOG
-            - SLOW_QUERY_LOG
-            - AUDIT_LOG
-            type: string
-          type: array
-      required:
-      - destination
-      - destinationConfigurations
-      - logTypes
-      type: object
     CreateReplicaDetails:
       description: Details required to create a read replica.
       properties:
@@ -726,22 +687,39 @@ components:
           $ref: '#/components/schemas/ReplicaOverrides'
       required:
       - dbSystemId
-    Error:
-      description: Sorry.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
+    TelemetryConfigurationDetails:
+      description: 'Telemetry configuration details of a DB System or a read replica.
 
-            [API Errors](/Content/API/References/apierrors.htm).
+        '
+      properties:
+        logs:
+          description: Telemetry configuration details for logging.
+          items:
+            $ref: '#/components/schemas/LoggingDestinationConfiguration'
+          maxItems: 10
+          minItems: 1
+          type: array
+    SecureConnectionDetails:
+      description: 'Secure connection configuration details.
+
+        '
+      properties:
+        certificateGenerationType:
+          default: SYSTEM
+          description: 'Select whether to use MySQL Database Service-managed certificate (SYSTEM) or your own certificate (BYOC).
 
             '
+          enum:
+          - SYSTEM
+          - BYOC
           type: string
-        message:
-          description: A human-readable error string.
+          x-obmcs-top-level-enum: '#/definitions/CertificateGenerationType'
+        certificateId:
+          description: The OCID of the certificate to use.
+          maxLength: 255
           type: string
       required:
-      - code
-      - message
+      - certificateGenerationType
     UpdateReplicaDetails:
       description: Details required to update a read replica.
       properties:
@@ -788,116 +766,15 @@ components:
           type: boolean
         replicaOverrides:
           $ref: '#/components/schemas/ReplicaOverrides'
-    EncryptDataDetails:
-      description: 'Encrypt data details.
-
-        '
-      properties:
-        keyGenerationType:
-          default: SYSTEM
-          description: Select whether to use Oracle-managed key (SYSTEM) or your own key (BYOK).
-          enum:
-          - SYSTEM
-          - BYOK
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/KeyGenerationType'
-        keyId:
-          description: The OCID of the key to use.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - keyGenerationType
-    TelemetryConfigurationDetails:
-      description: 'Telemetry configuration details of a DB System or a read replica.
-
-        '
-      properties:
-        logs:
-          description: Telemetry configuration details for logging.
-          items:
-            $ref: '#/components/schemas/LoggingDestinationConfiguration'
-          maxItems: 10
-          minItems: 1
-          type: array
-    DestinationConfiguration:
-      description: Configuration variable of a given destination.
-      properties:
-        key:
-          description: Name of the destination configuration variable.
-          maxLength: 255
-          minLength: 1
-          type: string
-        value:
-          description: Value of the destination configuration variable.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - key
-      - value
-      type: object
-    ReplicaOverrides:
-      description: "By default a read replica inherits the MySQL version, shape, and configuration of the source DB system. \nIf you want to override any of these, provide values in the properties, mysqlVersion, shapeName, \nand configurationId. If you set a property value to \"\", then the value is inherited from its \nsource DB system.\n"
-      properties:
-        configurationId:
-          description: The OCID of the Configuration to be used by the read replica.
-          maxLength: 255
-          type: string
-          x-default-description: 'If not specified by the user it will assume the value of the configurationId of
-
-            the target DB System.
-
-            '
-        mysqlVersion:
-          description: The MySQL version to be used by the read replica.
-          type: string
-          x-default-description: 'If not specified by the user it will assume the value of the mysqlVersion of
-
-            the target DB System.
-
-            '
-        nsgIds:
-          description: Network Security Group OCIDs used for the VNIC attachment.
-          items:
-            type: string
-          maxItems: 5
-          minItems: 0
-          type: array
-          uniqueItems: true
-          x-default-description: "If not specified by the user it will assume the NSGs of the target \nDB System.\n"
-        securityAttributes:
-          additionalProperties:
-            additionalProperties:
-              description: 'Security Attribute value and mode. Only the String type is supported for value. (Mode is reserved and “enforce” in this release)
-
-                '
-              type: object
-            description: 'Key-value pair representing a ZPR tag key and value, scoped to a namespace.
-
-              Example: `{"MaxEgressCount": {"value": "42", "mode": "audit"}}`
-
-              '
-            type: object
-          description: 'Security Attributes for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [ZPR Artifacts](https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm).
-
-            Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
-
-            '
-          type: object
-        shapeName:
-          description: "The shape to be used by the read replica. The shape determines the resources allocated: \nCPU cores and memory for VM shapes, CPU cores, memory and storage for non-VM (bare metal) shapes. \nTo get a list of shapes, use the [ListShapes](#/en/mysql/20190415/ShapeSummary/ListShapes) operation.\n"
-          maxLength: 255
-          type: string
-          x-default-description: 'If not specified by the user it will assume the value of the shape of
-
-            the target DB System.
-
-            '
-        telemetryConfiguration:
-          $ref: '#/components/schemas/TelemetryConfigurationDetails'
+    Replica:
+      allOf:
+      - $ref: '#/components/schemas/ReplicaSummary'
+      - properties:
+          encryptData:
+            $ref: '#/components/schemas/EncryptDataDetails'
+          secureConnections:
+            $ref: '#/components/schemas/SecureConnectionDetails'
+      description: A DB System read replica.
     ReplicaSummary:
       description: Summary of the read replica.
       properties:
@@ -1082,27 +959,150 @@ components:
       - ipAddress
       - port
       - portX
-    SecureConnectionDetails:
-      description: 'Secure connection configuration details.
+    Error:
+      description: Sorry.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    LoggingDestinationConfiguration:
+      description: Configuration parameters for a given destination.
+      properties:
+        destination:
+          description: Type of destination where MySQL telemetry is exposed to.
+          enum:
+          - LOG_ANALYTICS
+          - OPEN_TELEMETRY
+          type: string
+        destinationConfigurations:
+          description: List of configuration variables for a given destination type.
+          items:
+            $ref: '#/components/schemas/DestinationConfiguration'
+          maxItems: 10
+          type: array
+        logTypes:
+          description: List of MySQL telemetry types that can be exposed on a telemetry destination
+          items:
+            enum:
+            - ERROR_LOG
+            - GENERAL_LOG
+            - SLOW_QUERY_LOG
+            - AUDIT_LOG
+            type: string
+          type: array
+      required:
+      - destination
+      - destinationConfigurations
+      - logTypes
+      type: object
+    EncryptDataDetails:
+      description: 'Encrypt data details.
 
         '
       properties:
-        certificateGenerationType:
+        keyGenerationType:
           default: SYSTEM
-          description: 'Select whether to use MySQL Database Service-managed certificate (SYSTEM) or your own certificate (BYOC).
-
-            '
+          description: Select whether to use Oracle-managed key (SYSTEM) or your own key (BYOK).
           enum:
           - SYSTEM
-          - BYOC
+          - BYOK
           type: string
-          x-obmcs-top-level-enum: '#/definitions/CertificateGenerationType'
-        certificateId:
-          description: The OCID of the certificate to use.
+          x-obmcs-top-level-enum: '#/definitions/KeyGenerationType'
+        keyId:
+          description: The OCID of the key to use.
           maxLength: 255
+          minLength: 1
           type: string
       required:
-      - certificateGenerationType
+      - keyGenerationType
+    DestinationConfiguration:
+      description: Configuration variable of a given destination.
+      properties:
+        key:
+          description: Name of the destination configuration variable.
+          maxLength: 255
+          minLength: 1
+          type: string
+        value:
+          description: Value of the destination configuration variable.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - key
+      - value
+      type: object
+    ReplicaOverrides:
+      description: "By default a read replica inherits the MySQL version, shape, and configuration of the source DB system. \nIf you want to override any of these, provide values in the properties, mysqlVersion, shapeName, \nand configurationId. If you set a property value to \"\", then the value is inherited from its \nsource DB system.\n"
+      properties:
+        configurationId:
+          description: The OCID of the Configuration to be used by the read replica.
+          maxLength: 255
+          type: string
+          x-default-description: 'If not specified by the user it will assume the value of the configurationId of
+
+            the target DB System.
+
+            '
+        mysqlVersion:
+          description: The MySQL version to be used by the read replica.
+          type: string
+          x-default-description: 'If not specified by the user it will assume the value of the mysqlVersion of
+
+            the target DB System.
+
+            '
+        nsgIds:
+          description: Network Security Group OCIDs used for the VNIC attachment.
+          items:
+            type: string
+          maxItems: 5
+          minItems: 0
+          type: array
+          uniqueItems: true
+          x-default-description: "If not specified by the user it will assume the NSGs of the target \nDB System.\n"
+        securityAttributes:
+          additionalProperties:
+            additionalProperties:
+              description: 'Security Attribute value and mode. Only the String type is supported for value. (Mode is reserved and “enforce” in this release)
+
+                '
+              type: object
+            description: 'Key-value pair representing a ZPR tag key and value, scoped to a namespace.
+
+              Example: `{"MaxEgressCount": {"value": "42", "mode": "audit"}}`
+
+              '
+            type: object
+          description: 'Security Attributes for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [ZPR Artifacts](https://docs.oracle.com/en-us/iaas/Content/zero-trust-packet-routing/zpr-artifacts.htm).
+
+            Example: `{"Oracle-ZPR": {"MaxEgressCount": {"value": "42", "mode": "audit"}}}`
+
+            '
+          type: object
+        shapeName:
+          description: "The shape to be used by the read replica. The shape determines the resources allocated: \nCPU cores and memory for VM shapes, CPU cores, memory and storage for non-VM (bare metal) shapes. \nTo get a list of shapes, use the [ListShapes](#/en/mysql/20190415/ShapeSummary/ListShapes) operation.\n"
+          maxLength: 255
+          type: string
+          x-default-description: 'If not specified by the user it will assume the value of the shape of
+
+            the target DB System.
+
+            '
+        telemetryConfiguration:
+          $ref: '#/components/schemas/TelemetryConfigurationDetails'
 x-anchors:
   x-headers:
     etag:

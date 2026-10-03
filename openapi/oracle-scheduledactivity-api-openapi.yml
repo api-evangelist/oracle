@@ -125,18 +125,124 @@ paths:
       tags:
       - scheduledActivity
 components:
+  parameters:
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ScheduledActivityLifecycleStateQueryParam:
+      description: A filter that returns all resources that match the specified status
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: Returns all lifecycle states by default
+      x-obmcs-enumref: '#/definitions/ScheduledActivity/lifecycleState'
+      schema:
+        type: string
+    ScheduledStartTimeQueryParam:
+      description: A filter that returns all resources that are scheduled after this date
+      in: query
+      name: timeScheduledStartGreaterThanOrEqualTo
+      required: false
+      x-default-description: Returns based on other filters by default
+      schema:
+        type: string
+        format: date-time
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 100
+        minimum: 1
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIME_CREATED
+        - DISPLAY_NAME
+        default: TIME_CREATED
+    FusionEnvironmentIdentifierPathParam:
+      description: unique FusionEnvironment identifier
+      in: path
+      name: fusionEnvironmentId
+      required: true
+      schema:
+        type: string
+    ScheduledActivityIdentifierPathParam:
+      description: Unique ScheduledActivity identifier.
+      in: path
+      name: scheduledActivityId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    ScheduledActivityRunCycleQueryParam:
+      description: A filter that returns all resources that match the specified run cycle.
+      in: query
+      name: runCycle
+      required: false
+      x-default-description: Returns all states by default
+      x-obmcs-enumref: '#/definitions/ScheduledActivity/runCycle'
+      schema:
+        type: string
+    ExpectedFinishTimeQueryParam:
+      description: A filter that returns all resources that end before this date
+      in: query
+      name: timeExpectedFinishLessThanOrEqualTo
+      required: false
+      x-default-description: Returns based on other filters by default
+      schema:
+        type: string
+        format: date-time
   schemas:
-    ScheduledActivityCollection:
-      description: Results of a scheduled activity search.
+    Error:
+      description: Error Information.
       properties:
-        items:
-          description: A page of scheduled activity objects.
-          items:
-            $ref: '#/components/schemas/ScheduledActivitySummary'
-          type: array
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
       required:
-      - items
-      type: object
+      - code
+      - message
     ScheduledActivity:
       description: Details of scheduled activity.
       properties:
@@ -219,18 +325,6 @@ components:
       - timeExpectedFinish
       - serviceAvailability
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ScheduledActivitySummary:
       description: Summary of the scheduled activity for a Fusion environment.
       properties:
@@ -355,111 +449,17 @@ components:
       required:
       - actionType
       - description
-  parameters:
-    ScheduledActivityLifecycleStateQueryParam:
-      description: A filter that returns all resources that match the specified status
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: Returns all lifecycle states by default
-      x-obmcs-enumref: '#/definitions/ScheduledActivity/lifecycleState'
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 100
-        minimum: 1
-    ScheduledStartTimeQueryParam:
-      description: A filter that returns all resources that are scheduled after this date
-      in: query
-      name: timeScheduledStartGreaterThanOrEqualTo
-      required: false
-      x-default-description: Returns based on other filters by default
-      schema:
-        type: string
-        format: date-time
-    ExpectedFinishTimeQueryParam:
-      description: A filter that returns all resources that end before this date
-      in: query
-      name: timeExpectedFinishLessThanOrEqualTo
-      required: false
-      x-default-description: Returns based on other filters by default
-      schema:
-        type: string
-        format: date-time
-    ScheduledActivityRunCycleQueryParam:
-      description: A filter that returns all resources that match the specified run cycle.
-      in: query
-      name: runCycle
-      required: false
-      x-default-description: Returns all states by default
-      x-obmcs-enumref: '#/definitions/ScheduledActivity/runCycle'
-      schema:
-        type: string
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - TIME_CREATED
-        - DISPLAY_NAME
-        default: TIME_CREATED
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      required: false
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ScheduledActivityIdentifierPathParam:
-      description: Unique ScheduledActivity identifier.
-      in: path
-      name: scheduledActivityId
-      required: true
-      schema:
-        type: string
-    FusionEnvironmentIdentifierPathParam:
-      description: unique FusionEnvironment identifier
-      in: path
-      name: fusionEnvironmentId
-      required: true
-      schema:
-        type: string
+    ScheduledActivityCollection:
+      description: Results of a scheduled activity search.
+      properties:
+        items:
+          description: A page of scheduled activity objects.
+          items:
+            $ref: '#/components/schemas/ScheduledActivitySummary'
+          type: array
+      required:
+      - items
+      type: object
   responses:
     default:
       description: Unknown Error

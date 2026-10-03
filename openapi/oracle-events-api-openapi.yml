@@ -385,6 +385,15 @@ paths:
         required: true
 components:
   parameters:
+    RuleIdPathParam:
+      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of this rule.
+
+        '
+      in: path
+      name: ruleId
+      required: true
+      schema:
+        type: string
     ListRulesFilterByLifecycleStateQueryParam:
       description: 'A filter to return only rules that match the lifecycle state in this parameter.
 
@@ -396,6 +405,18 @@ components:
       name: lifecycleState
       required: false
       x-obmcs-enumref: '#/definitions/Rule/lifecycleState'
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the if-match
+
+        parameter to the value of the etag from a previous GET or POST response for that resource.  The resource
+
+        will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
       schema:
         type: string
     SortOrderQueryParam:
@@ -433,51 +454,6 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    CompartmentIdQueryParam:
-      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to which this rule belongs.
-
-        '
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    OpcRequestIdHeaderParam:
-      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
-
-        particular request, please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      required: false
-      schema:
-        type: string
-    RuleIdPathParam:
-      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of this rule.
-
-        '
-      in: path
-      name: ruleId
-      required: true
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: 'The maximum number of items to return. 1 is the minimum, 50 is the maximum.
-
-        Default: 10
-
-        '
-      in: query
-      name: limit
-      required: false
-      schema:
-        type: integer
-        default: 5
-        maximum: 50
-        minimum: 1
     PaginationTokenQueryParam:
       description: 'For list pagination. The value of the opc-next-page response header from the previous
 
@@ -493,19 +469,152 @@ components:
         type: string
         maxLength: 1024
         minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the if-match
+    OpcRequestIdHeaderParam:
+      description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
 
-        parameter to the value of the etag from a previous GET or POST response for that resource.  The resource
-
-        will be updated or deleted only if the etag you provide matches the resource''s current etag value.
+        particular request, please provide the request ID.
 
         '
       in: header
-      name: if-match
+      name: opc-request-id
+      required: false
       schema:
         type: string
+    CompartmentIdQueryParam:
+      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to which this rule belongs.
+
+        '
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return. 1 is the minimum, 50 is the maximum.
+
+        Default: 10
+
+        '
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        default: 5
+        maximum: 50
+        minimum: 1
   schemas:
+    ActionList:
+      description: 'A list of Action objects associated with a rule.
+
+        '
+      properties:
+        actions:
+          description: 'A list of one or more Action objects.
+
+            '
+          items:
+            $ref: '#/components/schemas/Action'
+          maxItems: 10
+          minItems: 1
+          type: array
+      required:
+      - actions
+      type: object
+      x-example: "{\n  \"actions\": { }\n}\n"
+    Action:
+      description: 'An object that represents an action to trigger for events that match a rule.
+
+        '
+      discriminator:
+        propertyName: actionType
+      properties:
+        actionType:
+          description: 'The action to perform if the condition in the rule matches an event.
+
+
+            * **ONS:** Send to an Oracle Notification Service topic.
+
+            * **OSS:** Send to a stream from Oracle Streaming Service.
+
+            * **FAAS:** Send to an Oracle Functions Service endpoint.
+
+            '
+          enum:
+          - ONS
+          - OSS
+          - FAAS
+          type: string
+        description:
+          description: 'A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering
+
+            confidential information.
+
+            '
+          maxLength: 1024
+          minLength: 0
+          type: string
+        id:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the action.
+
+            '
+          maxLength: 1024
+          minLength: 1
+          type: string
+        isEnabled:
+          default: true
+          description: 'Whether or not this action is currently enabled.
+
+
+            Example: `true`
+
+            '
+          type: boolean
+        lifecycleMessage:
+          description: 'A message generated by the Events service about the current state of this action.
+
+            '
+          type: string
+        lifecycleState:
+          description: 'The current state of the rule.
+
+            '
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+      required:
+      - actionType
+      - id
+      - lifecycleState
+      - lifecycleMessage
+      type: object
+      x-example: "{\n  \"actions\": [\n    {\n      \"actionType\": \"ONS\",\n      \"id\": \"ocid.action.oc1..<var>&lt;unique_ID&gt;</var>\",\n      \"lifecycleMessage\":null,\n      \"lifecycleState\": \"CREATING\"\n    }\n  ]\n}    \n"
+    ChangeRuleCompartmentDetails:
+      description: 'Specifies which compartment to move a rule to when changing a rule''s compartment.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+      x-example: "{\n  \"compartmentId\": \"ocid.compartment.oc1..<var>&lt;unique_ID&gt;</var>\"\n}\n"
     ActionDetails:
       description: 'Object used to create an action.
 
@@ -552,6 +661,26 @@ components:
       - isEnabled
       type: object
       x-example: "{\n  \"actionType\": \"ONS\",\n  \"isEnabled\": true,\n  \"description\": \"Notification action\"      \n}\n"
+    Error:
+      description: Error details.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/iaas/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: 'A human-readable error string.
+
+            '
+          type: string
+      required:
+      - code
+      - message
+      type: object
+      x-example: "{\n  \"code\" : \"400\",\n  \"message\" : \"Bad Request\"\n}\n"
     RuleSummary:
       description: 'The summary details of rules for Events. For more information, see
 
@@ -663,135 +792,6 @@ components:
       - timeCreated
       type: object
       x-example: "{\n  \"displayName\": \"This rule sends a notification upon completion of DbaaS backup\",\n  \"lifecycleState\": \"CREATING\",\n  \"condition\": \"{\n      \\\"eventType\\\": \\\"com.oraclecloud.databaseservice.autonomous.database.backup.end\\\"\n      }\",\n  \"compartmentId\": \"ocid.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"isEnabled\": true,\n  \"id\": \"ocid.rule.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"timeCreated\": \"2018-09-12T22:47:12.613Z\",\n  \"freeformTags\": {\n    \"Department\": \"Finance\"\n    },\n  \"definedTags\": {\n    \"Operations\": {\n      \"CostCenter\": \"42\"\n    },\n}\n"
-    Error:
-      description: Error details.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/iaas/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: 'A human-readable error string.
-
-            '
-          type: string
-      required:
-      - code
-      - message
-      type: object
-      x-example: "{\n  \"code\" : \"400\",\n  \"message\" : \"Bad Request\"\n}\n"
-    ActionList:
-      description: 'A list of Action objects associated with a rule.
-
-        '
-      properties:
-        actions:
-          description: 'A list of one or more Action objects.
-
-            '
-          items:
-            $ref: '#/components/schemas/Action'
-          maxItems: 10
-          minItems: 1
-          type: array
-      required:
-      - actions
-      type: object
-      x-example: "{\n  \"actions\": { }\n}\n"
-    Action:
-      description: 'An object that represents an action to trigger for events that match a rule.
-
-        '
-      discriminator:
-        propertyName: actionType
-      properties:
-        actionType:
-          description: 'The action to perform if the condition in the rule matches an event.
-
-
-            * **ONS:** Send to an Oracle Notification Service topic.
-
-            * **OSS:** Send to a stream from Oracle Streaming Service.
-
-            * **FAAS:** Send to an Oracle Functions Service endpoint.
-
-            '
-          enum:
-          - ONS
-          - OSS
-          - FAAS
-          type: string
-        description:
-          description: 'A string that describes the details of the action. It does not have to be unique, and you can change it. Avoid entering
-
-            confidential information.
-
-            '
-          maxLength: 1024
-          minLength: 0
-          type: string
-        id:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the action.
-
-            '
-          maxLength: 1024
-          minLength: 1
-          type: string
-        isEnabled:
-          default: true
-          description: 'Whether or not this action is currently enabled.
-
-
-            Example: `true`
-
-            '
-          type: boolean
-        lifecycleMessage:
-          description: 'A message generated by the Events service about the current state of this action.
-
-            '
-          type: string
-        lifecycleState:
-          description: 'The current state of the rule.
-
-            '
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-      required:
-      - actionType
-      - id
-      - lifecycleState
-      - lifecycleMessage
-      type: object
-      x-example: "{\n  \"actions\": [\n    {\n      \"actionType\": \"ONS\",\n      \"id\": \"ocid.action.oc1..<var>&lt;unique_ID&gt;</var>\",\n      \"lifecycleMessage\":null,\n      \"lifecycleState\": \"CREATING\"\n    }\n  ]\n}    \n"
-    ChangeRuleCompartmentDetails:
-      description: 'Specifies which compartment to move a rule to when changing a rule''s compartment.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
-
-            into which the resource should be moved.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-      x-example: "{\n  \"compartmentId\": \"ocid.compartment.oc1..<var>&lt;unique_ID&gt;</var>\"\n}\n"
     UpdateRuleDetails:
       description: The rule attributes that you can update.
       properties:
@@ -945,6 +945,22 @@ components:
       - compartmentId
       type: object
       x-example: "{\n  \"displayName\": \"This rule sends a notification upon completion of DbaaS backup\",\n  \"condition\": \"{\n    \\\"eventType\\\": \\\"com.oraclecloud.databaseservice.autonomous.database.backup.end\\\"\n    }\",\n  \"compartmentId\": \"ocid.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"isEnabled\": true,\n  \"freeformTags\": {\n    \"Department\": \"Finance\"\n    },\n  \"definedTags\": {\n    \"Operations\": {\n      \"CostCenter\": \"42\"\n    },\n  \"actions\": {\n    \"actions\": [\n      {\n        \"actionType\": \"ONS\",\n        \"id\": \"ocid.action.oc1..<var>&lt;unique_ID&gt;</var>\",\n        \"lifecycleMessage\":null,\n        \"lifecycleState\": \"CREATING\"\n      }\n    ]\n  }\n}\n"
+    ActionDetailsList:
+      description: A list of ActionDetails objects to create for a rule.
+      properties:
+        actions:
+          description: 'A list of one or more ActionDetails objects.
+
+            '
+          items:
+            $ref: '#/components/schemas/ActionDetails'
+          maxItems: 10
+          minItems: 1
+          type: array
+      required:
+      - actions
+      type: object
+      x-example: "{\n  \"actions\": [ ]\n}\n"
     Rule:
       description: 'The configuration details of an Events rule. For more information, see
 
@@ -1074,22 +1090,6 @@ components:
       - isEnabled
       type: object
       x-example: "{\n  \"displayName\": \"This rule sends a notification upon completion of DbaaS backup\",\n  \"lifecycleState\": \"CREATING\",\n  \"condition\": \"{\n      \\\"eventType\\\": \\\"com.oraclecloud.databaseservice.autonomous.database.backup.end\\\"\n      }\",\n  \"compartmentId\": \"ocid.compartment.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"isEnabled\": true,\n  \"freeformTags\": {\n    \"Department\": \"Finance\"\n    },\n  \"definedTags\": {\n    Operations\": {\n      \"CostCenter\": \"42\"\n    },\n  \"actions\": {\n    \"actions\": [\n      {\n        \"actionType\": \"ONS\",\n        \"id\": \"ocid.action.oc1..<var>&lt;unique_ID&gt;</var>\",\n        \"lifecycleMessage\":null,\n        \"lifecycleState\": \"CREATING\"\n      }\n    ]\n  },\n  \"id\": \"ocid.rule.oc1..<var>&lt;unique_ID&gt;</var>\",\n  \"timeCreated\": \"2018-09-12T22:47:12.613Z\",\n  \"lifecycleMessage\":null\n}\n"
-    ActionDetailsList:
-      description: A list of ActionDetails objects to create for a rule.
-      properties:
-        actions:
-          description: 'A list of one or more ActionDetails objects.
-
-            '
-          items:
-            $ref: '#/components/schemas/ActionDetails'
-          maxItems: 10
-          minItems: 1
-          type: array
-      required:
-      - actions
-      type: object
-      x-example: "{\n  \"actions\": [ ]\n}\n"
   responses:
     DefaultError:
       description: An error has occurred.

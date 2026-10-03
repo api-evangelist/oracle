@@ -449,22 +449,6 @@ paths:
       - Access Request
 components:
   parameters:
-    AccessRequestIdentifierPathParam:
-      description: The unique identifier (OCID) of the access request.
-      in: path
-      name: accessRequestId
-      required: true
-      schema:
-        type: string
-    RequestorIdentifierOptionalQueryParam:
-      description: The unique identifier (OCID) of the requestor in which to list resources.
-      in: query
-      name: requestorId
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     LockboxPartnerIdOptionalQueryParam:
       description: The ID of the partner.
       in: query
@@ -472,15 +456,23 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
+    IdentifierQueryParam:
+      description: A generic Id query param used to filter lockbox, access request and approval template by Id.
       in: query
-      name: displayName
+      name: id
       x-default-description: 'null'
       schema:
         type: string
         maxLength: 255
         minLength: 1
+    AccessRequestLifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/AccessRequest/lifecycleState'
+      schema:
+        type: string
     LockboxPartnerOptionalQueryParam:
       description: The name of the lockbox partner.
       in: query
@@ -492,15 +484,61 @@ components:
         enum:
         - FAAAS
         - CANARY
-    IdentifierQueryParam:
-      description: A generic Id query param used to filter lockbox, access request and approval template by Id.
+    AccessRequestIdentifierPathParam:
+      description: The unique identifier (OCID) of the access request.
+      in: path
+      name: accessRequestId
+      required: true
+      schema:
+        type: string
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
       in: query
-      name: id
+      name: displayName
       x-default-description: 'null'
       schema:
         type: string
         maxLength: 255
         minLength: 1
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        - id
+        default: timeCreated
+    RequestorIdentifierOptionalQueryParam:
+      description: The unique identifier (OCID) of the requestor in which to list resources.
+      in: query
+      name: requestorId
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
     SortOrderQueryParam:
       description: The sort order to use, either 'ASC' or 'DESC'.
       in: query
@@ -516,6 +554,29 @@ components:
         enum:
         - ASC
         - DESC
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    LockboxIdOptionalQueryParam:
+      description: The unique identifier (OCID) of the associated lockbox.
+      in: query
+      name: lockboxId
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    TimeCreatedAfterQueryParam:
+      description: Date and time on or after which Access Requests were created, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339)
+      in: query
+      name: timeCreatedAfter
+      x-default-description: 'null'
+      schema:
+        type: string
+        format: date-time
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -535,42 +596,22 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending.
-
-        '
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
       in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        - id
-        default: timeCreated
-    LockboxIdOptionalQueryParam:
-      description: The unique identifier (OCID) of the associated lockbox.
-      in: query
-      name: lockboxId
+      name: page
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 255
         minLength: 1
-    AccessRequestLifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
+    TimeCreatedBeforeQueryParam:
+      description: Date and time on or before which Access requests were created, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339)
       in: query
-      name: lifecycleState
+      name: timeCreatedBefore
       x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/AccessRequest/lifecycleState'
       schema:
         type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
+        format: date-time
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -580,47 +621,6 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
-    TimeCreatedBeforeQueryParam:
-      description: Date and time on or before which Access requests were created, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339)
-      in: query
-      name: timeCreatedBefore
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    TimeCreatedAfterQueryParam:
-      description: Date and time on or after which Access Requests were created, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339)
-      in: query
-      name: timeCreatedAfter
-      x-default-description: 'null'
-      schema:
-        type: string
-        format: date-time
   schemas:
     CreateAccessRequestDetails:
       description: 'The configuration details for a new access request.
@@ -658,164 +658,6 @@ components:
       - description
       - accessDuration
       type: object
-    AccessRequestSummary:
-      description: Summary information for an access request.
-      properties:
-        accessDuration:
-          description: The maximum amount of time operator has access to associated resources.
-          format: x-obmcs-duration
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: The rationale for requesting the access request.
-          type: string
-        displayName:
-          description: The name of the access request.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The unique identifier (OCID) of the access request, which can't be changed after creation.
-          type: string
-        lifecycleState:
-          description: The current state of the access request.
-          type: string
-          x-obmcs-enumref: '#/definitions/AccessRequest/lifecycleState'
-        lockboxId:
-          description: The unique identifier (OCID) of the lockbox box that the access request is associated with, which can't be changed after creation.
-          type: string
-        requestorId:
-          description: The unique identifier of the requestor.
-          type: string
-        requestorLocation:
-          description: 'The two-char country code of the requestor while creating the access request
-
-            Example: `US`
-
-            '
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The time the access request was created. Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-
-            Example: `2020-01-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeExpired:
-          description: 'The time the access request expired. Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-
-            Example: `2020-01-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-        timeUpdated:
-          description: 'The time the access request was last updated. Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-
-            Example: `2020-01-25T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - id
-      - lockboxId
-      - displayName
-      - description
-      - requestorId
-      - lifecycleState
-      - timeCreated
-      - timeUpdated
-      - timeExpired
-      type: object
-    HandleAccessRequestDetails:
-      description: The details for handling access request.
-      properties:
-        action:
-          description: The action take by persona
-          enum:
-          - APPROVE
-          - DENY
-          - REVOKE
-          - CANCEL
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/AccessRequestActionType'
-        message:
-          description: Action justification or details.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - action
-      type: object
-    AccessRequestCollection:
-      description: Results of access request search. Contains both AccessRequestSummary items and other information, such as metadata.
-      properties:
-        items:
-          description: List of AccessRequestSummary.
-          items:
-            $ref: '#/components/schemas/AccessRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     AccessRequest:
       description: 'An access request to a customer''s resource.
 
@@ -936,37 +778,6 @@ components:
       - reminderCount
       - requestorLocation
       type: object
-    ExportAccessRequestsDetails:
-      description: Details for generating report of Access Requests to export action
-      properties:
-        lockboxId:
-          description: The unique identifier (OCID) of the lockbox box that the access request is associated with which is immutable.
-          type: string
-        timeCreatedAfter:
-          description: Date and time after which access requests were created, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339)
-          format: date-time
-          type: string
-        timeCreatedBefore:
-          description: Date and time before which access requests were created, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339)s
-          format: date-time
-          type: string
-      required:
-      - lockboxId
-      - timeCreatedAfter
-      - timeCreatedBefore
-      type: object
-    AccessMaterials:
-      description: Access materials details.
-      properties:
-        details:
-          additionalProperties:
-            format: password
-            type: string
-          description: The contents of the material. This is a map that contains the various fields needed for access.
-          type: object
-      required:
-      - details
-      type: object
     ActivityLog:
       description: The log of the action taken by different persona on the access request, e.g. approve/deny/revoke
       properties:
@@ -1004,6 +815,164 @@ components:
           type: string
           x-obmcs-top-level-enum: '#/definitions/PersonaLevel'
       type: object
+    HandleAccessRequestDetails:
+      description: The details for handling access request.
+      properties:
+        action:
+          description: The action take by persona
+          enum:
+          - APPROVE
+          - DENY
+          - REVOKE
+          - CANCEL
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AccessRequestActionType'
+        message:
+          description: Action justification or details.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - action
+      type: object
+    AccessRequestCollection:
+      description: Results of access request search. Contains both AccessRequestSummary items and other information, such as metadata.
+      properties:
+        items:
+          description: List of AccessRequestSummary.
+          items:
+            $ref: '#/components/schemas/AccessRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    AccessRequestSummary:
+      description: Summary information for an access request.
+      properties:
+        accessDuration:
+          description: The maximum amount of time operator has access to associated resources.
+          format: x-obmcs-duration
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        description:
+          description: The rationale for requesting the access request.
+          type: string
+        displayName:
+          description: The name of the access request.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The unique identifier (OCID) of the access request, which can't be changed after creation.
+          type: string
+        lifecycleState:
+          description: The current state of the access request.
+          type: string
+          x-obmcs-enumref: '#/definitions/AccessRequest/lifecycleState'
+        lockboxId:
+          description: The unique identifier (OCID) of the lockbox box that the access request is associated with, which can't be changed after creation.
+          type: string
+        requestorId:
+          description: The unique identifier of the requestor.
+          type: string
+        requestorLocation:
+          description: 'The two-char country code of the requestor while creating the access request
+
+            Example: `US`
+
+            '
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The time the access request was created. Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            Example: `2020-01-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeExpired:
+          description: 'The time the access request expired. Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            Example: `2020-01-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time the access request was last updated. Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            Example: `2020-01-25T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - id
+      - lockboxId
+      - displayName
+      - description
+      - requestorId
+      - lifecycleState
+      - timeCreated
+      - timeUpdated
+      - timeExpired
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     AccessRequestExt:
       allOf:
       - $ref: '#/components/schemas/AccessRequest'
@@ -1021,6 +990,37 @@ components:
         An access request is a subsidiary resource of the Lockbox entity.
 
         '
+    ExportAccessRequestsDetails:
+      description: Details for generating report of Access Requests to export action
+      properties:
+        lockboxId:
+          description: The unique identifier (OCID) of the lockbox box that the access request is associated with which is immutable.
+          type: string
+        timeCreatedAfter:
+          description: Date and time after which access requests were created, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339)
+          format: date-time
+          type: string
+        timeCreatedBefore:
+          description: Date and time before which access requests were created, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339)s
+          format: date-time
+          type: string
+      required:
+      - lockboxId
+      - timeCreatedAfter
+      - timeCreatedBefore
+      type: object
+    AccessMaterials:
+      description: Access materials details.
+      properties:
+        details:
+          additionalProperties:
+            format: password
+            type: string
+          description: The contents of the material. This is a map that contains the various fields needed for access.
+          type: object
+      required:
+      - details
+      type: object
   responses:
     default:
       description: Unknown Error

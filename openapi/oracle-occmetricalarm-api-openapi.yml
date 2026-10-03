@@ -307,6 +307,157 @@ paths:
         required: true
 components:
   schemas:
+    OccMetricAlarmSummary:
+      description: Summary of OccMetricAlarm.
+      properties:
+        compartmentId:
+          description: Compartment OCID in which the alarm is created.
+          maxLength: 255
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: Optional description for the alarm.
+          maxLength: 1000
+          type: string
+        displayName:
+          description: Human-readable name for the alarm.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        frequency:
+          description: Frequency at which notifications should be sent.
+          type: string
+          x-obmcs-enumref: '#/definitions/OccMetricAlarm/frequency'
+        id:
+          description: Unique OCID for this alarm configuration.
+          maxLength: 255
+          type: string
+        isActive:
+          description: Alarm active status.
+          type: boolean
+        lifecycleState:
+          description: The current lifecycle state of the resource.
+          type: string
+          x-obmcs-enumref: '#/definitions/OccMetricAlarm/lifecycleState'
+        resourceConfiguration:
+          $ref: '#/components/schemas/BaseResourceConfiguration'
+        subscribers:
+          description: List of topic OCIDs for notifications.
+          items:
+            type: string
+          maxItems: 100
+          type: array
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
+
+
+              Example: `{"free-tier-retained": "true"}`
+
+              '
+            type: object
+          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
+
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        threshold:
+          description: Threshold at which alarm must be triggered.
+          minimum: 0
+          type: integer
+        thresholdType:
+          description: Units in which threshold is being stored.
+          type: string
+          x-obmcs-enumref: '#/definitions/OccMetricAlarm/thresholdType'
+        timeCreated:
+          description: Creation timestamp (RFC 3339).
+          format: date-time
+          type: string
+        timeUpdated:
+          description: Last update timestamp (RFC 3339).
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - timeCreated
+      - timeUpdated
+      - lifecycleState
+      - compartmentId
+      - isActive
+      - subscribers
+      - frequency
+      - threshold
+      - resourceConfiguration
+      type: object
+    Error:
+      description: Error information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error message.
+          type: string
+      required:
+      - code
+      - message
+    BaseResourceConfiguration:
+      description: Configuration for a given 'resource'
+      discriminator:
+        propertyName: resource
+      properties:
+        resource:
+          description: Resources like COMPUTE, STORAGE, EXADATA etc.
+          enum:
+          - COMPUTE
+          - EXADATA
+          - STORAGE
+          - NETWORK
+          type: string
+      required:
+      - resource
     OccMetricAlarm:
       description: 'OccMetricAlarm represents an alarm configuration for OCI Control Center metric.
 
@@ -445,33 +596,6 @@ components:
       - resourceConfiguration
       type: object
       x-example: "{\n  \"id\": \"ocid1.occmetricalarm.oc1..exampleuniqueID\",\n  \"displayName\": \"compute-alarm\",\n  \"description\": \"Compute Alarm\",\n  \"timeCreated\": \"2025-09-02T05:55:02.314Z\",\n  \"timeUpdated\": \"2025-09-02T05:56:11.105Z\",\n  \"lifecycleState\": \"ACTIVE\",\n  \"compartmentId\": \"ocid1.compartment.oc1..exampleuniqueCompartment\",\n  \"isActive\": true,\n  \"subscribers\": [\n    \"ocid1.topic.aaaaaa...\",\n    \"ocid1.topic.bbbbbb...\"\n  ],\n  \"frequency\": \"WEEKLY\",\n  \"threshold\": 65,\n  \"resourceConfiguration\": {\n    \"resource\": \"COMPUTE\",\n    \"shape\": \"VM.Standard.E5\",\n    \"computeHwGeneration\": \"GEN3\",\n    \"usageType\": \"CUSTOMER\"\n  }\n}\n"
-    BaseResourceConfiguration:
-      description: Configuration for a given 'resource'
-      discriminator:
-        propertyName: resource
-      properties:
-        resource:
-          description: Resources like COMPUTE, STORAGE, EXADATA etc.
-          enum:
-          - COMPUTE
-          - EXADATA
-          - STORAGE
-          - NETWORK
-          type: string
-      required:
-      - resource
-    Error:
-      description: Error information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error message.
-          type: string
-      required:
-      - code
-      - message
     CreateOccMetricAlarmDetails:
       description: Payload for creating an OccMetricAlarm.
       properties:
@@ -654,130 +778,22 @@ components:
           type: string
           x-obmcs-enumref: '#/definitions/OccMetricAlarm/thresholdType'
       type: object
-    OccMetricAlarmSummary:
-      description: Summary of OccMetricAlarm.
-      properties:
-        compartmentId:
-          description: Compartment OCID in which the alarm is created.
-          maxLength: 255
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
+            Oracle about a particular request, please provide the request ID.
 
             '
-          type: object
-        description:
-          description: Optional description for the alarm.
-          maxLength: 1000
-          type: string
-        displayName:
-          description: Human-readable name for the alarm.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
+          schema:
             type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        frequency:
-          description: Frequency at which notifications should be sent.
-          type: string
-          x-obmcs-enumref: '#/definitions/OccMetricAlarm/frequency'
-        id:
-          description: Unique OCID for this alarm configuration.
-          maxLength: 255
-          type: string
-        isActive:
-          description: Alarm active status.
-          type: boolean
-        lifecycleState:
-          description: The current lifecycle state of the resource.
-          type: string
-          x-obmcs-enumref: '#/definitions/OccMetricAlarm/lifecycleState'
-        resourceConfiguration:
-          $ref: '#/components/schemas/BaseResourceConfiguration'
-        subscribers:
-          description: List of topic OCIDs for notifications.
-          items:
-            type: string
-          maxItems: 100
-          type: array
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a system tag key and value, scoped to a namespace.
-
-
-              Example: `{"free-tier-retained": "true"}`
-
-              '
-            type: object
-          description: 'System tags for this resource. Each key is predefined and scoped to a namespace.
-
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        threshold:
-          description: Threshold at which alarm must be triggered.
-          minimum: 0
-          type: integer
-        thresholdType:
-          description: Units in which threshold is being stored.
-          type: string
-          x-obmcs-enumref: '#/definitions/OccMetricAlarm/thresholdType'
-        timeCreated:
-          description: Creation timestamp (RFC 3339).
-          format: date-time
-          type: string
-        timeUpdated:
-          description: Last update timestamp (RFC 3339).
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - timeCreated
-      - timeUpdated
-      - lifecycleState
-      - compartmentId
-      - isActive
-      - subscribers
-      - frequency
-      - threshold
-      - resourceConfiguration
-      type: object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
     DisplayNameQueryParam:
       description: A filter to return only resources that match the given display name exactly.
@@ -788,11 +804,33 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    OccMetricAlarmIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the OccMetricAlarm.
-      in: path
-      name: occMetricAlarmId
-      required: true
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
+
+        is descending. Default order for `displayName` is ascending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
+
+        `if-match` parameter to the value of the etag from a previous GET or POST response for
+
+        that resource. The resource will be updated or deleted only if the etag you provide
+
+        matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
       schema:
         type: string
     SortOrderQueryParam:
@@ -810,13 +848,20 @@ components:
         enum:
         - ASC
         - DESC
-    IsActiveFilterQueryParam:
-      description: Filter to list only active or inactive alarms.
-      in: query
-      name: isActive
-      x-default-description: 'null'
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
       schema:
-        type: boolean
+        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -836,39 +881,24 @@ components:
         type: string
         maxLength: 64
         minLength: 1
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
     CompartmentIdQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
       in: query
       name: compartmentId
       x-default-description: 'null'
-      schema:
-        type: string
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
-
-        is descending. Default order for `displayName` is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
       schema:
         type: string
     PaginationLimitQueryParam:
@@ -886,50 +916,20 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
+    OccMetricAlarmIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the OccMetricAlarm.
+      in: path
+      name: occMetricAlarmId
+      required: true
+      schema:
+        type: string
+    IsActiveFilterQueryParam:
+      description: Filter to list only active or inactive alarms.
       in: query
-      name: page
+      name: isActive
+      x-default-description: 'null'
       schema:
-        type: string
-        minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
-
-        `if-match` parameter to the value of the etag from a previous GET or POST response for
-
-        that resource. The resource will be updated or deleted only if the etag you provide
-
-        matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+        type: boolean
 x-anchors:
   x-headers:
     etag:

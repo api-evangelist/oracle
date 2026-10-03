@@ -154,27 +154,10 @@ paths:
         '
 components:
   parameters:
-    RequiredSubscriptionIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
+    LinkedCompartmentIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment linked to the resource.
       in: query
-      name: subscriptionId
-      required: true
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the given display name exactly.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ResourceAnchorIdentifierPathParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource anchor.
-      in: path
-      name: resourceAnchorId
-      required: true
+      name: linkedCompartmentId
       schema:
         type: string
     SubscriptionServiceNameQueryParam:
@@ -189,6 +172,27 @@ components:
         - ORACLEDBATAZURE
         - ORACLEDBATGOOGLE
         - ORACLEDBATAWS
+    RequiredSubscriptionServiceNameQueryParam:
+      description: The cloud service provider.
+      in: query
+      name: subscriptionServiceName
+      required: true
+      x-obmcs-top-level-enum: '#/definitions/SubscriptionType'
+      schema:
+        type: string
+        enum:
+        - ORACLEDBATAZURE
+        - ORACLEDBATGOOGLE
+        - ORACLEDBATAWS
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the given display name exactly.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     IsCompartmentIdInSubtreeParam:
       description: Check the sub-compartments of a given `compartmentId`.
       in: query
@@ -197,17 +201,25 @@ components:
       schema:
         type: boolean
         default: true
-    LifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
 
-        state value is case-insensitive.
+        is descending. Default order for `displayName` is ascending.
 
         '
       in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/ResourceAnchor/lifecycleState'
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    ResourceAnchorIdentifierPathParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource anchor.
+      in: path
+      name: resourceAnchorId
+      required: true
       schema:
         type: string
     SortOrderQueryParam:
@@ -227,47 +239,30 @@ components:
         enum:
         - ASC
         - DESC
-    BaseAndSubCompartmentIdQueryParam:
-      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud base compartment or sub-compartment in which to list resources.
-
-        A Multicloud base compartment is an OCI compartment that maps to a subscription in a cloud service provider (such as Azure or AWS).
-
-        '
-      in: query
-      name: compartmentId
-      required: false
-      schema:
-        type: string
-    ShouldFetchCompartmentName:
-      description: 'Whether to fetch and include the compartment name.
-
-        Setting this field to `true` might introduce additional latency.
-
-        '
-      in: query
-      name: shouldFetchCompartmentName
-      required: false
-      schema:
-        type: boolean
-        default: false
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide only one sort order. Default order for `timeCreated`
-
-        is descending. Default order for `displayName` is ascending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
     SubscriptionIdQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
       in: query
       name: subscriptionId
+      x-default-description: 'null'
+      schema:
+        type: string
+    LifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/ResourceAnchor/lifecycleState'
+      schema:
+        type: string
+    ResourceAnchorIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource anchor.
+      in: query
+      name: id
       x-default-description: 'null'
       schema:
         type: string
@@ -285,6 +280,38 @@ components:
       name: opc-request-id
       schema:
         type: string
+    ShouldFetchCompartmentName:
+      description: 'Whether to fetch and include the compartment name.
+
+        Setting this field to `true` might introduce additional latency.
+
+        '
+      in: query
+      name: shouldFetchCompartmentName
+      required: false
+      schema:
+        type: boolean
+        default: false
+    RequiredSubscriptionIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud subscription in which to list resources.
+      in: query
+      name: subscriptionId
+      required: true
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
     PaginationLimitQueryParam:
       description: 'For list pagination. The maximum number of results per page, or items to return in a
 
@@ -300,56 +327,18 @@ components:
         default: 10
         maximum: 1000
         minimum: 1
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
+    BaseAndSubCompartmentIdQueryParam:
+      description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the Multicloud base compartment or sub-compartment in which to list resources.
 
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+        A Multicloud base compartment is an OCI compartment that maps to a subscription in a cloud service provider (such as Azure or AWS).
 
         '
       in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    LinkedCompartmentIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment linked to the resource.
-      in: query
-      name: linkedCompartmentId
-      schema:
-        type: string
-    RequiredSubscriptionServiceNameQueryParam:
-      description: The cloud service provider.
-      in: query
-      name: subscriptionServiceName
-      required: true
-      x-obmcs-top-level-enum: '#/definitions/SubscriptionType'
-      schema:
-        type: string
-        enum:
-        - ORACLEDBATAZURE
-        - ORACLEDBATGOOGLE
-        - ORACLEDBATAWS
-    ResourceAnchorIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource anchor.
-      in: query
-      name: id
-      x-default-description: 'null'
+      name: compartmentId
+      required: false
       schema:
         type: string
   schemas:
-    ResourceAnchorCollection:
-      description: List of resource anchors in the indicated Multicloud subscription.
-      properties:
-        items:
-          description: List of resource anchors.
-          items:
-            $ref: '#/components/schemas/ResourceAnchorSummary'
-          type: array
-      required:
-      - items
-      type: object
     CloudServiceProviderMetadataItem:
       description: "Cloud Service Provider metadata item.\nWarning - In future this object can change to generic object with future Cloud Service Provider based on \nCloudServiceProvider field. This can be one of CSP provider type Azure, GCP and AWS.\n"
       discriminator:
@@ -387,22 +376,6 @@ components:
       - resourceAnchorName
       - subscriptionType
       type: object
-    Error:
-      description: Error response information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ResourceAnchorSummary:
       description: The properties that define a resource anchor.
       properties:
@@ -546,6 +519,33 @@ components:
       - freeformTags
       - definedTags
       - subscriptionId
+      type: object
+    Error:
+      description: Error response information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ResourceAnchorCollection:
+      description: List of resource anchors in the indicated Multicloud subscription.
+      properties:
+        items:
+          description: List of resource anchors.
+          items:
+            $ref: '#/components/schemas/ResourceAnchorSummary'
+          type: array
+      required:
+      - items
       type: object
     ResourceAnchor:
       description: 'A resource anchor.

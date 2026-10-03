@@ -916,6 +916,53 @@ paths:
         required: true
 components:
   schemas:
+    UpdateQuotaDetails:
+      description: Request object for update quota operation.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, and scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: The description you assign to the quota.
+          maxLength: 400
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        statements:
+          description: 'An array of quota statements written in the declarative quota statement language.
+
+            '
+          items:
+            type: string
+          type: array
     CreateQuotaDetails:
       description: Request object for create quota operation.
       properties:
@@ -986,40 +1033,22 @@ components:
       - description
       - name
       - statements
-    ResourceLock:
-      description: 'Resource locks prevent certain APIs from being called for the resource.
-
-        A full lock prevents both updating and deleting the resource. A lock delete
-
-        prevents deleting the resource.
-
-        '
+    Error:
+      description: Generic error object.
       properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
         message:
-          description: 'A message added by the lock creator. The message typically gives an
-
-            indication of why the resource is locked.
-
-            '
-          type: string
-        relatedResourceId:
-          description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
-
-            '
-          type: string
-        timeCreated:
-          description: Indicates when the lock was created, in the format defined by RFC 3339.
-          format: date-time
-          type: string
-        type:
-          description: Lock type.
-          enum:
-          - FULL
-          - DELETE
+          description: A human-readable error string.
           type: string
       required:
-      - type
-      type: object
+      - code
+      - message
     QuotaSummary:
       description: 'Consists of a subset of all the properties of the corresponding quota, and is recommended to be used in cases requiring
 
@@ -1130,71 +1159,14 @@ components:
       - name
       - description
       - timeCreated
-    Error:
-      description: Generic error object.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
+    ResourceLock:
+      description: 'Resource locks prevent certain APIs from being called for the resource.
 
-            [API Errors](/Content/API/References/apierrors.htm).
+        A full lock prevents both updating and deleting the resource. A lock delete
 
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    UpdateQuotaDetails:
-      description: Request object for update quota operation.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
+        prevents deleting the resource.
 
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, and scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        description:
-          description: The description you assign to the quota.
-          maxLength: 400
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        statements:
-          description: 'An array of quota statements written in the declarative quota statement language.
-
-            '
-          items:
-            type: string
-          type: array
-    AddLockDetails:
-      description: "Request payload to add lock to the resource. The FULL lock type allows no modifications (delete, create, update).\n  The DELETE lock type allows all modifications, but delete is not allowed.\n"
+        '
       properties:
         message:
           description: 'A message added by the lock creator. The message typically gives an
@@ -1207,6 +1179,10 @@ components:
           description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
 
             '
+          type: string
+        timeCreated:
+          description: Indicates when the lock was created, in the format defined by RFC 3339.
+          format: date-time
           type: string
         type:
           description: Lock type.
@@ -1329,6 +1305,30 @@ components:
       - statements
       - description
       - timeCreated
+    AddLockDetails:
+      description: "Request payload to add lock to the resource. The FULL lock type allows no modifications (delete, create, update).\n  The DELETE lock type allows all modifications, but delete is not allowed.\n"
+      properties:
+        message:
+          description: 'A message added by the lock creator. The message typically gives an
+
+            indication of why the resource is locked.
+
+            '
+          type: string
+        relatedResourceId:
+          description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
+
+            '
+          type: string
+        type:
+          description: Lock type.
+          enum:
+          - FULL
+          - DELETE
+          type: string
+      required:
+      - type
+      type: object
     RemoveLockDetails:
       description: 'Request payload to remove the resource lock.
 
@@ -1344,113 +1344,6 @@ components:
       - type
       type: object
   parameters:
-    OverrideLocksQueryParameter:
-      description: Whether to override locks (if any exist).
-      in: query
-      name: isLockOverride
-      schema:
-        type: boolean
-        default: false
-    LifecycleStateQueryParam:
-      description: Filters returned quotas based on the given state.
-      in: query
-      name: lifecycleState
-      schema:
-        type: string
-        enum:
-        - ACTIVE
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ''asc'' or ''desc''. By default, it is ascending.
-
-        '
-      in: query
-      name: sortOrder
-      required: false
-      x-obmcs-inline-enum: true
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error, without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations (e.g., if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        can be rejected).
-
-        '
-      in: header
-      name: opc-retry-token
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
-
-        particular request, please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    QuotaIdPathParam:
-      description: The OCID of the quota.
-      in: path
-      name: quotaId
-      required: true
-      schema:
-        type: string
-    FilterByNameQueryParam:
-      description: name
-      in: query
-      name: name
-      required: false
-      schema:
-        type: string
-        maxLength: 255
-    SortByForQuotasQueryParam:
-      description: 'The field to sort by. Only one sort order can be provided. Time created is default ordered as descending. Display name is default ordered as ascending.
-
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - NAME
-        - TIMECREATED
-        default: NAME
-    PaginationTokenQueryParam:
-      description: 'The value of the `opc-next-page` response header from the previous "List" call.
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        default: 0
-        maxLength: 512
-        minLength: 1
-    RootCompartmentIdQueryParam:
-      description: 'The OCID of the parent compartment (remember that the tenancy is simply the root compartment).
-
-        '
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 100
-        minLength: 1
     PaginationLimitForQuotasQueryParam:
       description: 'The maximum number of items to return in a paginated "List" call.
 
@@ -1474,6 +1367,113 @@ components:
       name: if-match
       schema:
         type: string
+    QuotaIdPathParam:
+      description: The OCID of the quota.
+      in: path
+      name: quotaId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ''asc'' or ''desc''. By default, it is ascending.
+
+        '
+      in: query
+      name: sortOrder
+      required: false
+      x-obmcs-inline-enum: true
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    LifecycleStateQueryParam:
+      description: Filters returned quotas based on the given state.
+      in: query
+      name: lifecycleState
+      schema:
+        type: string
+        enum:
+        - ACTIVE
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    FilterByNameQueryParam:
+      description: name
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error, without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations (e.g., if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        can be rejected).
+
+        '
+      in: header
+      name: opc-retry-token
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: 'The value of the `opc-next-page` response header from the previous "List" call.
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        default: 0
+        maxLength: 512
+        minLength: 1
+    RootCompartmentIdQueryParam:
+      description: 'The OCID of the parent compartment (remember that the tenancy is simply the root compartment).
+
+        '
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 100
+        minLength: 1
+    SortByForQuotasQueryParam:
+      description: 'The field to sort by. Only one sort order can be provided. Time created is default ordered as descending. Display name is default ordered as ascending.
+
+        '
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        type: string
+        enum:
+        - NAME
+        - TIMECREATED
+        default: NAME
+    OverrideLocksQueryParameter:
+      description: Whether to override locks (if any exist).
+      in: query
+      name: isLockOverride
+      schema:
+        type: boolean
+        default: false
 x-anchors:
   x-headers:
     etag:

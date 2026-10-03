@@ -126,6 +126,23 @@ paths:
       x-related-resource: '#/definitions/OciCacheDefaultConfigSet'
 components:
   parameters:
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     OciCacheDefaultConfigSetIdentifierPathParam:
       description: Unique OCI Cache Default Config Set identifier.
       in: path
@@ -133,12 +150,17 @@ components:
       required: true
       schema:
         type: string
-    CompartmentIdRequiredQueryParam:
-      description: The unique identifier for the compartment.
+    OciCacheDefaultConfigSetIdentifierQueryParam:
+      description: Unique OCI Cache Default Config Set identifier.
       in: query
-      name: compartmentId
-      required: true
+      name: id
       x-default-description: 'null'
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
     PaginationLimitQueryParam:
@@ -162,13 +184,13 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
-    OciCacheDefaultConfigSetLifecycleStateQueryParam:
-      description: A filter to return the OCI Cache Default Config Set resources, whose lifecycle state matches with the given lifecycle state.
+    SoftwareVersionQueryParam:
+      description: A filter to return the OCI Cache Config Set resources, whose software version matches with the given software version.
       in: query
-      name: lifecycleState
+      name: softwareVersion
       required: false
       x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/OciCacheDefaultConfigSet/lifecycleState'
+      x-obmcs-enumref: '#/definitions/OciCacheConfigSet/softwareVersion'
       schema:
         type: string
     SortOrderQueryParam:
@@ -186,46 +208,35 @@ components:
         enum:
         - ASC
         - DESC
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+    OciCacheDefaultConfigSetLifecycleStateQueryParam:
+      description: A filter to return the OCI Cache Default Config Set resources, whose lifecycle state matches with the given lifecycle state.
       in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    OciCacheDefaultConfigSetIdentifierQueryParam:
-      description: Unique OCI Cache Default Config Set identifier.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    SoftwareVersionQueryParam:
-      description: A filter to return the OCI Cache Config Set resources, whose software version matches with the given software version.
-      in: query
-      name: softwareVersion
+      name: lifecycleState
       required: false
       x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/OciCacheConfigSet/softwareVersion'
+      x-obmcs-enumref: '#/definitions/OciCacheDefaultConfigSet/lifecycleState'
+      schema:
+        type: string
+    CompartmentIdRequiredQueryParam:
+      description: The unique identifier for the compartment.
+      in: query
+      name: compartmentId
+      required: true
+      x-default-description: 'null'
       schema:
         type: string
   schemas:
+    OciCacheDefaultConfigSetCollection:
+      description: A list of OCI Cache Default Config Sets.
+      properties:
+        items:
+          description: List of OCI Cache Default Config Sets.
+          items:
+            $ref: '#/components/schemas/OciCacheDefaultConfigSetSummary'
+          type: array
+      required:
+      - items
+      type: object
     DefaultConfigurationInfo:
       description: Details of a configuration setting in the OCI Cache Default Config Set.
       properties:
@@ -252,6 +263,29 @@ components:
       - defaultConfigValue
       - dataType
       - isModifiable
+      type: object
+    Error:
+      description: Specifies details for an error.
+      properties:
+        code:
+          description: A machine-usable code for the error that occured.
+          type: string
+        message:
+          description: A human-readable error string for the error that occured.
+          type: string
+      required:
+      - code
+      - message
+    DefaultConfigurationDetails:
+      description: List of OCI Cache Default Config Set Values.
+      properties:
+        items:
+          description: List of DefaultConfigurationInfo objects.
+          items:
+            $ref: '#/components/schemas/DefaultConfigurationInfo'
+          type: array
+      required:
+      - items
       type: object
     OciCacheDefaultConfigSet:
       description: Default configurations for OCI Cache to manage the behavior, performance, and functionality of the underlying cache engine.
@@ -285,18 +319,6 @@ components:
       - id
       - softwareVersion
       type: object
-    Error:
-      description: Specifies details for an error.
-      properties:
-        code:
-          description: A machine-usable code for the error that occured.
-          type: string
-        message:
-          description: A human-readable error string for the error that occured.
-          type: string
-      required:
-      - code
-      - message
     OciCacheDefaultConfigSetSummary:
       description: Summary of information about an OCI Cache Default Config Set.
       properties:
@@ -321,28 +343,6 @@ components:
       required:
       - id
       - softwareVersion
-      type: object
-    DefaultConfigurationDetails:
-      description: List of OCI Cache Default Config Set Values.
-      properties:
-        items:
-          description: List of DefaultConfigurationInfo objects.
-          items:
-            $ref: '#/components/schemas/DefaultConfigurationInfo'
-          type: array
-      required:
-      - items
-      type: object
-    OciCacheDefaultConfigSetCollection:
-      description: A list of OCI Cache Default Config Sets.
-      properties:
-        items:
-          description: List of OCI Cache Default Config Sets.
-          items:
-            $ref: '#/components/schemas/OciCacheDefaultConfigSetSummary'
-          type: array
-      required:
-      - items
       type: object
   responses:
     default:

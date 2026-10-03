@@ -124,6 +124,44 @@ paths:
       - serviceAttachment
 components:
   parameters:
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ServiceAttachmentIdentifierPathParam:
+      description: OCID of the Service Attachment
+      in: path
+      name: serviceAttachmentId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    ServiceAttachmentsLifecycleStateQueryParam:
+      description: A filter that returns all resources that match the specified lifecycle state.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: Returns all lifecycle states by default
+      x-obmcs-enumref: '#/definitions/ServiceAttachment/lifecycleState'
+      schema:
+        type: string
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -133,13 +171,6 @@ components:
         default: 100
         maximum: 100
         minimum: 1
-    ServiceAttachmentIdentifierPathParam:
-      description: OCID of the Service Attachment
-      in: path
-      name: serviceAttachmentId
-      required: true
-      schema:
-        type: string
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
@@ -152,6 +183,22 @@ components:
         - TIME_CREATED
         - DISPLAY_NAME
         default: TIME_CREATED
+    ServiceInstanceTypeQueryParam:
+      description: A filter that returns all resources that match the specified lifecycle state.
+      in: query
+      name: serviceInstanceType
+      required: false
+      x-default-description: Returns all lifecycle states by default
+      x-obmcs-enumref: '#/definitions/ServiceAttachment/serviceInstanceType'
+      schema:
+        type: string
+    FusionEnvironmentIdentifierPathParam:
+      description: unique FusionEnvironment identifier
+      in: path
+      name: fusionEnvironmentId
+      required: true
+      schema:
+        type: string
     SortOrderQueryParam:
       description: The sort order to use, either 'asc' or 'desc'.
       in: query
@@ -163,65 +210,7 @@ components:
         - ASC
         - DESC
         default: DESC
-    ServiceAttachmentsLifecycleStateQueryParam:
-      description: A filter that returns all resources that match the specified lifecycle state.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: Returns all lifecycle states by default
-      x-obmcs-enumref: '#/definitions/ServiceAttachment/lifecycleState'
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    ServiceInstanceTypeQueryParam:
-      description: A filter that returns all resources that match the specified lifecycle state.
-      in: query
-      name: serviceInstanceType
-      required: false
-      x-default-description: Returns all lifecycle states by default
-      x-obmcs-enumref: '#/definitions/ServiceAttachment/serviceInstanceType'
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    FusionEnvironmentIdentifierPathParam:
-      description: unique FusionEnvironment identifier
-      in: path
-      name: fusionEnvironmentId
-      required: true
-      schema:
-        type: string
   schemas:
-    ServiceAttachmentCollection:
-      description: List of service attachments for a fusion instance.
-      properties:
-        items:
-          description: A page of FusionEnvironmentFamilySummary objects.
-          items:
-            $ref: '#/components/schemas/ServiceAttachmentSummary'
-          type: array
-      required:
-      - items
-      type: object
     Error:
       description: Error Information.
       properties:
@@ -234,6 +223,89 @@ components:
       required:
       - code
       - message
+    ServiceAttachmentCollection:
+      description: List of service attachments for a fusion instance.
+      properties:
+        items:
+          description: A page of FusionEnvironmentFamilySummary objects.
+          items:
+            $ref: '#/components/schemas/ServiceAttachmentSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ServiceAttachmentSummary:
+      description: Summary of the ServiceInstance.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: ServiceInstance Identifier, can be renamed
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: Unique identifier that is immutable on creation
+          type: string
+        isSkuBased:
+          description: Whether this service is provisioned due to the customer being subscribed to a specific SKU
+          type: boolean
+        lifecycleDetails:
+          description: A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
+          type: string
+        lifecycleState:
+          description: The current state of the ServiceInstance.
+          type: string
+          x-obmcs-enumref: '#/definitions/ServiceAttachment/lifecycleState'
+        serviceInstanceId:
+          description: The ID of the service instance created that can be used to identify this on the service control plane
+          type: string
+        serviceInstanceType:
+          description: Type of the service.
+          type: string
+          x-obmcs-enumref: '#/definitions/ServiceAttachment/serviceInstanceType'
+        serviceUrl:
+          description: Service URL of the instance
+          type: string
+        timeCreated:
+          description: The time the service instance was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the serivce instance was updated. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - id
+      - displayName
+      - serviceInstanceType
+      - lifecycleState
+      - isSkuBased
+      type: object
     ServiceAttachment:
       description: Description of ServiceAttachment.
       properties:
@@ -315,78 +387,6 @@ components:
           type: string
         timeUpdated:
           description: The time the ServiceInstance was updated. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - id
-      - displayName
-      - serviceInstanceType
-      - lifecycleState
-      - isSkuBased
-      type: object
-    ServiceAttachmentSummary:
-      description: Summary of the ServiceInstance.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: ServiceInstance Identifier, can be renamed
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: Unique identifier that is immutable on creation
-          type: string
-        isSkuBased:
-          description: Whether this service is provisioned due to the customer being subscribed to a specific SKU
-          type: boolean
-        lifecycleDetails:
-          description: A message describing the current state in more detail. For example, can be used to provide actionable information for a resource in Failed state.
-          type: string
-        lifecycleState:
-          description: The current state of the ServiceInstance.
-          type: string
-          x-obmcs-enumref: '#/definitions/ServiceAttachment/lifecycleState'
-        serviceInstanceId:
-          description: The ID of the service instance created that can be used to identify this on the service control plane
-          type: string
-        serviceInstanceType:
-          description: Type of the service.
-          type: string
-          x-obmcs-enumref: '#/definitions/ServiceAttachment/serviceInstanceType'
-        serviceUrl:
-          description: Service URL of the instance
-          type: string
-        timeCreated:
-          description: The time the service instance was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the serivce instance was updated. An RFC3339 formatted datetime string
           format: date-time
           type: string
       required:
