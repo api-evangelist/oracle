@@ -768,20 +768,184 @@ paths:
       - apmDomain
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
+  parameters:
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified, timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    DataKeyTypeQueryParam:
+      description: Data key type.
+      in: query
+      name: dataKeyType
+      required: false
+      x-default-description: When not specified, all Data Key types are included.
+      x-obmcs-top-level-enum: '#/definitions/DataKeyTypes'
+      schema:
+        type: string
+        enum:
+        - PRIVATE
+        - PUBLIC
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. Set the `if-match` parameter
+
+        to the value of the etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    WorkRequestIdPathParam:
+      description: The ID of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request therefore it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    LifecycleStateQueryParam:
+      description: A filter to return only resources that match the given life-cycle state.
+      in: query
+      name: lifecycleState
+      required: false
+      x-obmcs-top-level-enum: '#/definitions/LifecycleStates'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - DELETING
+        - DELETED
+        - FAILED
+    ApmDomainIdentifierPathParam:
+      description: The OCID of the APM domain.
+      in: path
+      name: apmDomainId
+      required: true
+      schema:
+        type: string
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
   schemas:
-    ChangeApmDomainCompartmentDetails:
-      description: The information needed for the change compartment operation.
+    Error:
+      description: The details of an error that occurred.
       properties:
-        compartmentId:
-          description: The OCID of the destination compartment for the APM domain.
-          maxLength: 255
-          minLength: 1
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
           type: string
       required:
-      - compartmentId
-      type: object
-    BaseKeyDetails:
-      description: The information about a Data Key.
+      - code
+      - message
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occurred. Error codes are listed at
+
+            [API Errors](/iaas/Content/API/References/apierrors.htm)
+
+            '
+          type: string
+        message:
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occurred, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    ApmDomainSummary:
+      allOf:
+      - $ref: '#/components/schemas/BaseDomainDetails'
+      - type: object
+      description: Summary of an APM domain.
+    RemoveDataKeyDetails:
+      description: Details of the Data Key to be removed.
       properties:
         name:
           description: 'Name of the Data Key. The name uniquely identifies a Data Key within an APM domain.
@@ -791,72 +955,8 @@ components:
           minLength: 1
           pattern: ^[a-zA-Z_][a-zA-Z_0-9]*$
           type: string
-        type:
-          description: Type of the Data Key.
-          enum:
-          - PRIVATE
-          - PUBLIC
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/DataKeyTypes'
       required:
       - name
-      - type
-      type: object
-    ApmDomain:
-      allOf:
-      - $ref: '#/components/schemas/BaseDomainDetails'
-      - properties:
-          dataUploadEndpoint:
-            description: The endpoint where the APM agents upload their observations and metrics.
-            type: string
-        type: object
-      description: Details of an APM domain.
-    UpdateApmDomainDetails:
-      description: The information that can be updated by update APM domain operation.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        description:
-          description: Description of the APM domain.
-          maxLength: 400
-          minLength: 1
-          type: string
-        displayName:
-          description: Display name of the APM domain.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        logGroupId:
-          description: The OCID of the Log Analytics log group to which the data uploaded to this APM domain will be mapped to.
-          maxLength: 255
-          minLength: 1
-          type: string
       type: object
     CreateApmDomainDetails:
       description: The information about the new APM domain.
@@ -917,11 +1017,6 @@ components:
       - displayName
       - compartmentId
       type: object
-    ApmDomainSummary:
-      allOf:
-      - $ref: '#/components/schemas/BaseDomainDetails'
-      - type: object
-      description: Summary of an APM domain.
     WorkRequest:
       description: A description of work request.
       properties:
@@ -995,39 +1090,66 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    Error:
-      description: The details of an error that occurred.
+    ApmDomain:
+      allOf:
+      - $ref: '#/components/schemas/BaseDomainDetails'
+      - properties:
+          dataUploadEndpoint:
+            description: The endpoint where the APM agents upload their observations and metrics.
+            type: string
+        type: object
+      description: Details of an APM domain.
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
         message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occurred. Error codes are listed at
-
-            [API Errors](/iaas/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
+          description: Human-readable log message.
           type: string
         timestamp:
           description: The time the error occurred, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
           format: date-time
           type: string
       required:
-      - code
       - message
       - timestamp
+    GenerateDataKeyDetails:
+      allOf:
+      - $ref: '#/components/schemas/BaseKeyDetails'
+      - type: object
+      description: Details of the Data Key to be generated.
+    BaseKeyDetails:
+      description: The information about a Data Key.
+      properties:
+        name:
+          description: 'Name of the Data Key. The name uniquely identifies a Data Key within an APM domain.
+
+            '
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z_][a-zA-Z_0-9]*$
+          type: string
+        type:
+          description: Type of the Data Key.
+          enum:
+          - PRIVATE
+          - PUBLIC
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/DataKeyTypes'
+      required:
+      - name
+      - type
+      type: object
+    DataKeySummary:
+      allOf:
+      - $ref: '#/components/schemas/BaseKeyDetails'
+      - properties:
+          value:
+            description: Value of the Data Key.
+            maxLength: 255
+            minLength: 1
+            type: string
+        type: object
+      description: Summary of Data Key.
     BaseDomainDetails:
       description: Details for an APM domain.
       properties:
@@ -1122,36 +1244,64 @@ components:
       - compartmentId
       - displayName
       type: object
-    RemoveDataKeyDetails:
-      description: Details of the Data Key to be removed.
+    UpdateApmDomainDetails:
+      description: The information that can be updated by update APM domain operation.
       properties:
-        name:
-          description: 'Name of the Data Key. The name uniquely identifies a Data Key within an APM domain.
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
 
             '
-          maxLength: 100
+          type: object
+        description:
+          description: Description of the APM domain.
+          maxLength: 400
           minLength: 1
-          pattern: ^[a-zA-Z_][a-zA-Z_0-9]*$
+          type: string
+        displayName:
+          description: Display name of the APM domain.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        logGroupId:
+          description: The OCID of the Log Analytics log group to which the data uploaded to this APM domain will be mapped to.
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    ChangeApmDomainCompartmentDetails:
+      description: The information needed for the change compartment operation.
+      properties:
+        compartmentId:
+          description: The OCID of the destination compartment for the APM domain.
+          maxLength: 255
+          minLength: 1
           type: string
       required:
-      - name
+      - compartmentId
       type: object
-    DataKeySummary:
-      allOf:
-      - $ref: '#/components/schemas/BaseKeyDetails'
-      - properties:
-          value:
-            description: Value of the Data Key.
-            maxLength: 255
-            minLength: 1
-            type: string
-        type: object
-      description: Summary of Data Key.
-    GenerateDataKeyDetails:
-      allOf:
-      - $ref: '#/components/schemas/BaseKeyDetails'
-      - type: object
-      description: Details of the Data Key to be generated.
     WorkRequestResource:
       description: The details of the resource that the work request affects.
       properties:
@@ -1186,156 +1336,6 @@ components:
       - actionType
       - entityType
       - identifier
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the error occurred, expressed in [RFC 3339](https://tools.ietf.org/rfc/rfc3339) timestamp format.
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-  parameters:
-    ApmDomainIdentifierPathParam:
-      description: The OCID of the APM domain.
-      in: path
-      name: apmDomainId
-      required: true
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified, timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. Set the `if-match` parameter
-
-        to the value of the etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    LifecycleStateQueryParam:
-      description: A filter to return only resources that match the given life-cycle state.
-      in: query
-      name: lifecycleState
-      required: false
-      x-obmcs-top-level-enum: '#/definitions/LifecycleStates'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - DELETING
-        - DELETED
-        - FAILED
-    DataKeyTypeQueryParam:
-      description: Data key type.
-      in: query
-      name: dataKeyType
-      required: false
-      x-default-description: When not specified, all Data Key types are included.
-      x-obmcs-top-level-enum: '#/definitions/DataKeyTypes'
-      schema:
-        type: string
-        enum:
-        - PRIVATE
-        - PUBLIC
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    WorkRequestIdPathParam:
-      description: The ID of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request therefore it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
   responses:
     default:
       description: Unknown Error

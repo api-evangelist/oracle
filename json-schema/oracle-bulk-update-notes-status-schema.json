@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/oracle/main/json-schema/oracle-bulk-update-notes-status-schema.json",
+  "title": "BulkUpdateNotesStatus",
+  "description": "Response of a bulk update notes operation.\n",
+  "x-generated": "2026-10-03",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/oracle-attributes-api-openapi.yml#/components/schemas/BulkUpdateNotesStatus",
+  "properties": {
+    "attributeStatuses": {
+      "description": "We preserve the order of the attribute items from the bulk update notes request in this collection.  The ith object in this collection represents the\nbulk update notes operation status of the ith object in the BulkUpdateAttributeNotesDetails object in the Bulk update notes request.  If the\nbulk update notes operation results in a processing error or a validation error, the operationStatus property in the  BulkUpdateNotesMetadata object will\ncontain the appropriate bulk error status for the bulk operation.\n",
+      "items": {
+        "$ref": "#/$defs/AttributeUpdateNotesResponse"
+      },
+      "type": "array"
+    },
+    "bulkUpdateNotesMetadata": {
+      "$ref": "#/$defs/BulkUpdateNotesMetadata"
+    }
+  },
+  "required": [
+    "attributeStatuses",
+    "bulkUpdateNotesMetadata"
+  ],
+  "type": "object",
+  "$defs": {
+    "AttributeUpdateNotesResponse": {
+      "description": "Response of an individual attribute item in the bulk update notes operation.\n",
+      "properties": {
+        "attributeName": {
+          "description": "Attribute for which notes were added to or edited in this bulk operation.\n",
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "attributeNameSpace": {
+          "default": "TRACES",
+          "description": "Namespace of the attribute whose notes were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n",
+          "enum": [
+            "TRACES",
+            "SYNTHETIC"
+          ],
+          "type": "string"
+        },
+        "attributeStatus": {
+          "description": "Status of the attribute after this operation.  The attribute can have one of the following statuses after the update notes operation.  The attribute\ncan have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata\nobject.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.\nThe following are successful status values of individual attribute items in a bulk update notes operation.\nATTRIBUTE_NOTES_UPDATED - The attribute's notes have been updated with the given notes.\nDUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,\nand call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.\nThe following values are error statuses and the bulk processing is stopped when the first error is encountered.\nINVALID_ATTRIBUTE - The attribute is invalid.  The length of the notes is more than a 1000 characters.\nATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.\nATTRIBUTE_DOES_NOT_EXIST - Attribute was neither active nor pinned inactive.\nNOTES_TOO_LONG - Attribute notes were too long (more than 1000 chars).\n",
+          "enum": [
+            "ATTRIBUTE_NOTES_UPDATED",
+            "DUPLICATE_ATTRIBUTE",
+            "INVALID_ATTRIBUTE",
+            "ATTRIBUTE_NOT_PROCESSED",
+            "ATTRIBUTE_DOES_NOT_EXIST",
+            "NOTES_TOO_LONG"
+          ],
+          "type": "string"
+        },
+        "notes": {
+          "description": "Notes added to or edited for this attribute.\n",
+          "type": "string"
+        },
+        "operationType": {
+          "description": "Type of operation - UPDATE_NOTES.\n",
+          "enum": [
+            "UPDATE_NOTES"
+          ],
+          "type": "string"
+        },
+        "timeUpdated": {
+          "description": "Time when the attribute's notes were updated.\n",
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attributeName",
+        "notes",
+        "operationType",
+        "attributeStatus",
+        "timeUpdated",
+        "attributeNameSpace"
+      ],
+      "type": "object"
+    },
+    "BulkUpdateNotesMetadata": {
+      "description": "Metadata about the bulk update notes operation.  The bulk update notes operation is atomic and binary.  If the processing of any of the attributes\nin the bulk update notes request results in a processing or validation error, then none of the notes in the update notes request are updated.\n",
+      "properties": {
+        "attributesNotesUpdated": {
+          "description": "Total number attributes (both string and numeric) in TRACES namespace for which notes were updated.\n",
+          "type": "integer"
+        },
+        "operationStatus": {
+          "description": "Operation status of the bulk update notes operation.\nSUCCESS - The bulk updates notes request has succeeded and all the attributes in the bulk update notes request have been updated with the provided notes.\nThe following are error statuses for the bulk update notes operation.\nEMPTY_ATTRIBUTE_LIST - The bulk update notes request object was empty and did not contain any attributes for which notes had to be updated.\nINVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted\nin a processing error.\n",
+          "enum": [
+            "SUCCESS",
+            "EMPTY_ATTRIBUTE_LIST",
+            "INVALID_BULK_REQUEST"
+          ],
+          "type": "string"
+        },
+        "operationType": {
+          "description": "Type of operation.\n",
+          "enum": [
+            "UPDATE_NOTES"
+          ],
+          "type": "string"
+        },
+        "syntheticAttributesPinned": {
+          "description": "Total number attributes (both string and numeric) in SYNTHETIC namespace that were pinned.\n",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "operationType",
+        "operationStatus",
+        "attributesNotesUpdated"
+      ],
+      "type": "object"
+    }
+  }
+}

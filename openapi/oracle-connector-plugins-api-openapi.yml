@@ -169,7 +169,54 @@ paths:
       x-obmcs-authz-declarations:
         authorizationRequired: false
 components:
+  responses:
+    default:
+      description: 'Unknown Error
+
+        '
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
+    ConnectorPluginNameQueryParam:
+      description: 'A filter to return only resources that match the given connector plugin name ignoring case.
+
+
+        Example: `QueueSource`
+
+        '
+      in: query
+      name: name
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return
+
+        in a paginated "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 100
+        minimum: 1
     PaginationTokenQueryParam:
       description: 'For list pagination. The value of the opc-next-page response header from the previous
 
@@ -197,20 +244,6 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    ConnectorPluginNameQueryParam:
-      description: 'A filter to return only resources that match the given connector plugin name ignoring case.
-
-
-        Example: `QueueSource`
-
-        '
-      in: query
-      name: name
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     RequestIdHeader:
       description: 'The unique Oracle-assigned identifier for the request.
 
@@ -221,21 +254,40 @@ components:
       name: opc-request-id
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return
+    LifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state.
 
-        in a paginated "List" call. For important details about how pagination works, see
 
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+        Example: `ACTIVE`
 
         '
       in: query
-      name: limit
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
       schema:
-        type: integer
-        default: 100
-        maximum: 100
-        minimum: 1
+        type: string
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - INACTIVE
+        - NEEDS_ATTENTION
+        - DELETING
+        - DELETED
+        - FAILED
+    ConnectorPluginNamePathParam:
+      description: 'The name of the connector plugin. This name indicates the service to be called by the connector plugin. For example, `QueueSource` indicates the Queue service.
+
+        '
+      in: path
+      name: connectorPluginName
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for `timeCreated` is descending.
 
@@ -263,116 +315,7 @@ components:
         - ASC
         - DESC
         default: ASC
-    ConnectorPluginNamePathParam:
-      description: 'The name of the connector plugin. This name indicates the service to be called by the connector plugin. For example, `QueueSource` indicates the Queue service.
-
-        '
-      in: path
-      name: connectorPluginName
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    LifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state.
-
-
-        Example: `ACTIVE`
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - INACTIVE
-        - NEEDS_ATTENTION
-        - DELETING
-        - DELETED
-        - FAILED
   schemas:
-    ConnectorPluginSummary:
-      description: 'Summary information for a connector plugin.
-
-        Example connector plugins include the Streaming source and the Notifications target.
-
-        For more information about flows defined by connectors, see
-
-        [Overview of Connector Hub](/iaas/Content/connector-hub/overview.htm).
-
-        For configuration instructions, see
-
-        [Creating a Connector](/iaas/Content/connector-hub/create-service-connector.htm).
-
-        '
-      discriminator:
-        propertyName: kind
-      properties:
-        displayName:
-          description: 'A user-friendly name. It does not have to be unique, and it is changeable.
-
-            Avoid entering confidential information.
-
-            '
-          type: string
-        estimatedThroughput:
-          default: UNKNOWN
-          description: 'The estimated throughput range (LOW, MEDIUM, HIGH).
-
-            '
-          enum:
-          - LOW
-          - MEDIUM
-          - HIGH
-          - UNKNOWN
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/EstimatedThroughput'
-        kind:
-          description: 'The plugin type discriminator.
-
-            '
-          enum:
-          - SOURCE
-          - TARGET
-          type: string
-        lifecycleState:
-          description: 'The current state of the service connector.
-
-            '
-          enum:
-          - ACTIVE
-          - DELETED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ConnectorPluginLifecycleState'
-        name:
-          description: 'The service to be called by the connector plugin.
-
-            '
-          type: string
-        timeCreated:
-          description: 'The date and time when this plugin became available.
-
-            Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
-
-            Example: `2023-09-10T21:10:29.600Z`
-
-            '
-          format: date-time
-          type: string
-      required:
-      - kind
-      - lifecycleState
-      - displayName
-      - name
-      - timeCreated
-      type: object
     ConnectorPlugin:
       description: 'A service source or service target used to create a connector.
 
@@ -473,6 +416,81 @@ components:
       required:
       - code
       - message
+    ConnectorPluginSummary:
+      description: 'Summary information for a connector plugin.
+
+        Example connector plugins include the Streaming source and the Notifications target.
+
+        For more information about flows defined by connectors, see
+
+        [Overview of Connector Hub](/iaas/Content/connector-hub/overview.htm).
+
+        For configuration instructions, see
+
+        [Creating a Connector](/iaas/Content/connector-hub/create-service-connector.htm).
+
+        '
+      discriminator:
+        propertyName: kind
+      properties:
+        displayName:
+          description: 'A user-friendly name. It does not have to be unique, and it is changeable.
+
+            Avoid entering confidential information.
+
+            '
+          type: string
+        estimatedThroughput:
+          default: UNKNOWN
+          description: 'The estimated throughput range (LOW, MEDIUM, HIGH).
+
+            '
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - UNKNOWN
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/EstimatedThroughput'
+        kind:
+          description: 'The plugin type discriminator.
+
+            '
+          enum:
+          - SOURCE
+          - TARGET
+          type: string
+        lifecycleState:
+          description: 'The current state of the service connector.
+
+            '
+          enum:
+          - ACTIVE
+          - DELETED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ConnectorPluginLifecycleState'
+        name:
+          description: 'The service to be called by the connector plugin.
+
+            '
+          type: string
+        timeCreated:
+          description: 'The date and time when this plugin became available.
+
+            Format is defined by [RFC3339](https://tools.ietf.org/html/rfc3339).
+
+            Example: `2023-09-10T21:10:29.600Z`
+
+            '
+          format: date-time
+          type: string
+      required:
+      - kind
+      - lifecycleState
+      - displayName
+      - name
+      - timeCreated
+      type: object
     ConnectorPluginCollection:
       description: 'A list of connector plugins that match filter criteria. Results contain `ConnectorPlugin` objects.
 
@@ -488,24 +506,6 @@ components:
       required:
       - items
       type: object
-  responses:
-    default:
-      description: 'Unknown Error
-
-        '
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
 x-anchors:
   x-connector-descriptions:
     StreamingSourceDescription:

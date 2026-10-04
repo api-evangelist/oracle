@@ -1443,6 +1443,30 @@ paths:
       x-related-resource: '#/definitions/DistributedDatabase'
 components:
   parameters:
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    DistributedAutonomousDatabaseIdentifierPathParam:
+      description: Globally distributed autonomous database identifier
+      in: path
+      name: distributedAutonomousDatabaseId
+      required: true
+      schema:
+        type: string
+    DistributedAutonomousDatabaseCaBundleIdQueryParam:
+      description: The ID of the Ca Bundle.
+      in: query
+      name: caBundleId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
     DistributedAutonomousDatabaseLifecycleStateQueryParam:
       description: A filter to return only resources their lifecycleState matches the given lifecycleState.
       in: query
@@ -1451,31 +1475,24 @@ components:
       x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/lifecycleState'
       schema:
         type: string
-    DistributedAutonomousDatabaseDbDeploymentTypeQueryParam:
-      description: A filter to return only resources their dbDeploymentType matches the given dbDeploymentType.
-      in: query
-      name: dbDeploymentType
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/dbDeploymentType'
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
-    DistributedAutonomousDatabaseRebalanceQueryParam:
-      description: 'The flag to indicate whether chunks need to be re-balanced. This flag is not applicable for USER-defined
-
-        sharding type.
-
-        '
+    DistributedAutonomousDatabaseIsSurrogateQueryParam:
+      description: Determines the surrogates check. Default is true.
       in: query
-      name: isRebalanceRequired
+      name: isSurrogate
       required: false
       schema:
         type: boolean
         default: true
-    DistributedAutonomousDatabaseDisplayNameQueryParam:
-      description: A filter to return only Globally distributed autonomous databases that match the entire name given. The match is not case sensitive.
+    DistributedAutonomousDatabaseCertificateIdQueryParam:
+      description: The ID of the cluster certificate.
       in: query
-      name: displayName
+      name: certificateId
       required: false
       x-default-description: 'null'
       schema:
@@ -1492,6 +1509,51 @@ components:
         - timeCreated
         - timeUpdated
         default: timeCreated
+    DistributedAutonomousDatabaseMetadata:
+      description: 'Comma separated names of argument corresponding to which metadata need to be retrived.
+
+        '
+      in: query
+      name: metadata
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    RecreateAutonomousResourceNameQueryParam:
+      description: 'Specify the name of Shard, Catalog or GSM.
+
+        '
+      in: query
+      name: resourceName
+      required: true
+      schema:
+        type: string
+    DistributedAutonomousDatabaseShardGroupQueryParam:
+      description: 'The shardGroup name example Shardgroupa, Shardgroupb.
+
+        '
+      in: query
+      name: shardGroup
+      required: false
+      x-default-description: Shardgroupa
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DistributedAutonomousDatabaseDbDeploymentTypeQueryParam:
+      description: A filter to return only resources their dbDeploymentType matches the given dbDeploymentType.
+      in: query
+      name: dbDeploymentType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/dbDeploymentType'
+      schema:
+        type: string
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call
 
@@ -1509,53 +1571,10 @@ components:
       required: false
       schema:
         type: string
-    DistributedAutonomousDatabaseIsSurrogateQueryParam:
-      description: Determines the surrogates check. Default is true.
-      in: query
-      name: isSurrogate
-      required: false
-      schema:
-        type: boolean
-        default: true
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
     PrivateEndpointIdQueryParam:
       description: A filter to return only resources that are associated with the given privateEndpointId.
       in: query
       name: privateEndpointId
-      schema:
-        type: string
-    DistributedAutonomousDatabaseShardGroupQueryParam:
-      description: 'The shardGroup name example Shardgroupa, Shardgroupb.
-
-        '
-      in: query
-      name: shardGroup
-      required: false
-      x-default-description: Shardgroupa
-      schema:
-        type: string
-    DistributedAutonomousDatabaseResourceNameQueryParam:
-      description: 'Specify the name of shard or catalog.
-
-        '
-      in: query
-      name: resourceName
-      required: false
-      x-default-description: 'null'
       schema:
         type: string
     IfNoneMatchHeader:
@@ -1576,35 +1595,29 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    DistributedAutonomousDatabaseMetadata:
-      description: 'Comma separated names of argument corresponding to which metadata need to be retrived.
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+    DistributedAutonomousDatabaseResourceNameQueryParam:
+      description: 'Specify the name of shard or catalog.
 
         '
       in: query
-      name: metadata
+      name: resourceName
       required: false
       x-default-description: 'null'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    DistributedAutonomousDatabaseCaBundleIdQueryParam:
-      description: The ID of the Ca Bundle.
-      in: query
-      name: caBundleId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    DistributedAutonomousDatabaseIdentifierPathParam:
-      description: Globally distributed autonomous database identifier
-      in: path
-      name: distributedAutonomousDatabaseId
-      required: true
       schema:
         type: string
     RetryTokenHeader:
@@ -1626,13 +1639,26 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+    DistributedAutonomousDatabaseDisplayNameQueryParam:
+      description: A filter to return only Globally distributed autonomous databases that match the entire name given. The match is not case sensitive.
       in: query
-      name: page
+      name: displayName
+      required: false
+      x-default-description: 'null'
       schema:
         type: string
-        minLength: 1
+    DistributedAutonomousDatabaseRebalanceQueryParam:
+      description: 'The flag to indicate whether chunks need to be re-balanced. This flag is not applicable for USER-defined
+
+        sharding type.
+
+        '
+      in: query
+      name: isRebalanceRequired
+      required: false
+      schema:
+        type: boolean
+        default: true
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
       in: query
@@ -1640,306 +1666,19 @@ components:
       required: true
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    RecreateAutonomousResourceNameQueryParam:
-      description: 'Specify the name of Shard, Catalog or GSM.
-
-        '
-      in: query
-      name: resourceName
-      required: true
-      schema:
-        type: string
-    DistributedAutonomousDatabaseCertificateIdQueryParam:
-      description: The ID of the cluster certificate.
-      in: query
-      name: certificateId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
   schemas:
-    DistributedAutonomousDatabaseSummary:
-      description: Globally distributed autonomous database.
+    Error:
+      description: Error Information.
       properties:
-        characterSet:
-          description: The character set for the database.
-          maxLength: 255
-          minLength: 1
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
-        chunks:
-          description: 'The default number of unique chunks in a shardspace. The value of chunks must be
-
-            greater than 2 times the size of the largest shardgroup in any shardspace.
-
-            '
-          type: integer
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Globally distributed autonomous database compartment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        connectionStrings:
-          $ref: '#/components/schemas/DistributedAutonomousDatabaseConnectionString'
-        databaseVersion:
-          description: Oracle Database version for the shards and catalog used in Globally distributed autonomous database.
-          maxLength: 255
-          minLength: 1
-          type: string
-        dbDeploymentType:
-          description: 'The distributed autonomous database deployment type.
-
-            '
-          enum:
-          - ADB_D
-          type: string
-        dbWorkload:
-          description: The workload type for the database.
-          type: string
-          x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/dbWorkload'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: The display name of the Globally distributed autonomous database.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Globally distributed autonomous database.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: The lifecycleDetails for the Globally distributed autonomous database.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: Lifecycle state of sharded database.
-          type: string
-          x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/lifecycleState'
-        listenerPort:
-          description: The listener port number for the Globally distributed autonomous database.
-          maximum: 65535
-          minimum: 1024
-          type: integer
-        listenerPortTls:
-          description: The TLS listener port number for the Globally distributed autonomous database.
-          maximum: 65535
-          minimum: 1024
-          type: integer
-        metadata:
-          $ref: '#/components/schemas/DistributedAutonomousDbMetadata'
-        ncharacterSet:
-          description: The national character set for the database.
-          maxLength: 255
-          minLength: 1
-          type: string
-        onsPortLocal:
-          description: Ons local port number for the Globally distributed autonomous database.
-          maximum: 65535
-          minimum: 1024
-          type: integer
-        onsPortRemote:
-          description: Ons remote port number for the Globally distributed autonomous database.
-          maximum: 65535
-          minimum: 1024
-          type: integer
-        prefix:
-          description: 'Unique name prefix for the Globally distributed autonomous databases. Only alpha-numeric values are allowed. First character
-
-            has to be a letter followed by any combination of letter and number.
-
-            '
-          maxLength: 3
-          minLength: 3
-          pattern: '[a-z][a-z0-9][a-z0-9]'
-          type: string
-        privateEndpointIds:
-          description: The collection of [OCID](/Content/General/Concepts/identifiers.htm) of the private endpoint associated with Globally distributed autonomous database.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 2
-          minItems: 1
-          type: array
-        replicationFactor:
-          description: 'The Replication factor for RAFT replication based Globally distributed autonomous database. Currently supported values are 3, 5 and 7.
-
-            '
-          maximum: 7
-          minimum: 3
-          type: integer
-        replicationMethod:
-          description: 'The Replication method for Globally distributed autonomous database. Use RAFT for Raft replication, and DG for
-
-            DataGuard. If replicationMethod is not provided, it defaults to DG.
-
-            '
-          type: string
-          x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/replicationMethod'
-        replicationUnit:
-          description: 'The replication unit count for RAFT based distributed autonomous database. For RAFT replication based
-
-            Globally distributed autonomous database, the value should be at least twice the number of shards.
-
-            '
-          maximum: 1000
-          minimum: 6
-          type: integer
-        shardingMethod:
-          description: Sharding Methods for the Globally distributed autonomous database.
-          type: string
-          x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/shardingMethod'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the Globally distributed autonomous database was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the Globally distributed autonomous database was last updated. An RFC3339 formatted datetime string
-          format: date-time
+        message:
+          description: A human-readable error string.
           type: string
       required:
-      - id
-      - compartmentId
-      - displayName
-      - timeCreated
-      - timeUpdated
-      - lifecycleState
-      - lifecycleDetails
-      - databaseVersion
-      - privateEndpointIds
-      - prefix
-      - shardingMethod
-      - characterSet
-      - ncharacterSet
-      - listenerPort
-      - onsPortLocal
-      - onsPortRemote
-      - dbWorkload
-      - dbDeploymentType
-    MoveDistributedAutonomousDatabaseReplicationUnitDetails:
-      description: 'The details for moving replication units from source shard to destination shard for the Globally distributed autonomous database.
-
-        '
-      properties:
-        destinationShardName:
-          description: The name of the destination shard to which the chunks moved out from source shard should be relocate to.
-          maxLength: 255
-          minLength: 1
-          type: string
-          x-default-description: 'null'
-        replicationUnits:
-          description: For RAFT databases please provide replication unit numbers to be moved from source shard to destination shard.
-          items:
-            minimum: 1
-            type: integer
-          maxItems: 2
-          minItems: 1
-          type: array
-        sourceShardName:
-          description: The name of the source shard from which to move the chunks out to other shards.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - sourceShardName
-      type: object
-    DistributedAutonomousDatabaseRaftMetric:
-      description: Raft metrics for shards and catalog for the Globally distributed autonomous database.
-      properties:
-        configTasks:
-          additionalProperties:
-            type: object
-          description: Details of in-progress configuration tasks.
-          maxProperties: 100
-          type: object
-        raftMetrics:
-          additionalProperties:
-            type: object
-          description: Raft metrics for the Globally distributed autonomous database.
-          type: object
-      required:
-      - raftMetrics
-      type: object
-    DistributedAutonomousDatabaseGsmImage:
-      description: The Global service manager image details.
-      properties:
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Global service manager software image.
-          maxLength: 255
-          minLength: 1
-          type: string
-        versionNumber:
-          description: The version number associated with the image identified by id.
-          minimum: 1
-          type: integer
-      required:
-      - id
-      - versionNumber
-      type: object
-    ChangeDistributedAutonomousDbBackupConfigDetails:
-      description: Details of the DbBackupConfig to be updated for the Globally distributed autonomous database.
-      properties:
-        dbBackupConfig:
-          $ref: '#/components/schemas/DistributedAutonomousDbBackupConfig'
-      required:
-      - dbBackupConfig
-      type: object
+      - code
+      - message
     DistributedAutonomousDatabaseShard:
       description: Globally distributed autonomous database shard.
       discriminator:
@@ -1972,70 +1711,113 @@ components:
       - name
       - timeCreated
       - timeUpdated
-    UpdateDistributedAutonomousDatabaseDetails:
-      description: The details of Globally distributed autonomous database to be updated.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: Display name of the Globally distributed autonomous database.
-          maxLength: 255
-          minLength: 1
-          pattern: ^[a-zA-Z_]((?!.*[-]{2})[a-zA-Z0-9_-]{0,254})$
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-      type: object
-    PatchInstruction:
-      description: A single instruction to be included as part of Patch request content.
+    CreateDistributedAutonomousDatabaseShardDetails:
+      description: Globally distributed autonomous database shard.
       discriminator:
-        propertyName: operation
+        propertyName: source
       properties:
-        operation:
-          description: 'The operation that need to be performed on an element inside list.
+        source:
+          description: 'The source of Globally distributed autonomous database type: Use ADB_D for the Globally distributed autonomous database with
+
+            autonomous dedicated cloudautonomousvmclusters.
 
             '
           enum:
-          - INSERT
-          - REMOVE
-          - MERGE
-          type: string
-        selection:
-          description: 'The set of values to which the operation applies as a [JMESPath expression](https://jmespath.org/specification.html) for evaluation against the context resource.
-
-            An operation fails if the selection yields an exception, except as otherwise specified.
-
-            Note that comparisons involving non-primitive values (objects or arrays) are not supported and will always evaluate to false.
-
-            '
+          - ADB_D
           type: string
       required:
-      - operation
-      - selection
+      - source
+    DistributedAutonomousDatabaseGsmImage:
+      description: The Global service manager image details.
+      properties:
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Global service manager software image.
+          maxLength: 255
+          minLength: 1
+          type: string
+        versionNumber:
+          description: The version number associated with the image identified by id.
+          minimum: 1
+          type: integer
+      required:
+      - id
+      - versionNumber
+      type: object
+    ChangeDistributedAutonomousDbBackupConfigDetails:
+      description: Details of the DbBackupConfig to be updated for the Globally distributed autonomous database.
+      properties:
+        dbBackupConfig:
+          $ref: '#/components/schemas/DistributedAutonomousDbBackupConfig'
+      required:
+      - dbBackupConfig
+      type: object
+    ConfigureDistributedAutonomousDatabaseGsmsDetails:
+      description: 'Details of the request to configure new global service manager(GSM) instances for the distributed autonomous database.
+
+        '
+      properties:
+        isLatestGsmImage:
+          description: 'Flag to indicate if new global service manager(GSM) instances shall use latest image or re-use image used by existing
+
+            GSM instances.
+
+            '
+          type: boolean
+        oldGsmNames:
+          description: Names of old global service manager(GSM) instances corresponding to which new GSM instances need to be configured.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 250
+          minItems: 1
+          type: array
+      required:
+      - oldGsmNames
+      - isLatestGsmImage
+    AddDistributedAutonomousDatabaseGdsControlNodeDetails:
+      description: 'Details required to create a new Global database services control(GDS CTL) compute node.
+
+        '
+      properties:
+        publicSshKey:
+          description: The public sshKey for Global database services control(GDS CTL) node.
+          maxLength: 51200
+          minLength: 1
+          type: string
+        subnetId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the subnet on which the Global database services control(GDS CTL) node should be created.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - publicSshKey
+    DistributedAutonomousDatabaseConnectionString:
+      description: Details of Globally distributed autonomous database connection String.
+      properties:
+        allConnectionStrings:
+          additionalProperties:
+            type: string
+          description: Collection of connection strings.
+          type: object
+      required:
+      - allConnectionStrings
+    CreateDistributedAutonomousDatabaseCatalogDetails:
+      description: Details of the Globally distributed autonomous database catalog.
+      discriminator:
+        propertyName: source
+      properties:
+        source:
+          description: 'The source of Globally distributed autonomous database type: Use ADB_D for the Globally distributed autonomous database with
+
+            autonomous dedicated cloudautonomousvmclusters.
+
+            '
+          enum:
+          - ADB_D
+          type: string
+      required:
+      - source
     DistributedAutonomousDatabaseCatalog:
       description: Globally distributed autonomous database catalog.
       discriminator:
@@ -2281,68 +2063,65 @@ components:
       - dbWorkload
       - dbDeploymentType
       type: object
-    ConfigureDistributedAutonomousDatabaseGsmWalletDetails:
-      description: 'Details of the request to configure wallet on global service manager(GSM) instances for a distributed autonomous database.
-
-        '
+    DistributedAutonomousDatabaseGsm:
+      description: Details of global service manager(GSM also known as shard director) instances for the Globally distributed autonomous database.
       properties:
-        caBundleId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the ca bundle id.
+        computeCount:
+          description: The compute count for the Global service manager instance.
+          format: float
+          minimum: 0.2
+          type: number
+        dataStorageSizeInGbs:
+          description: The data disk group size to be allocated in GBs for the Global service manager instance.
+          format: double
+          minimum: 32
+          type: number
+        gsmImageDetails:
+          $ref: '#/components/schemas/DistributedAutonomousDatabaseGsmImage'
+        metadata:
+          $ref: '#/components/schemas/DistributedAutonomousDbMetadata'
+        name:
+          description: Name of the Global service manager instance
           maxLength: 255
           minLength: 1
           type: string
-        certificateId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the cluster certificate.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - certificateId
-      - caBundleId
-    CreateDistributedAutonomousDatabaseCatalogDetails:
-      description: Details of the Globally distributed autonomous database catalog.
-      discriminator:
-        propertyName: source
-      properties:
-        source:
-          description: 'The source of Globally distributed autonomous database type: Use ADB_D for the Globally distributed autonomous database with
-
-            autonomous dedicated cloudautonomousvmclusters.
-
-            '
+        status:
+          description: Status of the gsm for the Globally distributed autonomous database.
           enum:
-          - ADB_D
+          - FAILED
+          - DELETING
+          - DELETED
+          - UPDATING
+          - CREATING
+          - CREATED
+          - READY_FOR_CONFIGURATION
+          - CONFIGURED
+          - NEEDS_ATTENTION
           type: string
-      required:
-      - source
-    DistributedAutonomousDatabaseCollection:
-      description: Collection of Globally distributed autonomous databases.
-      properties:
-        items:
-          description: Array of Globally distributed autonomous database summaries.
-          items:
-            $ref: '#/components/schemas/DistributedAutonomousDatabaseSummary'
-          type: array
-      required:
-      - items
-      type: object
-    AddDistributedAutonomousDatabaseGdsControlNodeDetails:
-      description: 'Details required to create a new Global database services control(GDS CTL) compute node.
-
-        '
-      properties:
-        publicSshKey:
-          description: The public sshKey for Global database services control(GDS CTL) node.
-          maxLength: 51200
-          minLength: 1
-          type: string
-        subnetId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the subnet on which the Global database services control(GDS CTL) node should be created.
+        supportingResourceId:
+          description: the identifier of the underlying supporting resource.
           maxLength: 255
           minLength: 1
           type: string
+        timeCreated:
+          description: The time the Global service manager instance was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeSslCertificateExpires:
+          description: The time the ssl certificate associated with Global service manager expires. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the Global service manager instance was last updated. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
       required:
-      - publicSshKey
+      - name
+      - computeCount
+      - dataStorageSizeInGbs
+      - timeCreated
+      - timeUpdated
+      - status
     GenerateDistributedAutonomousDatabaseWalletDetails:
       description: 'Details to create and download an Globally distributed autonomous database wallet.
 
@@ -2354,18 +2133,6 @@ components:
           type: string
       required:
       - password
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     UploadDistributedAutonomousDatabaseSignedCertificateAndGenerateWalletDetails:
       description: 'Details of the request to upload the CA signed certificates to GSMs and generate wallets for
 
@@ -2380,140 +2147,6 @@ components:
           type: string
       required:
       - caSignedCertificate
-    ChangeDistributedAutonomousDatabaseCompartmentDetails:
-      description: 'The configuration details for moving the resource for Globally distributed autonomous database to other compartment.
-
-        '
-      properties:
-        compartmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the resource to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-    DistributedAutonomousDbBackupConfig:
-      description: 'Backup options for the Distributed Autonomous Database.
-
-        '
-      properties:
-        backupDestinationDetails:
-          description: Backup destination details.
-          items:
-            $ref: '#/components/schemas/DistributedAutonomousDbBackupDestination'
-          type: array
-        recoveryWindowInDays:
-          description: 'Number of days between the current and the earliest point of recoverability covered by automatic backups.
-
-            This value applies to automatic backups. When the value is updated, it is applied to all existing automatic backups.
-
-            If the number of specified days is 0 then there will be no backups.
-
-            '
-          maximum: 95
-          minimum: 0
-          type: integer
-    PatchDistributedAutonomousDatabaseDetails:
-      description: 'Provide PatchInstuction(s) in items array. All instructions in items have to be of same type.
-
-        All instructions in items have to either PatchInsertInstruction type, PatchRemoveInstruction or
-
-        PatchMergeInstruction. Multiple instructions of different types is not allowed to be performed in
-
-        single operation.
-
-        '
-      properties:
-        items:
-          description: List of patch instructions.
-          items:
-            $ref: '#/components/schemas/PatchInstruction'
-          type: array
-      type: object
-    ConfigureDistributedAutonomousDatabaseGsmsDetails:
-      description: 'Details of the request to configure new global service manager(GSM) instances for the distributed autonomous database.
-
-        '
-      properties:
-        isLatestGsmImage:
-          description: 'Flag to indicate if new global service manager(GSM) instances shall use latest image or re-use image used by existing
-
-            GSM instances.
-
-            '
-          type: boolean
-        oldGsmNames:
-          description: Names of old global service manager(GSM) instances corresponding to which new GSM instances need to be configured.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 250
-          minItems: 1
-          type: array
-      required:
-      - oldGsmNames
-      - isLatestGsmImage
-    DistributedAutonomousDatabaseConnectionString:
-      description: Details of Globally distributed autonomous database connection String.
-      properties:
-        allConnectionStrings:
-          additionalProperties:
-            type: string
-          description: Collection of connection strings.
-          type: object
-      required:
-      - allConnectionStrings
-    DistributedAutonomousDbBackupDestination:
-      description: Backup destination details
-      properties:
-        dbrsPolicyId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the DBRS policy used for backup.
-          maxLength: 255
-          minLength: 1
-          type: string
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the backup destination.
-          maxLength: 255
-          minLength: 1
-          type: string
-        internetProxy:
-          description: Proxy URL to connect to object store.
-          type: string
-        isRemote:
-          default: false
-          description: Indicates whether the backup destination is cross-region or local region.
-          type: boolean
-        remoteRegion:
-          description: 'The name of the remote region where the remote automatic incremental backups will be stored.
-
-            For information about valid region names, see
-
-            [Regions and Availability Domains](/Content/General/Concepts/regions.htm).
-
-            '
-          maxLength: 50
-          minLength: 1
-          type: string
-        type:
-          description: Type of the database backup destination.
-          enum:
-          - NFS
-          - RECOVERY_APPLIANCE
-          - OBJECT_STORE
-          - LOCAL
-          - DBRS
-          type: string
-        vpcPassword:
-          description: For a RECOVERY_APPLIANCE backup destination, the password for the VPC user that is used to access the Recovery Appliance.
-          type: string
-        vpcUser:
-          description: For a RECOVERY_APPLIANCE backup destination, the Virtual Private Catalog (VPC) user that is used to access the Recovery Appliance.
-          type: string
-      required:
-      - type
     DistributedAutonomousDatabase:
       description: Globally distributed autonomous database.
       properties:
@@ -2756,6 +2389,217 @@ components:
       - onsPortRemote
       - dbWorkload
       - dbDeploymentType
+    DistributedAutonomousDbBackupDestination:
+      description: Backup destination details
+      properties:
+        dbrsPolicyId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the DBRS policy used for backup.
+          maxLength: 255
+          minLength: 1
+          type: string
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the backup destination.
+          maxLength: 255
+          minLength: 1
+          type: string
+        internetProxy:
+          description: Proxy URL to connect to object store.
+          type: string
+        isRemote:
+          default: false
+          description: Indicates whether the backup destination is cross-region or local region.
+          type: boolean
+        remoteRegion:
+          description: 'The name of the remote region where the remote automatic incremental backups will be stored.
+
+            For information about valid region names, see
+
+            [Regions and Availability Domains](/Content/General/Concepts/regions.htm).
+
+            '
+          maxLength: 50
+          minLength: 1
+          type: string
+        type:
+          description: Type of the database backup destination.
+          enum:
+          - NFS
+          - RECOVERY_APPLIANCE
+          - OBJECT_STORE
+          - LOCAL
+          - DBRS
+          type: string
+        vpcPassword:
+          description: For a RECOVERY_APPLIANCE backup destination, the password for the VPC user that is used to access the Recovery Appliance.
+          type: string
+        vpcUser:
+          description: For a RECOVERY_APPLIANCE backup destination, the Virtual Private Catalog (VPC) user that is used to access the Recovery Appliance.
+          type: string
+      required:
+      - type
+    DistributedAutonomousDatabaseRaftMetric:
+      description: Raft metrics for shards and catalog for the Globally distributed autonomous database.
+      properties:
+        configTasks:
+          additionalProperties:
+            type: object
+          description: Details of in-progress configuration tasks.
+          maxProperties: 100
+          type: object
+        raftMetrics:
+          additionalProperties:
+            type: object
+          description: Raft metrics for the Globally distributed autonomous database.
+          type: object
+      required:
+      - raftMetrics
+      type: object
+    UpdateDistributedAutonomousDatabaseDetails:
+      description: The details of Globally distributed autonomous database to be updated.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: Display name of the Globally distributed autonomous database.
+          maxLength: 255
+          minLength: 1
+          pattern: ^[a-zA-Z_]((?!.*[-]{2})[a-zA-Z0-9_-]{0,254})$
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+      type: object
+    ChangeDistributedAutonomousDatabaseCompartmentDetails:
+      description: 'The configuration details for moving the resource for Globally distributed autonomous database to other compartment.
+
+        '
+      properties:
+        compartmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment to move the resource to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+    PatchDistributedAutonomousDatabaseDetails:
+      description: 'Provide PatchInstuction(s) in items array. All instructions in items have to be of same type.
+
+        All instructions in items have to either PatchInsertInstruction type, PatchRemoveInstruction or
+
+        PatchMergeInstruction. Multiple instructions of different types is not allowed to be performed in
+
+        single operation.
+
+        '
+      properties:
+        items:
+          description: List of patch instructions.
+          items:
+            $ref: '#/components/schemas/PatchInstruction'
+          type: array
+      type: object
+    MoveDistributedAutonomousDatabaseReplicationUnitDetails:
+      description: 'The details for moving replication units from source shard to destination shard for the Globally distributed autonomous database.
+
+        '
+      properties:
+        destinationShardName:
+          description: The name of the destination shard to which the chunks moved out from source shard should be relocate to.
+          maxLength: 255
+          minLength: 1
+          type: string
+          x-default-description: 'null'
+        replicationUnits:
+          description: For RAFT databases please provide replication unit numbers to be moved from source shard to destination shard.
+          items:
+            minimum: 1
+            type: integer
+          maxItems: 2
+          minItems: 1
+          type: array
+        sourceShardName:
+          description: The name of the source shard from which to move the chunks out to other shards.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - sourceShardName
+      type: object
+    DistributedAutonomousDatabaseCollection:
+      description: Collection of Globally distributed autonomous databases.
+      properties:
+        items:
+          description: Array of Globally distributed autonomous database summaries.
+          items:
+            $ref: '#/components/schemas/DistributedAutonomousDatabaseSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ConfigureDistributedAutonomousDatabaseGsmWalletDetails:
+      description: 'Details of the request to configure wallet on global service manager(GSM) instances for a distributed autonomous database.
+
+        '
+      properties:
+        caBundleId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the ca bundle id.
+          maxLength: 255
+          minLength: 1
+          type: string
+        certificateId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the cluster certificate.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - certificateId
+      - caBundleId
+    DistributedAutonomousDbBackupConfig:
+      description: 'Backup options for the Distributed Autonomous Database.
+
+        '
+      properties:
+        backupDestinationDetails:
+          description: Backup destination details.
+          items:
+            $ref: '#/components/schemas/DistributedAutonomousDbBackupDestination'
+          type: array
+        recoveryWindowInDays:
+          description: 'Number of days between the current and the earliest point of recoverability covered by automatic backups.
+
+            This value applies to automatic backups. When the value is updated, it is applied to all existing automatic backups.
+
+            If the number of specified days is 0 then there will be no backups.
+
+            '
+          maximum: 95
+          minimum: 0
+          type: integer
     DistributedAutonomousDbMetadata:
       description: Additional metadata related to Globally distributed autonomous database resources.
       properties:
@@ -2764,81 +2608,237 @@ components:
             type: string
           description: The map containing key-value pair of additional metadata.
           type: object
-    CreateDistributedAutonomousDatabaseShardDetails:
-      description: Globally distributed autonomous database shard.
-      discriminator:
-        propertyName: source
+    DistributedAutonomousDatabaseSummary:
+      description: Globally distributed autonomous database.
       properties:
-        source:
-          description: 'The source of Globally distributed autonomous database type: Use ADB_D for the Globally distributed autonomous database with
+        characterSet:
+          description: The character set for the database.
+          maxLength: 255
+          minLength: 1
+          type: string
+        chunks:
+          description: 'The default number of unique chunks in a shardspace. The value of chunks must be
 
-            autonomous dedicated cloudautonomousvmclusters.
+            greater than 2 times the size of the largest shardgroup in any shardspace.
+
+            '
+          type: integer
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Globally distributed autonomous database compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        connectionStrings:
+          $ref: '#/components/schemas/DistributedAutonomousDatabaseConnectionString'
+        databaseVersion:
+          description: Oracle Database version for the shards and catalog used in Globally distributed autonomous database.
+          maxLength: 255
+          minLength: 1
+          type: string
+        dbDeploymentType:
+          description: 'The distributed autonomous database deployment type.
 
             '
           enum:
           - ADB_D
           type: string
-      required:
-      - source
-    DistributedAutonomousDatabaseGsm:
-      description: Details of global service manager(GSM also known as shard director) instances for the Globally distributed autonomous database.
-      properties:
-        computeCount:
-          description: The compute count for the Global service manager instance.
-          format: float
-          minimum: 0.2
-          type: number
-        dataStorageSizeInGbs:
-          description: The data disk group size to be allocated in GBs for the Global service manager instance.
-          format: double
-          minimum: 32
-          type: number
-        gsmImageDetails:
-          $ref: '#/components/schemas/DistributedAutonomousDatabaseGsmImage'
+        dbWorkload:
+          description: The workload type for the database.
+          type: string
+          x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/dbWorkload'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: The display name of the Globally distributed autonomous database.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Globally distributed autonomous database.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: The lifecycleDetails for the Globally distributed autonomous database.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: Lifecycle state of sharded database.
+          type: string
+          x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/lifecycleState'
+        listenerPort:
+          description: The listener port number for the Globally distributed autonomous database.
+          maximum: 65535
+          minimum: 1024
+          type: integer
+        listenerPortTls:
+          description: The TLS listener port number for the Globally distributed autonomous database.
+          maximum: 65535
+          minimum: 1024
+          type: integer
         metadata:
           $ref: '#/components/schemas/DistributedAutonomousDbMetadata'
-        name:
-          description: Name of the Global service manager instance
+        ncharacterSet:
+          description: The national character set for the database.
           maxLength: 255
           minLength: 1
           type: string
-        status:
-          description: Status of the gsm for the Globally distributed autonomous database.
-          enum:
-          - FAILED
-          - DELETING
-          - DELETED
-          - UPDATING
-          - CREATING
-          - CREATED
-          - READY_FOR_CONFIGURATION
-          - CONFIGURED
-          - NEEDS_ATTENTION
+        onsPortLocal:
+          description: Ons local port number for the Globally distributed autonomous database.
+          maximum: 65535
+          minimum: 1024
+          type: integer
+        onsPortRemote:
+          description: Ons remote port number for the Globally distributed autonomous database.
+          maximum: 65535
+          minimum: 1024
+          type: integer
+        prefix:
+          description: 'Unique name prefix for the Globally distributed autonomous databases. Only alpha-numeric values are allowed. First character
+
+            has to be a letter followed by any combination of letter and number.
+
+            '
+          maxLength: 3
+          minLength: 3
+          pattern: '[a-z][a-z0-9][a-z0-9]'
           type: string
-        supportingResourceId:
-          description: the identifier of the underlying supporting resource.
-          maxLength: 255
-          minLength: 1
+        privateEndpointIds:
+          description: The collection of [OCID](/Content/General/Concepts/identifiers.htm) of the private endpoint associated with Globally distributed autonomous database.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 2
+          minItems: 1
+          type: array
+        replicationFactor:
+          description: 'The Replication factor for RAFT replication based Globally distributed autonomous database. Currently supported values are 3, 5 and 7.
+
+            '
+          maximum: 7
+          minimum: 3
+          type: integer
+        replicationMethod:
+          description: 'The Replication method for Globally distributed autonomous database. Use RAFT for Raft replication, and DG for
+
+            DataGuard. If replicationMethod is not provided, it defaults to DG.
+
+            '
           type: string
+          x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/replicationMethod'
+        replicationUnit:
+          description: 'The replication unit count for RAFT based distributed autonomous database. For RAFT replication based
+
+            Globally distributed autonomous database, the value should be at least twice the number of shards.
+
+            '
+          maximum: 1000
+          minimum: 6
+          type: integer
+        shardingMethod:
+          description: Sharding Methods for the Globally distributed autonomous database.
+          type: string
+          x-obmcs-enumref: '#/definitions/DistributedAutonomousDatabase/shardingMethod'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
         timeCreated:
-          description: The time the Global service manager instance was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-        timeSslCertificateExpires:
-          description: The time the ssl certificate associated with Global service manager expires. An RFC3339 formatted datetime string
+          description: The time the Globally distributed autonomous database was created. An RFC3339 formatted datetime string
           format: date-time
           type: string
         timeUpdated:
-          description: The time the Global service manager instance was last updated. An RFC3339 formatted datetime string
+          description: The time the Globally distributed autonomous database was last updated. An RFC3339 formatted datetime string
           format: date-time
           type: string
       required:
-      - name
-      - computeCount
-      - dataStorageSizeInGbs
+      - id
+      - compartmentId
+      - displayName
       - timeCreated
       - timeUpdated
-      - status
+      - lifecycleState
+      - lifecycleDetails
+      - databaseVersion
+      - privateEndpointIds
+      - prefix
+      - shardingMethod
+      - characterSet
+      - ncharacterSet
+      - listenerPort
+      - onsPortLocal
+      - onsPortRemote
+      - dbWorkload
+      - dbDeploymentType
+    PatchInstruction:
+      description: A single instruction to be included as part of Patch request content.
+      discriminator:
+        propertyName: operation
+      properties:
+        operation:
+          description: 'The operation that need to be performed on an element inside list.
+
+            '
+          enum:
+          - INSERT
+          - REMOVE
+          - MERGE
+          type: string
+        selection:
+          description: 'The set of values to which the operation applies as a [JMESPath expression](https://jmespath.org/specification.html) for evaluation against the context resource.
+
+            An operation fails if the selection yields an exception, except as otherwise specified.
+
+            Note that comparisons involving non-primitive values (objects or arrays) are not supported and will always evaluate to false.
+
+            '
+          type: string
+      required:
+      - operation
+      - selection
   responses:
     default:
       description: Unknown Error

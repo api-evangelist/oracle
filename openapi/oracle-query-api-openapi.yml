@@ -172,16 +172,6 @@ paths:
       x-related-resource: '#/definitions/QuickPickSummary'
 components:
   parameters:
-    SpanStartTimeLessThanParam:
-      description: 'Include spans that have a `spanStartTime`less than this value.
-
-        '
-      in: query
-      name: timeSpanStartedLessThan
-      required: true
-      schema:
-        type: string
-        format: date-time
     SpanStartTimeGreaterThanOrEqualToParam:
       description: 'Include spans that have a `spanStartTime` equal to or greater than this value.
 
@@ -192,15 +182,16 @@ components:
       schema:
         type: string
         format: date-time
-    ApmDomainIdQueryParam:
-      description: 'The APM Domain ID for the intended request.
+    PaginationLimitQueryParam:
+      description: 'The maximum number of items to return.
 
         '
       in: query
-      name: apmDomainId
-      required: true
+      name: limit
       schema:
-        type: string
+        type: integer
+        default: 50
+        minimum: 1
     RequestIdHeader:
       description: 'Unique Oracle-assigned identifier for the request.  If you need to contact Oracle about a
 
@@ -224,17 +215,88 @@ components:
         default: 1
         maxLength: 1024
         minLength: 1
-    PaginationLimitQueryParam:
-      description: 'The maximum number of items to return.
+    ApmDomainIdQueryParam:
+      description: 'The APM Domain ID for the intended request.
 
         '
       in: query
-      name: limit
+      name: apmDomainId
+      required: true
       schema:
-        type: integer
-        default: 50
-        minimum: 1
+        type: string
+    SpanStartTimeLessThanParam:
+      description: 'Include spans that have a `spanStartTime`less than this value.
+
+        '
+      in: query
+      name: timeSpanStartedLessThan
+      required: true
+      schema:
+        type: string
+        format: date-time
   schemas:
+    Error:
+      description: 'Details of an error that occurred.
+
+        '
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing.
+
+            '
+          type: string
+        message:
+          description: 'A human-readable error string.
+
+            '
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    QueryResultRow:
+      description: 'Object that represents a single row of the query result.  It contains the queryResultRowData object that contains the actual data
+
+        represented by the elements of the query result row, and a queryResultRowMetadata object that contains the metadata about the data contained in
+
+        the query result row.
+
+        '
+      properties:
+        queryResultRowData:
+          additionalProperties:
+            type: object
+          description: 'A map containing the actual data represented by a single row of the query result.
+
+            The key is the column name or attribute specified in the show clause, or an aggregate function in the show clause.
+
+            The value is the actual value of that attribute or aggregate function of the corresponding single row of the query result set.
+
+            If an alias name is specified for an attribute or an aggregate function, then the key will be the alias name specified in the show
+
+            clause.  If an alias name is not specified for the group by aggregate function in the show clause, then the corresponding key
+
+            will be the appropriate aggregate_function_name_column_name (For example: count(traces) will be keyed as count_traces).  The datatype of the value
+
+            is presented in the queryResultRowTypeSummaries list in the queryResultMetadata structure, where the i-th queryResultRowTypeSummary object
+
+            represents the datatype of the i-th value when this map is iterated in order.
+
+            '
+          type: object
+        queryResultRowMetadata:
+          additionalProperties:
+            type: object
+          description: 'A map containing metadata or add-on data for the data presented in the queryResultRowData map.  Data required to present drill down
+
+            information from the queryResultRowData is presented as key-value pairs.
+
+            '
+          type: object
+      required:
+      - queryResultRowData
+      - queryResultRowMetadata
+      type: object
     QueryResultsTopologyInfo:
       description: 'The structure that provides the metadata of a topology query.
 
@@ -247,6 +309,36 @@ components:
           items:
             $ref: '#/components/schemas/QueryResultsTopologyNodeInfo'
           type: array
+      type: object
+    QuickPickSummary:
+      description: 'Summary of the Quick Pick query objects.
+
+        '
+      properties:
+        quickPickName:
+          description: 'Quick Pick name for the query.
+
+            '
+          type: string
+        quickPickQuery:
+          description: 'Query for the Quick Pick.
+
+            '
+          type: string
+      required:
+      - quickPickName
+      - quickPickQuery
+      type: object
+    QueryResultWarning:
+      description: 'A warning message that can be included with a query result that provides information to the user.
+
+        '
+      properties:
+        message:
+          description: 'The text of the warning message.
+
+            '
+          type: string
       type: object
     QueryResultMetadataSummary:
       description: 'Summary containing the metadata about the query result set.
@@ -293,80 +385,6 @@ components:
             '
           type: integer
       type: object
-    QueryResultWarning:
-      description: 'A warning message that can be included with a query result that provides information to the user.
-
-        '
-      properties:
-        message:
-          description: 'The text of the warning message.
-
-            '
-          type: string
-      type: object
-    QueryResultsTopologyNodeInfo:
-      description: 'The information about a node attribute.
-
-        '
-      properties:
-        nodeName:
-          description: The name of the node attribute.
-          type: string
-      type: object
-    QueryResultsOrderedBySummary:
-      description: 'Summary of the sort and order by attribute based on which the query results are organized.
-
-        '
-      properties:
-        queryResultsOrderedBy:
-          description: 'Attribute by which the query results are sorted.
-
-            '
-          type: string
-        queryResultsSortOrder:
-          description: 'The sort order for the attribute, either ''ASC'' or ''DESC''.
-
-            '
-          type: string
-      type: object
-    QuickPickSummary:
-      description: 'Summary of the Quick Pick query objects.
-
-        '
-      properties:
-        quickPickName:
-          description: 'Quick Pick name for the query.
-
-            '
-          type: string
-        quickPickQuery:
-          description: 'Query for the Quick Pick.
-
-            '
-          type: string
-      required:
-      - quickPickName
-      - quickPickQuery
-      type: object
-    Error:
-      description: 'Details of an error that occurred.
-
-        '
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing.
-
-            '
-          type: string
-        message:
-          description: 'A human-readable error string.
-
-            '
-          type: string
-      required:
-      - code
-      - message
-      type: object
     QueryResultRowTypeSummary:
       description: 'Summary of the datatype, unit and related metadata of an individual row element of a query result row that is returned.
 
@@ -402,6 +420,22 @@ components:
             '
           type: string
       type: object
+    QueryResultsOrderedBySummary:
+      description: 'Summary of the sort and order by attribute based on which the query results are organized.
+
+        '
+      properties:
+        queryResultsOrderedBy:
+          description: 'Attribute by which the query results are sorted.
+
+            '
+          type: string
+        queryResultsSortOrder:
+          description: 'The sort order for the attribute, either ''ASC'' or ''DESC''.
+
+            '
+          type: string
+      type: object
     QueryDetails:
       description: 'Request object containing the query to be run against the trace data.
 
@@ -413,49 +447,6 @@ components:
             '
           type: string
       type: object
-    QueryResultRow:
-      description: 'Object that represents a single row of the query result.  It contains the queryResultRowData object that contains the actual data
-
-        represented by the elements of the query result row, and a queryResultRowMetadata object that contains the metadata about the data contained in
-
-        the query result row.
-
-        '
-      properties:
-        queryResultRowData:
-          additionalProperties:
-            type: object
-          description: 'A map containing the actual data represented by a single row of the query result.
-
-            The key is the column name or attribute specified in the show clause, or an aggregate function in the show clause.
-
-            The value is the actual value of that attribute or aggregate function of the corresponding single row of the query result set.
-
-            If an alias name is specified for an attribute or an aggregate function, then the key will be the alias name specified in the show
-
-            clause.  If an alias name is not specified for the group by aggregate function in the show clause, then the corresponding key
-
-            will be the appropriate aggregate_function_name_column_name (For example: count(traces) will be keyed as count_traces).  The datatype of the value
-
-            is presented in the queryResultRowTypeSummaries list in the queryResultMetadata structure, where the i-th queryResultRowTypeSummary object
-
-            represents the datatype of the i-th value when this map is iterated in order.
-
-            '
-          type: object
-        queryResultRowMetadata:
-          additionalProperties:
-            type: object
-          description: 'A map containing metadata or add-on data for the data presented in the queryResultRowData map.  Data required to present drill down
-
-            information from the queryResultRowData is presented as key-value pairs.
-
-            '
-          type: object
-      required:
-      - queryResultRowData
-      - queryResultRowMetadata
-      type: object
     QueryResultsGroupedBySummary:
       description: 'Summary of the attribute based on which the query results are grouped.
 
@@ -465,6 +456,15 @@ components:
           description: 'Column or attribute in the query result, which is a group by value.
 
             '
+          type: string
+      type: object
+    QueryResultsTopologyNodeInfo:
+      description: 'The information about a node attribute.
+
+        '
+      properties:
+        nodeName:
+          description: The name of the node attribute.
           type: string
       type: object
     QueryResultResponse:

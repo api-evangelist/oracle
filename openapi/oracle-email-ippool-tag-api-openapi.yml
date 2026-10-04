@@ -742,189 +742,35 @@ paths:
 
         '
 components:
-  responses:
-    '401':
-      description: 'The required information to complete authentication was not provided or
-
-        was incorrect. Extra detail may be provided in the response body.
+  schemas:
+    AddLockDetails:
+      description: 'Request payload to add lock to the resource.
 
         '
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '500':
-      description: Internal Server Error.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '429':
-      description: Too Many Requests
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '400':
-      description: Incorrectly formatted request.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '412':
-      description: Precondition Failed.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '409':
-      description: Authorization failed or the requested resource already exists.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Error:
-      description: An error has occurred.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    '404':
-      description: Authorization failed or the requested resource was not found.
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-  schemas:
-    EmailOutboundIpSummary:
-      description: Summary of the Outbound IP address assigned to the tenancy.
       properties:
-        assignmentState:
-          description: The assignment state of the public IP address.
-          enum:
-          - AVAILABLE
-          - ASSIGNED
+        compartmentId:
+          description: The lock compartment ID.
           type: string
-        lifecycleDetails:
-          description: 'A message describing the current state in more detail. For example, can be used to provide actionable information for a
+        message:
+          description: 'A message added by the lock creator. The message typically gives an
 
-            resource in ''DRAINING'' state.
+            indication of why the resource is locked.
 
             '
           type: string
-        lifecycleState:
-          description: The current state of the Email Outbound Public IP.
-          enum:
-          - UPDATING
-          - ACTIVE
-          - FAILED
-          - DRAINING
-          type: string
-        outboundIp:
-          description: The public IP address assigned to the tenancy.
-          type: string
-        timeUnassigned:
-          description: 'The time IP was removed from IP Pool.
-
-            Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-            timestamp format, "YYYY-MM-ddThh:mmZ".
-
-            Example: `2021-02-12T22:47:12.613Z`
+        relatedResourceId:
+          description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
 
             '
-          format: date-time
+          type: string
+        type:
+          description: Lock type.
+          enum:
+          - FULL
+          - DELETE
           type: string
       required:
-      - outboundIp
-      - assignmentState
+      - type
       type: object
     RemoveEmailOutboundIpDetails:
       description: 'Outbound IP details to be unassigned from the IpPool.
@@ -941,11 +787,27 @@ components:
       required:
       - outboundIps
       type: object
-    CreateEmailIpPoolDetails:
-      description: The configuration details required to create a new IpPool which will be used to route emails.
+    Error:
+      description: An error has occurred.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    EmailIpPoolSummary:
+      description: The properties that define an IpPool.
       properties:
         compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment for this IpPool.
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the IpPool.
           maxLength: 255
           minLength: 1
           type: string
@@ -972,10 +834,6 @@ components:
 
             '
           type: object
-        description:
-          description: The description of the IpPool. Avoid entering confidential information.
-          maxLength: 400
-          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -988,71 +846,84 @@ components:
 
             '
           type: object
-        lastIpDrainPeriodInHours:
-          default: 24
-          description: 'Last IP will be unassigned from the IP Pool after the period of time (in hours) specified by this parameter. Default is 24 hours.
+        id:
+          description: The unique [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the IpPool resource that is immutable on creation.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: 'A message describing the current state in more detail. For example, can be used to provide actionable information for a
+
+            resource in ''INACTIVE'' state.
 
             '
-          maximum: 24
-          minimum: 0
-          type: integer
-        name:
-          description: "The name of the IpPool. The name must be unique within a region. \nThe name is case sensitive and supported characters include alphanumeric, hyphens (\"-\") and underscore (\"_\") characters.\n\nExample: green_pool-1\n"
           type: string
-        outboundIps:
-          description: A list of outbound public IPs for assignment to the IpPool. These IPs must be in the AVAILABLE state to be eligible for assignment.
+        lifecycleState:
+          description: The current state of the IpPool.
+          type: string
+          x-obmcs-enumref: '#/definitions/EmailIpPool/lifecycleState'
+        locks:
+          description: Locks associated with this resource.
           items:
-            type: string
-          maxItems: 3
-          minItems: 1
+            $ref: '#/components/schemas/ResourceLock'
           type: array
-          uniqueItems: true
+        name:
+          description: 'The name of the IpPool. The name must be unique within a region.
+
+            The name is case sensitive and supported characters include alphanumeric, hyphens ("-") and underscore ("_") characters.
+
+
+            Example: green_pool-1
+
+            '
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        timeCreated:
+          description: 'The time the IpPool was created.
+
+            Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            timestamp format, "YYYY-MM-ddThh:mmZ".
+
+            Example: `2021-02-12T22:47:12.613Z`
+
+            '
+          format: date-time
+          type: string
+        timeUpdated:
+          description: 'The time of the last change to the IpPool, due to a state change or
+
+            an update operation.
+
+            Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
+
+            timestamp format, "YYYY-MM-ddThh:mmZ".
+
+            '
+          format: date-time
+          type: string
       required:
+      - id
       - name
       - compartmentId
-      - outboundIps
-      type: object
-      x-example: "{\n  \"name\": \"green_pool-1\"\n  \"compartmentId\": \"ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\n}\n"
-    EmailOutboundIpCollection:
-      description: Results of an outbound public IP search. Contains EmailOutboundIpSummary items.
-      properties:
-        items:
-          description: List of public IPs.
-          items:
-            $ref: '#/components/schemas/EmailOutboundIpSummary'
-          type: array
-      required:
-      - items
-      type: object
-    EmailIpPoolCollection:
-      description: Results of an IpPool search. Contains EmailIpPoolSummary items.
-      properties:
-        items:
-          description: List of IpPools.
-          items:
-            $ref: '#/components/schemas/EmailIpPoolSummary'
-          type: array
-      required:
-      - items
-      type: object
-    AddEmailOutboundIpDetails:
-      description: 'Outbound IP details to be assigned to the IpPool.
-
-        '
-      properties:
-        outboundIps:
-          description: 'List of public IPs to ADD to the IpPool.
-
-            Public IPs must be in the AVAILABLE state to be assigned to the IpPool.
-
-            '
-          items:
-            type: string
-          maxItems: 3
-          type: array
-          uniqueItems: true
-      required:
-      - outboundIps
       type: object
     EmailIpPool:
       description: A collection of IP addresses used by the Email Delivery service to submit an email.
@@ -1202,22 +1073,23 @@ components:
       - name
       - compartmentId
       type: object
-    Error:
-      description: An error has occurred.
+    RemoveLockDetails:
+      description: 'Request payload to remove the resource lock.
+
+        '
       properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
+        compartmentId:
+          description: The lock compartment ID.
           type: string
-        message:
-          description: A human-readable error string.
+        type:
+          description: Lock type.
+          enum:
+          - FULL
+          - DELETE
           type: string
       required:
-      - code
-      - message
+      - type
+      type: object
     ResourceLock:
       description: 'Resource locks prevent certain APIs from being called for the resource.
 
@@ -1307,53 +1179,22 @@ components:
           minimum: 0
           type: integer
       type: object
-    AddLockDetails:
-      description: 'Request payload to add lock to the resource.
-
-        '
+    EmailOutboundIpCollection:
+      description: Results of an outbound public IP search. Contains EmailOutboundIpSummary items.
       properties:
-        compartmentId:
-          description: The lock compartment ID.
-          type: string
-        message:
-          description: 'A message added by the lock creator. The message typically gives an
-
-            indication of why the resource is locked.
-
-            '
-          type: string
-        relatedResourceId:
-          description: 'The resource ID that is locking this resource. Indicates that deleting this resource removes the lock.
-
-            '
-          type: string
-        type:
-          description: Lock type.
-          enum:
-          - FULL
-          - DELETE
-          type: string
+        items:
+          description: List of public IPs.
+          items:
+            $ref: '#/components/schemas/EmailOutboundIpSummary'
+          type: array
       required:
-      - type
+      - items
       type: object
-    ChangeEmailIpPoolCompartmentDetails:
-      description: Information about the change compartment for the IpPool resource.
+    CreateEmailIpPoolDetails:
+      description: The configuration details required to create a new IpPool which will be used to route emails.
       properties:
         compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment into which the resource should be moved.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    EmailIpPoolSummary:
-      description: The properties that define an IpPool.
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment containing the IpPool.
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment for this IpPool.
           maxLength: 255
           minLength: 1
           type: string
@@ -1380,6 +1221,10 @@ components:
 
             '
           type: object
+        description:
+          description: The description of the IpPool. Avoid entering confidential information.
+          maxLength: 400
+          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -1392,58 +1237,71 @@ components:
 
             '
           type: object
-        id:
-          description: The unique [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the IpPool resource that is immutable on creation.
-          maxLength: 255
-          minLength: 1
+        lastIpDrainPeriodInHours:
+          default: 24
+          description: 'Last IP will be unassigned from the IP Pool after the period of time (in hours) specified by this parameter. Default is 24 hours.
+
+            '
+          maximum: 24
+          minimum: 0
+          type: integer
+        name:
+          description: "The name of the IpPool. The name must be unique within a region. \nThe name is case sensitive and supported characters include alphanumeric, hyphens (\"-\") and underscore (\"_\") characters.\n\nExample: green_pool-1\n"
+          type: string
+        outboundIps:
+          description: A list of outbound public IPs for assignment to the IpPool. These IPs must be in the AVAILABLE state to be eligible for assignment.
+          items:
+            type: string
+          maxItems: 3
+          minItems: 1
+          type: array
+          uniqueItems: true
+      required:
+      - name
+      - compartmentId
+      - outboundIps
+      type: object
+      x-example: "{\n  \"name\": \"green_pool-1\"\n  \"compartmentId\": \"ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\n}\n"
+    EmailIpPoolCollection:
+      description: Results of an IpPool search. Contains EmailIpPoolSummary items.
+      properties:
+        items:
+          description: List of IpPools.
+          items:
+            $ref: '#/components/schemas/EmailIpPoolSummary'
+          type: array
+      required:
+      - items
+      type: object
+    EmailOutboundIpSummary:
+      description: Summary of the Outbound IP address assigned to the tenancy.
+      properties:
+        assignmentState:
+          description: The assignment state of the public IP address.
+          enum:
+          - AVAILABLE
+          - ASSIGNED
           type: string
         lifecycleDetails:
           description: 'A message describing the current state in more detail. For example, can be used to provide actionable information for a
 
-            resource in ''INACTIVE'' state.
+            resource in ''DRAINING'' state.
 
             '
           type: string
         lifecycleState:
-          description: The current state of the IpPool.
+          description: The current state of the Email Outbound Public IP.
+          enum:
+          - UPDATING
+          - ACTIVE
+          - FAILED
+          - DRAINING
           type: string
-          x-obmcs-enumref: '#/definitions/EmailIpPool/lifecycleState'
-        locks:
-          description: Locks associated with this resource.
-          items:
-            $ref: '#/components/schemas/ResourceLock'
-          type: array
-        name:
-          description: 'The name of the IpPool. The name must be unique within a region.
-
-            The name is case sensitive and supported characters include alphanumeric, hyphens ("-") and underscore ("_") characters.
-
-
-            Example: green_pool-1
-
-            '
+        outboundIp:
+          description: The public IP address assigned to the tenancy.
           type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: 'The time the IpPool was created.
+        timeUnassigned:
+          description: 'The time IP was removed from IP Pool.
 
             Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
 
@@ -1454,41 +1312,91 @@ components:
             '
           format: date-time
           type: string
-        timeUpdated:
-          description: 'The time of the last change to the IpPool, due to a state change or
-
-            an update operation.
-
-            Times are expressed in [RFC 3339](https://tools.ietf.org/html/rfc3339)
-
-            timestamp format, "YYYY-MM-ddThh:mmZ".
+      required:
+      - outboundIp
+      - assignmentState
+      type: object
+    ChangeEmailIpPoolCompartmentDetails:
+      description: Information about the change compartment for the IpPool resource.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment into which the resource should be moved.
 
             '
-          format: date-time
+          maxLength: 255
+          minLength: 1
           type: string
       required:
-      - id
-      - name
       - compartmentId
       type: object
-    RemoveLockDetails:
-      description: 'Request payload to remove the resource lock.
+    AddEmailOutboundIpDetails:
+      description: 'Outbound IP details to be assigned to the IpPool.
 
         '
       properties:
-        compartmentId:
-          description: The lock compartment ID.
-          type: string
-        type:
-          description: Lock type.
-          enum:
-          - FULL
-          - DELETE
-          type: string
+        outboundIps:
+          description: 'List of public IPs to ADD to the IpPool.
+
+            Public IPs must be in the AVAILABLE state to be assigned to the IpPool.
+
+            '
+          items:
+            type: string
+          maxItems: 3
+          type: array
+          uniqueItems: true
       required:
-      - type
+      - outboundIps
       type: object
   parameters:
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+        paginated "List" call. `1` is the minimum, `1000` is the maximum. For important details about
+
+        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      x-default-description: 'null'
+      schema:
+        type: integer
+        maximum: 1000
+        minimum: 1
+    RequestIdHeader:
+      description: The request ID for tracing from the system
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    FilterByIdQueryParam:
+      description: 'A filter to only return resources that match the given id exactly.
+
+        '
+      in: query
+      name: id
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous "List" call.
+
+        For important details about how pagination works,
+
+        see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 2000
+        minLength: 1
     IpPoolIdPathParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the IpPool.
       in: path
@@ -1498,13 +1406,25 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    FilterByOutboundIpQueryParam:
-      description: The outbound IP address assigned to the tenancy.
+    compartmentIdQueryParam:
+      description: The OCID for the compartment.
       in: query
-      name: outboundIp
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    FilterByNameQueryParam:
+      description: 'A filter to only return resources that match the given name exactly.
+
+        '
+      in: query
+      name: name
+      required: false
       x-default-description: 'null'
       schema:
         type: string
+        maxLength: 1024
+        minLength: 1
     IfMatchHeader:
       description: 'Used for optimistic concurrency control. In the update or delete call for a resource, set the `if-match`
 
@@ -1520,38 +1440,20 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending or descending order.
-
-        '
+    OverrideLocksQueryParameter:
+      description: Whether to override locks (if any exist).
       in: query
-      name: sortOrder
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      name: isLockOverride
       schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    RequestIdHeader:
-      description: The request ID for tracing from the system
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    FilterByNameQueryParam:
-      description: 'A filter to only return resources that match the given name exactly.
-
-        '
+        type: boolean
+        default: false
+    FilterByOutboundIpQueryParam:
+      description: The outbound IP address assigned to the tenancy.
       in: query
-      name: name
-      required: false
+      name: outboundIp
       x-default-description: 'null'
       schema:
         type: string
-        maxLength: 1024
-        minLength: 1
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1571,62 +1473,160 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous "List" call.
-
-        For important details about how pagination works,
-
-        see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending or descending order.
 
         '
       in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 2000
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. `1` is the minimum, `1000` is the maximum. For important details about
-
-        how pagination works, see [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      x-default-description: 'null'
-      schema:
-        type: integer
-        maximum: 1000
-        minimum: 1
-    OverrideLocksQueryParameter:
-      description: Whether to override locks (if any exist).
-      in: query
-      name: isLockOverride
-      schema:
-        type: boolean
-        default: false
-    FilterByIdQueryParam:
-      description: 'A filter to only return resources that match the given id exactly.
-
-        '
-      in: query
-      name: id
+      name: sortOrder
       required: false
       x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
-    compartmentIdQueryParam:
-      description: The OCID for the compartment.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
+        enum:
+        - ASC
+        - DESC
+  responses:
+    Error:
+      description: An error has occurred.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal Server Error.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too Many Requests
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '400':
+      description: Incorrectly formatted request.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '412':
+      description: Precondition Failed.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'The required information to complete authentication was not provided or
+
+        was incorrect. Extra detail may be provided in the response body.
+
+        '
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Authorization failed or the requested resource was not found.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '409':
+      description: Authorization failed or the requested resource already exists.
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

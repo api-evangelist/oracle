@@ -452,19 +452,130 @@ paths:
       x-related-resource: '#/definitions/GuardrailVersionCollection'
 components:
   schemas:
-    LlmInferenceRequest:
-      description: The base class for the inference requests.
-      discriminator:
-        propertyName: runtimeType
+    DocumentRank:
+      description: An object that contains a relevance score, an index and the text for a document.
       properties:
-        runtimeType:
-          description: The runtime of the provided model.
-          enum:
-          - COHERE
-          - LLAMA
+        document:
+          $ref: '#/components/schemas/Document'
+        index:
+          description: Index of the document in documents array.
+          type: integer
+        relevanceScore:
+          description: The relevance score for the document at that index.
+          format: double
+          type: number
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
           type: string
       required:
-      - runtimeType
+      - code
+      - message
+    PromptInjectionProtectionResult:
+      description: The result of prompt injection protection.
+      properties:
+        flaggedModalities:
+          description: 'The input modalities flagged by the prompt injection result. Present only when the request
+
+            is processed using a non-empty `multimodalInput`.
+
+            '
+          items:
+            enum:
+            - TEXT
+            - IMAGE
+            type: string
+          maxItems: 2
+          type: array
+        score:
+          description: The score indicating the likelihood of a prompt injection attack.
+          format: double
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+      required:
+      - score
+      type: object
+    GuardrailsResults:
+      description: The results of applying each guardrail.
+      properties:
+        contentModeration:
+          $ref: '#/components/schemas/ContentModerationResult'
+        personallyIdentifiableInformation:
+          description: The result of PII detection
+          items:
+            $ref: '#/components/schemas/PersonallyIdentifiableInformationResult'
+          maxItems: 1000
+          type: array
+        promptInjection:
+          $ref: '#/components/schemas/PromptInjectionProtectionResult'
+      type: object
+    SummarizeTextDetails:
+      description: Details for the request to summarize text.
+      properties:
+        additionalCommand:
+          description: A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". For example, "focusing on the next steps" or "written by Yoda".
+          type: string
+        compartmentId:
+          description: The OCID of compartment in which to call the Generative AI service to summarize text.
+          type: string
+        extractiveness:
+          default: AUTO
+          description: Controls how close to the original text the summary is. High extractiveness summaries will lean towards reusing sentences verbatim, while low extractiveness summaries will tend to paraphrase more.
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - AUTO
+          type: string
+        format:
+          default: AUTO
+          description: Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If "AUTO" is selected, the best option will be picked based on the input text.
+          enum:
+          - PARAGRAPH
+          - BULLETS
+          - AUTO
+          type: string
+        input:
+          description: The input string to be summarized.
+          type: string
+        isEcho:
+          default: false
+          description: Whether or not to include the original inputs in the response.
+          type: boolean
+        length:
+          default: AUTO
+          description: Indicates the approximate length of the summary. If "AUTO" is selected, the best option will be picked based on the input text.
+          enum:
+          - SHORT
+          - MEDIUM
+          - LONG
+          - AUTO
+          type: string
+        servingMode:
+          $ref: '#/components/schemas/ServingMode'
+        temperature:
+          default: 1.0
+          description: 'A number that sets the randomness of the generated output. Lower temperatures mean less random generations.
+
+
+            Use lower numbers for tasks with a correct answer such as question answering or summarizing. High temperatures can generate hallucinations or factually incorrect information. Start with temperatures lower than 1.0, and increase the temperature for more creative outputs, as you regenerate the prompts to refine the outputs.
+
+            '
+          format: double
+          maximum: 5.0
+          minimum: 0.0
+          type: number
+      required:
+      - input
+      - compartmentId
+      - servingMode
       type: object
     RerankTextDetails:
       description: Details required for a rerank request.
@@ -506,211 +617,121 @@ components:
       - servingMode
       - documents
       type: object
-    GuardrailVersionSummary:
-      description: Details of a guardrail version.
+    LlmInferenceRequest:
+      description: The base class for the inference requests.
+      discriminator:
+        propertyName: runtimeType
       properties:
-        description:
-          description: The description of the guardrail version.
-          type: string
-        guardrailVersion:
-          description: The guardrail system version string, e.g., "1.0.0"
-          type: string
-        state:
-          description: The state of the guardrail version.
-          type: string
-          x-obmcs-enumref: '#/definitions/GuardrailVersion/state'
-        timeActivated:
-          description: The activation date of the guardrail version.
-          format: date-time
-          type: string
-        timeDeprecated:
-          description: The deprecated date of the guardrail version.
-          format: date-time
-          type: string
-        timePreviewed:
-          description: The preview date of the guardrail version.
-          format: date-time
-          type: string
-        timeRetired:
-          description: The retired date of the guardrail version.
-          format: date-time
+        runtimeType:
+          description: The runtime of the provided model.
+          enum:
+          - COHERE
+          - LLAMA
           type: string
       required:
-      - guardrailVersion
-      - state
-      - description
+      - runtimeType
       type: object
-    ChatDetails:
-      description: Details of the conversation for the model to respond.
+    EmbedTextResult:
+      description: The generated embedded result to return.
       properties:
-        chatRequest:
-          $ref: '#/components/schemas/BaseChatRequest'
-        compartmentId:
-          description: The OCID of compartment in which to call the Generative AI service to chat.
+        embedContents:
+          description: The original inputs. Only present if "isEcho" is set to true.
+          items:
+            $ref: '#/components/schemas/EmbedContent'
+          type: array
+        embeddings:
+          description: The embeddings corresponding to float.
+          items:
+            items:
+              format: float
+              type: number
+            type: array
+          type: array
+        embeddingsByType:
+          description: The embeddings corresponding to embedding types input.
+          type: object
+        id:
+          description: A unique identifier for the generated result.
           type: string
-        servingMode:
-          $ref: '#/components/schemas/ServingMode'
-      required:
-      - compartmentId
-      - servingMode
-      - chatRequest
-      type: object
-    GenerateTextResult:
-      description: The generated text result to return.
-      properties:
-        inferenceResponse:
-          $ref: '#/components/schemas/LlmInferenceResponse'
+        inputs:
+          description: The original inputs. Only present if "isEcho" is set to true.
+          items:
+            type: string
+          type: array
         modelId:
           description: The OCID of the model used in this inference request.
-          maxLength: 255
-          minLength: 1
           type: string
         modelVersion:
           description: The version of the model.
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - id
+      - embeddings
+      type: object
+    ApplyGuardrailsDetails:
+      description: 'Details for applying guardrails to the input content.
+
+        Case 1: Use `input` for simple single-text moderation. Existing customers can continue to
+
+        use this field for the current text-only flow.
+
+        Case 2: Use `multimodalInput` for moderation over text, image, or a combination of both.
+
+        `multimodalInput` supports a single text item, an array of text items only, an array of
+
+        images only, or a mixed ordered combination of text and image items.
+
+        Clients may provide `input`, `multimodalInput`, or both. At least one of these fields must
+
+        be provided. If both `input` and `multimodalInput` are provided, the service will process
+
+        `input` and discard `multimodalInput`.
+
+        '
+      properties:
+        compartmentId:
+          description: The OCID of the compartment to apply guardrails.
           maxLength: 255
           minLength: 1
           type: string
-      required:
-      - modelId
-      - modelVersion
-      - inferenceResponse
-      type: object
-    Usage:
-      description: Usage statistics for the completion request.
-      properties:
-        completionTokens:
-          description: Number of tokens in the generated completion.
-          type: integer
-        completionTokensDetails:
-          $ref: '#/components/schemas/CompletionTokensDetails'
-        promptTokens:
-          description: Number of tokens in the prompt.
-          type: integer
-        promptTokensDetails:
-          $ref: '#/components/schemas/PromptTokensDetails'
-        totalTokens:
-          description: Total number of tokens used in the request (prompt + completion).
-          type: integer
-      type: object
-    PromptInjectionConfiguration:
-      description: Configuration for prompt injection
-      type: object
-    GuardrailVersionConfig:
-      description: The version of the guardrail to use. If not specified, the default version will be used.
-      properties:
-        guardrailVersion:
-          description: The version string, e.g., "1.0.0". When a PATCH version is not specified, the latest available PATCH within the specified MAJOR and MINOR version will be used.
-          type: string
-      required:
-      - guardrailVersion
-      type: object
-    CompletionTokensDetails:
-      description: Breakdown of tokens used in a completion.
-      properties:
-        acceptedPredictionTokens:
-          description: 'When using Predicted Outputs, the number of tokens in the prediction that appeared in the completion.
-
-            '
-          type: integer
-        reasoningTokens:
-          description: Tokens generated by the model for reasoning.
-          type: integer
-        rejectedPredictionTokens:
-          description: When using Predicted Outputs, the number of tokens in the prediction that did not appear in the completion. However, like reasoning tokens, these tokens are still counted in the total completion tokens for purposes of billing, output, and context window limits.
-          type: integer
-      type: object
-    DocumentRank:
-      description: An object that contains a relevance score, an index and the text for a document.
-      properties:
-        document:
-          $ref: '#/components/schemas/Document'
-        index:
-          description: Index of the document in documents array.
-          type: integer
-        relevanceScore:
-          description: The relevance score for the document at that index.
-          format: double
-          type: number
-      type: object
-    ContentModerationConfiguration:
-      description: Configuration for content moderation.
-      properties:
-        categories:
-          description: The categories to detect in the input text.
+        guardrailConfigs:
+          $ref: '#/components/schemas/GuardrailConfigs'
+        guardrailVersionConfig:
+          $ref: '#/components/schemas/GuardrailVersionConfig'
+        input:
+          $ref: '#/components/schemas/GuardrailsInput'
+        multimodalInput:
+          description: An ordered list of text and image inputs for multimodal guardrail evaluation. This field supports a single text item, an array of text items only, an array of images only, or a mixed ordered combination of text and image items. If both `input` and `multimodalInput` are provided, this field is ignored.
           items:
-            type: string
-          maxItems: 20
+            $ref: '#/components/schemas/GuardrailsInput'
+          minItems: 1
           type: array
       required:
-      - categories
+      - guardrailConfigs
+      - compartmentId
       type: object
-    GuardrailsResults:
-      description: The results of applying each guardrail.
+    RerankTextResult:
+      description: The rerank response to return to the caller.
       properties:
-        contentModeration:
-          $ref: '#/components/schemas/ContentModerationResult'
-        personallyIdentifiableInformation:
-          description: The result of PII detection
+        documentRanks:
+          description: Top n documents with their index and relevance score.
           items:
-            $ref: '#/components/schemas/PersonallyIdentifiableInformationResult'
-          maxItems: 1000
+            $ref: '#/components/schemas/DocumentRank'
           type: array
-        promptInjection:
-          $ref: '#/components/schemas/PromptInjectionProtectionResult'
-      type: object
-    CategoryScore:
-      description: A category with its score.
-      properties:
-        flaggedModalities:
-          description: 'The input modalities flagged by this category score. Present only when the request is
-
-            processed using a non-empty `multimodalInput`.
-
-            '
-          items:
-            enum:
-            - TEXT
-            - IMAGE
-            type: string
-          maxItems: 2
-          type: array
-        name:
-          description: The name of the category.
-          maxLength: 255
-          minLength: 1
+        id:
+          description: A unique identifier for this `RerankResult`.
           type: string
-        score:
-          description: The score of the category.
-          format: double
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-      required:
-      - name
-      - score
-      type: object
-    GuardrailVersionResponse:
-      description: The guardaril version applied on the given content.
-      properties:
-        version:
-          description: The guardrail system version string, e.g., "1.0.0". When a PATCH version is not specified, the latest available PATCH within the specified MAJOR and MINOR version will be used.
+        modelId:
+          description: The OCID of the model used in the rerank request.
+          type: string
+        modelVersion:
+          description: The version of the model.
           type: string
       required:
-      - version
-      type: object
-    EmbedContent:
-      description: The base class for the embed content.
-      discriminator:
-        propertyName: type
-      properties:
-        type:
-          description: The type of the content.
-          enum:
-          - TEXT
-          - IMAGE
-          type: string
-      required:
-      - type
+      - id
+      - documentRanks
       type: object
     ContentModerationResult:
       description: The result of content moderation.
@@ -724,56 +745,43 @@ components:
       required:
       - categories
       type: object
-    ChatResult:
-      description: The response to the chat conversation.
+    GuardrailVersionResponse:
+      description: The guardaril version applied on the given content.
       properties:
-        chatResponse:
-          $ref: '#/components/schemas/BaseChatResponse'
-        modelId:
-          description: The OCID of the model that's used in this inference request.
-          maxLength: 255
-          minLength: 1
-          type: string
-        modelVersion:
-          description: The version of the model.
-          maxLength: 255
-          minLength: 1
+        version:
+          description: The guardrail system version string, e.g., "1.0.0". When a PATCH version is not specified, the latest available PATCH within the specified MAJOR and MINOR version will be used.
           type: string
       required:
-      - modelId
-      - modelVersion
-      - chatResponse
+      - version
       type: object
-    BaseChatResponse:
-      description: The base class that creates the chat response.
-      discriminator:
-        propertyName: apiFormat
+    PersonallyIdentifiableInformationResult:
+      description: An item of personally identifiable information.
       properties:
-        apiFormat:
-          description: The API format for the model's response.
-          enum:
-          - COHERE
-          - GENERIC
-          - COHEREV2
+        label:
+          description: The label of the personally identifiable information.
           type: string
-      required:
-      - apiFormat
-      type: object
-    PromptTokensDetails:
-      description: Breakdown of tokens used in the prompt.
-      properties:
-        cachedTokens:
-          description: Cached tokens present in the prompt.
+        length:
+          description: The length of the personally identifiable information.
           type: integer
-      type: object
-    Document:
-      description: The input of the document to rerank.
-      properties:
+        offset:
+          description: The offset of the personally identifiable information.
+          type: integer
+        score:
+          description: The score of the personally identifiable information.
+          format: double
+          maximum: 1.0
+          minimum: 0.0
+          type: number
         text:
-          description: The text of the document to rerank.
+          description: The text of the personally identifiable information.
           type: string
       required:
+      - length
+      - offset
       - text
+      - label
+      - score
+      type: object
     EmbedTextDetails:
       description: Details for the request to embed texts.
       properties:
@@ -840,45 +848,196 @@ components:
       - compartmentId
       - servingMode
       type: object
-    ServingMode:
-      description: The model's serving mode, which is either on-demand serving or dedicated serving.
-      discriminator:
-        propertyName: servingType
+    ContentModerationConfiguration:
+      description: Configuration for content moderation.
       properties:
-        servingType:
-          description: The serving mode type, which is either on-demand serving or dedicated serving.
-          enum:
-          - ON_DEMAND
-          - DEDICATED
-          type: string
+        categories:
+          description: The categories to detect in the input text.
+          items:
+            type: string
+          maxItems: 20
+          type: array
       required:
-      - servingType
+      - categories
       type: object
-    Error:
-      description: Error Information.
+    Usage:
+      description: Usage statistics for the completion request.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
+        completionTokens:
+          description: Number of tokens in the generated completion.
+          type: integer
+        completionTokensDetails:
+          $ref: '#/components/schemas/CompletionTokensDetails'
+        promptTokens:
+          description: Number of tokens in the prompt.
+          type: integer
+        promptTokensDetails:
+          $ref: '#/components/schemas/PromptTokensDetails'
+        totalTokens:
+          description: Total number of tokens used in the request (prompt + completion).
+          type: integer
+      type: object
+    GuardrailVersionCollection:
+      description: The response containing a list of guardrail system versions.
+      properties:
+        items:
+          description: The list of guardrail system versions.
+          items:
+            $ref: '#/components/schemas/GuardrailVersionSummary'
+          type: array
+      required:
+      - items
+      type: object
+    Document:
+      description: The input of the document to rerank.
+      properties:
+        text:
+          description: The text of the document to rerank.
           type: string
       required:
-      - code
-      - message
-    GuardrailsInput:
-      description: The input data for applying guardrails. This can be text, image, video, or audio content.
+      - text
+    PromptTokensDetails:
+      description: Breakdown of tokens used in the prompt.
+      properties:
+        cachedTokens:
+          description: Cached tokens present in the prompt.
+          type: integer
+      type: object
+    CompletionTokensDetails:
+      description: Breakdown of tokens used in a completion.
+      properties:
+        acceptedPredictionTokens:
+          description: 'When using Predicted Outputs, the number of tokens in the prediction that appeared in the completion.
+
+            '
+          type: integer
+        reasoningTokens:
+          description: Tokens generated by the model for reasoning.
+          type: integer
+        rejectedPredictionTokens:
+          description: When using Predicted Outputs, the number of tokens in the prediction that did not appear in the completion. However, like reasoning tokens, these tokens are still counted in the total completion tokens for purposes of billing, output, and context window limits.
+          type: integer
+      type: object
+    ApplyGuardrailsResult:
+      description: The result of applying guardrails to the input content.
+      properties:
+        guardrailVersion:
+          $ref: '#/components/schemas/GuardrailVersionResponse'
+        results:
+          $ref: '#/components/schemas/GuardrailsResults'
+      required:
+      - results
+      type: object
+    ChatDetails:
+      description: Details of the conversation for the model to respond.
+      properties:
+        chatRequest:
+          $ref: '#/components/schemas/BaseChatRequest'
+        compartmentId:
+          description: The OCID of compartment in which to call the Generative AI service to chat.
+          type: string
+        servingMode:
+          $ref: '#/components/schemas/ServingMode'
+      required:
+      - compartmentId
+      - servingMode
+      - chatRequest
+      type: object
+    GuardrailVersionSummary:
+      description: Details of a guardrail version.
+      properties:
+        description:
+          description: The description of the guardrail version.
+          type: string
+        guardrailVersion:
+          description: The guardrail system version string, e.g., "1.0.0"
+          type: string
+        state:
+          description: The state of the guardrail version.
+          type: string
+          x-obmcs-enumref: '#/definitions/GuardrailVersion/state'
+        timeActivated:
+          description: The activation date of the guardrail version.
+          format: date-time
+          type: string
+        timeDeprecated:
+          description: The deprecated date of the guardrail version.
+          format: date-time
+          type: string
+        timePreviewed:
+          description: The preview date of the guardrail version.
+          format: date-time
+          type: string
+        timeRetired:
+          description: The retired date of the guardrail version.
+          format: date-time
+          type: string
+      required:
+      - guardrailVersion
+      - state
+      - description
+      type: object
+    GenerateTextDetails:
+      description: Details for the request to generate text.
+      properties:
+        compartmentId:
+          description: The OCID of compartment in which to call the Generative AI service to generate text.
+          type: string
+        inferenceRequest:
+          $ref: '#/components/schemas/LlmInferenceRequest'
+        servingMode:
+          $ref: '#/components/schemas/ServingMode'
+      required:
+      - compartmentId
+      - servingMode
+      - inferenceRequest
+      type: object
+    ChatResult:
+      description: The response to the chat conversation.
+      properties:
+        chatResponse:
+          $ref: '#/components/schemas/BaseChatResponse'
+        modelId:
+          description: The OCID of the model that's used in this inference request.
+          maxLength: 255
+          minLength: 1
+          type: string
+        modelVersion:
+          description: The version of the model.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - modelId
+      - modelVersion
+      - chatResponse
+      type: object
+    PersonallyIdentifiableInformationConfiguration:
+      description: Configuration for personally identifiable information detection.
+      properties:
+        types:
+          description: The types of personally identifiable information to detect.
+          items:
+            type: string
+          maxItems: 50
+          type: array
+      required:
+      - types
+      type: object
+    BaseChatResponse:
+      description: The base class that creates the chat response.
       discriminator:
-        propertyName: type
+        propertyName: apiFormat
       properties:
-        type:
-          description: The type of the input data.
+        apiFormat:
+          description: The API format for the model's response.
           enum:
-          - TEXT
-          - IMAGE
+          - COHERE
+          - GENERIC
+          - COHEREV2
           type: string
       required:
-      - type
+      - apiFormat
       type: object
     BaseChatRequest:
       description: The base class to use for the chat inference request.
@@ -900,192 +1059,6 @@ components:
           type: string
       required:
       - apiFormat
-      type: object
-    SummarizeTextDetails:
-      description: Details for the request to summarize text.
-      properties:
-        additionalCommand:
-          description: A free-form instruction for modifying how the summaries get generated. Should complete the sentence "Generate a summary _". For example, "focusing on the next steps" or "written by Yoda".
-          type: string
-        compartmentId:
-          description: The OCID of compartment in which to call the Generative AI service to summarize text.
-          type: string
-        extractiveness:
-          default: AUTO
-          description: Controls how close to the original text the summary is. High extractiveness summaries will lean towards reusing sentences verbatim, while low extractiveness summaries will tend to paraphrase more.
-          enum:
-          - LOW
-          - MEDIUM
-          - HIGH
-          - AUTO
-          type: string
-        format:
-          default: AUTO
-          description: Indicates the style in which the summary will be delivered - in a free form paragraph or in bullet points. If "AUTO" is selected, the best option will be picked based on the input text.
-          enum:
-          - PARAGRAPH
-          - BULLETS
-          - AUTO
-          type: string
-        input:
-          description: The input string to be summarized.
-          type: string
-        isEcho:
-          default: false
-          description: Whether or not to include the original inputs in the response.
-          type: boolean
-        length:
-          default: AUTO
-          description: Indicates the approximate length of the summary. If "AUTO" is selected, the best option will be picked based on the input text.
-          enum:
-          - SHORT
-          - MEDIUM
-          - LONG
-          - AUTO
-          type: string
-        servingMode:
-          $ref: '#/components/schemas/ServingMode'
-        temperature:
-          default: 1.0
-          description: 'A number that sets the randomness of the generated output. Lower temperatures mean less random generations.
-
-
-            Use lower numbers for tasks with a correct answer such as question answering or summarizing. High temperatures can generate hallucinations or factually incorrect information. Start with temperatures lower than 1.0, and increase the temperature for more creative outputs, as you regenerate the prompts to refine the outputs.
-
-            '
-          format: double
-          maximum: 5.0
-          minimum: 0.0
-          type: number
-      required:
-      - input
-      - compartmentId
-      - servingMode
-      type: object
-    GenerateTextDetails:
-      description: Details for the request to generate text.
-      properties:
-        compartmentId:
-          description: The OCID of compartment in which to call the Generative AI service to generate text.
-          type: string
-        inferenceRequest:
-          $ref: '#/components/schemas/LlmInferenceRequest'
-        servingMode:
-          $ref: '#/components/schemas/ServingMode'
-      required:
-      - compartmentId
-      - servingMode
-      - inferenceRequest
-      type: object
-    ApplyGuardrailsResult:
-      description: The result of applying guardrails to the input content.
-      properties:
-        guardrailVersion:
-          $ref: '#/components/schemas/GuardrailVersionResponse'
-        results:
-          $ref: '#/components/schemas/GuardrailsResults'
-      required:
-      - results
-      type: object
-    ApplyGuardrailsDetails:
-      description: 'Details for applying guardrails to the input content.
-
-        Case 1: Use `input` for simple single-text moderation. Existing customers can continue to
-
-        use this field for the current text-only flow.
-
-        Case 2: Use `multimodalInput` for moderation over text, image, or a combination of both.
-
-        `multimodalInput` supports a single text item, an array of text items only, an array of
-
-        images only, or a mixed ordered combination of text and image items.
-
-        Clients may provide `input`, `multimodalInput`, or both. At least one of these fields must
-
-        be provided. If both `input` and `multimodalInput` are provided, the service will process
-
-        `input` and discard `multimodalInput`.
-
-        '
-      properties:
-        compartmentId:
-          description: The OCID of the compartment to apply guardrails.
-          maxLength: 255
-          minLength: 1
-          type: string
-        guardrailConfigs:
-          $ref: '#/components/schemas/GuardrailConfigs'
-        guardrailVersionConfig:
-          $ref: '#/components/schemas/GuardrailVersionConfig'
-        input:
-          $ref: '#/components/schemas/GuardrailsInput'
-        multimodalInput:
-          description: An ordered list of text and image inputs for multimodal guardrail evaluation. This field supports a single text item, an array of text items only, an array of images only, or a mixed ordered combination of text and image items. If both `input` and `multimodalInput` are provided, this field is ignored.
-          items:
-            $ref: '#/components/schemas/GuardrailsInput'
-          minItems: 1
-          type: array
-      required:
-      - guardrailConfigs
-      - compartmentId
-      type: object
-    PromptInjectionProtectionResult:
-      description: The result of prompt injection protection.
-      properties:
-        flaggedModalities:
-          description: 'The input modalities flagged by the prompt injection result. Present only when the request
-
-            is processed using a non-empty `multimodalInput`.
-
-            '
-          items:
-            enum:
-            - TEXT
-            - IMAGE
-            type: string
-          maxItems: 2
-          type: array
-        score:
-          description: The score indicating the likelihood of a prompt injection attack.
-          format: double
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-      required:
-      - score
-      type: object
-    PersonallyIdentifiableInformationConfiguration:
-      description: Configuration for personally identifiable information detection.
-      properties:
-        types:
-          description: The types of personally identifiable information to detect.
-          items:
-            type: string
-          maxItems: 50
-          type: array
-      required:
-      - types
-      type: object
-    RerankTextResult:
-      description: The rerank response to return to the caller.
-      properties:
-        documentRanks:
-          description: Top n documents with their index and relevance score.
-          items:
-            $ref: '#/components/schemas/DocumentRank'
-          type: array
-        id:
-          description: A unique identifier for this `RerankResult`.
-          type: string
-        modelId:
-          description: The OCID of the model used in the rerank request.
-          type: string
-        modelVersion:
-          description: The version of the model.
-          type: string
-      required:
-      - id
-      - documentRanks
       type: object
     SummarizeTextResult:
       description: Summarize text result to return to caller.
@@ -1123,55 +1096,82 @@ components:
       required:
       - runtimeType
       type: object
-    GuardrailVersionCollection:
-      description: The response containing a list of guardrail system versions.
-      properties:
-        items:
-          description: The list of guardrail system versions.
-          items:
-            $ref: '#/components/schemas/GuardrailVersionSummary'
-          type: array
-      required:
-      - items
+    PromptInjectionConfiguration:
+      description: Configuration for prompt injection
       type: object
-    EmbedTextResult:
-      description: The generated embedded result to return.
+    GenerateTextResult:
+      description: The generated text result to return.
       properties:
-        embedContents:
-          description: The original inputs. Only present if "isEcho" is set to true.
-          items:
-            $ref: '#/components/schemas/EmbedContent'
-          type: array
-        embeddings:
-          description: The embeddings corresponding to float.
-          items:
-            items:
-              format: float
-              type: number
-            type: array
-          type: array
-        embeddingsByType:
-          description: The embeddings corresponding to embedding types input.
-          type: object
-        id:
-          description: A unique identifier for the generated result.
-          type: string
-        inputs:
-          description: The original inputs. Only present if "isEcho" is set to true.
-          items:
-            type: string
-          type: array
+        inferenceResponse:
+          $ref: '#/components/schemas/LlmInferenceResponse'
         modelId:
           description: The OCID of the model used in this inference request.
+          maxLength: 255
+          minLength: 1
           type: string
         modelVersion:
           description: The version of the model.
+          maxLength: 255
+          minLength: 1
           type: string
-        usage:
-          $ref: '#/components/schemas/Usage'
       required:
-      - id
-      - embeddings
+      - modelId
+      - modelVersion
+      - inferenceResponse
+      type: object
+    GuardrailVersionConfig:
+      description: The version of the guardrail to use. If not specified, the default version will be used.
+      properties:
+        guardrailVersion:
+          description: The version string, e.g., "1.0.0". When a PATCH version is not specified, the latest available PATCH within the specified MAJOR and MINOR version will be used.
+          type: string
+      required:
+      - guardrailVersion
+      type: object
+    GuardrailsInput:
+      description: The input data for applying guardrails. This can be text, image, video, or audio content.
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          description: The type of the input data.
+          enum:
+          - TEXT
+          - IMAGE
+          type: string
+      required:
+      - type
+      type: object
+    CategoryScore:
+      description: A category with its score.
+      properties:
+        flaggedModalities:
+          description: 'The input modalities flagged by this category score. Present only when the request is
+
+            processed using a non-empty `multimodalInput`.
+
+            '
+          items:
+            enum:
+            - TEXT
+            - IMAGE
+            type: string
+          maxItems: 2
+          type: array
+        name:
+          description: The name of the category.
+          maxLength: 255
+          minLength: 1
+          type: string
+        score:
+          description: The score of the category.
+          format: double
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+      required:
+      - name
+      - score
       type: object
     GuardrailConfigs:
       additionalProperties: false
@@ -1185,63 +1185,76 @@ components:
         promptInjectionConfig:
           $ref: '#/components/schemas/PromptInjectionConfiguration'
       type: object
-    PersonallyIdentifiableInformationResult:
-      description: An item of personally identifiable information.
+    EmbedContent:
+      description: The base class for the embed content.
+      discriminator:
+        propertyName: type
       properties:
-        label:
-          description: The label of the personally identifiable information.
-          type: string
-        length:
-          description: The length of the personally identifiable information.
-          type: integer
-        offset:
-          description: The offset of the personally identifiable information.
-          type: integer
-        score:
-          description: The score of the personally identifiable information.
-          format: double
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-        text:
-          description: The text of the personally identifiable information.
+        type:
+          description: The type of the content.
+          enum:
+          - TEXT
+          - IMAGE
           type: string
       required:
-      - length
-      - offset
-      - text
-      - label
-      - score
+      - type
       type: object
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+    ServingMode:
+      description: The model's serving mode, which is either on-demand serving or dedicated serving.
+      discriminator:
+        propertyName: servingType
+      properties:
+        servingType:
+          description: The serving mode type, which is either on-demand serving or dedicated serving.
+          enum:
+          - ON_DEMAND
+          - DEDICATED
+          type: string
+      required:
+      - servingType
+      type: object
   parameters:
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+        paginated "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
     GuardrailStateQueryParam:
       description: A filter to return only the guardrail versions whose state matches the given value.
       in: query
       name: state
       x-default-description: 'null'
       x-obmcs-enumref: '#/definitions/GuardrailVersion/state'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
       schema:
         type: string
     CompartmentIdHeader:
@@ -1268,35 +1281,22 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
 
-        "List" call. For important details about how pagination works, see
+            Oracle about a particular request, please provide the request ID.
 
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

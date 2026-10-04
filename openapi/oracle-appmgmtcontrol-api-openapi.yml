@@ -463,95 +463,140 @@ paths:
         '
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
+  parameters:
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 20
+        minimum: 1
+    SortMonitoredInstancesByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    MonitoredInstanceIdentifierPathParam:
+      description: OCID of monitored instance.
+      in: path
+      name: monitoredInstanceId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    WorkRequestIdPathParam:
+      description: The ID of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either ascending ('ASC') or descending ('DESC').
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
   schemas:
-    WorkRequestSummaryCollection:
-      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
+    Error:
+      description: Error Information.
       properties:
-        items:
-          description: List of workRequestSummary objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  items: [\n    {\n      \"operationType\": \"ACTIVATE_RESOURCE_MONITORING_PLUGIN\",\n      \"status\": \"SUCCEEDED\",\n      \"id\": \"ocid1.appmgmtworkrequest.oc1.iad.&lt;unique_id&gt;\",\n      \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n      \"resources\": [\n        {\n          \"entityType\": \"monitoredInstance\",\n          \"actionType\": \"CREATED\"\n          \"identifier\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n          \"entityUri\": \"/monitoredInstances/ocid1.instance.oc1.iad.&lt;unique_id&gt;\"\n        }\n      ],\n      \"percentComplete\": 100,\n      \"timeAccepted\": \"2021-11-29T19:11:37.920+0100\",\n      \"timeStarted\": \"2021-11-29T19:11:55.920+0100\",\n      \"timeFinished\": \"2021-11-29T19:13:37.920+0100\"\n    }\n  ]\n}\n"
-    WorkRequestSummary:
-      description: A summary of the status of a work request.
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
           type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - ACTIVATE_RESOURCE_MONITORING_PLUGIN
-          - PUBLISH_TOP_PROCESSES_METRICS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
+        message:
+          description: A human-readable error string.
           type: string
       required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-      x-example: "{\n  \"operationType\": \"ACTIVATE_RESOURCE_MONITORING_PLUGIN\",\n  \"status\": \"SUCCEEDED\",\n  \"id\": \"ocid1.appmgmtworkrequest.oc1.iad.&lt;unique_id&gt;\",\n  \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n  \"resources\": [\n    {\n      \"entityType\": \"monitoredInstance\",\n      \"actionType\": \"CREATED\"\n      \"identifier\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n      \"entityUri\": \"/monitoredInstances/ocid1.instance.oc1.iad.&lt;unique_id&gt;\"\n    }\n  ],\n  \"percentComplete\": 100,\n  \"timeAccepted\": \"2021-11-29T19:11:37.920+0100\",\n  \"timeStarted\": \"2021-11-29T19:11:55.920+0100\",\n  \"timeFinished\": \"2021-11-29T19:13:37.920+0100\"\n}\n"
+      - code
+      - message
     WorkRequestLogEntryCollection:
       description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
       properties:
@@ -564,6 +609,40 @@ components:
       - items
       type: object
       x-example: "{\n  items: [\n    {\n      \"message\": \"Management Agent OCA plugin has been deployed to Monitored Instance\",\n      \"timestamp: \"2021-11-29T19:11:55.920+0100\"\n    },\n    {\n      \"message\": \"Successfully activated Resource Monitoring Plugin\",\n      \"timestamp: \"2021-11-29T19:13:55.920+0100\"\n    }\n  ]\n}\n"
+    MonitoredInstanceCollection:
+      description: Results of a monitored instance search. Contains MonitoredInstanceSummary items.
+      properties:
+        items:
+          description: List of monitored instances.
+          items:
+            $ref: '#/components/schemas/MonitoredInstanceSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  items: [\n    {\n      \"instanceId\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n      \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n      \"displayName\": \"someDisplayName\",\n      \"managementAgentId\": \"ocid1.managementagent.oc1.iad.&lt;unique_id&gt;\",\n      \"monitoringState\": \"ENABLED\",\n      \"lifecycleState\": \"ACTIVE\"\n    }\n  ]\n}\n"
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. Error codes are listed on
+
+            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+
+            '
+          type: string
+        message:
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+      x-example: "{\n  \"code\": \"500\",\n  \"message\": \"Get MACS agent id retry count exceeded limit. There is an issue with MACS plugin deployment\",\n  \"timestamp: \"2021-11-29T19:11:55.920+0100\"\n}\n"
     WorkRequest:
       description: A description of workrequest status
       properties:
@@ -640,40 +719,84 @@ components:
       - percentComplete
       - timeAccepted
       x-example: "{\n  \"operationType\": \"ACTIVATE_RESOURCE_MONITORING_PLUGIN\",\n  \"status\": \"SUCCEEDED\",\n  \"id\": \"ocid1.appmgmtworkrequest.oc1.iad.&lt;unique_id&gt;\",\n  \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n  \"resources\": [\n    {\n      \"entityType\": \"monitoredInstance\",\n      \"actionType\": \"CREATED\"\n      \"identifier\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n      \"entityUri\": \"/monitoredInstances/ocid1.instance.oc1.iad.&lt;unique_id&gt;\"\n    }\n  ],\n  \"percentComplete\": 100,\n  \"timeAccepted\": \"2021-11-29T19:11:37.920+0100\",\n  \"timeStarted\": \"2021-11-29T19:11:55.920+0100\",\n  \"timeFinished\": \"2021-11-29T19:13:37.920+0100\"\n}\n"
-    Error:
-      description: Error Information.
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
         message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed on
-
-            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
+          description: Human-readable log message.
           type: string
         timestamp:
-          description: The time the error occured. An RFC3339 formatted datetime string.
+          description: The time the log message was written. An RFC3339 formatted datetime string
           format: date-time
           type: string
       required:
-      - code
       - message
       - timestamp
-      x-example: "{\n  \"code\": \"500\",\n  \"message\": \"Get MACS agent id retry count exceeded limit. There is an issue with MACS plugin deployment\",\n  \"timestamp: \"2021-11-29T19:11:55.920+0100\"\n}\n"
+      x-example: "{\n  \"message\": \"Management Agent OCA plugin has been deployed to Monitored Instance\",\n  \"timestamp: \"2021-11-29T19:11:55.920+0100\"\n}\n"
+    WorkRequestSummaryCollection:
+      description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestSummary objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  items: [\n    {\n      \"operationType\": \"ACTIVATE_RESOURCE_MONITORING_PLUGIN\",\n      \"status\": \"SUCCEEDED\",\n      \"id\": \"ocid1.appmgmtworkrequest.oc1.iad.&lt;unique_id&gt;\",\n      \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n      \"resources\": [\n        {\n          \"entityType\": \"monitoredInstance\",\n          \"actionType\": \"CREATED\"\n          \"identifier\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n          \"entityUri\": \"/monitoredInstances/ocid1.instance.oc1.iad.&lt;unique_id&gt;\"\n        }\n      ],\n      \"percentComplete\": 100,\n      \"timeAccepted\": \"2021-11-29T19:11:37.920+0100\",\n      \"timeStarted\": \"2021-11-29T19:11:55.920+0100\",\n      \"timeFinished\": \"2021-11-29T19:13:37.920+0100\"\n    }\n  ]\n}\n"
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
+          type: array
+      required:
+      - items
+      type: object
+      x-example: "{\n  items: [\n    {\n      \"code\": \"500\",\n      \"message\": \"Get MACS agent id retry count exceeded limit. There is an issue with MACS plugin deployment\",\n      \"timestamp: \"2021-11-29T19:11:55.920+0100\"\n    }\n  ]\n}\n"
+    MonitoredInstanceSummary:
+      description: Summary of the monitored instance.
+      properties:
+        compartmentId:
+          description: Compartment Identifier [OCID](/Content/General/Concepts/identifiers.htm)
+          maxLength: 255
+          minLength: 1
+          type: string
+        displayName:
+          description: 'A user-friendly name of the monitored instance. It is binded to [Compute Instance](/Content/Compute/Concepts/computeoverview.htm).
+
+            DisplayName is fetched from [Core Service API](/api/#/en/iaas/20160918/Instance/).
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+        instanceId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of monitored instance.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current state of the monitored instance.
+          type: string
+          x-obmcs-enumref: '#/definitions/MonitoredInstance/lifecycleState'
+        managementAgentId:
+          description: Management Agent Identifier [OCID](/Content/General/Concepts/identifiers.htm).
+          maxLength: 255
+          minLength: 1
+          type: string
+        monitoringState:
+          description: Monitoring status. Can be either enabled or disabled.
+          type: string
+          x-obmcs-enumref: '#/definitions/MonitoredInstance/monitoringState'
+      required:
+      - instanceId
+      - compartmentId
+      type: object
+      x-example: "{\n  \"instanceId\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n  \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n  \"displayName\": \"someDisplayName\",\n  \"managementAgentId\": \"ocid1.managementagent.oc1.iad.&lt;unique_id&gt;\",\n  \"monitoringState\": \"ENABLED\",\n  \"lifecycleState\": \"ACTIVE\"\n}\n"
     MonitoredInstance:
       description: Description of Monitored Instance.
       properties:
@@ -739,70 +862,82 @@ components:
       - compartmentId
       type: object
       x-example: "{\n  \"instanceId\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n  \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n  \"displayName\": \"someDisplayName\",\n  \"managementAgentId\": \"ocid1.managementagent.oc1.iad.&lt;unique_id&gt;\",\n  \"timeCreated\": \"2021-10-27T17:05:50.347+0200\",\n  \"timeUpdated\": \"2021-11-29T13:22:57.729+0100\",\n  \"monitoringState\": \"ENABLED\",\n  \"lifecycleState\": \"ACTIVE\",\n  \"lifecycleDetails: \"\"\n}\n"
-    MonitoredInstanceCollection:
-      description: Results of a monitored instance search. Contains MonitoredInstanceSummary items.
-      properties:
-        items:
-          description: List of monitored instances.
-          items:
-            $ref: '#/components/schemas/MonitoredInstanceSummary'
-          type: array
-      required:
-      - items
-      type: object
-      x-example: "{\n  items: [\n    {\n      \"instanceId\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n      \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n      \"displayName\": \"someDisplayName\",\n      \"managementAgentId\": \"ocid1.managementagent.oc1.iad.&lt;unique_id&gt;\",\n      \"monitoringState\": \"ENABLED\",\n      \"lifecycleState\": \"ACTIVE\"\n    }\n  ]\n}\n"
-    MonitoredInstanceSummary:
-      description: Summary of the monitored instance.
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
       properties:
         compartmentId:
-          description: Compartment Identifier [OCID](/Content/General/Concepts/identifiers.htm)
-          maxLength: 255
-          minLength: 1
-          type: string
-        displayName:
-          description: 'A user-friendly name of the monitored instance. It is binded to [Compute Instance](/Content/Compute/Concepts/computeoverview.htm).
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
 
-            DisplayName is fetched from [Core Service API](/api/#/en/iaas/20160918/Instance/).
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
 
             '
-          maxLength: 255
-          minLength: 1
           type: string
-        instanceId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of monitored instance.
-          maxLength: 255
-          minLength: 1
+        id:
+          description: The id of the work request.
           type: string
-        lifecycleState:
-          description: The current state of the monitored instance.
+        operationType:
+          description: Type of the work request
+          enum:
+          - ACTIVATE_RESOURCE_MONITORING_PLUGIN
+          - PUBLISH_TOP_PROCESSES_METRICS
           type: string
-          x-obmcs-enumref: '#/definitions/MonitoredInstance/lifecycleState'
-        managementAgentId:
-          description: Management Agent Identifier [OCID](/Content/General/Concepts/identifiers.htm).
-          maxLength: 255
-          minLength: 1
-          type: string
-        monitoringState:
-          description: Monitoring status. Can be either enabled or disabled.
-          type: string
-          x-obmcs-enumref: '#/definitions/MonitoredInstance/monitoringState'
-      required:
-      - instanceId
-      - compartmentId
-      type: object
-      x-example: "{\n  \"instanceId\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n  \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n  \"displayName\": \"someDisplayName\",\n  \"managementAgentId\": \"ocid1.managementagent.oc1.iad.&lt;unique_id&gt;\",\n  \"monitoringState\": \"ENABLED\",\n  \"lifecycleState\": \"ACTIVE\"\n}\n"
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestError objects.
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
           items:
-            $ref: '#/components/schemas/WorkRequestError'
+            $ref: '#/components/schemas/WorkRequestResource'
           type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
       required:
-      - items
-      type: object
-      x-example: "{\n  items: [\n    {\n      \"code\": \"500\",\n      \"message\": \"Get MACS agent id retry count exceeded limit. There is an issue with MACS plugin deployment\",\n      \"timestamp: \"2021-11-29T19:11:55.920+0100\"\n    }\n  ]\n}\n"
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+      x-example: "{\n  \"operationType\": \"ACTIVATE_RESOURCE_MONITORING_PLUGIN\",\n  \"status\": \"SUCCEEDED\",\n  \"id\": \"ocid1.appmgmtworkrequest.oc1.iad.&lt;unique_id&gt;\",\n  \"compartmentId\": \"ocid1.comapertment.oc1..&lt;unique_id&gt;\",\n  \"resources\": [\n    {\n      \"entityType\": \"monitoredInstance\",\n      \"actionType\": \"CREATED\"\n      \"identifier\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n      \"entityUri\": \"/monitoredInstances/ocid1.instance.oc1.iad.&lt;unique_id&gt;\"\n    }\n  ],\n  \"percentComplete\": 100,\n  \"timeAccepted\": \"2021-11-29T19:11:37.920+0100\",\n  \"timeStarted\": \"2021-11-29T19:11:55.920+0100\",\n  \"timeFinished\": \"2021-11-29T19:13:37.920+0100\"\n}\n"
     WorkRequestResource:
       description: A resource created or operated on by a work request.
       properties:
@@ -839,141 +974,6 @@ components:
       - entityType
       - identifier
       x-example: "{\n  \"entityType\": \"monitoredInstance\",\n  \"actionType\": \"CREATED\"\n  \"identifier\": \"ocid1.instance.oc1.iad.&lt;unique_id&gt;\",\n  \"entityUri\": \"/monitoredInstances/ocid1.instance.oc1.iad.&lt;unique_id&gt;\"\n}\n"
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-      x-example: "{\n  \"message\": \"Management Agent OCA plugin has been deployed to Monitored Instance\",\n  \"timestamp: \"2021-11-29T19:11:55.920+0100\"\n}\n"
-  parameters:
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    MonitoredInstanceIdentifierPathParam:
-      description: OCID of monitored instance.
-      in: path
-      name: monitoredInstanceId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    SortMonitoredInstancesByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    SortOrderQueryParam:
-      description: The sort order to use, either ascending ('ASC') or descending ('DESC').
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    WorkRequestIdPathParam:
-      description: The ID of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 20
-        minimum: 1
   responses:
     default:
       description: Unknown Error

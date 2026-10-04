@@ -315,32 +315,29 @@ paths:
         description: CompartmentId of the destination compartment
         required: true
 components:
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
   parameters:
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: displayName
-      x-default-description: 'null'
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    RoverEntitlementIdPathParam:
+      description: ID of the rover node or cluster entitlement
+      in: path
+      name: roverEntitlementId
+      required: true
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
@@ -353,6 +350,23 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call
 
@@ -381,35 +395,6 @@ components:
         - ASC
         - DESC
         default: ASC
-    LifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - DELETING
-        - DELETED
-        - FAILED
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    RoverEntitlementIdPathParam:
-      description: ID of the rover node or cluster entitlement
-      in: path
-      name: roverEntitlementId
-      required: true
-      schema:
-        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -429,14 +414,22 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+    LifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
       in: query
-      name: page
+      name: lifecycleState
+      required: false
       x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
       schema:
         type: string
-        minLength: 1
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - DELETING
+        - DELETED
+        - FAILED
     CompartmentIdQueryParam:
       description: The OCID of the compartment in which to list resources.
       in: query
@@ -444,97 +437,7 @@ components:
       required: true
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
   schemas:
-    RoverEntitlementCollection:
-      description: Results of a roverEntitlement search. Contains RoverEntitlementSummary.
-      properties:
-        items:
-          description: List of RoverEntitlementSummary.
-          items:
-            $ref: '#/components/schemas/RoverEntitlementSummary'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateRoverEntitlementDetails:
-      description: Information required to update a RoverEntitlement.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
-          type: string
-        entitlementDetails:
-          description: Details about the entitlement.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        lifecycleState:
-          description: The current state of the RoverNode.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        lifecycleStateDetails:
-          description: A property that can contain details on the lifecycle.
-          type: string
-        requestorEmail:
-          description: Requestor email for the entitlement.
-          type: string
-        requestorName:
-          description: Requestor name for the entitlement.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{orcl-cloud: {free-tier-retain: true}}`
-
-            '
-          type: object
-        tenantId:
-          description: tenant Id.
-          type: string
-      type: object
     Error:
       description: Error Information.
       properties:
@@ -547,93 +450,6 @@ components:
       required:
       - code
       - message
-    RoverEntitlement:
-      description: Information about a RoverEntitlement.
-      properties:
-        compartmentId:
-          description: The compartment Id for the entitlement.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
-          type: string
-        entitlementDetails:
-          description: Details about the entitlement.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: A property that can uniquely identify the rover entitlement.
-          type: string
-        lifecycleState:
-          description: Lifecyclestate for the entitlement.
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - DELETED
-          type: string
-        lifecycleStateDetails:
-          description: A property that can contain details on the lifecycle.
-          type: string
-        requestorEmail:
-          description: Requestor email for the entitlement.
-          type: string
-        requestorName:
-          description: Requestor name for the entitlement.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{orcl-cloud: {free-tier-retain: true}}`
-
-            '
-          type: object
-        tenantId:
-          description: tenant Id.
-          type: string
-        timeCreated:
-          description: Time of creation for the entitlement.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: Time when the entitlement was last updated.
-          format: date-time
-          type: string
-      required:
-      - compartmentId
-      - lifecycleState
-      - requestorName
-      - requestorEmail
-      - id
-      type: object
     RoverEntitlementSummary:
       description: Rover entitlement summary.
       properties:
@@ -790,6 +606,190 @@ components:
       - requestorName
       - requestorEmail
       type: object
+    UpdateRoverEntitlementDetails:
+      description: Information required to update a RoverEntitlement.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+          type: string
+        entitlementDetails:
+          description: Details about the entitlement.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+
+            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        lifecycleState:
+          description: The current state of the RoverNode.
+          enum:
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        lifecycleStateDetails:
+          description: A property that can contain details on the lifecycle.
+          type: string
+        requestorEmail:
+          description: Requestor email for the entitlement.
+          type: string
+        requestorName:
+          description: Requestor name for the entitlement.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+            '
+          type: object
+        tenantId:
+          description: tenant Id.
+          type: string
+      type: object
+    RoverEntitlement:
+      description: Information about a RoverEntitlement.
+      properties:
+        compartmentId:
+          description: The compartment Id for the entitlement.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+          type: string
+        entitlementDetails:
+          description: Details about the entitlement.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+
+            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: A property that can uniquely identify the rover entitlement.
+          type: string
+        lifecycleState:
+          description: Lifecyclestate for the entitlement.
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - DELETED
+          type: string
+        lifecycleStateDetails:
+          description: A property that can contain details on the lifecycle.
+          type: string
+        requestorEmail:
+          description: Requestor email for the entitlement.
+          type: string
+        requestorName:
+          description: Requestor name for the entitlement.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+            '
+          type: object
+        tenantId:
+          description: tenant Id.
+          type: string
+        timeCreated:
+          description: Time of creation for the entitlement.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: Time when the entitlement was last updated.
+          format: date-time
+          type: string
+      required:
+      - compartmentId
+      - lifecycleState
+      - requestorName
+      - requestorEmail
+      - id
+      type: object
+    RoverEntitlementCollection:
+      description: Results of a roverEntitlement search. Contains RoverEntitlementSummary.
+      properties:
+        items:
+          description: List of RoverEntitlementSummary.
+          items:
+            $ref: '#/components/schemas/RoverEntitlementSummary'
+          type: array
+      required:
+      - items
+      type: object
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

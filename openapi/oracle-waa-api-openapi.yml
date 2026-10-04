@@ -757,13 +757,161 @@ paths:
         required: true
 components:
   schemas:
-    CreateWebAppAccelerationPolicyDetails:
-      description: The information about new WebAppAccelerationPolicy.
+    ResponseCachingPolicy:
+      description: 'An object that specifies an HTTP response caching policy.
+
+        '
       properties:
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
+        isResponseHeaderBasedCachingEnabled:
+          default: false
+          description: 'When false, responses will not be cached by the backend based on response headers.
+
+
+            When true, responses that contain one of the supported cache control headers will be cached according to the
+
+            values specified in the cache control headers.
+
+
+            The "X-Accel-Expires" header field sets caching time of a response in seconds. The zero value disables
+
+            caching for a response. If the value starts with the @ prefix, it sets an absolute time in seconds since
+
+            Epoch, up to which the response may be cached.
+
+
+            If the header does not include the "X-Accel-Expires" field, parameters of caching may be set in the header
+
+            fields "Expires" or "Cache-Control".
+
+
+            If the header includes the "Set-Cookie" field, such a response will not be cached.
+
+
+            If the header includes the "Vary" field with the special value "*", such a response will not be cached. If the
+
+            header includes the "Vary" field with another value, such a response will be cached taking into account the
+
+            corresponding request header fields.
+
+            '
+          type: boolean
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WebAppAccelerationCollection:
+      description: Result of a WebAppAcceleration list operation.
+      properties:
+        items:
+          description: List of WebAppAccelerations.
+          items:
+            $ref: '#/components/schemas/WebAppAccelerationSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateWebAppAccelerationDetails:
+      description: The information to be updated for WebAppAcceleration.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: WebAppAcceleration display name, can be renamed.
           maxLength: 255
           minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+        webAppAccelerationPolicyId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of WebAppAccelerationPolicy, which is attached to the resource.
+
+            This update guarantees that the resource always has WebAppAccelerationPolicy attached at any time.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    ChangeWebAppAccelerationPolicyCompartmentDetails:
+      description: Updates compartmentId of resource.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    WebAppAccelerationSummary:
+      description: Summary of the WebAppAcceleration.
+      discriminator:
+        propertyName: backendType
+      properties:
+        backendType:
+          description: Type of the WebAppAcceleration, as example LOAD_BALANCER.
+          enum:
+          - LOAD_BALANCER
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/BackendType'
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
           type: string
         definedTags:
           additionalProperties:
@@ -785,9 +933,7 @@ components:
             '
           type: object
         displayName:
-          description: WebAppAccelerationPolicy display name, can be renamed.
-          maxLength: 255
-          minLength: 1
+          description: WebAppAcceleration display name, can be renamed.
           type: string
         freeformTags:
           additionalProperties:
@@ -798,10 +944,20 @@ components:
 
             '
           type: object
-        responseCachingPolicy:
-          $ref: '#/components/schemas/ResponseCachingPolicy'
-        responseCompressionPolicy:
-          $ref: '#/components/schemas/ResponseCompressionPolicy'
+        id:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the WebAppAcceleration.
+          type: string
+        lifecycleDetails:
+          description: 'A message describing the current state in more detail.
+
+            For example, can be used to provide actionable information for a resource in FAILED state.
+
+            '
+          type: string
+        lifecycleState:
+          description: The current state of the WebAppAcceleration.
+          type: string
+          x-obmcs-enumref: '#/definitions/WebAppAcceleration/lifecycleState'
         systemTags:
           additionalProperties:
             additionalProperties:
@@ -821,53 +977,28 @@ components:
 
             '
           type: object
-      required:
-      - compartmentId
-      type: object
-    GzipCompressionPolicy:
-      description: 'An object that specifies the gzip compression policy.
-
-        '
-      properties:
-        isEnabled:
-          default: false
-          description: 'When true, support for gzip compression is enabled. HTTP responses will be compressed with gzip only if the
-
-            client indicates support for gzip via the "Accept-Encoding: gzip" request header.
-
-
-            When false, support for gzip compression is disabled and HTTP responses will not be compressed with gzip
-
-            even if the client indicates support for gzip.
-
-            '
-          type: boolean
-      type: object
-    WebAppAccelerationCollection:
-      description: Result of a WebAppAcceleration list operation.
-      properties:
-        items:
-          description: List of WebAppAccelerations.
-          items:
-            $ref: '#/components/schemas/WebAppAccelerationSummary'
-          type: array
-      required:
-      - items
-      type: object
-    ChangeWebAppAccelerationCompartmentDetails:
-      description: Updates compartmentId of resource.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
-
-            into which the resource should be moved.
-
-            '
-          maxLength: 255
-          minLength: 1
+        timeCreated:
+          description: The time the WebAppAcceleration was created. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the WebAppAcceleration was updated. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        webAppAccelerationPolicyId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of WebAppAccelerationPolicy, which is attached to the resource.
           type: string
       required:
+      - id
       - compartmentId
+      - displayName
+      - timeCreated
+      - lifecycleState
+      - freeformTags
+      - definedTags
+      - systemTags
+      - backendType
+      - webAppAccelerationPolicyId
       type: object
     WebAppAcceleration:
       description: A resource connecting a WebAppAccelerationPolicy to a backend of particular type, applying that policy's coverage to the backend.
@@ -978,160 +1109,24 @@ components:
       - backendType
       - webAppAccelerationPolicyId
       type: object
-    WebAppAccelerationSummary:
-      description: Summary of the WebAppAcceleration.
-      discriminator:
-        propertyName: backendType
-      properties:
-        backendType:
-          description: Type of the WebAppAcceleration, as example LOAD_BALANCER.
-          enum:
-          - LOAD_BALANCER
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/BackendType'
-        compartmentId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: WebAppAcceleration display name, can be renamed.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        id:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the WebAppAcceleration.
-          type: string
-        lifecycleDetails:
-          description: 'A message describing the current state in more detail.
-
-            For example, can be used to provide actionable information for a resource in FAILED state.
-
-            '
-          type: string
-        lifecycleState:
-          description: The current state of the WebAppAcceleration.
-          type: string
-          x-obmcs-enumref: '#/definitions/WebAppAcceleration/lifecycleState'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the WebAppAcceleration was created. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the WebAppAcceleration was updated. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        webAppAccelerationPolicyId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of WebAppAccelerationPolicy, which is attached to the resource.
-          type: string
-      required:
-      - id
-      - compartmentId
-      - displayName
-      - timeCreated
-      - lifecycleState
-      - freeformTags
-      - definedTags
-      - systemTags
-      - backendType
-      - webAppAccelerationPolicyId
-      type: object
-    ResponseCachingPolicy:
-      description: 'An object that specifies an HTTP response caching policy.
+    GzipCompressionPolicy:
+      description: 'An object that specifies the gzip compression policy.
 
         '
       properties:
-        isResponseHeaderBasedCachingEnabled:
+        isEnabled:
           default: false
-          description: 'When false, responses will not be cached by the backend based on response headers.
+          description: 'When true, support for gzip compression is enabled. HTTP responses will be compressed with gzip only if the
+
+            client indicates support for gzip via the "Accept-Encoding: gzip" request header.
 
 
-            When true, responses that contain one of the supported cache control headers will be cached according to the
+            When false, support for gzip compression is disabled and HTTP responses will not be compressed with gzip
 
-            values specified in the cache control headers.
-
-
-            The "X-Accel-Expires" header field sets caching time of a response in seconds. The zero value disables
-
-            caching for a response. If the value starts with the @ prefix, it sets an absolute time in seconds since
-
-            Epoch, up to which the response may be cached.
-
-
-            If the header does not include the "X-Accel-Expires" field, parameters of caching may be set in the header
-
-            fields "Expires" or "Cache-Control".
-
-
-            If the header includes the "Set-Cookie" field, such a response will not be cached.
-
-
-            If the header includes the "Vary" field with the special value "*", such a response will not be cached. If the
-
-            header includes the "Vary" field with another value, such a response will be cached taking into account the
-
-            corresponding request header fields.
+            even if the client indicates support for gzip.
 
             '
           type: boolean
-      type: object
-    ChangeWebAppAccelerationPolicyCompartmentDetails:
-      description: Updates compartmentId of resource.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
-
-            into which the resource should be moved.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
       type: object
     UpdateWebAppAccelerationPolicyDetails:
       description: 'The information to be updated.
@@ -1201,18 +1196,6 @@ components:
             '
           type: object
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     PurgeWebAppAccelerationCacheDetails:
       description: Specifies options for a cache purge.
       discriminator:
@@ -1225,71 +1208,6 @@ components:
           type: string
       required:
       - purgeType
-      type: object
-    UpdateWebAppAccelerationDetails:
-      description: The information to be updated for WebAppAcceleration.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            Example: `{"foo-namespace": {"bar-key": "value"}}`
-
-            '
-          type: object
-        displayName:
-          description: WebAppAcceleration display name, can be renamed.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
-
-            Example: `{"bar-key": "value"}`
-
-            '
-          type: object
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
-
-            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
-
-            '
-          type: object
-        webAppAccelerationPolicyId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of WebAppAccelerationPolicy, which is attached to the resource.
-
-            This update guarantees that the resource always has WebAppAccelerationPolicy attached at any time.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
       type: object
     CreateWebAppAccelerationDetails:
       description: The information about new WebAppAcceleration.
@@ -1369,16 +1287,23 @@ components:
       - compartmentId
       - webAppAccelerationPolicyId
       type: object
-    WebAppAccelerationPolicyCollection:
-      description: Contains WebAppAccelerationPolicySummary items.
+    ResponseCompressionPolicy:
+      description: 'An object that specifies a compression policy for HTTP response from ENABLEMENT POINT to the client.
+
+
+        This compression policy can be used to enable support for HTTP response compression algorithms like gzip and
+
+        configure the conditions of when a compression algorithm will be used.
+
+
+        HTTP responses will only be compressed if the client indicates support for one of the enabled compression
+
+        algorithms via the "Accept-Encoding" request header.
+
+        '
       properties:
-        items:
-          description: A list of WebAppAccelerationPolicySummary objects.
-          items:
-            $ref: '#/components/schemas/WebAppAccelerationPolicySummary'
-          type: array
-      required:
-      - items
+        gzipCompression:
+          $ref: '#/components/schemas/GzipCompressionPolicy'
       type: object
     WebAppAccelerationPolicySummary:
       description: Summary of the WebAppAccelerationPolicy.
@@ -1467,6 +1392,73 @@ components:
       - freeformTags
       - definedTags
       - systemTags
+      type: object
+    CreateWebAppAccelerationPolicyDetails:
+      description: The information about new WebAppAccelerationPolicy.
+      properties:
+        compartmentId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            Example: `{"foo-namespace": {"bar-key": "value"}}`
+
+            '
+          type: object
+        displayName:
+          description: WebAppAccelerationPolicy display name, can be renamed.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Simple key-value pair that is applied without any predefined name, type or scope. Exists for cross-compatibility only.
+
+            Example: `{"bar-key": "value"}`
+
+            '
+          type: object
+        responseCachingPolicy:
+          $ref: '#/components/schemas/ResponseCachingPolicy'
+        responseCompressionPolicy:
+          $ref: '#/components/schemas/ResponseCompressionPolicy'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'Usage of system tag keys. These predefined keys are scoped to namespaces.
+
+            Example: `{"orcl-cloud": {"free-tier-retained": "true"}}`
+
+            '
+          type: object
+      required:
+      - compartmentId
       type: object
     WebAppAccelerationPolicy:
       description: "The details of WebAppAccelerationPolicy. A policy is comprised of rules, which allows enablement of Caching \nand Compression of HTTP response.\nCaching can be enabled for a particular path\nCompression is enabled at global level\n"
@@ -1568,25 +1560,42 @@ components:
       - definedTags
       - systemTags
       type: object
-    ResponseCompressionPolicy:
-      description: 'An object that specifies a compression policy for HTTP response from ENABLEMENT POINT to the client.
-
-
-        This compression policy can be used to enable support for HTTP response compression algorithms like gzip and
-
-        configure the conditions of when a compression algorithm will be used.
-
-
-        HTTP responses will only be compressed if the client indicates support for one of the enabled compression
-
-        algorithms via the "Accept-Encoding" request header.
-
-        '
+    WebAppAccelerationPolicyCollection:
+      description: Contains WebAppAccelerationPolicySummary items.
       properties:
-        gzipCompression:
-          $ref: '#/components/schemas/GzipCompressionPolicy'
+        items:
+          description: A list of WebAppAccelerationPolicySummary objects.
+          items:
+            $ref: '#/components/schemas/WebAppAccelerationPolicySummary'
+          type: array
+      required:
+      - items
+      type: object
+    ChangeWebAppAccelerationCompartmentDetails:
+      description: Updates compartmentId of resource.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment
+
+            into which the resource should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
       type: object
   parameters:
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     WebAppAccelerationIdentifierPathParam:
       description: The [OCID](/Content/General/Concepts/identifiers.htm) of the WebAppAcceleration.
       in: path
@@ -1594,22 +1603,25 @@ components:
       required: true
       schema:
         type: string
-    WebAppAccelerationIdentifierQueryParam:
-      description: A filter to return only the WebAppAcceleration with the given [OCID](/Content/General/Concepts/identifiers.htm).
+    WebAppAccelerationLifecycleStateQueryParam:
+      description: A filter to return only resources that match the given lifecycleState.
       in: query
-      name: id
+      name: lifecycleState
+      required: false
       x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          x-obmcs-enumref: '#/definitions/WebAppAcceleration/lifecycleState'
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided.
 
@@ -1628,6 +1640,64 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    WebAppAccelerationPolicyLifecycleStateQueryParam:
+      description: A filter to return only resources that match the given lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          x-obmcs-enumref: '#/definitions/WebAppAccelerationPolicy/lifecycleState'
+    WebAppAccelerationWebAppAccelerationPolicyIdentifierQueryParam:
+      description: 'A filter to return only the WebAppAcceleration with the given
+
+        [OCID](/Content/General/Concepts/identifiers.htm) of related WebAppAccelerationPolicy.
+
+        '
+      in: query
+      name: webAppAccelerationPolicyId
+      x-default-description: 'null'
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'A token representing the position at which to start retrieving results.
+
+        This must come from the `opc-next-page` header field of a previous response.
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    WebAppAccelerationPolicyIdentifierPathParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the WebAppAccelerationPolicy.
+      in: path
+      name: webAppAccelerationPolicyId
+      required: true
+      schema:
+        type: string
+    WebAppAccelerationIdentifierQueryParam:
+      description: A filter to return only the WebAppAcceleration with the given [OCID](/Content/General/Concepts/identifiers.htm).
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource,
 
@@ -1656,49 +1726,6 @@ components:
         enum:
         - ASC
         - DESC
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    WebAppAccelerationLifecycleStateQueryParam:
-      description: A filter to return only resources that match the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-          x-obmcs-enumref: '#/definitions/WebAppAcceleration/lifecycleState'
-    WebAppAccelerationPolicyLifecycleStateQueryParam:
-      description: A filter to return only resources that match the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      style: form
-      explode: true
-      schema:
-        type: array
-        items:
-          type: string
-          x-obmcs-enumref: '#/definitions/WebAppAccelerationPolicy/lifecycleState'
-    WebAppAccelerationWebAppAccelerationPolicyIdentifierQueryParam:
-      description: 'A filter to return only the WebAppAcceleration with the given
-
-        [OCID](/Content/General/Concepts/identifiers.htm) of related WebAppAccelerationPolicy.
-
-        '
-      in: query
-      name: webAppAccelerationPolicyId
-      x-default-description: 'null'
-      schema:
-        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1716,24 +1743,6 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    WebAppAccelerationPolicyIdentifierPathParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the WebAppAccelerationPolicy.
-      in: path
-      name: webAppAccelerationPolicyId
-      required: true
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'A token representing the position at which to start retrieving results.
-
-        This must come from the `opc-next-page` header field of a previous response.
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
     WebAppAccelerationPolicyIdentifierQueryParam:
       description: A filter to return only the WebAppAccelerationPolicy with the given [OCID](/Content/General/Concepts/identifiers.htm).
       in: query
@@ -1748,15 +1757,6 @@ components:
       required: true
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
   responses:
     default:
       description: Unknown Error

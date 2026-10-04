@@ -643,28 +643,60 @@ paths:
       x-obmcs-client-retries-enabled: true
 components:
   schemas:
-    LimitValueSummary:
-      description: The value of a specific resource limit.
+    Error:
+      description: Generic error object.
       properties:
-        availabilityDomain:
-          description: If present, the returned value is only specific to this availability domain.
-          type: string
-        name:
-          description: 'The resource limit name. To be used for writing policies (in case of quotas) or other programmatic calls.
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
 
             '
           type: string
-        scopeType:
-          description: 'The scope type of the limit.
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    ResourceAvailability:
+      description: 'The availability of a given resource limit, based on the usage, tenant service limits, and quotas set for the tenancy.
+
+        Note: We cannot guarantee this data for all the limits. In such cases, these fields will be empty.
+
+        '
+      properties:
+        available:
+          description: 'The count of available resources. To support resources with fractional counts,
+
+            the field rounds down to the nearest integer.
 
             '
-          enum:
-          - GLOBAL
-          - REGION
-          - AD
-          type: string
-        value:
-          description: The resource limit value.
+          format: int64
+          type: integer
+        effectiveQuotaValue:
+          description: 'The effective quota value for the given compartment. This field is only present if there is a
+
+            current quota policy affecting the current resource in the target region or availability domain.
+
+            '
+          type: number
+        fractionalAvailability:
+          description: 'The most accurate count of available resources.
+
+            '
+          type: number
+        fractionalUsage:
+          description: 'The current most accurate usage in the given compartment.
+
+            '
+          type: number
+        used:
+          description: 'The current usage in the given compartment. To support resources with fractional counts,
+
+            the field rounds up to the nearest integer.
+
+            '
           format: int64
           type: integer
       type: object
@@ -741,63 +773,6 @@ components:
             type: string
           type: array
       type: object
-    Error:
-      description: Generic error object.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    ResourceAvailability:
-      description: 'The availability of a given resource limit, based on the usage, tenant service limits, and quotas set for the tenancy.
-
-        Note: We cannot guarantee this data for all the limits. In such cases, these fields will be empty.
-
-        '
-      properties:
-        available:
-          description: 'The count of available resources. To support resources with fractional counts,
-
-            the field rounds down to the nearest integer.
-
-            '
-          format: int64
-          type: integer
-        effectiveQuotaValue:
-          description: 'The effective quota value for the given compartment. This field is only present if there is a
-
-            current quota policy affecting the current resource in the target region or availability domain.
-
-            '
-          type: number
-        fractionalAvailability:
-          description: 'The most accurate count of available resources.
-
-            '
-          type: number
-        fractionalUsage:
-          description: 'The current most accurate usage in the given compartment.
-
-            '
-          type: number
-        used:
-          description: 'The current usage in the given compartment. To support resources with fractional counts,
-
-            the field rounds up to the nearest integer.
-
-            '
-          format: int64
-          type: integer
-      type: object
     ServiceSummary:
       description: A specific OCI service supported by resource limits.
       properties:
@@ -815,19 +790,32 @@ components:
             type: string
           type: array
       type: object
-  parameters:
-    SortByForLimitValuesQueryParam:
-      description: 'The field to sort by. The sorting is by availabilityDomain, as a second level field, if available.
+    LimitValueSummary:
+      description: The value of a specific resource limit.
+      properties:
+        availabilityDomain:
+          description: If present, the returned value is only specific to this availability domain.
+          type: string
+        name:
+          description: 'The resource limit name. To be used for writing policies (in case of quotas) or other programmatic calls.
 
-        '
-      in: query
-      name: sortBy
-      required: false
-      schema:
-        type: string
-        enum:
-        - name
-        default: name
+            '
+          type: string
+        scopeType:
+          description: 'The scope type of the limit.
+
+            '
+          enum:
+          - GLOBAL
+          - REGION
+          - AD
+          type: string
+        value:
+          description: The resource limit value.
+          format: int64
+          type: integer
+      type: object
+  parameters:
     PaginationTokenQueryParam:
       description: 'The value of the `opc-next-page` response header from the previous "List" call.
 
@@ -852,6 +840,17 @@ components:
         - name
         - description
         default: name
+    PaginationLimitForServiceLimitsQueryParam:
+      description: 'The maximum number of items to return in a paginated "List" call.
+
+        '
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     ExternalLocationQueryParam:
       description: 'The external cloud provider location.
 
@@ -866,6 +865,16 @@ components:
         type: string
         maxLength: 100
         minLength: 1
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
+
+        particular request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
     RootCompartmentIdQueryParam:
       description: 'The OCID of the parent compartment (remember that the tenancy is simply the root compartment).
 
@@ -877,27 +886,18 @@ components:
         type: string
         maxLength: 100
         minLength: 1
-    PaginationLimitForServiceLimitsQueryParam:
-      description: 'The maximum number of items to return in a paginated "List" call.
+    SortByForLimitValuesQueryParam:
+      description: 'The field to sort by. The sorting is by availabilityDomain, as a second level field, if available.
 
         '
       in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
-
-        particular request, please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
+      name: sortBy
+      required: false
       schema:
         type: string
+        enum:
+        - name
+        default: name
     SortByForDefinitionsQueryParam:
       description: 'The field to sort by.
 
@@ -911,6 +911,18 @@ components:
         - name
         - description
         default: name
+    SubscriptionIdQueryParam:
+      description: 'The subscription OCID assigned to the tenant.
+
+        '
+      in: query
+      name: subscriptionId
+      required: false
+      x-default-description: 'Defaults to null.
+
+        '
+      schema:
+        type: string
     SortOrderQueryParam:
       description: 'The sort order to use, either ''asc'' or ''desc''. By default, it is ascending.
 
@@ -925,18 +937,6 @@ components:
         - ASC
         - DESC
         default: ASC
-    SubscriptionIdQueryParam:
-      description: 'The subscription OCID assigned to the tenant.
-
-        '
-      in: query
-      name: subscriptionId
-      required: false
-      x-default-description: 'Defaults to null.
-
-        '
-      schema:
-        type: string
 x-anchors:
   x-headers:
     etag:

@@ -332,16 +332,49 @@ paths:
       x-related-resource: '#/definitions/FusionEnvironment'
 components:
   schemas:
-    TimeAvailableForRefreshSummary:
-      description: one available refresh time.
+    RefreshActivityCollection:
+      description: Results of a refresh activity search.
       properties:
-        timeAvailableForRefresh:
-          description: refresh time.
-          format: date-time
-          pattern: /([0-9]{4})-(?:[0-9]{2})-([0-9]{2})/
+        items:
+          description: A page of refresh activity objects.
+          items:
+            $ref: '#/components/schemas/RefreshActivitySummary'
+          type: array
+      required:
+      - items
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
           type: string
       required:
-      - timeAvailableForRefresh
+      - code
+      - message
+    CreateRefreshActivityDetails:
+      description: The information about current refresh.
+      properties:
+        isDataMaskingOpted:
+          default: false
+          description: Represents if the customer opted for Data Masking or not during refreshActivity.
+          type: boolean
+        sourceFusionEnvironmentId:
+          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the source environment
+
+            '
+          maxLength: 1024
+          minLength: 1
+          type: string
+        timeScheduledStart:
+          description: Current time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - sourceFusionEnvironmentId
       type: object
     RefreshActivity:
       description: An environment refresh copies data from a source environment to a target environment, making a copy of the source environment onto the target environment. For more information, see [Refreshing an Environment](/iaas/Content/fusion-applications/refresh-environment.htm).
@@ -488,35 +521,13 @@ components:
       - timeExpectedFinish
       - serviceAvailability
       type: object
-    Error:
-      description: Error Information.
+    UpdateRefreshActivityDetails:
+      description: The information about scheduled refresh.
       properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
+        timeScheduledStart:
+          description: Time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
+          format: date-time
           type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    RefreshIssueDetails:
-      description: Details of refresh failure or validation failure that needs to be investigated.
-      properties:
-        refreshIssues:
-          description: Detail reasons of refresh failure or validation failure that needs to be shown to customer.
-          type: string
-      type: object
-    RefreshActivityCollection:
-      description: Results of a refresh activity search.
-      properties:
-        items:
-          description: A page of refresh activity objects.
-          items:
-            $ref: '#/components/schemas/RefreshActivitySummary'
-          type: array
-      required:
-      - items
       type: object
     TimeAvailableForRefreshCollection:
       description: The available refresh times for a fusion environment
@@ -529,79 +540,40 @@ components:
       required:
       - items
       type: object
-    UpdateRefreshActivityDetails:
-      description: The information about scheduled refresh.
+    TimeAvailableForRefreshSummary:
+      description: one available refresh time.
       properties:
-        timeScheduledStart:
-          description: Time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
+        timeAvailableForRefresh:
+          description: refresh time.
           format: date-time
-          type: string
-      type: object
-    CreateRefreshActivityDetails:
-      description: The information about current refresh.
-      properties:
-        isDataMaskingOpted:
-          default: false
-          description: Represents if the customer opted for Data Masking or not during refreshActivity.
-          type: boolean
-        sourceFusionEnvironmentId:
-          description: 'The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the source environment
-
-            '
-          maxLength: 1024
-          minLength: 1
-          type: string
-        timeScheduledStart:
-          description: Current time the refresh activity is scheduled to start. An RFC3339 formatted datetime string.
-          format: date-time
+          pattern: /([0-9]{4})-(?:[0-9]{2})-([0-9]{2})/
           type: string
       required:
-      - sourceFusionEnvironmentId
+      - timeAvailableForRefresh
       type: object
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+    RefreshIssueDetails:
+      description: Details of refresh failure or validation failure that needs to be investigated.
+      properties:
+        refreshIssues:
+          description: Detail reasons of refresh failure or validation failure that needs to be shown to customer.
+          type: string
+      type: object
   parameters:
-    ExpectedFinishTimeQueryParam:
-      description: A filter that returns all resources that end before this date
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: timeExpectedFinishLessThanOrEqualTo
-      required: false
-      x-default-description: Returns based on other filters by default
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 100
+        minimum: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
-        format: date-time
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ScheduledStartTimeQueryParam:
-      description: A filter that returns all resources that are scheduled after this date
-      in: query
-      name: timeScheduledStartGreaterThanOrEqualTo
-      required: false
-      x-default-description: Returns based on other filters by default
-      schema:
-        type: string
-        format: date-time
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
@@ -614,6 +586,55 @@ components:
         - TIME_CREATED
         - DISPLAY_NAME
         default: TIME_CREATED
+    RefreshActivityIdentifierToRescheduleQueryParam:
+      description: A filter that returns all available refresh times including the refresh window of the refresh ID provided
+      in: query
+      name: refreshActivityIdToReschedule
+      required: false
+      x-default-description: Returns all available refresh times
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    FusionEnvironmentIdentifierPathParam:
+      description: unique FusionEnvironment identifier
+      in: path
+      name: fusionEnvironmentId
+      required: true
+      schema:
+        type: string
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    ExpectedFinishTimeQueryParam:
+      description: A filter that returns all resources that end before this date
+      in: query
+      name: timeExpectedFinishLessThanOrEqualTo
+      required: false
+      x-default-description: Returns based on other filters by default
+      schema:
+        type: string
+        format: date-time
+    ScheduledStartTimeQueryParam:
+      description: A filter that returns all resources that are scheduled after this date
+      in: query
+      name: timeScheduledStartGreaterThanOrEqualTo
+      required: false
+      x-default-description: Returns based on other filters by default
+      schema:
+        type: string
+        format: date-time
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call
 
@@ -631,28 +652,20 @@ components:
       required: false
       schema:
         type: string
-    FusionEnvironmentIdentifierPathParam:
-      description: unique FusionEnvironment identifier
+    RefreshActivityIdentifierPathParam:
+      description: The unique identifier (OCID) of the Refresh activity.
       in: path
-      name: fusionEnvironmentId
+      name: refreshActivityId
       required: true
       schema:
         type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
+    RefreshActivityLifecycleStateQueryParam:
+      description: A filter that returns all resources that match the specified status
       in: query
-      name: sortOrder
+      name: lifecycleState
       required: false
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
+      x-default-description: Returns all lifecycle states by default
+      x-obmcs-enumref: '#/definitions/RefreshActivity/lifecycleState'
       schema:
         type: string
     RetryTokenHeader:
@@ -673,46 +686,33 @@ components:
       schema:
         type: string
         minLength: 1
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
       in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    RefreshActivityIdentifierToRescheduleQueryParam:
-      description: A filter that returns all available refresh times including the refresh window of the refresh ID provided
-      in: query
-      name: refreshActivityIdToReschedule
+      name: sortOrder
       required: false
-      x-default-description: Returns all available refresh times
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 100
-        minimum: 1
-    RefreshActivityIdentifierPathParam:
-      description: The unique identifier (OCID) of the Refresh activity.
-      in: path
-      name: refreshActivityId
-      required: true
-      schema:
-        type: string
-    RefreshActivityLifecycleStateQueryParam:
-      description: A filter that returns all resources that match the specified status
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: Returns all lifecycle states by default
-      x-obmcs-enumref: '#/definitions/RefreshActivity/lifecycleState'
-      schema:
-        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

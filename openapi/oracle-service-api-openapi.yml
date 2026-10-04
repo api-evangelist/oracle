@@ -86,7 +86,32 @@ paths:
         '
       x-related-resource: '#/definitions/Service'
 components:
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return in a paginated "List" call.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 1000
+        minimum: 1
     PaginationTokenQueryParam:
       description: The value of the `opc-next-page` response header from the previous "List" call.
       in: query
@@ -108,28 +133,6 @@ components:
         - FUSION
         - AS
         - ERF
-    ServiceSortByQueryParam:
-      description: Sort by service name parameter
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - serviceName
-        default: serviceName
-    PlatformTypeQueryParam:
-      description: A filter to return only announcements affecting a specific platform.
-      in: query
-      name: platformType
-      x-default-description: No default value for PlatformType
-      schema:
-        type: string
-        enum:
-        - IAAS
-        - SAAS
-        - PAAS
-        maxLength: 64
-        minLength: 1
     CompartmentIdQueryParam:
       description: 'The OCID of the compartment.
 
@@ -151,15 +154,28 @@ components:
       name: opc-request-id
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return in a paginated "List" call.
+    PlatformTypeQueryParam:
+      description: A filter to return only announcements affecting a specific platform.
       in: query
-      name: limit
+      name: platformType
+      x-default-description: No default value for PlatformType
       schema:
-        type: integer
-        default: 100
-        maximum: 1000
-        minimum: 1
+        type: string
+        enum:
+        - IAAS
+        - SAAS
+        - PAAS
+        maxLength: 64
+        minLength: 1
+    ServiceSortByQueryParam:
+      description: Sort by service name parameter
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - serviceName
+        default: serviceName
     SortOrderQueryParam:
       description: The sort order to use, whether ascending ('ASC') or descending ('DESC').
       in: query
@@ -176,18 +192,6 @@ components:
         - ASC
         - DESC
   schemas:
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     BaseService:
       description: Object representing a single service.
       discriminator:
@@ -269,6 +273,18 @@ components:
       - commsManagerName
       - excludedRealms
       - previousServiceNames
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
     ServiceSummary:
       allOf:
       - $ref: '#/components/schemas/BaseService'
@@ -284,22 +300,6 @@ components:
           type: array
       required:
       - items
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

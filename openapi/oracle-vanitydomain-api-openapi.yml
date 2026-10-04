@@ -538,7 +538,298 @@ paths:
         description: The Certificate Details of Vanity Domain to be uploaded
         required: true
 components:
+  parameters:
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 100
+        maximum: 100
+        minimum: 1
+    VanityDomainIdentifierPathParam:
+      description: The unique identifier (OCID) of the VanityDomain
+      in: path
+      name: vanityDomainId
+      required: true
+      schema:
+        type: string
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIME_CREATED
+        - DISPLAY_NAME
+        default: TIME_CREATED
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    FusionEnvironmentIdentifierPathParam:
+      description: unique FusionEnvironment identifier
+      in: path
+      name: fusionEnvironmentId
+      required: true
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    VanityDomainActivityIdentifierPathParam:
+      description: The unique identifier (OCID) of the VanityDomainActivity
+      in: path
+      name: vanityDomainActivityId
+      required: true
+      schema:
+        type: string
+    DoesDownloadAkamaiCsrQueryParam:
+      description: A parameter indicating whether to download the Akamai Csr or not
+      in: query
+      name: doesDownloadAkamaiCsr
+      required: false
+      x-default-description: default = false
+      schema:
+        type: boolean
+    DoesDownloadOriginCsrQueryParam:
+      description: A parameter indicating whether to download the Origin Csr or not
+      in: query
+      name: doesDownloadOriginCsr
+      required: false
+      x-default-description: default = false
+      schema:
+        type: boolean
+    IsFullVanityQueryParam:
+      description: The boolean filter to distinguish prefix or full vanity
+      in: query
+      name: isFullVanityDomain
+      required: true
+      schema:
+        type: boolean
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        might be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        minLength: 1
   schemas:
+    CreateVanityDomainDetails:
+      description: Vanity domain request detail
+      properties:
+        cdnCertRequestType:
+          description: The cdn request type for which the certificate is generated
+          enum:
+          - REQUEST_CSR
+          - REQUEST_DV
+          type: string
+        certificateInfo:
+          $ref: '#/components/schemas/CertificateInfo'
+        changeManagementLink:
+          description: The cm link that was used to create the DNS prefix
+          type: string
+        dnsManagedBy:
+          description: The dns is managed by the customer or Oracle
+          enum:
+          - ORACLE_MANAGED
+          - CUSTOMER_MANAGED
+          type: string
+        originCertRequestType:
+          description: The origin request type for which the certificate is generated
+          enum:
+          - REQUEST_CSR
+          - REQUEST_DV
+          type: string
+        prefix:
+          description: The prefix value of the DnsPrefix. Can't be changed after creation
+          type: string
+        vanityDomain:
+          description: Vanity domain
+          type: string
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    VanityDomainCollection:
+      description: Results of a VanityDomain search
+      properties:
+        items:
+          description: A page of VanityDomainSummary objects
+          items:
+            $ref: '#/components/schemas/VanityDomainSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateVanityDomainActivityDetails:
+      description: The information about scheduled refresh.
+      properties:
+        timeScheduled:
+          description: Expected activity start time
+          format: date-time
+          type: string
+      type: object
+    CreateVanityDomainActivityDetails:
+      description: Schedule activity details to vanity domain on pod
+      properties:
+        operationType:
+          description: The type of operation
+          enum:
+          - ENABLE_VANITY_DOMAIN
+          - DELETE_VANITY_DOMAIN
+          type: string
+        timeScheduled:
+          description: Activity start time
+          format: date-time
+          type: string
+        vanityDomainId:
+          description: Vanity domain ID
+          type: string
+      required:
+      - vanityDomainId
+      - timeScheduled
+      - operationType
+      type: object
+    UploadVanityDomainCertificateDetails:
+      description: Add vanity domain with certificate
+      properties:
+        certificateChainPem:
+          description: Certificate chain PEM, including intermediate and root
+          type: string
+        certificatePem:
+          description: Public certificate PEM
+          type: string
+        commonName:
+          description: Fully qualified host name
+          type: string
+        isAkamai:
+          description: Identify if this is certificate for pod LB or Akamai
+          type: boolean
+      required:
+      - isAkamai
+      - commonName
+      - certificatePem
+      type: object
+    CertificateInfo:
+      description: Properties of certificate
+      properties:
+        akamaiCsr:
+          description: Akamai Certificate signing request
+          type: string
+        akamaiDvCertInstruction:
+          description: Akamai Dv Cert instruction to validate domain, e.g. set DNS token or HTTP token, etc
+          type: string
+        commonName:
+          description: Fully qualified host name
+          type: string
+        country:
+          description: Country name
+          type: string
+        emailAddress:
+          description: Email address
+          type: string
+        firstName:
+          description: First name
+          type: string
+        lastName:
+          description: Last name
+          type: string
+        locality:
+          description: City
+          type: string
+        organizationName:
+          description: Company name
+          type: string
+        organizationUnit:
+          description: Company section
+          type: string
+        originCsr:
+          description: Certificate signing request
+          type: string
+        originDvCertInstruction:
+          description: Dv Cert instruction to validate domain, e.g. set DNS token or HTTP token, etc
+          type: string
+        phoneNumber:
+          description: Phone number
+          type: string
+        postalCode:
+          description: Postal code
+          type: string
+        state:
+          description: State or province
+          type: string
+        subjectAltNames:
+          description: List of subject alternative names, comma separated
+          items:
+            type: string
+          type: array
+      type: object
     VanityDomain:
       description: Vanity Domain resource
       properties:
@@ -716,34 +1007,32 @@ components:
       - freeformTags
       - definedTags
       type: object
-    CreateVanityDomainActivityDetails:
-      description: Schedule activity details to vanity domain on pod
+    UpdateVanityDomainDetails:
+      description: The information about scheduled VanityDomain refresh.
       properties:
-        operationType:
-          description: The type of operation
-          enum:
-          - ENABLE_VANITY_DOMAIN
-          - DELETE_VANITY_DOMAIN
+        certificateInfo:
+          $ref: '#/components/schemas/CertificateInfo'
+      type: object
+    VanityDnsRecord:
+      description: DNS record for vanity domain
+      properties:
+        domain:
+          description: domain name for dns record
           type: string
-        timeScheduled:
-          description: Activity start time
-          format: date-time
+        rdata:
+          description: dns server hostname is pointed to
           type: string
-        vanityDomainId:
-          description: Vanity domain ID
+        ttlInSeconds:
+          description: time to live for dns record
+          type: integer
+        type:
+          description: record data for record type
           type: string
       required:
-      - vanityDomainId
-      - timeScheduled
-      - operationType
-      type: object
-    UpdateVanityDomainActivityDetails:
-      description: The information about scheduled refresh.
-      properties:
-        timeScheduled:
-          description: Expected activity start time
-          format: date-time
-          type: string
+      - domain
+      - rdata
+      - type
+      - ttlInSeconds
       type: object
     VanityDomainSummary:
       description: Summary of the VanityDomain
@@ -837,56 +1126,6 @@ components:
       - freeformTags
       - definedTags
       type: object
-    UpdateVanityDomainDetails:
-      description: The information about scheduled VanityDomain refresh.
-      properties:
-        certificateInfo:
-          $ref: '#/components/schemas/CertificateInfo'
-      type: object
-    VanityDomainCollection:
-      description: Results of a VanityDomain search
-      properties:
-        items:
-          description: A page of VanityDomainSummary objects
-          items:
-            $ref: '#/components/schemas/VanityDomainSummary'
-          type: array
-      required:
-      - items
-      type: object
-    VanityDnsRecord:
-      description: DNS record for vanity domain
-      properties:
-        domain:
-          description: domain name for dns record
-          type: string
-        rdata:
-          description: dns server hostname is pointed to
-          type: string
-        ttlInSeconds:
-          description: time to live for dns record
-          type: integer
-        type:
-          description: record data for record type
-          type: string
-      required:
-      - domain
-      - rdata
-      - type
-      - ttlInSeconds
-      type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     VanityDomainActivity:
       description: Vanity Domain Activity resource
       properties:
@@ -953,113 +1192,6 @@ components:
       - timeScheduled
       - operationType
       type: object
-    UploadVanityDomainCertificateDetails:
-      description: Add vanity domain with certificate
-      properties:
-        certificateChainPem:
-          description: Certificate chain PEM, including intermediate and root
-          type: string
-        certificatePem:
-          description: Public certificate PEM
-          type: string
-        commonName:
-          description: Fully qualified host name
-          type: string
-        isAkamai:
-          description: Identify if this is certificate for pod LB or Akamai
-          type: boolean
-      required:
-      - isAkamai
-      - commonName
-      - certificatePem
-      type: object
-    CertificateInfo:
-      description: Properties of certificate
-      properties:
-        akamaiCsr:
-          description: Akamai Certificate signing request
-          type: string
-        akamaiDvCertInstruction:
-          description: Akamai Dv Cert instruction to validate domain, e.g. set DNS token or HTTP token, etc
-          type: string
-        commonName:
-          description: Fully qualified host name
-          type: string
-        country:
-          description: Country name
-          type: string
-        emailAddress:
-          description: Email address
-          type: string
-        firstName:
-          description: First name
-          type: string
-        lastName:
-          description: Last name
-          type: string
-        locality:
-          description: City
-          type: string
-        organizationName:
-          description: Company name
-          type: string
-        organizationUnit:
-          description: Company section
-          type: string
-        originCsr:
-          description: Certificate signing request
-          type: string
-        originDvCertInstruction:
-          description: Dv Cert instruction to validate domain, e.g. set DNS token or HTTP token, etc
-          type: string
-        phoneNumber:
-          description: Phone number
-          type: string
-        postalCode:
-          description: Postal code
-          type: string
-        state:
-          description: State or province
-          type: string
-        subjectAltNames:
-          description: List of subject alternative names, comma separated
-          items:
-            type: string
-          type: array
-      type: object
-    CreateVanityDomainDetails:
-      description: Vanity domain request detail
-      properties:
-        cdnCertRequestType:
-          description: The cdn request type for which the certificate is generated
-          enum:
-          - REQUEST_CSR
-          - REQUEST_DV
-          type: string
-        certificateInfo:
-          $ref: '#/components/schemas/CertificateInfo'
-        changeManagementLink:
-          description: The cm link that was used to create the DNS prefix
-          type: string
-        dnsManagedBy:
-          description: The dns is managed by the customer or Oracle
-          enum:
-          - ORACLE_MANAGED
-          - CUSTOMER_MANAGED
-          type: string
-        originCertRequestType:
-          description: The origin request type for which the certificate is generated
-          enum:
-          - REQUEST_CSR
-          - REQUEST_DV
-          type: string
-        prefix:
-          description: The prefix value of the DnsPrefix. Can't be changed after creation
-          type: string
-        vanityDomain:
-          description: Vanity domain
-          type: string
-      type: object
   responses:
     default:
       description: Unknown Error
@@ -1076,138 +1208,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-  parameters:
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - TIME_CREATED
-        - DISPLAY_NAME
-        default: TIME_CREATED
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    FusionEnvironmentIdentifierPathParam:
-      description: unique FusionEnvironment identifier
-      in: path
-      name: fusionEnvironmentId
-      required: true
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
-      in: query
-      name: sortOrder
-      required: false
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    DoesDownloadOriginCsrQueryParam:
-      description: A parameter indicating whether to download the Origin Csr or not
-      in: query
-      name: doesDownloadOriginCsr
-      required: false
-      x-default-description: default = false
-      schema:
-        type: boolean
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    VanityDomainIdentifierPathParam:
-      description: The unique identifier (OCID) of the VanityDomain
-      in: path
-      name: vanityDomainId
-      required: true
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        might be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        minLength: 1
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    VanityDomainActivityIdentifierPathParam:
-      description: The unique identifier (OCID) of the VanityDomainActivity
-      in: path
-      name: vanityDomainActivityId
-      required: true
-      schema:
-        type: string
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    IsFullVanityQueryParam:
-      description: The boolean filter to distinguish prefix or full vanity
-      in: query
-      name: isFullVanityDomain
-      required: true
-      schema:
-        type: boolean
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 100
-        maximum: 100
-        minimum: 1
-    DoesDownloadAkamaiCsrQueryParam:
-      description: A parameter indicating whether to download the Akamai Csr or not
-      in: query
-      name: doesDownloadAkamaiCsr
-      required: false
-      x-default-description: default = false
-      schema:
-        type: boolean
 x-anchors:
   x-headers:
     etag:

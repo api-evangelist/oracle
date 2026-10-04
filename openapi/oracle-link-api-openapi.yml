@@ -228,30 +228,23 @@ paths:
       x-obmcs-client-retries-enabled: true
       x-related-resource: '#/definitions/LinkWithTenancyNames'
 components:
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    FeatureQueryParam:
-      description: The feature associated with this link.
-      in: query
-      name: feature
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 64
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
     PaginationLimitQueryParam:
       description: The maximum number of items to return.
       in: query
@@ -278,10 +271,57 @@ components:
       required: false
       schema:
         type: string
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    FeatureQueryParam:
+      description: The feature associated with this link.
+      in: query
+      name: feature
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 64
     ParentTenancyIdQueryParam:
       description: The ID of the parent tenancy this link is associated with.
       in: query
       name: parentTenancyId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    LifecycleStateQueryParam:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - ACTIVE
+        - INACTIVE
+        - UPDATING
+        - FAILED
+        - TERMINATED
+    ChildTenancyIdQueryParam:
+      description: The ID of the child tenancy this link is associated with.
+      in: query
+      name: childTenancyId
       required: false
       x-default-description: 'null'
       schema:
@@ -298,31 +338,18 @@ components:
         enum:
         - ASC
         - DESC
-    ChildTenancyIdQueryParam:
-      description: The ID of the child tenancy this link is associated with.
-      in: query
-      name: childTenancyId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-    LifecycleStateQueryParam:
-      description: The lifecycle state of the resource.
-      in: query
-      name: lifecycleState
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - ACTIVE
-        - INACTIVE
-        - UPDATING
-        - FAILED
-        - TERMINATED
   schemas:
+    LinkCollection:
+      description: Result of a query request for a list of links. Contains Link items.
+      properties:
+        items:
+          description: Array containing LinkSummary items.
+          items:
+            $ref: '#/components/schemas/LinkSummary'
+          type: array
+      required:
+      - items
+      type: object
     Error:
       description: Error information.
       properties:
@@ -466,17 +493,6 @@ components:
       - parentTenancyId
       - childTenancyId
       - timeCreated
-    LinkCollection:
-      description: Result of a query request for a list of links. Contains Link items.
-      properties:
-        items:
-          description: Array containing LinkSummary items.
-          items:
-            $ref: '#/components/schemas/LinkSummary'
-          type: array
-      required:
-      - items
-      type: object
     LinkWithTenancyNames:
       allOf:
       - $ref: '#/components/schemas/Link'
@@ -495,22 +511,6 @@ components:
         - parentTenancyName
         - childTenancyName
       description: A link between a parent tenancy and a child tenancy, including the parent and child tenancy names.
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/oracle/main/json-schema/oracle-bulk-update-attribute-status-schema.json",
+  "title": "BulkUpdateAttributeStatus",
+  "description": "Response of a bulk update attribute operation.\n",
+  "x-generated": "2026-10-03",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/oracle-attributes-api-openapi.yml#/components/schemas/BulkUpdateAttributeStatus",
+  "properties": {
+    "attributeStatuses": {
+      "description": "We preserve the order of the attribute items from the bulk update attribute request in this collection.  The ith object in this collection represents the\nbulk update attribute operation status of the ith object in the BulkUpdateAttributeDetails object in the Bulk update attribute request.  If the\nbulk update attribute operation results in a processing error or a validation error, the operationStatus property in the  BulkUpdateAttributeMetadata object will\ncontain the appropriate bulk error status for the bulk operation.\n",
+      "items": {
+        "$ref": "#/$defs/AttributeUpdateResponse"
+      },
+      "type": "array"
+    },
+    "bulkUpdateAttributeMetadata": {
+      "$ref": "#/$defs/BulkUpdateAttributeMetadata"
+    }
+  },
+  "required": [
+    "attributeStatuses",
+    "bulkUpdateAttributeMetadata"
+  ],
+  "type": "object",
+  "$defs": {
+    "AttributeUpdateResponse": {
+      "description": "Response of an individual attribute item in the bulk update attribute operation.\n",
+      "properties": {
+        "attributeName": {
+          "description": "Attribute for which properties were updated in this bulk operation.\n",
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "attributeNameSpace": {
+          "default": "TRACES",
+          "description": "Namespace of the attribute whose properties were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n",
+          "enum": [
+            "TRACES",
+            "SYNTHETIC"
+          ],
+          "type": "string"
+        },
+        "attributeStatus": {
+          "description": "Status of the attribute after this operation.  The attribute can have one of the following statuses after the update operation.  The attribute\ncan have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata\nobject.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.\nThe following are successful status values of individual attribute items in a bulk update attribute operation.\nATTRIBUTE_UPDATED - The attribute's properites have been updated with the given properties.\nDUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,\nand call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.\nThe following values are error statuses and the bulk processing is stopped when the first error is encountered.\nINVALID_ATTRIBUTE - The attribute is invalid.\nATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.\nATTRIBUTE_DOES_NOT_EXIST - Attribute was neither active nor pinned inactive.\nATTRIBUTE_UPDATE_NOT_ALLOWED - Attribute update is not allowed as it is an in-built system attribute.\n",
+          "enum": [
+            "ATTRIBUTE_UPDATED",
+            "DUPLICATE_ATTRIBUTE",
+            "INVALID_ATTRIBUTE",
+            "ATTRIBUTE_NOT_PROCESSED",
+            "ATTRIBUTE_DOES_NOT_EXIST",
+            "ATTRIBUTE_UPDATE_NOT_ALLOWED"
+          ],
+          "type": "string"
+        },
+        "attributeType": {
+          "description": "Type of the attribute.\n",
+          "enum": [
+            "NUMERIC",
+            "STRING"
+          ],
+          "type": "string"
+        },
+        "notes": {
+          "description": "Notes for the attribute.\n",
+          "type": "string"
+        },
+        "operationType": {
+          "description": "Type of operation - UPDATE_ATTRIBUTE_PROPERTIES.\n",
+          "enum": [
+            "UPDATE_ATTRIBUTE_PROPERTIES"
+          ],
+          "type": "string"
+        },
+        "timeUpdated": {
+          "description": "Time when the attribute's properties were updated.\n",
+          "format": "date-time",
+          "type": "string"
+        },
+        "unit": {
+          "description": "Unit updated for this attribute.  If unit is not specified, it defaults to NONE.\n",
+          "enum": [
+            "NONE",
+            "EPOCH_TIME_MS",
+            "BYTES",
+            "COUNT",
+            "DURATION_MS",
+            "TRACE_STATUS",
+            "PERCENTAGE"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "attributeName",
+        "attributeNameSpace",
+        "timeUpdated"
+      ],
+      "type": "object"
+    },
+    "BulkUpdateAttributeMetadata": {
+      "description": "Metadata about the bulk attribute update operation.  The bulk attribute update operation is atomic and binary.  If the processing of any of the attributes\nin the bulk attribute update request results in a processing or validation error, then none of the attributes updated.\n",
+      "properties": {
+        "attributesUpdated": {
+          "description": "Total number attributes (both string and numeric) in TRACES namespace for which properties were updated.\n",
+          "type": "integer"
+        },
+        "operationStatus": {
+          "description": "Operation status of the bulk update attribute operation.\nSUCCESS - The bulk attribute update request has succeeded and all the attributes in the request have been updated.\nThe following are error statuses for the bulk update attributes operation.\nEMPTY_ATTRIBUTE_LIST - The bulk update attributes request object was empty and did not contain any attributes for which properties had to be updated.\nINVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted\nin a processing error.\n",
+          "enum": [
+            "SUCCESS",
+            "EMPTY_ATTRIBUTE_LIST",
+            "INVALID_BULK_REQUEST"
+          ],
+          "type": "string"
+        },
+        "operationType": {
+          "description": "Type of operation.\n",
+          "enum": [
+            "UPDATE_ATTRIBUTE_PROPERTIES"
+          ],
+          "type": "string"
+        },
+        "syntheticAttributesUpdated": {
+          "description": "Total number attributes (both string and numeric) in SYNTHETIC namespace for which properties were updated.\n",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "operationType",
+        "operationStatus",
+        "attributesUpdated"
+      ],
+      "type": "object"
+    }
+  }
+}

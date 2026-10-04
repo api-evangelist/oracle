@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/oracle/main/json-schema/oracle-bulk-unpin-status-schema.json",
+  "title": "BulkUnpinStatus",
+  "description": "Response of a bulk attribute unpin operation.\n",
+  "x-generated": "2026-10-03",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/oracle-attributes-api-openapi.yml#/components/schemas/BulkUnpinStatus",
+  "properties": {
+    "attributeStatuses": {
+      "description": "We preserve the order of the attribute items from the bulk unpin request in this collection.  The ith object in this collection represents the\nbulk unpin operation status of the ith object in the BulkUnpinAttributeDetails object in the Bulk unpin request.  If the\nbulk unpin operation results in a processing error or a validation error, the operationStatus property in the  BulkUnpinMetadata object will\ncontain the appropriate bulk error status for the bulk operation.\n",
+      "items": {
+        "$ref": "#/$defs/AttributeUnpinResponse"
+      },
+      "type": "array"
+    },
+    "bulkUnpinMetadata": {
+      "$ref": "#/$defs/BulkUnpinMetadata"
+    }
+  },
+  "required": [
+    "attributeStatuses",
+    "bulkUnpinMetadata"
+  ],
+  "type": "object",
+  "$defs": {
+    "AttributeUnpinResponse": {
+      "description": "Response of an individual attribute item in the bulk unpin operation.\n",
+      "properties": {
+        "attributeName": {
+          "description": "Attribute that was unpinned by this bulk operation.\n",
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "attributeNameSpace": {
+          "default": "TRACES",
+          "description": "Namespace of the attribute whose properties were updated.  The attributeNameSpace will default to TRACES if it is \nnot passed in.\n",
+          "enum": [
+            "TRACES",
+            "SYNTHETIC"
+          ],
+          "type": "string"
+        },
+        "attributeStatus": {
+          "description": "Status of the attribute after this operation.  The attribute can have one of the following statuses after the unpin operation.  The attribute\ncan have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata\nobject.  The bulk operation will be successful only when all attributes in the bulk request are processed successfully and they get a success status back.\nThe following are successful status values of individual attribute items in a bulk attribute unpin operation.\nATTRIBUTE_UNPINNED - The attribute is marked unpinned and associated notes have been cleared.\nDUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,\nand call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.\nThe following values are error statuses and the bulk processing is stopped when the first error is encountered.\nINVALID_ATTRIBUTE - The attribute is invalid.  The size of the attribute is more than a 1000 chars.\nATTRIBUTE_NOT_FOUND - The attribute was not found in the set of pinned attributes.\nATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.\n",
+          "enum": [
+            "ATTRIBUTE_UNPINNED",
+            "DUPLICATE_ATTRIBUTE",
+            "INVALID_ATTRIBUTE",
+            "ATTRIBUTE_NOT_FOUND",
+            "ATTRIBUTE_NOT_PROCESSED"
+          ],
+          "type": "string"
+        },
+        "operationType": {
+          "description": "Type of operation - unpin.\n",
+          "enum": [
+            "UNPIN"
+          ],
+          "type": "string"
+        },
+        "timeUpdated": {
+          "description": "Time when the attribute was activated or deactivated.  Note that ingest might not have picked up the changes even if this time has elapsed.\n",
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attributeName",
+        "operationType",
+        "attributeStatus",
+        "timeUpdated",
+        "attributeNameSpace"
+      ],
+      "type": "object"
+    },
+    "BulkUnpinMetadata": {
+      "description": "Metadata about the bulk unpin operation.  The bulk unpin operation is atomic and binary.  If the processing of any of the attributes\nin the bulk unpin request results in a processing or validation error, then none of the attributes in the request are unpinned.\n",
+      "properties": {
+        "attributesUnpinned": {
+          "description": "Total number attributes (both string and numeric) in TRACES namespace that were unpinned.\n",
+          "type": "integer"
+        },
+        "operationStatus": {
+          "description": "Operation status of the bulk unpin operation.\nSUCCESS - The bulk unpin operation has succeeded and all the attributes in the bulk unpin request have been unpinned by this operation.\nThe following are error statuses for the bulk unpin operation.\nEMPTY_ATTRIBUTE_LIST - The bulk unpin request object was empty and did not contain any attributes to be unpinned.\nINVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted\nin a processing error.\n",
+          "enum": [
+            "SUCCESS",
+            "EMPTY_ATTRIBUTE_LIST",
+            "INVALID_BULK_REQUEST"
+          ],
+          "type": "string"
+        },
+        "operationType": {
+          "description": "Type of operation.\n",
+          "enum": [
+            "UNPIN"
+          ],
+          "type": "string"
+        },
+        "syntheticAttributesUnpinned": {
+          "description": "Total number attributes (both string and numeric) in SYNTHETIC namespace that were unpinned.\n",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "operationType",
+        "operationStatus",
+        "attributesUnpinned"
+      ],
+      "type": "object"
+    }
+  }
+}

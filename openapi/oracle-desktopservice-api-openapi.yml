@@ -972,66 +972,223 @@ paths:
       - desktopService
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
+  parameters:
+    AvailabilityDomainQueryParam:
+      description: The name of the availability domain.
+      in: query
+      name: availabilityDomain
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    DesktopPoolIdPathParam:
+      description: The OCID of the desktop pool.
+      in: path
+      name: desktopPoolId
+      required: true
+      schema:
+        type: string
+    DesktopIdPathParam:
+      description: The OCID of the desktop.
+      in: path
+      name: desktopId
+      required: true
+      schema:
+        type: string
+    WorkRequestStatusQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given OperationStatus.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - WAITING
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+    SortByQueryParam:
+      description: A field to sort by.
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - TIMECREATED
+        - DISPLAYNAME
+        default: TIMECREATED
+    IdQueryParam:
+      description: A filter to return only results with the given OCID.
+      in: query
+      name: id
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    ResourceIdentifierQueryParam:
+      description: The ID of the resource affected by the work request.
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+    DesktopPoolIdOptionalQueryParam:
+      description: The OCID of the desktop pool.
+      in: query
+      name: desktopPoolId
+      schema:
+        type: string
+    DisplayNameQueryParam:
+      description: A filter to return only results with the given displayName.
+      in: query
+      name: displayName
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The OCID of the compartment of the desktop pool.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PageQueryParam:
+      description: For list pagination.
+      in: query
+      name: page
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    RequestIdHeaderParam:
+      description: The unique identifier of the request.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    WorkRequestIdPathParam:
+      description: The ID of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    IfMatchHeaderParam:
+      description: For optimistic concurrency control.
+      in: header
+      name: if-match
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    LifecycleQueryParam:
+      description: A filter to return only results with the given lifecycleState.
+      in: query
+      name: lifecycleState
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    QueryPreserveVolumesParam:
+      description: Whether the volumes are preserved when a desktop pool is deleted.
+      in: query
+      name: areVolumesPreserved
+      schema:
+        type: boolean
+        default: false
+    LimitQueryParam:
+      description: The maximum number of results to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        format: int32
+        default: 100
+        maximum: 100
+    RetryTokenHeaderParam:
+      description: A token that uniquely identifies a request.
+      in: header
+      name: opc-retry-token
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    SortOrderQueryParam:
+      description: A field to indicate the sort order.
+      in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
   schemas:
-    WorkRequestSummaryCollection:
-      description: Results of a workRequest search.
+    Error:
+      description: Provides information about an error message.
+      properties:
+        code:
+          description: A short error code.
+          type: string
+        message:
+          description: A human readable message describing the error.
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search.
       properties:
         items:
-          description: List of workRequestSummary objects.
+          description: List of workRequestLogEntries.
           items:
-            $ref: '#/components/schemas/WorkRequestSummary'
+            $ref: '#/components/schemas/WorkRequestLogEntry'
           type: array
       required:
       - items
       type: object
-    DesktopDevicePolicy:
-      description: 'Provides the settings for desktop and client device options, such as audio in and out, client drive mapping, and clipboard access.
-
-        '
+    HostingOptions:
+      description: Provides information about where a desktop is hosted.
       properties:
-        audioMode:
-          description: "The audio mode.\nNONE: No access to the local audio devices is permitted.\nTODESKTOP: The user may record audio on their desktop. \nFROMDESKTOP: The user may play audio on their desktop.\nFULL: The user may play and record audio on their desktop.\n"
-          enum:
-          - NONE
-          - TODESKTOP
-          - FROMDESKTOP
-          - FULL
+        connectAddress:
+          description: The connection address of the desktop.
+          maxLength: 255
+          minLength: 1
           type: string
-        cdmMode:
-          description: "The client local drive access mode.\nNONE: No access to local drives permitted.\nREADONLY: The user may read from local drives on their desktop.\nFULL: The user may read from and write to their local drives on their desktop. \n"
-          enum:
-          - NONE
-          - READONLY
-          - FULL
-          type: string
-        clipboardMode:
-          description: "The clipboard mode.\nNONE: No access to the local clipboard is permitted.\nTODESKTOP: The clipboard can be used to transfer data to the desktop only. \nFROMDESKTOP: The clipboard can be used to transfer data from the desktop only.\nFULL: The clipboard can be used to transfer data to and from the desktop.\n"
-          enum:
-          - NONE
-          - TODESKTOP
-          - FROMDESKTOP
-          - FULL
-          type: string
-        isDisplayEnabled:
-          description: Indicates whether the display is enabled.
-          type: boolean
-        isKeyboardEnabled:
-          description: Indicates whether the keyboard is enabled.
-          type: boolean
-        isPointerEnabled:
-          description: Indicates whether the pointer is enabled.
-          type: boolean
-        isPrintingEnabled:
-          description: Indicates whether printing is enabled.
-          type: boolean
+        image:
+          $ref: '#/components/schemas/DesktopImage'
       required:
-      - clipboardMode
-      - audioMode
-      - cdmMode
-      - isPrintingEnabled
-      - isPointerEnabled
-      - isKeyboardEnabled
-      - isDisplayEnabled
+      - image
+      - connectAddress
       type: object
     DesktopNetworkConfiguration:
       description: Provides information about the network configuration of the desktop pool.
@@ -1056,17 +1213,113 @@ components:
       - vcnId
       - subnetId
       type: object
-    DesktopPoolDesktopCollection:
-      description: A list of desktops within a desktop pool.
+    DesktopSchedule:
+      description: Provides the schedule information for a desktop.
       properties:
-        items:
-          description: A list of desktops.
-          items:
-            $ref: '#/components/schemas/DesktopPoolDesktopSummary'
-          type: array
+        cronExpression:
+          description: A cron expression describing the desktop's schedule.
+          maxLength: 64
+          minLength: 1
+          type: string
+        timezone:
+          description: The timezone of the desktop's schedule.
+          maxLength: 64
+          minLength: 1
+          type: string
       required:
-      - items
+      - cronExpression
+      - timezone
       type: object
+    DesktopPoolVolumeSummary:
+      description: Provides information about a volume within the desktop pool.
+      properties:
+        availabilityDomain:
+          description: The availability domain of the desktop pool.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: The value of the tag. Only the string type is supported.
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of the desktop pool volume.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The state of the desktop pool volume.
+          enum:
+          - ACTIVE
+          - INACTIVE
+          type: string
+        name:
+          description: The name of the desktop pool volume.
+          maxLength: 255
+          minLength: 1
+          type: string
+        poolId:
+          description: The OCID of the desktop pool to which this volume belongs.
+          maxLength: 255
+          minLength: 1
+          type: string
+        userName:
+          description: The owner of the desktop pool volume.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - name
+      - lifecycleState
+      - userName
+      - availabilityDomain
+      type: object
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. Error codes are listed on
+
+            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+
+            '
+          type: string
+        message:
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
     DesktopPool:
       description: Provides information about a desktop pool including all configuration parameters.
       properties:
@@ -1227,317 +1480,6 @@ components:
       - arePrivilegedUsers
       - availabilityDomain
       type: object
-    WorkRequestSummary:
-      description: A summary of the status of a work request.
-      properties:
-        compartmentId:
-          description: The ocid of the compartment that contains the work request.
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - CREATE_DESKTOP_POOL
-          - UPDATE_DESKTOP_POOL
-          - DELETE_DESKTOP_POOL
-          - MOVE_DESKTOP_POOL
-          - START_DESKTOP_POOL
-          - STOP_DESKTOP_POOL
-          - DELETE_DESKTOP
-          - UPDATE_DESKTOP
-          - START_DESKTOP
-          - STOP_DESKTOP
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    ChangeDesktopPoolCompartmentDetails:
-      description: Provides the OCID of the new compartment that will contain the desktop pool.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment which will contain the desktop pool.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    UpdateDesktopDetails:
-      description: Provides the details of an updated desktop.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: The value of the tag. Only the string type is supported.
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user friendly display name. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-      type: object
-    DesktopAvailabilityPolicy:
-      description: Provides the start and stop schedule information for desktop availability of the desktop pool.
-      properties:
-        startSchedule:
-          $ref: '#/components/schemas/DesktopSchedule'
-        stopSchedule:
-          $ref: '#/components/schemas/DesktopSchedule'
-      required:
-      - startSchedule
-      - stopSchedule
-      type: object
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search.
-      properties:
-        items:
-          description: List of workRequestLogEntries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    DesktopPoolDesktopSummary:
-      description: 'Provides information about a desktop within a desktop pool, such as if it is assigned to a user, the state, owner, desktop pool, resource id, and time created.
-
-        '
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: The value of the tag. Only the string type is supported.
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        desktopId:
-          description: The OCID of the desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        instanceId:
-          description: The OCID of the compute resource used by this desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-        isAssigned:
-          description: Indicates whether the desktop is assigned to a user.
-          type: boolean
-        lifecycleState:
-          description: The state of the desktop.
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        timeCreated:
-          description: The date and time the resource was created.
-          format: date-time
-          type: string
-        userName:
-          description: The owner of the desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - desktopId
-      - instanceId
-      - isAssigned
-      - lifecycleState
-      - timeCreated
-      type: object
-    DesktopPoolVolumeCollection:
-      description: A list of volumes within a desktop pool.
-      properties:
-        items:
-          description: A list of desktop pool volumes.
-          items:
-            $ref: '#/components/schemas/DesktopPoolVolumeSummary'
-          type: array
-      required:
-      - items
-      type: object
-    Desktop:
-      description: Provides information about a desktop including name, state, id, configuration, owner, and time created.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: The value of the tag. Only the string type is supported.
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        devicePolicy:
-          $ref: '#/components/schemas/DesktopDevicePolicy'
-        displayName:
-          description: A user friendly display name. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        hostingOptions:
-          $ref: '#/components/schemas/HostingOptions'
-        id:
-          description: The OCID of the desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The state of the desktop.
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        poolId:
-          description: The OCID of the desktop pool the desktop is a member of.
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeCreated:
-          description: The date and time the resource was created.
-          format: date-time
-          type: string
-        userName:
-          description: The owner of the desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - id
-      - lifecycleState
-      - timeCreated
-      - displayName
-      - devicePolicy
-      - hostingOptions
-      - userName
-      - poolId
-      type: object
     WorkRequest:
       description: A description of workrequest status.
       properties:
@@ -1613,53 +1555,6 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-    Error:
-      description: Provides information about an error message.
-      properties:
-        code:
-          description: A short error code.
-          type: string
-        message:
-          description: A human readable message describing the error.
-          type: string
-      required:
-      - code
-      - message
-      type: object
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed on
-
-            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
     DesktopImage:
       description: Provides information about the desktop image.
       properties:
@@ -1676,175 +1571,6 @@ components:
       required:
       - imageId
       - imageName
-      type: object
-    DesktopPoolCollection:
-      description: A list of desktop pools.
-      properties:
-        items:
-          description: A list of desktop pool summaries.
-          items:
-            $ref: '#/components/schemas/DesktopPoolSummary'
-          type: array
-      required:
-      - items
-      type: object
-    HostingOptions:
-      description: Provides information about where a desktop is hosted.
-      properties:
-        connectAddress:
-          description: The connection address of the desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-        image:
-          $ref: '#/components/schemas/DesktopImage'
-      required:
-      - image
-      - connectAddress
-      type: object
-    DesktopPoolVolumeSummary:
-      description: Provides information about a volume within the desktop pool.
-      properties:
-        availabilityDomain:
-          description: The availability domain of the desktop pool.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: The value of the tag. Only the string type is supported.
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the desktop pool volume.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The state of the desktop pool volume.
-          enum:
-          - ACTIVE
-          - INACTIVE
-          type: string
-        name:
-          description: The name of the desktop pool volume.
-          maxLength: 255
-          minLength: 1
-          type: string
-        poolId:
-          description: The OCID of the desktop pool to which this volume belongs.
-          maxLength: 255
-          minLength: 1
-          type: string
-        userName:
-          description: The owner of the desktop pool volume.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - id
-      - name
-      - lifecycleState
-      - userName
-      - availabilityDomain
-      type: object
-    DesktopSummary:
-      description: Provides information about a desktop.
-      properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: The value of the tag. Only the string type is supported.
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user friendly display name. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of the desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The state of the desktop.
-          enum:
-          - CREATING
-          - ACTIVE
-          - INACTIVE
-          - UPDATING
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        poolId:
-          description: The pool ID of the desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeCreated:
-          description: The date and time the resource was created.
-          format: date-time
-          type: string
-        userName:
-          description: The owner of the desktop.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - id
-      - lifecycleState
-      - timeCreated
-      - displayName
-      - userName
-      - poolId
       type: object
     CreateDesktopPoolDetails:
       description: Provides the configuration information used to create the desktop pool.
@@ -1982,20 +1708,22 @@ components:
       - arePrivilegedUsers
       - availabilityDomain
       type: object
-    UpdateDesktopPoolDetails:
-      description: Provides the details of a request to update the desktop pool.
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
       properties:
-        availabilityPolicy:
-          $ref: '#/components/schemas/DesktopAvailabilityPolicy'
-        contactDetails:
-          description: 'Contact information of the desktop pool administrator.
-
-            Avoid entering confidential information.
-
-            '
-          maxLength: 1024
-          minLength: 1
+        message:
+          description: Human-readable log message.
           type: string
+        timestamp:
+          description: The time the log message was written. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
+    DesktopSummary:
+      description: Provides information about a desktop.
+      properties:
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -2015,16 +1743,6 @@ components:
 
             '
           type: object
-        description:
-          description: 'A user friendly description providing additional information about the resource.
-
-            Avoid entering confidential information.
-
-            '
-          maxLength: 400
-          type: string
-        devicePolicy:
-          $ref: '#/components/schemas/DesktopDevicePolicy'
         displayName:
           description: A user friendly display name. Avoid entering confidential information.
           maxLength: 255
@@ -2039,32 +1757,137 @@ components:
 
             '
           type: object
-        maximumSize:
-          description: The maximum number of desktops permitted in the desktop pool.
-          format: int32
-          maximum: 10000
-          minimum: 1
-          type: integer
-        standbySize:
-          description: The maximum number of standby desktops available in the desktop pool.
-          format: int32
-          type: integer
-        timeStartScheduled:
-          description: The start time of the desktop pool.
+        id:
+          description: The OCID of the desktop.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The state of the desktop.
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        poolId:
+          description: The pool ID of the desktop.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: The date and time the resource was created.
           format: date-time
           type: string
-        timeStopScheduled:
-          description: The stop time of the desktop pool.
-          format: date-time
+        userName:
+          description: The owner of the desktop.
+          maxLength: 255
+          minLength: 1
           type: string
+      required:
+      - id
+      - lifecycleState
+      - timeCreated
+      - displayName
+      - userName
+      - poolId
       type: object
-    DesktopCollection:
-      description: A list of desktops.
+    DesktopPoolDesktopSummary:
+      description: 'Provides information about a desktop within a desktop pool, such as if it is assigned to a user, the state, owner, desktop pool, resource id, and time created.
+
+        '
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: The value of the tag. Only the string type is supported.
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        desktopId:
+          description: The OCID of the desktop.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        instanceId:
+          description: The OCID of the compute resource used by this desktop.
+          maxLength: 255
+          minLength: 1
+          type: string
+        isAssigned:
+          description: Indicates whether the desktop is assigned to a user.
+          type: boolean
+        lifecycleState:
+          description: The state of the desktop.
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        timeCreated:
+          description: The date and time the resource was created.
+          format: date-time
+          type: string
+        userName:
+          description: The owner of the desktop.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - desktopId
+      - instanceId
+      - isAssigned
+      - lifecycleState
+      - timeCreated
+      type: object
+    WorkRequestSummaryCollection:
+      description: Results of a workRequest search.
       properties:
         items:
-          description: A list of desktop summaries.
+          description: List of workRequestSummary objects.
           items:
-            $ref: '#/components/schemas/DesktopSummary'
+            $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search.
+      properties:
+        items:
+          description: List of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
           type: array
       required:
       - items
@@ -2161,13 +1984,386 @@ components:
       - compartmentId
       - timeCreated
       type: object
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search.
+    DesktopAvailabilityPolicy:
+      description: Provides the start and stop schedule information for desktop availability of the desktop pool.
+      properties:
+        startSchedule:
+          $ref: '#/components/schemas/DesktopSchedule'
+        stopSchedule:
+          $ref: '#/components/schemas/DesktopSchedule'
+      required:
+      - startSchedule
+      - stopSchedule
+      type: object
+    ChangeDesktopPoolCompartmentDetails:
+      description: Provides the OCID of the new compartment that will contain the desktop pool.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment which will contain the desktop pool.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    UpdateDesktopDetails:
+      description: Provides the details of an updated desktop.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: The value of the tag. Only the string type is supported.
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: A user friendly display name. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      type: object
+    DesktopDevicePolicy:
+      description: 'Provides the settings for desktop and client device options, such as audio in and out, client drive mapping, and clipboard access.
+
+        '
+      properties:
+        audioMode:
+          description: "The audio mode.\nNONE: No access to the local audio devices is permitted.\nTODESKTOP: The user may record audio on their desktop. \nFROMDESKTOP: The user may play audio on their desktop.\nFULL: The user may play and record audio on their desktop.\n"
+          enum:
+          - NONE
+          - TODESKTOP
+          - FROMDESKTOP
+          - FULL
+          type: string
+        cdmMode:
+          description: "The client local drive access mode.\nNONE: No access to local drives permitted.\nREADONLY: The user may read from local drives on their desktop.\nFULL: The user may read from and write to their local drives on their desktop. \n"
+          enum:
+          - NONE
+          - READONLY
+          - FULL
+          type: string
+        clipboardMode:
+          description: "The clipboard mode.\nNONE: No access to the local clipboard is permitted.\nTODESKTOP: The clipboard can be used to transfer data to the desktop only. \nFROMDESKTOP: The clipboard can be used to transfer data from the desktop only.\nFULL: The clipboard can be used to transfer data to and from the desktop.\n"
+          enum:
+          - NONE
+          - TODESKTOP
+          - FROMDESKTOP
+          - FULL
+          type: string
+        isDisplayEnabled:
+          description: Indicates whether the display is enabled.
+          type: boolean
+        isKeyboardEnabled:
+          description: Indicates whether the keyboard is enabled.
+          type: boolean
+        isPointerEnabled:
+          description: Indicates whether the pointer is enabled.
+          type: boolean
+        isPrintingEnabled:
+          description: Indicates whether printing is enabled.
+          type: boolean
+      required:
+      - clipboardMode
+      - audioMode
+      - cdmMode
+      - isPrintingEnabled
+      - isPointerEnabled
+      - isKeyboardEnabled
+      - isDisplayEnabled
+      type: object
+    UpdateDesktopPoolDetails:
+      description: Provides the details of a request to update the desktop pool.
+      properties:
+        availabilityPolicy:
+          $ref: '#/components/schemas/DesktopAvailabilityPolicy'
+        contactDetails:
+          description: 'Contact information of the desktop pool administrator.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 1024
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: The value of the tag. Only the string type is supported.
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        description:
+          description: 'A user friendly description providing additional information about the resource.
+
+            Avoid entering confidential information.
+
+            '
+          maxLength: 400
+          type: string
+        devicePolicy:
+          $ref: '#/components/schemas/DesktopDevicePolicy'
+        displayName:
+          description: A user friendly display name. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        maximumSize:
+          description: The maximum number of desktops permitted in the desktop pool.
+          format: int32
+          maximum: 10000
+          minimum: 1
+          type: integer
+        standbySize:
+          description: The maximum number of standby desktops available in the desktop pool.
+          format: int32
+          type: integer
+        timeStartScheduled:
+          description: The start time of the desktop pool.
+          format: date-time
+          type: string
+        timeStopScheduled:
+          description: The stop time of the desktop pool.
+          format: date-time
+          type: string
+      type: object
+    DesktopPoolDesktopCollection:
+      description: A list of desktops within a desktop pool.
       properties:
         items:
-          description: List of workRequestError objects.
+          description: A list of desktops.
           items:
-            $ref: '#/components/schemas/WorkRequestError'
+            $ref: '#/components/schemas/DesktopPoolDesktopSummary'
+          type: array
+      required:
+      - items
+      type: object
+    DesktopPoolVolumeCollection:
+      description: A list of volumes within a desktop pool.
+      properties:
+        items:
+          description: A list of desktop pool volumes.
+          items:
+            $ref: '#/components/schemas/DesktopPoolVolumeSummary'
+          type: array
+      required:
+      - items
+      type: object
+    DesktopPoolCollection:
+      description: A list of desktop pools.
+      properties:
+        items:
+          description: A list of desktop pool summaries.
+          items:
+            $ref: '#/components/schemas/DesktopPoolSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestSummary:
+      description: A summary of the status of a work request.
+      properties:
+        compartmentId:
+          description: The ocid of the compartment that contains the work request.
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_DESKTOP_POOL
+          - UPDATE_DESKTOP_POOL
+          - DELETE_DESKTOP_POOL
+          - MOVE_DESKTOP_POOL
+          - START_DESKTOP_POOL
+          - STOP_DESKTOP_POOL
+          - DELETE_DESKTOP
+          - UPDATE_DESKTOP
+          - START_DESKTOP
+          - STOP_DESKTOP
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    Desktop:
+      description: Provides information about a desktop including name, state, id, configuration, owner, and time created.
+      properties:
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: The value of the tag. Only the string type is supported.
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        devicePolicy:
+          $ref: '#/components/schemas/DesktopDevicePolicy'
+        displayName:
+          description: A user friendly display name. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. For more information, see [Resource Tags](/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        hostingOptions:
+          $ref: '#/components/schemas/HostingOptions'
+        id:
+          description: The OCID of the desktop.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The state of the desktop.
+          enum:
+          - CREATING
+          - ACTIVE
+          - INACTIVE
+          - UPDATING
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        poolId:
+          description: The OCID of the desktop pool the desktop is a member of.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: The date and time the resource was created.
+          format: date-time
+          type: string
+        userName:
+          description: The owner of the desktop.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      - lifecycleState
+      - timeCreated
+      - displayName
+      - devicePolicy
+      - hostingOptions
+      - userName
+      - poolId
+      type: object
+    DesktopCollection:
+      description: A list of desktops.
+      properties:
+        items:
+          description: A list of desktop summaries.
+          items:
+            $ref: '#/components/schemas/DesktopSummary'
           type: array
       required:
       - items
@@ -2207,202 +2403,6 @@ components:
       - actionType
       - entityType
       - identifier
-    DesktopSchedule:
-      description: Provides the schedule information for a desktop.
-      properties:
-        cronExpression:
-          description: A cron expression describing the desktop's schedule.
-          maxLength: 64
-          minLength: 1
-          type: string
-        timezone:
-          description: The timezone of the desktop's schedule.
-          maxLength: 64
-          minLength: 1
-          type: string
-      required:
-      - cronExpression
-      - timezone
-      type: object
-  parameters:
-    ResourceIdentifierQueryParam:
-      description: The ID of the resource affected by the work request.
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-    IdQueryParam:
-      description: A filter to return only results with the given OCID.
-      in: query
-      name: id
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    DesktopIdPathParam:
-      description: The OCID of the desktop.
-      in: path
-      name: desktopId
-      required: true
-      schema:
-        type: string
-    LifecycleQueryParam:
-      description: A filter to return only results with the given lifecycleState.
-      in: query
-      name: lifecycleState
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    AvailabilityDomainQueryParam:
-      description: The name of the availability domain.
-      in: query
-      name: availabilityDomain
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    DisplayNameQueryParam:
-      description: A filter to return only results with the given displayName.
-      in: query
-      name: displayName
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    DesktopPoolIdOptionalQueryParam:
-      description: The OCID of the desktop pool.
-      in: query
-      name: desktopPoolId
-      schema:
-        type: string
-    RequestIdHeaderParam:
-      description: The unique identifier of the request.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    QueryPreserveVolumesParam:
-      description: Whether the volumes are preserved when a desktop pool is deleted.
-      in: query
-      name: areVolumesPreserved
-      schema:
-        type: boolean
-        default: false
-    SortByQueryParam:
-      description: A field to sort by.
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - TIMECREATED
-        - DISPLAYNAME
-        default: TIMECREATED
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    SortOrderQueryParam:
-      description: A field to indicate the sort order.
-      in: query
-      name: sortOrder
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: DESC
-    RetryTokenHeaderParam:
-      description: A token that uniquely identifies a request.
-      in: header
-      name: opc-retry-token
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    LimitQueryParam:
-      description: The maximum number of results to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        format: int32
-        default: 100
-        maximum: 100
-    IfMatchHeaderParam:
-      description: For optimistic concurrency control.
-      in: header
-      name: if-match
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    WorkRequestIdPathParam:
-      description: The ID of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    PageQueryParam:
-      description: For list pagination.
-      in: query
-      name: page
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    CompartmentIdQueryParam:
-      description: The OCID of the compartment of the desktop pool.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    WorkRequestStatusQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given OperationStatus.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-      schema:
-        type: string
-        enum:
-        - ACCEPTED
-        - IN_PROGRESS
-        - WAITING
-        - FAILED
-        - SUCCEEDED
-        - CANCELING
-        - CANCELED
-    DesktopPoolIdPathParam:
-      description: The OCID of the desktop pool.
-      in: path
-      name: desktopPoolId
-      required: true
-      schema:
-        type: string
   responses:
     default:
       description: Unknown error

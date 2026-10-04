@@ -53,51 +53,68 @@ paths:
       - ServiceInstanceResource
 components:
   schemas:
-    json_MSSIExadataSecurityGroupAssignments:
-      description: MyServices Exadata Security Group Assignments object
+    json_MSSIServiceConfiguration:
+      description: MyServices ServiceInstance Service Configuration object
       properties:
-        canonicalLink:
-          description: link to access this SIExadataSecurityGroupAssignment list
-          type: string
-        hasMore:
-          description: Set to true if subsequent GETs need to be done to list all SIExadataSecurityGroupAssignments
-          type: boolean
-        items:
-          description: List of SIExadataSecurityGroupAssignments.
-          items:
-            $ref: '#/components/schemas/json_MSSIExadataSecurityGroupAssignment'
-          type: array
-        limit:
-          description: Maximum number of SIExadataSecurityGroupAssignment returned
-          type: number
-        nextLink:
-          description: Link to next SIExadataSecurityGroupAssignment page
-          type: string
-        offset:
-          description: Starting offset of SIExadataSecurityGroupAssignments returned
-          type: number
-        previousLink:
-          description: Link to previous SIExadataSecurityGroupAssignment page
-          type: string
-      title: SIExadataSecurityGroupAssignments
-      type: object
-    json_MSSIServiceConfigurationExadata:
-      description: MyServices ServiceInstance Service Configuration Exadata object
-      properties:
-        bursting:
-          $ref: '#/components/schemas/json_MSSIExadataBursting'
-          description: ''
         canonicalLink:
           description: ''
           type: string
+        exadata:
+          $ref: '#/components/schemas/json_MSSIServiceConfigurationExadata'
+          description: ''
         id:
           description: ''
           type: string
-        securityGroupAssignments:
-          $ref: '#/components/schemas/json_MSSIExadataSecurityGroupAssignments'
-          description: ''
-      title: SIServiceConfigurationExadata
+      title: SIServiceConfiguration
       type: object
+    json_ResourceFilter:
+      description: ''
+      title: ResourceFilter
+      type: object
+    json_ServiceEntitlementStatus:
+      description: ''
+      enum:
+      - TRA_UNKNOWN
+      - INITIALIZED
+      - PENDING_CANCELATION
+      - ACTIVE
+      - PASSIVE
+      - PENDING_ACTIVATION
+      - ACTIVATED
+      - BEGIN_TERMINATION
+      - LOCKED
+      - MIGRATED
+      - MIGRATED_INACTIVE
+      - PROVISIONED
+      - PENDING_RECLAIM
+      - RECLAIMED
+      - RELOCATING
+      - ARCHIVED
+      - PURGED
+      - DISABLED
+      - NON_RECOVERABLE
+      - TERMINATED
+      - CANCELED
+      - CONVERTED_TO_PAID
+      - SOFT_TERMINATED
+      - PENDING_DEPROVISIONING
+      - DEPROVISIONED
+      - BEGIN_ONBOARDING_PASSIVE
+      - BEGIN_ACTIVATION
+      - BEGIN_SOFT_TERMINATION
+      - BEGIN_SUSPENSION
+      - BEGIN_RESUMPTION
+      - SUSPENDED
+      - BEGIN_LOCK_RELOCATION
+      - LOCKED_RELOCATION
+      - BEGIN_RELOCATION
+      - RELOCATED
+      - BEGIN_UNLOCK_RELOCATION
+      - UNLOCKED_RELOCATION
+      - FAILED_LOCK_RELOCATION
+      - FAILED_ACTIVATION
+      title: ServiceEntitlementStatus
+      type: string
     json_PurchaseEntitlementStatus:
       description: ''
       enum:
@@ -129,6 +146,38 @@ components:
       - BEGIN_ONBOARDING_PASSIVE
       title: PurchaseEntitlementStatus
       type: string
+    json_MSSIExadataOcpuAllocation:
+      description: MyServices Exadata Ocpu Allocation object used in Exadata Bursting
+      properties:
+        burstOcpu:
+          description: Current Burst value. 0 means no Bursting. A positive value means an increase in compute nodes. Not that the additional number of compute nodes cannot exceed the value in maxBurstOcpu
+          type: number
+        hostName:
+          description: Host Name
+          type: string
+        maxBurstOcpu:
+          description: Maximum amount of compute nodes allowed for Bursting.
+          type: number
+        maxMetOcpu:
+          description: ''
+          type: number
+        maxOcpu:
+          description: ''
+          type: number
+        maxSubOcpu:
+          description: ''
+          type: number
+        meteredOcpu:
+          description: ''
+          type: number
+        minOcpu:
+          description: ''
+          type: number
+        subscriptionOcpu:
+          description: ''
+          type: number
+      title: SIExadataOcpuAllocation
+      type: object
     json_MSServiceInstance:
       description: 'Customer ServiceInstance. A Service Instance represents a specific instance of a Service Entitlement. As an example,
 
@@ -214,64 +263,59 @@ components:
           type: number
       title: SIExadataBursting
       type: object
-    json_MSSEServiceConfigurationExadata:
-      description: MyServices ServiceEntitlement Service Configuration Exadata object
+    json_MSSEExadataSecurityRule:
+      description: MyServices Exadata Security Rule. Each rule defines an element in the white-list of allowed network access points
+      properties:
+        direction:
+          description: 'Direction of the network communications that are subject to this rule. Allowed values: [ingress | egress] for inbound (configures the rule to allow network communications to be received from the location specified in the rule) or outbound (configures the rule to allow network communications to be sent to the location specified in the rule).'
+          type: string
+        endPort:
+          description: See startPort.
+          type: number
+        ipSubnet:
+          description: Specifies the IP addresses that are subject to this rule. Specify a single IP address, or specify a range of IP addresses using Classless Inter-Domain Routing (CIDR) notation.
+          type: string
+        proto:
+          description: 'Network Protocol. Allowed values: [tcp | udp].'
+          type: string
+        ruleInterface:
+          description: 'Network interface that is subject to this rule. Allowed values: [admin | client | backup]. admin: The rule applies to network communications over the administration network interface. The administration network is typically used to support administration tasks by using terminal sessions, monitoring agents, and so on. client: The rule applies to network communications over the client access network interface, which is typically used by Oracle Net (database) connections. backup: The rule applies to network communications over the backup network interface, which is typically used to transport backup information to and from network-based storage that is separate from Exadata Cloud Service.'
+          type: string
+        startPort:
+          description: startPort and endPort define the range of ports to open/white-list [0 - 65535]. startPort <= endPort and startPort == endPort to open only 1 port.
+          type: number
+      title: SEExadataSecurityRule
+      type: object
+    json_MSSEServiceConfigurations:
+      description: MyServices ServiceEntitlement Service Configurations object
       properties:
         canonicalLink:
           description: ''
           type: string
+        items:
+          description: ''
+          items:
+            $ref: '#/components/schemas/json_MSSEServiceConfiguration'
+          type: array
+        resourceFilter:
+          $ref: '#/components/schemas/json_ResourceFilter'
+          description: ''
+      title: SEServiceConfigurations
+      type: object
+    json_MSSEServiceConfiguration:
+      description: MyServices ServiceEntitlement Service Configuration object
+      properties:
+        canonicalLink:
+          description: ''
+          type: string
+        exadata:
+          $ref: '#/components/schemas/json_MSSEServiceConfigurationExadata'
+          description: ''
         id:
           description: ''
           type: string
-        securityGroups:
-          $ref: '#/components/schemas/json_MSSEExadataSecurityGroups'
-          description: ''
-      title: SEServiceConfigurationExadata
+      title: SEServiceConfiguration
       type: object
-    json_ServiceEntitlementStatus:
-      description: ''
-      enum:
-      - TRA_UNKNOWN
-      - INITIALIZED
-      - PENDING_CANCELATION
-      - ACTIVE
-      - PASSIVE
-      - PENDING_ACTIVATION
-      - ACTIVATED
-      - BEGIN_TERMINATION
-      - LOCKED
-      - MIGRATED
-      - MIGRATED_INACTIVE
-      - PROVISIONED
-      - PENDING_RECLAIM
-      - RECLAIMED
-      - RELOCATING
-      - ARCHIVED
-      - PURGED
-      - DISABLED
-      - NON_RECOVERABLE
-      - TERMINATED
-      - CANCELED
-      - CONVERTED_TO_PAID
-      - SOFT_TERMINATED
-      - PENDING_DEPROVISIONING
-      - DEPROVISIONED
-      - BEGIN_ONBOARDING_PASSIVE
-      - BEGIN_ACTIVATION
-      - BEGIN_SOFT_TERMINATION
-      - BEGIN_SUSPENSION
-      - BEGIN_RESUMPTION
-      - SUSPENDED
-      - BEGIN_LOCK_RELOCATION
-      - LOCKED_RELOCATION
-      - BEGIN_RELOCATION
-      - RELOCATED
-      - BEGIN_UNLOCK_RELOCATION
-      - UNLOCKED_RELOCATION
-      - FAILED_LOCK_RELOCATION
-      - FAILED_ACTIVATION
-      title: ServiceEntitlementStatus
-      type: string
     json_MSPurchaseEntitlement:
       description: Customer PurchaseEntitlement. A Purchase Entitlement represents the entity bought by a customer.
       properties:
@@ -331,59 +375,6 @@ components:
           type: boolean
       title: PurchaseEntitlement
       type: object
-    json_MSSEExadataSecurityGroup:
-      description: 'MyServices Exadata Security Group. Exadata Cloud Service Self-Service Firewall provides a system of rules and groups. By default, the firewall denies network access to the Exadata Cloud Service instance.
-
-        Security groups contains security rules. The security rules effectively define a white-list of allowed network access points.'
-      properties:
-        canonicalLink:
-          description: Canonical Link
-          type: string
-        customerId:
-          description: Customer Id. This must be the same as the {serviceEntitlementId}
-          type: string
-        description:
-          description: Group Description
-          type: string
-        id:
-          description: MSSEExadataSecurityGroup unique identifier
-          type: string
-        name:
-          description: Group Name. A group name.
-          type: string
-        rules:
-          description: Rules defining the white-list of allowed network access points
-          items:
-            $ref: '#/components/schemas/json_MSSEExadataSecurityRule'
-          type: array
-        version:
-          description: Version
-          type: number
-      title: SEExadataSecurityGroup
-      type: object
-    json_MSSEExadataSecurityRule:
-      description: MyServices Exadata Security Rule. Each rule defines an element in the white-list of allowed network access points
-      properties:
-        direction:
-          description: 'Direction of the network communications that are subject to this rule. Allowed values: [ingress | egress] for inbound (configures the rule to allow network communications to be received from the location specified in the rule) or outbound (configures the rule to allow network communications to be sent to the location specified in the rule).'
-          type: string
-        endPort:
-          description: See startPort.
-          type: number
-        ipSubnet:
-          description: Specifies the IP addresses that are subject to this rule. Specify a single IP address, or specify a range of IP addresses using Classless Inter-Domain Routing (CIDR) notation.
-          type: string
-        proto:
-          description: 'Network Protocol. Allowed values: [tcp | udp].'
-          type: string
-        ruleInterface:
-          description: 'Network interface that is subject to this rule. Allowed values: [admin | client | backup]. admin: The rule applies to network communications over the administration network interface. The administration network is typically used to support administration tasks by using terminal sessions, monitoring agents, and so on. client: The rule applies to network communications over the client access network interface, which is typically used by Oracle Net (database) connections. backup: The rule applies to network communications over the backup network interface, which is typically used to transport backup information to and from network-based storage that is separate from Exadata Cloud Service.'
-          type: string
-        startPort:
-          description: startPort and endPort define the range of ports to open/white-list [0 - 65535]. startPort <= endPort and startPort == endPort to open only 1 port.
-          type: number
-      title: SEExadataSecurityRule
-      type: object
     json_ServiceInstanceStatus:
       description: ''
       enum:
@@ -429,115 +420,47 @@ components:
       - CANCELLED
       title: ServiceInstanceStatus
       type: string
-    json_MSSEServiceConfigurations:
-      description: MyServices ServiceEntitlement Service Configurations object
+    json_MSSIExadataSecurityGroupAssignments:
+      description: MyServices Exadata Security Group Assignments object
       properties:
         canonicalLink:
-          description: ''
+          description: link to access this SIExadataSecurityGroupAssignment list
           type: string
+        hasMore:
+          description: Set to true if subsequent GETs need to be done to list all SIExadataSecurityGroupAssignments
+          type: boolean
         items:
-          description: ''
+          description: List of SIExadataSecurityGroupAssignments.
           items:
-            $ref: '#/components/schemas/json_MSSEServiceConfiguration'
+            $ref: '#/components/schemas/json_MSSIExadataSecurityGroupAssignment'
           type: array
-        resourceFilter:
-          $ref: '#/components/schemas/json_ResourceFilter'
-          description: ''
-      title: SEServiceConfigurations
-      type: object
-    json_MSSIExadataOcpuAllocation:
-      description: MyServices Exadata Ocpu Allocation object used in Exadata Bursting
-      properties:
-        burstOcpu:
-          description: Current Burst value. 0 means no Bursting. A positive value means an increase in compute nodes. Not that the additional number of compute nodes cannot exceed the value in maxBurstOcpu
+        limit:
+          description: Maximum number of SIExadataSecurityGroupAssignment returned
           type: number
-        hostName:
-          description: Host Name
+        nextLink:
+          description: Link to next SIExadataSecurityGroupAssignment page
           type: string
-        maxBurstOcpu:
-          description: Maximum amount of compute nodes allowed for Bursting.
+        offset:
+          description: Starting offset of SIExadataSecurityGroupAssignments returned
           type: number
-        maxMetOcpu:
-          description: ''
-          type: number
-        maxOcpu:
-          description: ''
-          type: number
-        maxSubOcpu:
-          description: ''
-          type: number
-        meteredOcpu:
-          description: ''
-          type: number
-        minOcpu:
-          description: ''
-          type: number
-        subscriptionOcpu:
-          description: ''
-          type: number
-      title: SIExadataOcpuAllocation
+        previousLink:
+          description: Link to previous SIExadataSecurityGroupAssignment page
+          type: string
+      title: SIExadataSecurityGroupAssignments
       type: object
-    json_MSSIServiceConfiguration:
-      description: MyServices ServiceInstance Service Configuration object
+    json_MSSIExadataSecurityGroupAssignment:
+      description: MyServices Exadata Security Group Assignment object
       properties:
         canonicalLink:
-          description: ''
-          type: string
-        exadata:
-          $ref: '#/components/schemas/json_MSSIServiceConfigurationExadata'
-          description: ''
-        id:
-          description: ''
-          type: string
-      title: SIServiceConfiguration
-      type: object
-    json_MSIdentityDomain:
-      description: MyServices IdentityDomain object
-      properties:
-        displayName:
-          description: Identity Domain Display Name
+          description: Canonical Link
           type: string
         id:
-          description: Identity Domain Unique Id
+          description: Unique Id
           type: string
-        name:
-          description: Identity Domain Name
-          type: string
-      title: IdentityDomain
-      type: object
-    json_ResourceFilter:
-      description: ''
-      title: ResourceFilter
-      type: object
-    json_MSSIServiceConfigurations:
-      description: MyServices ServiceInstance Service Configurations object
-      properties:
-        canonicalLink:
-          description: ''
-          type: string
-        items:
-          description: ''
-          items:
-            $ref: '#/components/schemas/json_MSSIServiceConfiguration'
-          type: array
-        resourceFilter:
-          $ref: '#/components/schemas/json_ResourceFilter'
-          description: ''
-      title: SIServiceConfigurations
-      type: object
-    json_MSServiceDefinition:
-      description: MyServices ServiceDefinition
-      properties:
-        canonicalLink:
-          description: Canonical Link of the Service Entitlement Resource
-          type: string
-        id:
-          description: Unique Id of the Service Definition
-          type: string
-        name:
-          description: Name of the Service Definition. As an example, "DBAAS" would represent the service "DataBase As A Service"
-          type: string
-      title: ServiceDefinition
+        securityGroup:
+          $ref: '#/components/schemas/json_MSSEExadataSecurityGroup'
+          description: Assigned Security group.
+      title: SIExadataSecurityGroupAssignment
       type: object
     json_MSServiceEntitlement:
       description: 'Customer ServiceEntitlement. A Service Entitlement represents a specific service included in a Purchase Entitlement.
@@ -584,6 +507,64 @@ components:
           description: Current Status
       title: ServiceEntitlement
       type: object
+    json_MSServiceDefinition:
+      description: MyServices ServiceDefinition
+      properties:
+        canonicalLink:
+          description: Canonical Link of the Service Entitlement Resource
+          type: string
+        id:
+          description: Unique Id of the Service Definition
+          type: string
+        name:
+          description: Name of the Service Definition. As an example, "DBAAS" would represent the service "DataBase As A Service"
+          type: string
+      title: ServiceDefinition
+      type: object
+    json_MSSEServiceConfigurationExadata:
+      description: MyServices ServiceEntitlement Service Configuration Exadata object
+      properties:
+        canonicalLink:
+          description: ''
+          type: string
+        id:
+          description: ''
+          type: string
+        securityGroups:
+          $ref: '#/components/schemas/json_MSSEExadataSecurityGroups'
+          description: ''
+      title: SEServiceConfigurationExadata
+      type: object
+    json_MSSIServiceConfigurations:
+      description: MyServices ServiceInstance Service Configurations object
+      properties:
+        canonicalLink:
+          description: ''
+          type: string
+        items:
+          description: ''
+          items:
+            $ref: '#/components/schemas/json_MSSIServiceConfiguration'
+          type: array
+        resourceFilter:
+          $ref: '#/components/schemas/json_ResourceFilter'
+          description: ''
+      title: SIServiceConfigurations
+      type: object
+    json_MSIdentityDomain:
+      description: MyServices IdentityDomain object
+      properties:
+        displayName:
+          description: Identity Domain Display Name
+          type: string
+        id:
+          description: Identity Domain Unique Id
+          type: string
+        name:
+          description: Identity Domain Name
+          type: string
+      title: IdentityDomain
+      type: object
     json_MSSEExadataSecurityGroups:
       description: MyServices Exadata Security Groups object
       properties:
@@ -612,19 +593,22 @@ components:
           type: string
       title: SEExadataSecurityGroups
       type: object
-    json_MSSEServiceConfiguration:
-      description: MyServices ServiceEntitlement Service Configuration object
+    json_MSSIServiceConfigurationExadata:
+      description: MyServices ServiceInstance Service Configuration Exadata object
       properties:
+        bursting:
+          $ref: '#/components/schemas/json_MSSIExadataBursting'
+          description: ''
         canonicalLink:
           description: ''
           type: string
-        exadata:
-          $ref: '#/components/schemas/json_MSSEServiceConfigurationExadata'
-          description: ''
         id:
           description: ''
           type: string
-      title: SEServiceConfiguration
+        securityGroupAssignments:
+          $ref: '#/components/schemas/json_MSSIExadataSecurityGroupAssignments'
+          description: ''
+      title: SIServiceConfigurationExadata
       type: object
     json_MSCloudAccount:
       description: MyServices Cloud Account. A Cloud Account is a container for Cloud Services purchased by a Customer.
@@ -640,17 +624,33 @@ components:
           type: string
       title: CloudAccount
       type: object
-    json_MSSIExadataSecurityGroupAssignment:
-      description: MyServices Exadata Security Group Assignment object
+    json_MSSEExadataSecurityGroup:
+      description: 'MyServices Exadata Security Group. Exadata Cloud Service Self-Service Firewall provides a system of rules and groups. By default, the firewall denies network access to the Exadata Cloud Service instance.
+
+        Security groups contains security rules. The security rules effectively define a white-list of allowed network access points.'
       properties:
         canonicalLink:
           description: Canonical Link
           type: string
-        id:
-          description: Unique Id
+        customerId:
+          description: Customer Id. This must be the same as the {serviceEntitlementId}
           type: string
-        securityGroup:
-          $ref: '#/components/schemas/json_MSSEExadataSecurityGroup'
-          description: Assigned Security group.
-      title: SIExadataSecurityGroupAssignment
+        description:
+          description: Group Description
+          type: string
+        id:
+          description: MSSEExadataSecurityGroup unique identifier
+          type: string
+        name:
+          description: Group Name. A group name.
+          type: string
+        rules:
+          description: Rules defining the white-list of allowed network access points
+          items:
+            $ref: '#/components/schemas/json_MSSEExadataSecurityRule'
+          type: array
+        version:
+          description: Version
+          type: number
+      title: SEExadataSecurityGroup
       type: object

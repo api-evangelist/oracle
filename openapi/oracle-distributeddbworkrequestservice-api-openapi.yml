@@ -254,7 +254,270 @@ paths:
         '
       x-related-resource: '#/definitions/WorkRequestLogEntry'
 components:
+  parameters:
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    WorkRequestStatusQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given OperationStatus.
+      in: query
+      name: status
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+      schema:
+        type: string
+        enum:
+        - ACCEPTED
+        - IN_PROGRESS
+        - WAITING
+        - FAILED
+        - SUCCEEDED
+        - CANCELING
+        - CANCELED
+        - NEEDS_ATTENTION
+    WorkRequestIdQueryParam:
+      description: The ID of the asynchronous work request.
+      in: query
+      name: workRequestId
+      x-default-description: 'null'
+      schema:
+        type: string
+    ResourceIdentifierQueryParam:
+      description: The ID of the resource affected by the work request.
+      in: query
+      name: resourceId
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    CompartmentIdQueryParam:
+      description: The ID of the compartment in which to list resources.
+      in: query
+      name: compartmentId
+      required: true
+      schema:
+        type: string
+    WorkRequestSortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeAccepted
+        default: timeAccepted
+    WorkRequestIdPathParam:
+      description: The ID of the asynchronous request.
+      in: path
+      name: workRequestId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: The sort order to use, either 'ASC' or 'DESC'.
+      in: query
+      name: sortOrder
+      x-default-description: 'The default value depends upon `sortBy`, and
+
+        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
+
+        '
+      x-obmcs-top-level-enum: '#/definitions/SortOrder'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
   schemas:
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    WorkRequestLogEntryCollection:
+      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestLogEntries.
+          items:
+            $ref: '#/components/schemas/WorkRequestLogEntry'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestError:
+      description: An error encountered while executing a work request.
+      properties:
+        code:
+          description: 'A machine-usable code for the error that occured. Error codes are listed on
+
+            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
+
+            '
+          type: string
+        message:
+          description: A human readable description of the issue encountered.
+          type: string
+        timestamp:
+          description: The time the error occured. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - code
+      - message
+      - timestamp
+    WorkRequest:
+      description: A description of workrequest status
+      properties:
+        compartmentId:
+          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
+
+            the same compartment as the resource the work request affects. If the work request affects multiple resources,
+
+            and those resources are not in the same compartment, it is up to the service team to pick the primary
+
+            resource whose compartment should be used
+
+            '
+          type: string
+        id:
+          description: The id of the work request.
+          type: string
+        operationType:
+          description: Type of the work request
+          enum:
+          - CREATE_DISTRIBUTED_DB
+          - PATCH_DISTRIBUTED_DB_INSERT_SHARDS
+          - PATCH_DISTRIBUTED_DB_REMOVE_SHARDS
+          - PATCH_DISTRIBUTED_DB_MERGE_CATALOG_SHARDS
+          - DELETE_DISTRIBUTED_DB
+          - CHANGE_DISTRIBUTED_DB_COMPARTMENT
+          - CONFIGURE_DISTRIBUTED_DB_GSMS
+          - CONFIGURE_DISTRIBUTED_DB_SHARDING
+          - GENERATE_DISTRIBUTED_DB_GSM_CERT_SIGNING_REQ
+          - ROTATE_DISTRIBUTED_DB_PASSWORDS
+          - START_DISTRIBUTED_DB
+          - STOP_DISTRIBUTED_DB
+          - START_DISTRIBUTED_DB_SHARD
+          - START_DISTRIBUTED_DB_CATALOG
+          - STOP_DISTRIBUTED_DB_SHARD
+          - STOP_DISTRIBUTED_DB_CATALOG
+          - UPLOAD_DISTRIBUTED_DB_SIGNED_CERT_AND_GENERATE_WALLET
+          - CREATE_DISTRIBUTED_DB_SHARD
+          - CREATE_DISTRIBUTED_DB_CATALOG
+          - CREATE_DISTRIBUTED_DB_GSM
+          - UPDATE_DISTRIBUTED_DB_CATALOG_SHARDS
+          - VALIDATE_NETWORK
+          - EXECUTE_VALIDATE_NETWORK_TESTS
+          - CREATE_PRIVATE_ENDPOINT
+          - DELETE_PRIVATE_ENDPOINT
+          - CHANGE_PRIVATE_ENDPOINT_COMPARTMENT
+          - REINSTATE_PROXY_INSTANCE
+          - DELETE_DISTRIBUTED_DB_SHARD
+          - DELETE_DISTRIBUTED_DB_CATALOG
+          - DELETE_DISTRIBUTED_DB_GSM
+          - ADD_GDSCONTROL_NODE
+          - CHANGE_DISTRIBUTED_DB_BACKUP_CONFIG
+          - ADD_DISTRIBUTED_DB_DG
+          - REMOVE_DISTRIBUTED_DB_DG
+          - CONFIGURE_DISTRIBUTED_DB_GSMS_WALLET
+          - VALIDATE_CA_BUNDLE
+          - RECREATE_FAILED_RESOURCE
+          - MOVE_REPLICATION_UNITS
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationType'
+        percentComplete:
+          description: Percentage of the request completed.
+          format: float
+          type: number
+        resources:
+          description: The resources affected by this work request.
+          items:
+            $ref: '#/components/schemas/WorkRequestResource'
+          type: array
+        status:
+          description: Status of current work request.
+          enum:
+          - ACCEPTED
+          - IN_PROGRESS
+          - WAITING
+          - FAILED
+          - SUCCEEDED
+          - CANCELING
+          - CANCELED
+          - NEEDS_ATTENTION
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
+        timeAccepted:
+          description: 'The date and time the request was created, as described in
+
+            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
+
+            '
+          format: date-time
+          type: string
+        timeFinished:
+          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
+
+            '
+          format: date-time
+          type: string
+        timeStarted:
+          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
+
+            section 14.29.
+
+            '
+          format: date-time
+          type: string
+      required:
+      - operationType
+      - status
+      - id
+      - compartmentId
+      - resources
+      - percentComplete
+      - timeAccepted
+    WorkRequestLogEntry:
+      description: A log message from the execution of a work request.
+      properties:
+        message:
+          description: Human-readable log message.
+          type: string
+        timestamp:
+          description: The time the log message was written. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - message
+      - timestamp
     WorkRequestSummaryCollection:
       description: Results of a workRequest search. Contains both WorkRequest items and other information, such as metadata.
       properties:
@@ -262,6 +525,17 @@ components:
           description: List of workRequestSummary objects.
           items:
             $ref: '#/components/schemas/WorkRequestSummary'
+          type: array
+      required:
+      - items
+      type: object
+    WorkRequestErrorCollection:
+      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
+      properties:
+        items:
+          description: List of workRequestError objects.
+          items:
+            $ref: '#/components/schemas/WorkRequestError'
           type: array
       required:
       - items
@@ -378,173 +652,6 @@ components:
       - resources
       - percentComplete
       - timeAccepted
-    WorkRequestLogEntryCollection:
-      description: Results of a workRequestLog search. Contains both workRequestLog items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestLogEntries.
-          items:
-            $ref: '#/components/schemas/WorkRequestLogEntry'
-          type: array
-      required:
-      - items
-      type: object
-    WorkRequest:
-      description: A description of workrequest status
-      properties:
-        compartmentId:
-          description: 'The ocid of the compartment that contains the work request. Work requests should be scoped to
-
-            the same compartment as the resource the work request affects. If the work request affects multiple resources,
-
-            and those resources are not in the same compartment, it is up to the service team to pick the primary
-
-            resource whose compartment should be used
-
-            '
-          type: string
-        id:
-          description: The id of the work request.
-          type: string
-        operationType:
-          description: Type of the work request
-          enum:
-          - CREATE_DISTRIBUTED_DB
-          - PATCH_DISTRIBUTED_DB_INSERT_SHARDS
-          - PATCH_DISTRIBUTED_DB_REMOVE_SHARDS
-          - PATCH_DISTRIBUTED_DB_MERGE_CATALOG_SHARDS
-          - DELETE_DISTRIBUTED_DB
-          - CHANGE_DISTRIBUTED_DB_COMPARTMENT
-          - CONFIGURE_DISTRIBUTED_DB_GSMS
-          - CONFIGURE_DISTRIBUTED_DB_SHARDING
-          - GENERATE_DISTRIBUTED_DB_GSM_CERT_SIGNING_REQ
-          - ROTATE_DISTRIBUTED_DB_PASSWORDS
-          - START_DISTRIBUTED_DB
-          - STOP_DISTRIBUTED_DB
-          - START_DISTRIBUTED_DB_SHARD
-          - START_DISTRIBUTED_DB_CATALOG
-          - STOP_DISTRIBUTED_DB_SHARD
-          - STOP_DISTRIBUTED_DB_CATALOG
-          - UPLOAD_DISTRIBUTED_DB_SIGNED_CERT_AND_GENERATE_WALLET
-          - CREATE_DISTRIBUTED_DB_SHARD
-          - CREATE_DISTRIBUTED_DB_CATALOG
-          - CREATE_DISTRIBUTED_DB_GSM
-          - UPDATE_DISTRIBUTED_DB_CATALOG_SHARDS
-          - VALIDATE_NETWORK
-          - EXECUTE_VALIDATE_NETWORK_TESTS
-          - CREATE_PRIVATE_ENDPOINT
-          - DELETE_PRIVATE_ENDPOINT
-          - CHANGE_PRIVATE_ENDPOINT_COMPARTMENT
-          - REINSTATE_PROXY_INSTANCE
-          - DELETE_DISTRIBUTED_DB_SHARD
-          - DELETE_DISTRIBUTED_DB_CATALOG
-          - DELETE_DISTRIBUTED_DB_GSM
-          - ADD_GDSCONTROL_NODE
-          - CHANGE_DISTRIBUTED_DB_BACKUP_CONFIG
-          - ADD_DISTRIBUTED_DB_DG
-          - REMOVE_DISTRIBUTED_DB_DG
-          - CONFIGURE_DISTRIBUTED_DB_GSMS_WALLET
-          - VALIDATE_CA_BUNDLE
-          - RECREATE_FAILED_RESOURCE
-          - MOVE_REPLICATION_UNITS
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationType'
-        percentComplete:
-          description: Percentage of the request completed.
-          format: float
-          type: number
-        resources:
-          description: The resources affected by this work request.
-          items:
-            $ref: '#/components/schemas/WorkRequestResource'
-          type: array
-        status:
-          description: Status of current work request.
-          enum:
-          - ACCEPTED
-          - IN_PROGRESS
-          - WAITING
-          - FAILED
-          - SUCCEEDED
-          - CANCELING
-          - CANCELED
-          - NEEDS_ATTENTION
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-        timeAccepted:
-          description: 'The date and time the request was created, as described in
-
-            [RFC 3339](https://tools.ietf.org/rfc/rfc3339), section 14.29.
-
-            '
-          format: date-time
-          type: string
-        timeFinished:
-          description: 'The date and time the object was finished, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339).
-
-            '
-          format: date-time
-          type: string
-        timeStarted:
-          description: 'The date and time the request was started, as described in [RFC 3339](https://tools.ietf.org/rfc/rfc3339),
-
-            section 14.29.
-
-            '
-          format: date-time
-          type: string
-      required:
-      - operationType
-      - status
-      - id
-      - compartmentId
-      - resources
-      - percentComplete
-      - timeAccepted
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    WorkRequestError:
-      description: An error encountered while executing a work request.
-      properties:
-        code:
-          description: 'A machine-usable code for the error that occured. Error codes are listed on
-
-            (https://docs.cloud.oracle.com/Content/API/References/apierrors.htm)
-
-            '
-          type: string
-        message:
-          description: A human readable description of the issue encountered.
-          type: string
-        timestamp:
-          description: The time the error occured. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-      required:
-      - code
-      - message
-      - timestamp
-    WorkRequestErrorCollection:
-      description: Results of a workRequestError search. Contains both WorkRequestError items and other information, such as metadata.
-      properties:
-        items:
-          description: List of workRequestError objects.
-          items:
-            $ref: '#/components/schemas/WorkRequestError'
-          type: array
-      required:
-      - items
-      type: object
     WorkRequestResource:
       description: A resource created or operated on by a work request.
       properties:
@@ -588,113 +695,6 @@ components:
       - actionType
       - entityType
       - identifier
-    WorkRequestLogEntry:
-      description: A log message from the execution of a work request.
-      properties:
-        message:
-          description: Human-readable log message.
-          type: string
-        timestamp:
-          description: The time the log message was written. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - message
-      - timestamp
-  parameters:
-    ResourceIdentifierQueryParam:
-      description: The ID of the resource affected by the work request.
-      in: query
-      name: resourceId
-      schema:
-        type: string
-    WorkRequestIdQueryParam:
-      description: The ID of the asynchronous work request.
-      in: query
-      name: workRequestId
-      x-default-description: 'null'
-      schema:
-        type: string
-    WorkRequestSortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeAccepted is descending.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeAccepted
-        default: timeAccepted
-    SortOrderQueryParam:
-      description: The sort order to use, either 'ASC' or 'DESC'.
-      in: query
-      name: sortOrder
-      x-default-description: 'The default value depends upon `sortBy`, and
-
-        in general is ''DESC'' when sorting by time and ''ASC'' otherwise.
-
-        '
-      x-obmcs-top-level-enum: '#/definitions/SortOrder'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    WorkRequestIdPathParam:
-      description: The ID of the asynchronous request.
-      in: path
-      name: workRequestId
-      required: true
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    CompartmentIdQueryParam:
-      description: The ID of the compartment in which to list resources.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
-    WorkRequestStatusQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given OperationStatus.
-      in: query
-      name: status
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/OperationStatus'
-      schema:
-        type: string
-        enum:
-        - ACCEPTED
-        - IN_PROGRESS
-        - WAITING
-        - FAILED
-        - SUCCEEDED
-        - CANCELING
-        - CANCELED
-        - NEEDS_ATTENTION
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
   responses:
     default:
       description: Unknown Error

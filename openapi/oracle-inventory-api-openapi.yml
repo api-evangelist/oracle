@@ -853,18 +853,15 @@ paths:
         required: true
 components:
   parameters:
-    AssetTypeQueryParam:
-      description: The type of asset.
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: assetType
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/AssetType'
+      name: limit
       schema:
-        type: string
-        enum:
-        - VMWARE_VM
-        - VM
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
     InventoryIdPathParam:
       description: Inventory OCID.
       in: path
@@ -872,37 +869,22 @@ components:
       required: true
       schema:
         type: string
-    AssetIdentifierQueryParam:
-      description: Unique asset identifier.
+    AggregationPropertiesParam:
+      description: An array of properties on which to aggregate.
       in: query
-      name: assetId
-      required: false
+      name: aggregationProperties
+      required: true
       x-default-description: 'null'
       schema:
-        type: string
-    InventoryIdentifierQueryParam:
-      description: Unique Inventory identifier.
-      in: query
-      name: inventoryId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    ExternalAssetKeyQueryParam:
-      description: External asset key.
-      in: query
-      name: externalAssetKey
-      required: false
-      x-default-description: 'null'
+        type: array
+        items:
+          type: string
+        maxItems: 1
+        minItems: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
     SortByQueryParam:
@@ -918,6 +900,67 @@ components:
         - timeUpdated
         - displayName
         default: timeCreated
+    AssetIdentifierQueryParam:
+      description: Unique asset identifier.
+      in: query
+      name: assetId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PaginationTokenQueryParam:
+      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    InventoryLifecycleStateQueryParam:
+      description: A filter to return inventory if the lifecycleState matches the given lifecycleState.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/Inventory/lifecycleState'
+      schema:
+        type: string
+    GroupByParam:
+      description: The dimensions in which to group the aggregations.
+      in: query
+      name: groupBy
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: array
+        items:
+          type: string
+        maxItems: 1
+        minItems: 0
+    AssetIdentifierPathParam:
+      description: Unique asset identifier.
+      in: path
+      name: assetId
+      required: true
+      schema:
+        type: string
+    SourceKeyQueryParam:
+      description: Source key from where the assets originate.
+      in: query
+      name: sourceKey
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
     AssetLifecycleStateQueryParam:
       description: A filter to return only assets whose lifecycleState matches the given lifecycleState.
       in: query
@@ -944,6 +987,22 @@ components:
       required: false
       schema:
         type: string
+    InventoryIdentifierQueryParam:
+      description: Unique Inventory identifier.
+      in: query
+      name: inventoryId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    ExternalAssetKeyQueryParam:
+      description: External asset key.
+      in: query
+      name: externalAssetKey
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
     SortOrderQueryParam:
       description: The sort order to use, either 'ASC' or 'DESC'.
       in: query
@@ -959,52 +1018,6 @@ components:
         enum:
         - ASC
         - DESC
-    InventoryLifecycleStateQueryParam:
-      description: A filter to return inventory if the lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/Inventory/lifecycleState'
-      schema:
-        type: string
-    AssetIdentifierPathParam:
-      description: Unique asset identifier.
-      in: path
-      name: assetId
-      required: true
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    AggregationPropertiesParam:
-      description: An array of properties on which to aggregate.
-      in: query
-      name: aggregationProperties
-      required: true
-      x-default-description: 'null'
-      schema:
-        type: array
-        items:
-          type: string
-        maxItems: 1
-        minItems: 1
-    GroupByParam:
-      description: The dimensions in which to group the aggregations.
-      in: query
-      name: groupBy
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: array
-        items:
-          type: string
-        maxItems: 1
-        minItems: 0
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1024,22 +1037,18 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    PaginationTokenQueryParam:
-      description: A token representing the position at which to start retrieving results. This must come from the `opc-next-page` header field of a previous response.
+    AssetTypeQueryParam:
+      description: The type of asset.
       in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        minLength: 1
-    SourceKeyQueryParam:
-      description: Source key from where the assets originate.
-      in: query
-      name: sourceKey
+      name: assetType
       required: false
       x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/AssetType'
       schema:
         type: string
+        enum:
+        - VMWARE_VM
+        - VM
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
       in: query
@@ -1047,26 +1056,110 @@ components:
       required: true
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
   schemas:
-    AssetCollection:
-      description: Results of a set of asset summary.
+    Error:
+      description: Error Information.
       properties:
-        items:
-          description: List of assets.
-          items:
-            $ref: '#/components/schemas/AssetSummary'
-          type: array
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
       required:
-      - items
+      - code
+      - message
+    InventorySummary:
+      description: Description of inventory.
+      properties:
+        compartmentId:
+          description: The OCID of the tenantId.
+          maxLength: 255
+          minLength: 1
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: Inventory display name.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+
+            predefined name, type, or namespace/scope. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: Inventory OCID.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleDetails:
+          description: A message describing the current state in more detail. For example, it can be used to provide actionable information for a resource in Failed state.
+          maxLength: 255
+          minLength: 1
+          type: string
+        lifecycleState:
+          description: The current state of the inventory.
+          type: string
+          x-obmcs-enumref: '#/definitions/Inventory/lifecycleState'
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time when the inventory was created. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time when the inventory was updated. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+      required:
+      - id
+      - lifecycleState
       type: object
     UpdateInventoryDetails:
       description: Description for updating inventory details.
@@ -1108,88 +1201,6 @@ components:
 
             '
           type: object
-      type: object
-    HistoricalMetric:
-      description: Metric details.
-      properties:
-        aggregation:
-          description: Aggregation time interval.
-          maxLength: 255
-          minLength: 1
-          type: string
-        name:
-          description: Metric name.
-          maxLength: 255
-          minLength: 1
-          type: string
-        value:
-          description: Aggregation value.
-          format: float
-          type: number
-      required:
-      - name
-      - aggregation
-      - value
-      type: object
-    CreateInventoryDetails:
-      description: Description for creating inventory details.
-      properties:
-        compartmentId:
-          description: The OCID of the tenantId.
-          maxLength: 255
-          minLength: 1
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: Inventory displayName.
-          maxLength: 255
-          minLength: 1
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace/scope. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-      required:
-      - compartmentId
-      - displayName
-      type: object
-    HistoricalMetricCollection:
-      description: List of historical metric.
-      properties:
-        items:
-          description: List of asset historical metrics.
-          items:
-            $ref: '#/components/schemas/HistoricalMetricSummary'
-          type: array
-      required:
-      - items
       type: object
     CreateAssetDetails:
       description: The information about the new asset.
@@ -1276,41 +1287,94 @@ components:
       - inventoryId
       - assetType
       type: object
-    ChangeAssetTagsDetails:
-      description: The information about tags to be updated.
+    HistoricalMetricSummary:
+      description: Metric details.
       properties:
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        freeformTags:
+        aggregation:
+          description: Aggregation time interval.
+          maxLength: 255
+          minLength: 1
+          type: string
+        name:
+          description: Metric name.
+          maxLength: 255
+          minLength: 1
+          type: string
+        timeCreated:
+          description: The time the HistoricalMetric was created. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        timeUpdated:
+          description: The time the HistoricalMetric was updated. An RFC3339 formatted datetime string.
+          format: date-time
+          type: string
+        value:
+          description: Aggregation value.
+          format: float
+          type: number
+      required:
+      - name
+      - aggregation
+      - value
+      type: object
+    AssetAggregation:
+      description: The result of an analytics aggregation on a set of assets.
+      properties:
+        aggregatedProperty:
+          description: Aggregated property.
+          maxLength: 255
+          minLength: 1
+          type: string
+        count:
+          description: Returns the total number of observations from the group of assets.
+          format: int64
+          minimum: 0
+          type: integer
+        dimensions:
           additionalProperties:
             type: string
-          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace/scope. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
+          description: The dimensions along which assets can be aggregated for analytics.
           type: object
+        max:
+          description: Returns the highest value from all the assets.
+          format: double
+          type: number
+        mean:
+          description: Returns the value of sum divided by count from the group of assets.
+          format: double
+          type: number
+        min:
+          description: Returns the lowest value from the group of assets.
+          format: double
+          type: number
+        sum:
+          description: Returns all values added together from the group of assets.
+          format: double
+          type: number
+      required:
+      - aggregatedProperty
+      type: object
+    HistoricalMetric:
+      description: Metric details.
+      properties:
+        aggregation:
+          description: Aggregation time interval.
+          maxLength: 255
+          minLength: 1
+          type: string
+        name:
+          description: Metric name.
+          maxLength: 255
+          minLength: 1
+          type: string
+        value:
+          description: Aggregation value.
+          format: float
+          type: number
+      required:
+      - name
+      - aggregation
+      - value
       type: object
     Inventory:
       description: Description of inventory.
@@ -1413,8 +1477,8 @@ components:
       - timeCreated
       - timeUpdated
       type: object
-    InventorySummary:
-      description: Description of inventory.
+    CreateInventoryDetails:
+      description: Description for creating inventory details.
       properties:
         compartmentId:
           description: The OCID of the tenantId.
@@ -1443,7 +1507,7 @@ components:
             '
           type: object
         displayName:
-          description: Inventory display name.
+          description: Inventory displayName.
           maxLength: 255
           minLength: 1
           type: string
@@ -1458,143 +1522,21 @@ components:
 
             '
           type: object
-        id:
-          description: Inventory OCID.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleDetails:
-          description: A message describing the current state in more detail. For example, it can be used to provide actionable information for a resource in Failed state.
-          maxLength: 255
-          minLength: 1
-          type: string
-        lifecycleState:
-          description: The current state of the inventory.
-          type: string
-          x-obmcs-enumref: '#/definitions/Inventory/lifecycleState'
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only string, integer and boolean types are supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing system tags'' keys and values scoped to a namespace.
-
-              Example: `{"bar-key": "value"}`
-
-              '
-            type: object
-          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{orcl-cloud: {free-tier-retain: true}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time when the inventory was created. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time when the inventory was updated. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
       required:
-      - id
-      - lifecycleState
+      - compartmentId
+      - displayName
       type: object
-    HistoricalMetricSummary:
-      description: Metric details.
-      properties:
-        aggregation:
-          description: Aggregation time interval.
-          maxLength: 255
-          minLength: 1
-          type: string
-        name:
-          description: Metric name.
-          maxLength: 255
-          minLength: 1
-          type: string
-        timeCreated:
-          description: The time the HistoricalMetric was created. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        timeUpdated:
-          description: The time the HistoricalMetric was updated. An RFC3339 formatted datetime string.
-          format: date-time
-          type: string
-        value:
-          description: Aggregation value.
-          format: float
-          type: number
-      required:
-      - name
-      - aggregation
-      - value
-      type: object
-    InventoryCollection:
-      description: Result of inventory summaries.
+    AssetCollection:
+      description: Results of a set of asset summary.
       properties:
         items:
-          description: List of inventories.
+          description: List of assets.
           items:
-            $ref: '#/components/schemas/InventorySummary'
+            $ref: '#/components/schemas/AssetSummary'
           type: array
       required:
       - items
       type: object
-    AssetAggregation:
-      description: The result of an analytics aggregation on a set of assets.
-      properties:
-        aggregatedProperty:
-          description: Aggregated property.
-          maxLength: 255
-          minLength: 1
-          type: string
-        count:
-          description: Returns the total number of observations from the group of assets.
-          format: int64
-          minimum: 0
-          type: integer
-        dimensions:
-          additionalProperties:
-            type: string
-          description: The dimensions along which assets can be aggregated for analytics.
-          type: object
-        max:
-          description: Returns the highest value from all the assets.
-          format: double
-          type: number
-        mean:
-          description: Returns the value of sum divided by count from the group of assets.
-          format: double
-          type: number
-        min:
-          description: Returns the lowest value from the group of assets.
-          format: double
-          type: number
-        sum:
-          description: Returns all values added together from the group of assets.
-          format: double
-          type: number
-      required:
-      - aggregatedProperty
-      type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     ChangeAssetCompartmentDetails:
       description: The information to be updated for changing asset compartment.
       properties:
@@ -1606,49 +1548,9 @@ components:
       required:
       - compartmentId
       type: object
-    SubmitHistoricalMetricsDetails:
-      description: Post historical metric details.
+    ChangeAssetTagsDetails:
+      description: The information about tags to be updated.
       properties:
-        historicalMetrics:
-          description: List of asset historical metrics.
-          items:
-            $ref: '#/components/schemas/HistoricalMetric'
-          type: array
-      required:
-      - historicalMetrics
-      type: object
-    AssetAggregationCollection:
-      description: The result of an analytics aggregation on a set of assets.
-      properties:
-        items:
-          description: List of asset aggregations.
-          items:
-            $ref: '#/components/schemas/AssetAggregation'
-          type: array
-      required:
-      - items
-      type: object
-    UpdateAssetDetails:
-      description: The information of asset to be updated.
-      discriminator:
-        propertyName: assetType
-      properties:
-        assetSourceIds:
-          description: List of asset source OCID.
-          items:
-            maxLength: 255
-            minLength: 1
-            type: string
-          maxItems: 10
-          minItems: 0
-          type: array
-        assetType:
-          description: Asset type
-          enum:
-          - VMWARE_VM
-          - VM
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/AssetType'
         definedTags:
           additionalProperties:
             additionalProperties:
@@ -1670,11 +1572,6 @@ components:
 
             '
           type: object
-        displayName:
-          description: Asset display name.
-          maxLength: 255
-          minLength: 1
-          type: string
         freeformTags:
           additionalProperties:
             type: string
@@ -1686,8 +1583,6 @@ components:
 
             '
           type: object
-      required:
-      - assetType
       type: object
     Asset:
       description: Description of an asset.
@@ -1865,6 +1760,111 @@ components:
           type: string
       required:
       - compartmentId
+      type: object
+    InventoryCollection:
+      description: Result of inventory summaries.
+      properties:
+        items:
+          description: List of inventories.
+          items:
+            $ref: '#/components/schemas/InventorySummary'
+          type: array
+      required:
+      - items
+      type: object
+    HistoricalMetricCollection:
+      description: List of historical metric.
+      properties:
+        items:
+          description: List of asset historical metrics.
+          items:
+            $ref: '#/components/schemas/HistoricalMetricSummary'
+          type: array
+      required:
+      - items
+      type: object
+    UpdateAssetDetails:
+      description: The information of asset to be updated.
+      discriminator:
+        propertyName: assetType
+      properties:
+        assetSourceIds:
+          description: List of asset source OCID.
+          items:
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 10
+          minItems: 0
+          type: array
+        assetType:
+          description: Asset type
+          enum:
+          - VMWARE_VM
+          - VM
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/AssetType'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only string, integer and boolean types are supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing predefined tags'' keys and values scoped to a namespace.
+
+              Example: `{"bar-key": "value"}`
+
+              '
+            type: object
+          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: Asset display name.
+          maxLength: 255
+          minLength: 1
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+
+            predefined name, type, or namespace/scope. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+      required:
+      - assetType
+      type: object
+    SubmitHistoricalMetricsDetails:
+      description: Post historical metric details.
+      properties:
+        historicalMetrics:
+          description: List of asset historical metrics.
+          items:
+            $ref: '#/components/schemas/HistoricalMetric'
+          type: array
+      required:
+      - historicalMetrics
+      type: object
+    AssetAggregationCollection:
+      description: The result of an analytics aggregation on a set of assets.
+      properties:
+        items:
+          description: List of asset aggregations.
+          items:
+            $ref: '#/components/schemas/AssetAggregation'
+          type: array
+      required:
+      - items
       type: object
     AssetSummary:
       description: Summary of the asset.

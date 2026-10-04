@@ -106,21 +106,6 @@ paths:
         authorizationRequired: false
 components:
   responses:
-    '401':
-      description: Not Authenticated
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorEntity'
     '429':
       description: Too Many Requests
       headers:
@@ -136,8 +121,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEntity'
-    '404':
-      description: Not Found
+    '409':
+      description: Conflict
       headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
@@ -166,8 +151,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEntity'
-    '500':
-      description: Internal Server Error
+    '401':
+      description: Not Authenticated
       headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
@@ -181,8 +166,23 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorEntity'
-    '409':
-      description: Conflict
+    '404':
+      description: Not Found
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEntity'
+    '500':
+      description: Internal Server Error
       headers:
         opc-request-id:
           description: 'Unique Oracle-assigned identifier for the request. If you need to contact
@@ -212,6 +212,45 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorEntity'
   schemas:
+    LaunchEligibility:
+      description: Tenant eligibility and other information for launching a PIC image
+      properties:
+        imageId:
+          description: PIC Image ID
+          type: string
+        ineligibilityReason:
+          description: Reason the account is ineligible to launch paid listings
+          enum:
+          - INELIGIBLE_ACCOUNT_COUNTRY
+          - INELIGIBLE_REGION
+          - INELIGIBLE_ACCOUNT_BLACKLISTED
+          - INELIGIBLE_ACCOUNT_FEATURE_DISABLED
+          - INELIGIBLE_ACCOUNT_CURRENCY
+          - INELIGIBLE_ACCOUNT_NOT_PAID
+          - INELIGIBLE_ACCOUNT_INTERNAL
+          - INELIGIBLE_ACCOUNT_GOV_SUBSCRIPTION
+          - INELIGIBLE_PAID_LISTING_THROTTLED
+          - INELIGIBLE_ACCOUNT_NOT_AVAILABLE
+          - INELIGIBLE_ACCOUNT_NOT_MONTHLY_INCLUSIVE
+          - IMAGE_META_DATA_SO
+          - INELIGIBLE_ACCOUNT_TENANCY_NOT_ALLOWED_ACCESS_IMAGE
+          - INELIGIBLE_ACCOUNT_GOV_LAUNCH_NON_GOV_LISTING
+          - AGREEMENT_NOT_ACCEPTED
+          - NOT_AUTHORIZED
+          - ELIGIBLE
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/IneligibilityReasonEnum'
+        isLaunchAllowed:
+          description: Is the tenant permitted to launch the PIC image
+          type: boolean
+        meters:
+          description: related meters for the PIC image
+          type: string
+      required:
+      - imageId
+      - isLaunchAllowed
+      type: object
+      x-example: "[\n  {\n    \"imageId\" : \"ocid1.appcataloglisting.oc1..aaaaaaaavvijdvafj64pj5y45k7qgda2um7qdsunr6snzl2456s5isvyuaoq\",\n    \"isLaunchAllowed\" : true,\n    \"meters\" : \"{\\\"default\\\" : {\\\"pausedOnInstanceStop\\\" : true,\\\"extendedMeters\\\" : [{\\\"name\\\" : \\\"MP_BOBO_AP\\\",\\\"minimumBillingPeriodInHours\\\" : 0}]}}\"\n  }\n  {\n    \"imageId\" : \"ocid1.appcataloglisting.oc1..aaaaaaaavvijdvafj64pj5y45k7qgda2um7qdsunr6snzl2456s5isvyuaoq\",\n    \"isLaunchAllowed\" : false,\n    \"meters\" : \"{\\\"default\\\" : {\\\"pausedOnInstanceStop\\\" : true,\\\"extendedMeters\\\" : [{\\\"name\\\" : \\\"MP_BOBO_AP\\\",\\\"minimumBillingPeriodInHours\\\" : 0}]}}\"\n    \"ineligibilityReason\" : \"INELIGILE_PAID_LISTING_THROTTLED\"\n  }\n]\n"
     ErrorEntity:
       description: The model for the error entity.
       properties:
@@ -258,45 +297,6 @@ components:
       - eligibilityReason
       type: object
       x-example: "{\n  \"isPaidListingEligible\" : true,\n  \"isPaidListingThrottled\" : false,\n  \"eligibilityReason\" : \"ELIGIBLE\"\n}\n"
-    LaunchEligibility:
-      description: Tenant eligibility and other information for launching a PIC image
-      properties:
-        imageId:
-          description: PIC Image ID
-          type: string
-        ineligibilityReason:
-          description: Reason the account is ineligible to launch paid listings
-          enum:
-          - INELIGIBLE_ACCOUNT_COUNTRY
-          - INELIGIBLE_REGION
-          - INELIGIBLE_ACCOUNT_BLACKLISTED
-          - INELIGIBLE_ACCOUNT_FEATURE_DISABLED
-          - INELIGIBLE_ACCOUNT_CURRENCY
-          - INELIGIBLE_ACCOUNT_NOT_PAID
-          - INELIGIBLE_ACCOUNT_INTERNAL
-          - INELIGIBLE_ACCOUNT_GOV_SUBSCRIPTION
-          - INELIGIBLE_PAID_LISTING_THROTTLED
-          - INELIGIBLE_ACCOUNT_NOT_AVAILABLE
-          - INELIGIBLE_ACCOUNT_NOT_MONTHLY_INCLUSIVE
-          - IMAGE_META_DATA_SO
-          - INELIGIBLE_ACCOUNT_TENANCY_NOT_ALLOWED_ACCESS_IMAGE
-          - INELIGIBLE_ACCOUNT_GOV_LAUNCH_NON_GOV_LISTING
-          - AGREEMENT_NOT_ACCEPTED
-          - NOT_AUTHORIZED
-          - ELIGIBLE
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/IneligibilityReasonEnum'
-        isLaunchAllowed:
-          description: Is the tenant permitted to launch the PIC image
-          type: boolean
-        meters:
-          description: related meters for the PIC image
-          type: string
-      required:
-      - imageId
-      - isLaunchAllowed
-      type: object
-      x-example: "[\n  {\n    \"imageId\" : \"ocid1.appcataloglisting.oc1..aaaaaaaavvijdvafj64pj5y45k7qgda2um7qdsunr6snzl2456s5isvyuaoq\",\n    \"isLaunchAllowed\" : true,\n    \"meters\" : \"{\\\"default\\\" : {\\\"pausedOnInstanceStop\\\" : true,\\\"extendedMeters\\\" : [{\\\"name\\\" : \\\"MP_BOBO_AP\\\",\\\"minimumBillingPeriodInHours\\\" : 0}]}}\"\n  }\n  {\n    \"imageId\" : \"ocid1.appcataloglisting.oc1..aaaaaaaavvijdvafj64pj5y45k7qgda2um7qdsunr6snzl2456s5isvyuaoq\",\n    \"isLaunchAllowed\" : false,\n    \"meters\" : \"{\\\"default\\\" : {\\\"pausedOnInstanceStop\\\" : true,\\\"extendedMeters\\\" : [{\\\"name\\\" : \\\"MP_BOBO_AP\\\",\\\"minimumBillingPeriodInHours\\\" : 0}]}}\"\n    \"ineligibilityReason\" : \"INELIGILE_PAID_LISTING_THROTTLED\"\n  }\n]\n"
   parameters:
     OpcRequestIdHeaderParam:
       description: 'Unique Oracle-assigned identifier for the request. If you need to contact Oracle about a particular request,
@@ -309,17 +309,17 @@ components:
       required: false
       schema:
         type: string
-    CompartmentIdQueryParam:
-      description: The unique identifier for the compartment.
-      in: query
-      name: compartmentId
-      required: true
-      schema:
-        type: string
     ImageIdQueryParam:
       description: Image ID
       in: query
       name: imageId
+      required: true
+      schema:
+        type: string
+    CompartmentIdQueryParam:
+      description: The unique identifier for the compartment.
+      in: query
+      name: compartmentId
       required: true
       schema:
         type: string

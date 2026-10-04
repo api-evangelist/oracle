@@ -116,6 +116,41 @@ paths:
         description: The information needed to activate an order in a tenancy.
         required: true
 components:
+  parameters:
+    OrderActivationToken:
+      description: 'Activation token containing an order ID. A JWT RFC 7519-formatted string.
+
+        '
+      in: path
+      name: activationToken
+      required: true
+      schema:
+        type: string
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
+
+        server error, without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        will be rejected.
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
   schemas:
     Error:
       description: Error information.
@@ -129,18 +164,16 @@ components:
       required:
       - code
       - message
-    Sku:
-      description: A single subscription SKU.
+    ActivateOrderDetails:
+      description: The parameters for activating an order subscription in a tenancy.
       properties:
-        name:
-          description: SKU name.
+        compartmentId:
+          description: Tenant ID to activate the order.
+          maxLength: 255
+          minLength: 1
           type: string
-        number:
-          description: SKU number.
-          type: string
-        quantity:
-          description: SKU quantity.
-          type: integer
+      required:
+      - compartmentId
     Order:
       description: Order details.
       properties:
@@ -169,6 +202,18 @@ components:
       - adminEmail
       - orderState
       - subscriptions
+    Sku:
+      description: A single subscription SKU.
+      properties:
+        name:
+          description: SKU name.
+          type: string
+        number:
+          description: SKU number.
+          type: string
+        quantity:
+          description: SKU quantity.
+          type: integer
     SubscriptionInfo:
       description: A single subscription's details.
       properties:
@@ -198,51 +243,6 @@ components:
       - startDate
       - endDate
       - skus
-    ActivateOrderDetails:
-      description: The parameters for activating an order subscription in a tenancy.
-      properties:
-        compartmentId:
-          description: Tenant ID to activate the order.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-  parameters:
-    OrderActivationToken:
-      description: 'Activation token containing an order ID. A JWT RFC 7519-formatted string.
-
-        '
-      in: path
-      name: activationToken
-      required: true
-      schema:
-        type: string
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request, so it can be retried in case of a timeout or
-
-        server error, without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations. For example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        will be rejected.
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
   responses:
     default:
       description: Unknown Error

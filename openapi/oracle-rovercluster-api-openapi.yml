@@ -367,6 +367,382 @@ paths:
       x-obmcs-client-retries-enabled: true
 components:
   schemas:
+    RoverWorkload:
+      description: Information about a RoverWorkload.
+      properties:
+        compartmentId:
+          description: The OCID of the compartment containing the workload.
+          type: string
+        id:
+          description: The Unique Oracle ID (OCID) that is immutable on creation.
+          type: string
+        name:
+          description: Name of the Rover Workload
+          type: string
+        objectCount:
+          description: Number of objects in a workload.
+          type: string
+        prefix:
+          description: Prefix to filter objects in case it is a bucket.
+          type: string
+        rangeEnd:
+          description: End of the range in a bucket.
+          type: string
+        rangeStart:
+          description: Start of the range in a bucket.
+          type: string
+        size:
+          description: Size of the workload.
+          type: string
+        workRequestId:
+          description: The compute work request id to track progress of custom image exports.
+          type: string
+        workloadType:
+          description: The type of workload
+          type: string
+      required:
+      - id
+      - compartmentId
+      - workloadType
+      type: object
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: A short error code that defines the error, meant for programmatic parsing.
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    RoverClusterCollection:
+      description: Results of a roverCluster search. Contains both RoverClusterSummary items and other data.
+      properties:
+        items:
+          description: List of roverClusterSummary.
+          items:
+            $ref: '#/components/schemas/RoverClusterSummary'
+          type: array
+      required:
+      - items
+      type: object
+    ChangeRoverClusterCompartmentDetails:
+      description: Object for moving a cluster to a different compartment.
+      properties:
+        compartmentId:
+          description: 'The [OCID] (/Content/General/Concepts/identifiers.htm) of the compartment into which the resources should be moved.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+      type: object
+    RoverClusterSummary:
+      description: Summary of the RoverCluster.
+      properties:
+        clusterSize:
+          description: Size of the cluster.
+          format: int32
+          type: integer
+        clusterType:
+          description: Type of cluster.
+          enum:
+          - STANDALONE
+          - STATION
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ClusterType'
+        compartmentId:
+          description: The OCID of the compartment containing the RoverCluster.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+          type: string
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+
+            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        id:
+          description: The OCID of RoverCluster.
+          type: string
+        lifecycleState:
+          description: The current state of the RoverCluster.
+          enum:
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        lifecycleStateDetails:
+          description: A property that can contain details on the lifecycle.
+          type: string
+        nodes:
+          description: The nodes that are part of this cluster.
+          items:
+            type: string
+          type: array
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+            '
+          type: object
+        timeCreated:
+          description: The time the the RoverCluster was created. An RFC3339 formatted datetime string
+          format: date-time
+          type: string
+      required:
+      - id
+      - compartmentId
+      - lifecycleState
+      type: object
+    CreateRoverClusterDetails:
+      description: The information required to create a RoverCluster.
+      properties:
+        clusterSize:
+          description: Number of nodes desired in the cluster, in standalone clusters, between 5 and 15 inclusive. In station clusters, between 15 and 30 inclusive.
+          format: int32
+          maximum: 30
+          minimum: 5
+          type: integer
+        clusterType:
+          description: Type of cluster.
+          enum:
+          - STANDALONE
+          - STATION
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/ClusterType'
+        clusterWorkloads:
+          description: List of existing workloads that should be provisioned on the nodes.
+          items:
+            $ref: '#/components/schemas/RoverWorkload'
+          type: array
+        compartmentId:
+          description: The OCID of the compartment containing the RoverCluster.
+          maxLength: 255
+          minLength: 1
+          type: string
+        customerShippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        dataValidationCode:
+          description: Validation code returned by data validation tool. Required for return shipping label generation if data import was requested.
+          type: string
+          x-default-description: 'null'
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        displayName:
+          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
+          maxLength: 255
+          minLength: 1
+          type: string
+        enclosureType:
+          description: The type of enclosure rover nodes in this cluster are shipped in.
+          enum:
+          - RUGGADIZED
+          - NON_RUGGADIZED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/EnclosureType'
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
+
+            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        importCompartmentId:
+          description: An OCID of a compartment where data will be imported to upon Rover cluster return.
+          type: string
+          x-default-description: 'null'
+        importFileBucket:
+          description: Name of a bucket where files from NFS share will be imported to upon Rover cluster return.
+          type: string
+          x-default-description: 'null'
+        isImportRequested:
+          description: The flag indicating that customer requests data to be imported to OCI upon Rover cluster return.
+          type: boolean
+          x-default-description: 'null'
+        lifecycleState:
+          description: The current state of the RoverCluster.
+          enum:
+          - CREATING
+          - UPDATING
+          - ACTIVE
+          - DELETING
+          - DELETED
+          - FAILED
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
+        lifecycleStateDetails:
+          description: A property that can contain details on the lifecycle.
+          type: string
+        oracleShippingTrackingUrl:
+          description: Tracking Url for the shipped Rover Cluster.
+          format: uri
+          type: string
+        pointOfContact:
+          description: Name of point of contact for this order if customer is picking up.
+          type: string
+        pointOfContactPhoneNumber:
+          description: Phone number of point of contact for this order if customer is picking up.
+          type: string
+        shippingPreference:
+          default: ORACLE_SHIPPED
+          description: Preference for device delivery.
+          enum:
+          - ORACLE_SHIPPED
+          - CUSTOMER_PICKUP
+          type: string
+        shippingVendor:
+          description: Shipping vendor of choice for orace to customer shipping.
+          type: string
+        subscriptionId:
+          description: ID provided to customer after successful subscription to Rover Stations.
+          type: string
+        superUserPassword:
+          description: Root password for the rover cluster.
+          type: string
+        systemTags:
+          additionalProperties:
+            additionalProperties:
+              type: object
+            type: object
+          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
+
+            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
+
+            Example: `{orcl-cloud: {free-tier-retain: true}}`
+
+            '
+          type: object
+        timePickupExpected:
+          description: Expected date when customer wants to pickup the cluster if they chose customer pickup.
+          format: date-time
+          type: string
+        unlockPassphrase:
+          description: Password to unlock the rover cluster.
+          type: string
+      required:
+      - displayName
+      - compartmentId
+      - clusterSize
+      type: object
+    ShippingAddress:
+      description: Shipping address for rover devices.
+      properties:
+        address1:
+          description: Address line 1.
+          maxLength: 128
+          minLength: 1
+          type: string
+        address2:
+          description: Address line 2.
+          maxLength: 128
+          minLength: 1
+          type: string
+        address3:
+          description: Address line 3.
+          maxLength: 128
+          minLength: 1
+          type: string
+        address4:
+          description: Address line 4.
+          maxLength: 128
+          minLength: 1
+          type: string
+        addressee:
+          description: Addressee in shipping address.
+          maxLength: 64
+          minLength: 1
+          type: string
+        careOf:
+          description: CareOf for shipping address.
+          maxLength: 64
+          minLength: 1
+          type: string
+        cityOrLocality:
+          description: city or locality for shipping address.
+          maxLength: 64
+          minLength: 1
+          type: string
+        country:
+          description: country for shipping address.
+          maxLength: 64
+          minLength: 1
+          type: string
+        email:
+          description: recipient email address.
+          format: email
+          type: string
+        phoneNumber:
+          description: recipient phone number.
+          type: string
+        stateOrRegion:
+          description: state or region for shipping address.
+          maxLength: 64
+          minLength: 1
+          type: string
+        zipcode:
+          description: zipcode for shipping address.
+          maxLength: 64
+          minLength: 1
+          type: string
+      required:
+      - addressee
+      - address1
+      - cityOrLocality
+      - stateOrRegion
+      - zipcode
+      - country
+      - phoneNumber
+      type: object
     RoverCluster:
       description: Description of RoverCluster.
       properties:
@@ -647,391 +1023,6 @@ components:
       - compartmentId
       - lifecycleState
       type: object
-    ChangeRoverClusterCompartmentDetails:
-      description: Object for moving a cluster to a different compartment.
-      properties:
-        compartmentId:
-          description: 'The [OCID] (/Content/General/Concepts/identifiers.htm) of the compartment into which the resources should be moved.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - compartmentId
-      type: object
-    RoverClusterCollection:
-      description: Results of a roverCluster search. Contains both RoverClusterSummary items and other data.
-      properties:
-        items:
-          description: List of roverClusterSummary.
-          items:
-            $ref: '#/components/schemas/RoverClusterSummary'
-          type: array
-      required:
-      - items
-      type: object
-    RoverWorkload:
-      description: Information about a RoverWorkload.
-      properties:
-        compartmentId:
-          description: The OCID of the compartment containing the workload.
-          type: string
-        id:
-          description: The Unique Oracle ID (OCID) that is immutable on creation.
-          type: string
-        name:
-          description: Name of the Rover Workload
-          type: string
-        objectCount:
-          description: Number of objects in a workload.
-          type: string
-        prefix:
-          description: Prefix to filter objects in case it is a bucket.
-          type: string
-        rangeEnd:
-          description: End of the range in a bucket.
-          type: string
-        rangeStart:
-          description: Start of the range in a bucket.
-          type: string
-        size:
-          description: Size of the workload.
-          type: string
-        workRequestId:
-          description: The compute work request id to track progress of custom image exports.
-          type: string
-        workloadType:
-          description: The type of workload
-          type: string
-      required:
-      - id
-      - compartmentId
-      - workloadType
-      type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: A short error code that defines the error, meant for programmatic parsing.
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    ShippingAddress:
-      description: Shipping address for rover devices.
-      properties:
-        address1:
-          description: Address line 1.
-          maxLength: 128
-          minLength: 1
-          type: string
-        address2:
-          description: Address line 2.
-          maxLength: 128
-          minLength: 1
-          type: string
-        address3:
-          description: Address line 3.
-          maxLength: 128
-          minLength: 1
-          type: string
-        address4:
-          description: Address line 4.
-          maxLength: 128
-          minLength: 1
-          type: string
-        addressee:
-          description: Addressee in shipping address.
-          maxLength: 64
-          minLength: 1
-          type: string
-        careOf:
-          description: CareOf for shipping address.
-          maxLength: 64
-          minLength: 1
-          type: string
-        cityOrLocality:
-          description: city or locality for shipping address.
-          maxLength: 64
-          minLength: 1
-          type: string
-        country:
-          description: country for shipping address.
-          maxLength: 64
-          minLength: 1
-          type: string
-        email:
-          description: recipient email address.
-          format: email
-          type: string
-        phoneNumber:
-          description: recipient phone number.
-          type: string
-        stateOrRegion:
-          description: state or region for shipping address.
-          maxLength: 64
-          minLength: 1
-          type: string
-        zipcode:
-          description: zipcode for shipping address.
-          maxLength: 64
-          minLength: 1
-          type: string
-      required:
-      - addressee
-      - address1
-      - cityOrLocality
-      - stateOrRegion
-      - zipcode
-      - country
-      - phoneNumber
-      type: object
-    CreateRoverClusterDetails:
-      description: The information required to create a RoverCluster.
-      properties:
-        clusterSize:
-          description: Number of nodes desired in the cluster, in standalone clusters, between 5 and 15 inclusive. In station clusters, between 15 and 30 inclusive.
-          format: int32
-          maximum: 30
-          minimum: 5
-          type: integer
-        clusterType:
-          description: Type of cluster.
-          enum:
-          - STANDALONE
-          - STATION
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ClusterType'
-        clusterWorkloads:
-          description: List of existing workloads that should be provisioned on the nodes.
-          items:
-            $ref: '#/components/schemas/RoverWorkload'
-          type: array
-        compartmentId:
-          description: The OCID of the compartment containing the RoverCluster.
-          maxLength: 255
-          minLength: 1
-          type: string
-        customerShippingAddress:
-          $ref: '#/components/schemas/ShippingAddress'
-        dataValidationCode:
-          description: Validation code returned by data validation tool. Required for return shipping label generation if data import was requested.
-          type: string
-          x-default-description: 'null'
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
-          maxLength: 255
-          minLength: 1
-          type: string
-        enclosureType:
-          description: The type of enclosure rover nodes in this cluster are shipped in.
-          enum:
-          - RUGGADIZED
-          - NON_RUGGADIZED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/EnclosureType'
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        importCompartmentId:
-          description: An OCID of a compartment where data will be imported to upon Rover cluster return.
-          type: string
-          x-default-description: 'null'
-        importFileBucket:
-          description: Name of a bucket where files from NFS share will be imported to upon Rover cluster return.
-          type: string
-          x-default-description: 'null'
-        isImportRequested:
-          description: The flag indicating that customer requests data to be imported to OCI upon Rover cluster return.
-          type: boolean
-          x-default-description: 'null'
-        lifecycleState:
-          description: The current state of the RoverCluster.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        lifecycleStateDetails:
-          description: A property that can contain details on the lifecycle.
-          type: string
-        oracleShippingTrackingUrl:
-          description: Tracking Url for the shipped Rover Cluster.
-          format: uri
-          type: string
-        pointOfContact:
-          description: Name of point of contact for this order if customer is picking up.
-          type: string
-        pointOfContactPhoneNumber:
-          description: Phone number of point of contact for this order if customer is picking up.
-          type: string
-        shippingPreference:
-          default: ORACLE_SHIPPED
-          description: Preference for device delivery.
-          enum:
-          - ORACLE_SHIPPED
-          - CUSTOMER_PICKUP
-          type: string
-        shippingVendor:
-          description: Shipping vendor of choice for orace to customer shipping.
-          type: string
-        subscriptionId:
-          description: ID provided to customer after successful subscription to Rover Stations.
-          type: string
-        superUserPassword:
-          description: Root password for the rover cluster.
-          type: string
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{orcl-cloud: {free-tier-retain: true}}`
-
-            '
-          type: object
-        timePickupExpected:
-          description: Expected date when customer wants to pickup the cluster if they chose customer pickup.
-          format: date-time
-          type: string
-        unlockPassphrase:
-          description: Password to unlock the rover cluster.
-          type: string
-      required:
-      - displayName
-      - compartmentId
-      - clusterSize
-      type: object
-    RoverClusterCertificate:
-      description: The certificate response
-      properties:
-        certificate:
-          description: The certificate that can be installed on a client to do TLS communication to the cluster
-          type: string
-      required:
-      - certificate
-      type: object
-    RoverClusterSummary:
-      description: Summary of the RoverCluster.
-      properties:
-        clusterSize:
-          description: Size of the cluster.
-          format: int32
-          type: integer
-        clusterType:
-          description: Type of cluster.
-          enum:
-          - STANDALONE
-          - STATION
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/ClusterType'
-        compartmentId:
-          description: The OCID of the compartment containing the RoverCluster.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The defined tags associated with this resource, if any. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        displayName:
-          description: A user-friendly name. Does not have to be unique, and it's changeable. Avoid entering confidential information.
-          type: string
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'The freeform tags associated with this resource, if any. Each tag is a simple key-value pair with no
-
-            predefined name, type, or namespace. For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        id:
-          description: The OCID of RoverCluster.
-          type: string
-        lifecycleState:
-          description: The current state of the RoverCluster.
-          enum:
-          - CREATING
-          - UPDATING
-          - ACTIVE
-          - DELETING
-          - DELETED
-          - FAILED
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-        lifecycleStateDetails:
-          description: A property that can contain details on the lifecycle.
-          type: string
-        nodes:
-          description: The nodes that are part of this cluster.
-          items:
-            type: string
-          type: array
-        systemTags:
-          additionalProperties:
-            additionalProperties:
-              type: object
-            type: object
-          description: 'The system tags associated with this resource, if any. The system tags are set by Oracle cloud infrastructure services. Each key is predefined and scoped to namespaces.
-
-            For more information, see [Resource Tags](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/resourcetags.htm).
-
-            Example: `{orcl-cloud: {free-tier-retain: true}}`
-
-            '
-          type: object
-        timeCreated:
-          description: The time the the RoverCluster was created. An RFC3339 formatted datetime string
-          format: date-time
-          type: string
-      required:
-      - id
-      - compartmentId
-      - lifecycleState
-      type: object
     UpdateRoverClusterDetails:
       description: The information required to update a RoverCluster.
       properties:
@@ -1161,44 +1152,38 @@ components:
           description: Password to unlock the rover cluster.
           type: string
       type: object
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
+    RoverClusterCertificate:
+      description: The certificate response
+      properties:
+        certificate:
+          description: The certificate that can be installed on a client to do TLS communication to the cluster
+          type: string
+      required:
+      - certificate
+      type: object
   parameters:
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
       in: query
-      name: displayName
-      x-default-description: 'null'
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 100
+        minimum: 1
+    RoverClusterIdentifierPathParam:
+      description: Unique RoverCluster identifier
+      in: path
+      name: roverClusterId
+      required: true
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
-    ClusterTypeQueryParam:
-      description: A filter to return only Clusters of type matched with the given cluster type.
-      in: query
-      name: clusterType
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/ClusterType'
+    RequestIdHeader:
+      description: The client request ID for tracing.
+      in: header
+      name: opc-request-id
       schema:
         type: string
-        enum:
-        - STANDALONE
-        - STATION
     SortByQueryParam:
       description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
 
@@ -1211,6 +1196,35 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    ClusterTypeQueryParam:
+      description: A filter to return only Clusters of type matched with the given cluster type.
+      in: query
+      name: clusterType
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/ClusterType'
+      schema:
+        type: string
+        enum:
+        - STANDALONE
+        - STATION
+    PaginationTokenQueryParam:
+      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call
 
@@ -1239,28 +1253,6 @@ components:
         - ASC
         - DESC
         default: ASC
-    LifecycleStateQueryParam:
-      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - DELETING
-        - DELETED
-        - FAILED
-    RequestIdHeader:
-      description: The client request ID for tracing.
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1280,21 +1272,22 @@ components:
         type: string
         maxLength: 64
         minLength: 1
-    PaginationTokenQueryParam:
-      description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
+    LifecycleStateQueryParam:
+      description: A filter to return only resources their lifecycleState matches the given lifecycleState.
       in: query
-      name: page
+      name: lifecycleState
+      required: false
       x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleState'
       schema:
         type: string
-        minLength: 1
-    RoverClusterIdentifierPathParam:
-      description: Unique RoverCluster identifier
-      in: path
-      name: roverClusterId
-      required: true
-      schema:
-        type: string
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - DELETING
+        - DELETED
+        - FAILED
     CompartmentIdQueryParam:
       description: The OCID of the compartment in which to list resources.
       in: query
@@ -1302,15 +1295,22 @@ components:
       required: true
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 100
-        minimum: 1
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

@@ -402,7 +402,226 @@ paths:
         description: Request to change the compartment of the specified Datastore
         required: true
 components:
+  parameters:
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: limit
+      x-default-description: 'null'
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    RequestIdHeader:
+      description: 'Unique identifier for the request. If you need to contact Oracle about a particular
+
+        request, please provide the request ID.
+
+        '
+      in: header
+      name: opc-request-id
+      schema:
+        type: string
+    ClusterIdentifierQueryParam:
+      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the SDDC Cluster.
+
+        '
+      in: query
+      name: clusterId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
+    SortByQueryParam:
+      description: 'The field to sort by. You can provide one sort order (`sortOrder`). Default order for
+
+        TIMECREATED is descending. Default order for DISPLAYNAME is ascending. The DISPLAYNAME
+
+        sort order is case sensitive.
+
+
+        **Note:** In general, some "List" operations (for example, `ListInstances`) let you
+
+        optionally filter by availability domain if the scope of the resource type is within a
+
+        single availability domain. If you call one of these "List" operations without specifying
+
+        an availability domain, the resources are grouped by availability domain, then sorted.
+
+        '
+      in: query
+      name: sortBy
+      schema:
+        type: string
+        enum:
+        - timeCreated
+        - displayName
+        default: timeCreated
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List"
+
+        call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 1024
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the given display name exactly.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    CompartmentIdOptionalQueryParam:
+      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment as optional parameter.
+      in: query
+      name: compartmentId
+      required: false
+      schema:
+        type: string
+    IfMatchHeader:
+      description: 'For optimistic concurrency control. In the PUT or DELETE call
+
+        for a resource, set the `if-match` parameter to the value of the
+
+        etag from a previous GET or POST response for that resource.
+
+        The resource will be updated or deleted only if the etag you
+
+        provide matches the resource''s current etag value.
+
+        '
+      in: header
+      name: if-match
+      required: false
+      schema:
+        type: string
+    DatastoreIdentifierPathParam:
+      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the Datastore.
+
+        '
+      in: path
+      name: datastoreId
+      required: true
+      schema:
+        type: string
+    SortOrderQueryParam:
+      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The DISPLAYNAME sort order
+
+        is case sensitive.
+
+        '
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: ASC
+    RetryTokenHeader:
+      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
+
+        server error without risk of executing that same action again. Retry tokens expire after 24
+
+        hours, but can be invalidated before then due to conflicting operations (for example, if a resource
+
+        has been deleted and purged from the system, then a retry of the original creation request
+
+        may be rejected).
+
+        '
+      in: header
+      name: opc-retry-token
+      required: false
+      schema:
+        type: string
+        maxLength: 64
+        minLength: 1
+    LifecycleState:
+      description: The lifecycle state of the resource.
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-top-level-enum: '#/definitions/LifecycleStates'
+      schema:
+        type: string
+        enum:
+        - CREATING
+        - UPDATING
+        - ACTIVE
+        - DELETING
+        - DELETED
+        - FAILED
+    DatastoreIdentifierQueryParam:
+      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the Datastore.
+
+        '
+      in: query
+      name: datastoreId
+      required: false
+      x-default-description: 'null'
+      schema:
+        type: string
   schemas:
+    Error:
+      description: Error Information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    BlockVolumeDetails:
+      description: 'Block volume that is part of the Datastore.
+
+        '
+      properties:
+        attachments:
+          description: List of BlockVolumeAttachment objects containing information about attachment details
+          items:
+            $ref: '#/components/schemas/BlockVolumeAttachment'
+          maxItems: 32
+          type: array
+        id:
+          description: An [OCID](/Content/General/Concepts/identifiers.htm)s of the Block Storage Volume.
+          maxLength: 255
+          minLength: 1
+          type: string
+        iqn:
+          description: An IQN of the Block Storage Volume.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - id
+      type: object
     UpdateDatastoreDetails:
       description: The Datastore information to be updated.
       properties:
@@ -450,31 +669,6 @@ components:
 
             '
           type: object
-      type: object
-    BlockVolumeAttachment:
-      description: 'The details about the attachment of block volume.
-
-        '
-      properties:
-        esxiHostId:
-          description: 'The [OCIDs](/Content/General/Concepts/identifiers.htm) of the ESXi host that block volume is attached to.
-
-            '
-          maxLength: 255
-          minLength: 1
-          type: string
-        ipAddress:
-          description: The IP address of block volume attachment.
-          maxLength: 255
-          minLength: 1
-          type: string
-        port:
-          description: The port of block volume attachment.
-          type: integer
-      required:
-      - esxiHostId
-      - ipAddress
-      - port
       type: object
     DatastoreCollection:
       description: A list of Datastores.
@@ -651,22 +845,6 @@ components:
       - timeCreated
       - timeUpdated
       type: object
-    Error:
-      description: Error Information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
     DatastoreSummary:
       description: "An [Oracle Cloud VMware Solution](/iaas/Content/VMware/Concepts/ocvsoverview.htm) Datastore for software-defined data center. \n\nThe Datastore can be attached to multiple ESXi hosts.\n"
       properties:
@@ -821,6 +999,31 @@ components:
       - availabilityDomain
       - timeCreated
       type: object
+    ChangeDatastoreCompartmentDetails:
+      description: The configuration details for the move operation.
+      properties:
+        compartmentId:
+          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to move
+
+            the Datastore to.
+
+            '
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - compartmentId
+    AddBlockVolumeToDatastoreDetails:
+      description: Details for the Block Volume addition to the datastore
+      properties:
+        blockVolumeId:
+          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Block Volume to be added to the Datastore.
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - blockVolumeId
+      type: object
     CreateDatastoreDetails:
       description: Details of the Datastore
       properties:
@@ -902,234 +1105,31 @@ components:
       - compartmentId
       - availabilityDomain
       type: object
-    AddBlockVolumeToDatastoreDetails:
-      description: Details for the Block Volume addition to the datastore
-      properties:
-        blockVolumeId:
-          description: The [OCID](/Content/General/Concepts/identifiers.htm) of the Block Volume to be added to the Datastore.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - blockVolumeId
-      type: object
-    BlockVolumeDetails:
-      description: 'Block volume that is part of the Datastore.
+    BlockVolumeAttachment:
+      description: 'The details about the attachment of block volume.
 
         '
       properties:
-        attachments:
-          description: List of BlockVolumeAttachment objects containing information about attachment details
-          items:
-            $ref: '#/components/schemas/BlockVolumeAttachment'
-          maxItems: 32
-          type: array
-        id:
-          description: An [OCID](/Content/General/Concepts/identifiers.htm)s of the Block Storage Volume.
-          maxLength: 255
-          minLength: 1
-          type: string
-        iqn:
-          description: An IQN of the Block Storage Volume.
-          maxLength: 255
-          minLength: 1
-          type: string
-      required:
-      - id
-      type: object
-    ChangeDatastoreCompartmentDetails:
-      description: The configuration details for the move operation.
-      properties:
-        compartmentId:
-          description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment to move
-
-            the Datastore to.
+        esxiHostId:
+          description: 'The [OCIDs](/Content/General/Concepts/identifiers.htm) of the ESXi host that block volume is attached to.
 
             '
           maxLength: 255
           minLength: 1
           type: string
+        ipAddress:
+          description: The IP address of block volume attachment.
+          maxLength: 255
+          minLength: 1
+          type: string
+        port:
+          description: The port of block volume attachment.
+          type: integer
       required:
-      - compartmentId
-  parameters:
-    DatastoreIdentifierPathParam:
-      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the Datastore.
-
-        '
-      in: path
-      name: datastoreId
-      required: true
-      schema:
-        type: string
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the given display name exactly.
-      in: query
-      name: displayName
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
-    SortByQueryParam:
-      description: 'The field to sort by. You can provide one sort order (`sortOrder`). Default order for
-
-        TIMECREATED is descending. Default order for DISPLAYNAME is ascending. The DISPLAYNAME
-
-        sort order is case sensitive.
-
-
-        **Note:** In general, some "List" operations (for example, `ListInstances`) let you
-
-        optionally filter by availability domain if the scope of the resource type is within a
-
-        single availability domain. If you call one of these "List" operations without specifying
-
-        an availability domain, the resources are grouped by availability domain, then sorted.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
-    IfMatchHeader:
-      description: 'For optimistic concurrency control. In the PUT or DELETE call
-
-        for a resource, set the `if-match` parameter to the value of the
-
-        etag from a previous GET or POST response for that resource.
-
-        The resource will be updated or deleted only if the etag you
-
-        provide matches the resource''s current etag value.
-
-        '
-      in: header
-      name: if-match
-      required: false
-      schema:
-        type: string
-    SortOrderQueryParam:
-      description: 'The sort order to use, either ascending (`ASC`) or descending (`DESC`). The DISPLAYNAME sort order
-
-        is case sensitive.
-
-        '
-      in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
-      schema:
-        type: string
-        enum:
-        - ASC
-        - DESC
-        default: ASC
-    RequestIdHeader:
-      description: 'Unique identifier for the request. If you need to contact Oracle about a particular
-
-        request, please provide the request ID.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
-    DatastoreIdentifierQueryParam:
-      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the Datastore.
-
-        '
-      in: query
-      name: datastoreId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    CompartmentIdOptionalQueryParam:
-      description: The [OCID](/Content/General/Concepts/identifiers.htm) of the compartment as optional parameter.
-      in: query
-      name: compartmentId
-      required: false
-      schema:
-        type: string
-    ClusterIdentifierQueryParam:
-      description: 'The [OCID](/Content/General/Concepts/identifiers.htm) of the SDDC Cluster.
-
-        '
-      in: query
-      name: clusterId
-      required: false
-      x-default-description: 'null'
-      schema:
-        type: string
-    RetryTokenHeader:
-      description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
-
-        server error without risk of executing that same action again. Retry tokens expire after 24
-
-        hours, but can be invalidated before then due to conflicting operations (for example, if a resource
-
-        has been deleted and purged from the system, then a retry of the original creation request
-
-        may be rejected).
-
-        '
-      in: header
-      name: opc-retry-token
-      required: false
-      schema:
-        type: string
-        maxLength: 64
-        minLength: 1
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the `opc-next-page` response header from the previous "List"
-
-        call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a paginated
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      x-default-description: 'null'
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    LifecycleState:
-      description: The lifecycle state of the resource.
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-top-level-enum: '#/definitions/LifecycleStates'
-      schema:
-        type: string
-        enum:
-        - CREATING
-        - UPDATING
-        - ACTIVE
-        - DELETING
-        - DELETED
-        - FAILED
+      - esxiHostId
+      - ipAddress
+      - port
+      type: object
   responses:
     default:
       description: Unknown Error

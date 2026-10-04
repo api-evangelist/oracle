@@ -118,7 +118,50 @@ paths:
       - operatorActions
       x-related-resource: '#/definitions/OperatorAction'
 components:
+  responses:
+    default:
+      description: Unknown Error
+      headers:
+        opc-request-id:
+          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+            Oracle about a particular request, please provide the request ID.
+
+            '
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   parameters:
+    OperatorActionPathParam:
+      description: Unique Oracle supplied identifier associated with the operator action.
+      in: path
+      name: operatorActionId
+      required: true
+      schema:
+        type: string
+    PaginationLimitQueryParam:
+      description: The maximum number of items to return.
+      in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    SortOrderQueryParam:
+      description: The sort order to use, either 'asc' or 'desc'.
+      in: query
+      name: sortOrder
+      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      schema:
+        type: string
+        enum:
+        - ASC
+        - DESC
+        default: DESC
     PaginationTokenQueryParam:
       description: The page token representing the page at which to start retrieving results. This is usually retrieved from a previous list call.
       in: query
@@ -126,15 +169,6 @@ components:
       schema:
         type: string
         maxLength: 1024
-        minLength: 1
-    OperatorActionNameQueryParam:
-      description: A filter to return only resources that match the entire display name given.
-      in: query
-      name: name
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
         minLength: 1
     CompartmentIdQueryParam:
       description: The ID of the compartment in which to list resources.
@@ -149,27 +183,6 @@ components:
       name: opc-request-id
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: The maximum number of items to return.
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
-    SortByQueryParam:
-      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
-
-        '
-      in: query
-      name: sortBy
-      schema:
-        type: string
-        enum:
-        - timeCreated
-        - displayName
-        default: timeCreated
     OperatorActionLifecycleStateQueryParam:
       description: A filter to return only resources whose lifecycleState matches the given OperatorAction lifecycleState.
       in: query
@@ -182,24 +195,27 @@ components:
         enum:
         - ACTIVE
         - INACTIVE
-    SortOrderQueryParam:
-      description: The sort order to use, either 'asc' or 'desc'.
+    OperatorActionNameQueryParam:
+      description: A filter to return only resources that match the entire display name given.
       in: query
-      name: sortOrder
-      x-obmcs-top-level-enum: '#/definitions/SortOrders'
+      name: name
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    SortByQueryParam:
+      description: 'The field to sort by. Only one sort order may be provided. Default order for timeCreated is descending. Default order for displayName is ascending. If no value is specified timeCreated is default.
+
+        '
+      in: query
+      name: sortBy
       schema:
         type: string
         enum:
-        - ASC
-        - DESC
-        default: DESC
-    OperatorActionPathParam:
-      description: Unique Oracle supplied identifier associated with the operator action.
-      in: path
-      name: operatorActionId
-      required: true
-      schema:
-        type: string
+        - timeCreated
+        - displayName
+        default: timeCreated
   schemas:
     Error:
       description: Error Information.
@@ -213,17 +229,6 @@ components:
       required:
       - code
       - message
-    OperatorActionCollection:
-      description: Results of operator action search, which contains summary of the action.
-      properties:
-        items:
-          description: contains OperatorActionSummary
-          items:
-            $ref: '#/components/schemas/OperatorActionSummary'
-          type: array
-      required:
-      - items
-      type: object
     OperatorActionSummary:
       description: Details of the operator action. Operator actions are pre-defined set of commands available to the operator on different layers of the infrastructure.
       properties:
@@ -256,6 +261,17 @@ components:
       required:
       - id
       - name
+      type: object
+    OperatorActionCollection:
+      description: Results of operator action search, which contains summary of the action.
+      properties:
+        items:
+          description: contains OperatorActionSummary
+          items:
+            $ref: '#/components/schemas/OperatorActionSummary'
+          type: array
+      required:
+      - items
       type: object
     OperatorAction:
       description: "Details of the operator action. Operator actions are a pre-defined set of commands available to the operator on different layers of the infrastructure. Although the groupings may differ depending on the infrastructure layers, \nthe groups are designed to enable the operator access to commands to resolve a specific set of issues. The infrastructure layers controlled by the Operator Control include Dom0, CellServer, and Control Plane Server (CPS).\n\nThere are five groups available to the operator. x-obmcs-top-level-enum: '#/definitions/OperatorActionCategories' enum: *OPERATORACTIONCATEGORIES\n\nThe following infrastructure layers are controlled by the operator actions x-obmcs-top-level-enum: '#/definitions/InfrastructureLayers' enum: *INFRASTRUCTURELAYERS\n"
@@ -298,22 +314,6 @@ components:
           description: value of the property
           type: string
       type: object
-  responses:
-    default:
-      description: Unknown Error
-      headers:
-        opc-request-id:
-          description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-            Oracle about a particular request, please provide the request ID.
-
-            '
-          schema:
-            type: string
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
 x-anchors:
   x-headers:
     etag:

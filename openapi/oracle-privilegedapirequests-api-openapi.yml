@@ -412,12 +412,144 @@ paths:
         required: true
 components:
   schemas:
-    ClosePrivilegedApiRequestDetails:
-      description: The information about closing PrivilegedApiRequest.
+    ApprovePrivilegedApiRequestDetails:
+      description: Details of the privilegedApi request approval such as when the approver approved and any comment provided by the approver.
       properties:
-        description:
-          description: description about why the request is closed
+        approverComment:
+          description: Comment by the approver during approval.
+          maxLength: 500
+          minLength: 1
           type: string
+        timeOfUserCreation:
+          description: 'The time when access request is scheduled to be approved in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.Example: ''2020-05-22T21:10:29.600Z''
+
+            '
+          format: date-time
+          type: string
+      type: object
+    Error:
+      description: Error response information.
+      properties:
+        code:
+          description: 'A short error code that defines the error, meant for programmatic parsing. See
+
+            [API Errors](/Content/API/References/apierrors.htm).
+
+            '
+          type: string
+        message:
+          description: A human-readable error string.
+          type: string
+      required:
+      - code
+      - message
+    CreatePrivilegedApiRequestDetails:
+      description: "An Oracle operator raises privilegedApi request when they need access to any infrastructure resource governed by PrivilegedApi Access Control.\n  The privilegedApi request identifies the target resource and the set of operator actions. Access request handling depends upon the Operator Control \n  that governs the target resource, and the set of operator actions listed for approval in the access request. If all of the operator actions \n  listed in the privilegedApi request are in the pre-approved list in the PrivilegedApi Control that governs the target resource, then the privilegedApi request is \n  automatically approved. If not, then the privilegedApi request requires explicit approval from the approver group specified by the PrivilegedApi Control governing the target resource.\n\nYou can approve or reject an privilegedApi request. You can also revoke the approval of an already approved privilegedApi request. While creating an access request, \n  the operator specifies the duration of access. You have the option to approve the entire duration or reduce or even increase the time duration. \n  An operator can also request for an extension. The approval for such an extension is processed the same way the original privilegedApi request was processed.\n"
+      properties:
+        compartmentId:
+          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
+          type: string
+        definedTags:
+          additionalProperties:
+            additionalProperties:
+              description: 'The value of the tag. Only the String type is supported.
+
+                '
+              type: object
+            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
+
+
+              Example: `{"CostCenter": "42"}`
+
+              '
+            type: object
+          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Operations": {"CostCenter": "42"}}`
+
+            '
+          type: object
+        durationInHrs:
+          description: Duration in hours for which access is sought on the target resource.
+          type: integer
+        freeformTags:
+          additionalProperties:
+            type: string
+          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
+
+            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
+
+
+            Example: `{"Department": "Finance"}`
+
+            '
+          type: object
+        notificationTopicId:
+          description: The OCID of the OCI Notification topic to publish messages related to this Privileged Api Request.
+          maxLength: 255
+          minLength: 1
+          type: string
+        privilegedOperationList:
+          description: 'List of api names, attributes for which approval is sought by the user.
+
+            '
+          items:
+            $ref: '#/components/schemas/PrivilegedApiRequestOperationDetails'
+          maxItems: 20
+          minItems: 1
+          type: array
+        reasonDetail:
+          description: Reason in detail for which the operator is requesting access on the target resource.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        reasonSummary:
+          description: Summary comment by the operator creating the access request.
+          maxLength: 1000
+          minLength: 1
+          type: string
+        resourceId:
+          description: 'The OCID of the target resource associated with the access request. The operator raises an access request to get approval to access the target resource.
+
+            '
+          type: string
+        severity:
+          description: Priority assigned to the access request by the operator
+          enum:
+          - SEV_1
+          - SEV_2
+          - SEV_3
+          - SEV_4
+          type: string
+          x-obmcs-top-level-enum: '#/definitions/PrivilegedApiRequestSeverity'
+        subResourceNameList:
+          description: The subresource names requested for approval.
+          items:
+            type: string
+          maxItems: 10
+          type: array
+        ticketNumbers:
+          description: 'A list of ticket numbers related to this Privileged Api Access Request, e.g. Service Request (SR) number and JIRA ticket number.
+
+            '
+          items:
+            type: string
+          maxItems: 5
+          minItems: 0
+          type: array
+        timeRequestedForFutureAccess:
+          description: 'Time in future when the user for the privilegedApi request needs to be created in [RFC 3339](https://tools.ietf.org/html/rfc3339)timestamp format. Example: ''2020-05-22T21:10:29.600Z''
+
+            '
+          format: date-time
+          type: string
+      required:
+      - reasonSummary
+      - resourceId
+      - privilegedOperationList
       type: object
     PrivilegedApiRequestCollection:
       description: Results of privilegedApi request search, which contains summary of privilegedApi request.
@@ -652,6 +784,70 @@ components:
       - resourceId
       - state
       type: object
+    ApproverDetail:
+      description: It contains appprovers details such as who approved it, when he approved and any details the approver would have entered as a part of approval process.
+      properties:
+        approvalAction:
+          description: The action done by the approver.
+          type: string
+        approvalComment:
+          description: Comment specified by the approver of the request.
+          type: string
+        approverId:
+          description: The userId of the approver.
+          type: string
+        timeApprovedForAccess:
+          description: 'Time for when the privilegedApi request should start that is authorized by the customer in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.Example: ''2020-05-22T21:10:29.600Z''
+
+            '
+          format: date-time
+          type: string
+        timeOfAuthorization:
+          description: 'Time when the privilegedApi request was authorized by the customer in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.Example: ''2020-05-22T21:10:29.600Z''
+
+            '
+          format: date-time
+          type: string
+      type: object
+    RevokePrivilegedApiRequestDetails:
+      description: Summary of why the already approved privilegedApi request was revoked.
+      properties:
+        approverComment:
+          description: Comment specified by the approver explaining why the approval is revoked.
+          maxLength: 500
+          minLength: 1
+          type: string
+      type: object
+    RejectPrivilegedApiRequestDetails:
+      description: Summary of why the privilegedApi request was rejected.
+      properties:
+        approverComment:
+          description: Comment by the approver explaining why the request is rejected.
+          maxLength: 500
+          minLength: 1
+          type: string
+      type: object
+    ClosePrivilegedApiRequestDetails:
+      description: The information about closing PrivilegedApiRequest.
+      properties:
+        description:
+          description: description about why the request is closed
+          type: string
+      type: object
+    PrivilegedApiRequestOperationDetails:
+      description: It represents the api details of the service
+      properties:
+        apiName:
+          description: name of the api which needs to be protected.
+          type: string
+        attributeNames:
+          description: list of attributes belonging to the above api which needs to be protected.
+          items:
+            type: string
+          type: array
+      required:
+      - apiName
+      type: object
     PrivilegedApiRequestSummary:
       description: Summary of access request.
       properties:
@@ -799,212 +995,36 @@ components:
       - reasonSummary
       - resourceId
       type: object
-    ApprovePrivilegedApiRequestDetails:
-      description: Details of the privilegedApi request approval such as when the approver approved and any comment provided by the approver.
-      properties:
-        approverComment:
-          description: Comment by the approver during approval.
-          maxLength: 500
-          minLength: 1
-          type: string
-        timeOfUserCreation:
-          description: 'The time when access request is scheduled to be approved in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.Example: ''2020-05-22T21:10:29.600Z''
-
-            '
-          format: date-time
-          type: string
-      type: object
-    Error:
-      description: Error response information.
-      properties:
-        code:
-          description: 'A short error code that defines the error, meant for programmatic parsing. See
-
-            [API Errors](/Content/API/References/apierrors.htm).
-
-            '
-          type: string
-        message:
-          description: A human-readable error string.
-          type: string
-      required:
-      - code
-      - message
-    CreatePrivilegedApiRequestDetails:
-      description: "An Oracle operator raises privilegedApi request when they need access to any infrastructure resource governed by PrivilegedApi Access Control.\n  The privilegedApi request identifies the target resource and the set of operator actions. Access request handling depends upon the Operator Control \n  that governs the target resource, and the set of operator actions listed for approval in the access request. If all of the operator actions \n  listed in the privilegedApi request are in the pre-approved list in the PrivilegedApi Control that governs the target resource, then the privilegedApi request is \n  automatically approved. If not, then the privilegedApi request requires explicit approval from the approver group specified by the PrivilegedApi Control governing the target resource.\n\nYou can approve or reject an privilegedApi request. You can also revoke the approval of an already approved privilegedApi request. While creating an access request, \n  the operator specifies the duration of access. You have the option to approve the entire duration or reduce or even increase the time duration. \n  An operator can also request for an extension. The approval for such an extension is processed the same way the original privilegedApi request was processed.\n"
-      properties:
-        compartmentId:
-          description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment.
-          type: string
-        definedTags:
-          additionalProperties:
-            additionalProperties:
-              description: 'The value of the tag. Only the String type is supported.
-
-                '
-              type: object
-            description: 'Key-value pair representing a defined tag key and value, scoped to a namespace.
-
-
-              Example: `{"CostCenter": "42"}`
-
-              '
-            type: object
-          description: 'Defined tags for this resource. Each key is predefined and scoped to a namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Operations": {"CostCenter": "42"}}`
-
-            '
-          type: object
-        durationInHrs:
-          description: Duration in hours for which access is sought on the target resource.
-          type: integer
-        freeformTags:
-          additionalProperties:
-            type: string
-          description: 'Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace.
-
-            For more information, see [Resource Tags](/iaas/Content/General/Concepts/resourcetags.htm).
-
-
-            Example: `{"Department": "Finance"}`
-
-            '
-          type: object
-        notificationTopicId:
-          description: The OCID of the OCI Notification topic to publish messages related to this Privileged Api Request.
-          maxLength: 255
-          minLength: 1
-          type: string
-        privilegedOperationList:
-          description: 'List of api names, attributes for which approval is sought by the user.
-
-            '
-          items:
-            $ref: '#/components/schemas/PrivilegedApiRequestOperationDetails'
-          maxItems: 20
-          minItems: 1
-          type: array
-        reasonDetail:
-          description: Reason in detail for which the operator is requesting access on the target resource.
-          maxLength: 10000
-          minLength: 1
-          type: string
-        reasonSummary:
-          description: Summary comment by the operator creating the access request.
-          maxLength: 1000
-          minLength: 1
-          type: string
-        resourceId:
-          description: 'The OCID of the target resource associated with the access request. The operator raises an access request to get approval to access the target resource.
-
-            '
-          type: string
-        severity:
-          description: Priority assigned to the access request by the operator
-          enum:
-          - SEV_1
-          - SEV_2
-          - SEV_3
-          - SEV_4
-          type: string
-          x-obmcs-top-level-enum: '#/definitions/PrivilegedApiRequestSeverity'
-        subResourceNameList:
-          description: The subresource names requested for approval.
-          items:
-            type: string
-          maxItems: 10
-          type: array
-        ticketNumbers:
-          description: 'A list of ticket numbers related to this Privileged Api Access Request, e.g. Service Request (SR) number and JIRA ticket number.
-
-            '
-          items:
-            type: string
-          maxItems: 5
-          minItems: 0
-          type: array
-        timeRequestedForFutureAccess:
-          description: 'Time in future when the user for the privilegedApi request needs to be created in [RFC 3339](https://tools.ietf.org/html/rfc3339)timestamp format. Example: ''2020-05-22T21:10:29.600Z''
-
-            '
-          format: date-time
-          type: string
-      required:
-      - reasonSummary
-      - resourceId
-      - privilegedOperationList
-      type: object
-    PrivilegedApiRequestOperationDetails:
-      description: It represents the api details of the service
-      properties:
-        apiName:
-          description: name of the api which needs to be protected.
-          type: string
-        attributeNames:
-          description: list of attributes belonging to the above api which needs to be protected.
-          items:
-            type: string
-          type: array
-      required:
-      - apiName
-      type: object
-    RejectPrivilegedApiRequestDetails:
-      description: Summary of why the privilegedApi request was rejected.
-      properties:
-        approverComment:
-          description: Comment by the approver explaining why the request is rejected.
-          maxLength: 500
-          minLength: 1
-          type: string
-      type: object
-    RevokePrivilegedApiRequestDetails:
-      description: Summary of why the already approved privilegedApi request was revoked.
-      properties:
-        approverComment:
-          description: Comment specified by the approver explaining why the approval is revoked.
-          maxLength: 500
-          minLength: 1
-          type: string
-      type: object
-    ApproverDetail:
-      description: It contains appprovers details such as who approved it, when he approved and any details the approver would have entered as a part of approval process.
-      properties:
-        approvalAction:
-          description: The action done by the approver.
-          type: string
-        approvalComment:
-          description: Comment specified by the approver of the request.
-          type: string
-        approverId:
-          description: The userId of the approver.
-          type: string
-        timeApprovedForAccess:
-          description: 'Time for when the privilegedApi request should start that is authorized by the customer in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.Example: ''2020-05-22T21:10:29.600Z''
-
-            '
-          format: date-time
-          type: string
-        timeOfAuthorization:
-          description: 'Time when the privilegedApi request was authorized by the customer in [RFC 3339](https://tools.ietf.org/html/rfc3339) timestamp format.Example: ''2020-05-22T21:10:29.600Z''
-
-            '
-          format: date-time
-          type: string
-      type: object
   parameters:
-    DisplayNameQueryParam:
-      description: A filter to return only resources that match the given display name exactly.
+    PaginationLimitQueryParam:
+      description: 'For list pagination. The maximum number of results per page, or items to return in a
+
+        paginated "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
       in: query
-      name: displayName
-      x-default-description: 'null'
+      name: limit
+      schema:
+        type: integer
+        default: 10
+        maximum: 1000
+        minimum: 1
+    RequestIdHeader:
+      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
+
+        Oracle about a particular request, please provide the request ID.
+
+        The only valid characters for request IDs are letters, numbers,
+
+        underscore, and dash.
+
+        '
+      in: header
+      name: opc-request-id
       schema:
         type: string
-        maxLength: 255
-        minLength: 1
     ResourceTypeQueryParam:
       description: A filter to return only lists of resources that match the entire given service type.
       in: query
@@ -1028,6 +1048,57 @@ components:
         - timeCreated
         - displayName
         default: timeCreated
+    PrivilegedApiRequestLifecycleStateQueryParam:
+      description: 'A filter to return only resources that match the given lifecycle state. The
+
+        state value is case-insensitive.
+
+        '
+      in: query
+      name: lifecycleState
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/PrivilegedApiRequest/lifecycleState'
+      schema:
+        type: string
+    PaginationTokenQueryParam:
+      description: 'For list pagination. The value of the opc-next-page response header from the previous
+
+        "List" call. For important details about how pagination works, see
+
+        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
+
+        '
+      in: query
+      name: page
+      schema:
+        type: string
+        minLength: 1
+    DisplayNameQueryParam:
+      description: A filter to return only resources that match the given display name exactly.
+      in: query
+      name: displayName
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
+    PrivilegedApiRequestIdentifierQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the PrivilegedApiRequest.
+      in: query
+      name: id
+      x-default-description: 'null'
+      schema:
+        type: string
+    ResourceIdQueryParam:
+      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource .
+      in: query
+      name: resourceId
+      x-default-description: 'null'
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 1
     IfMatchHeader:
       description: 'For optimistic concurrency control. In the PUT or DELETE call for a resource, set the
 
@@ -1041,6 +1112,26 @@ components:
       in: header
       name: if-match
       required: false
+      schema:
+        type: string
+    StateQueryParam:
+      description: 'A filter to return only resources that match the state. The
+
+        state value is case-insensitive.
+
+        '
+      in: query
+      name: state
+      required: false
+      x-default-description: 'null'
+      x-obmcs-enumref: '#/definitions/PrivilegedApiRequest/state'
+      schema:
+        type: string
+    PrivilegedApiRequestIdentifierPathParam:
+      description: unique PrivilegedApiRequest identifier
+      in: path
+      name: privilegedApiRequestId
+      required: true
       schema:
         type: string
     SortOrderQueryParam:
@@ -1058,53 +1149,6 @@ components:
         enum:
         - ASC
         - DESC
-    PrivilegedApiRequestIdentifierQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the PrivilegedApiRequest.
-      in: query
-      name: id
-      x-default-description: 'null'
-      schema:
-        type: string
-    PrivilegedApiRequestLifecycleStateQueryParam:
-      description: 'A filter to return only resources that match the given lifecycle state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: lifecycleState
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/PrivilegedApiRequest/lifecycleState'
-      schema:
-        type: string
-    StateQueryParam:
-      description: 'A filter to return only resources that match the state. The
-
-        state value is case-insensitive.
-
-        '
-      in: query
-      name: state
-      required: false
-      x-default-description: 'null'
-      x-obmcs-enumref: '#/definitions/PrivilegedApiRequest/state'
-      schema:
-        type: string
-    RequestIdHeader:
-      description: 'Unique Oracle-assigned identifier for the request. If you need to contact
-
-        Oracle about a particular request, please provide the request ID.
-
-        The only valid characters for request IDs are letters, numbers,
-
-        underscore, and dash.
-
-        '
-      in: header
-      name: opc-request-id
-      schema:
-        type: string
     RetryTokenHeader:
       description: 'A token that uniquely identifies a request so it can be retried in case of a timeout or
 
@@ -1124,35 +1168,6 @@ components:
         type: string
         maxLength: 255
         minLength: 1
-    PrivilegedApiRequestIdentifierPathParam:
-      description: unique PrivilegedApiRequest identifier
-      in: path
-      name: privilegedApiRequestId
-      required: true
-      schema:
-        type: string
-    PaginationTokenQueryParam:
-      description: 'For list pagination. The value of the opc-next-page response header from the previous
-
-        "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: page
-      schema:
-        type: string
-        minLength: 1
-    ResourceIdQueryParam:
-      description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the resource .
-      in: query
-      name: resourceId
-      x-default-description: 'null'
-      schema:
-        type: string
-        maxLength: 255
-        minLength: 1
     CompartmentIdQueryParam:
       description: The [OCID](/iaas/Content/General/Concepts/identifiers.htm) of the compartment in which to list resources.
       in: query
@@ -1160,21 +1175,6 @@ components:
       x-default-description: 'null'
       schema:
         type: string
-    PaginationLimitQueryParam:
-      description: 'For list pagination. The maximum number of results per page, or items to return in a
-
-        paginated "List" call. For important details about how pagination works, see
-
-        [List Pagination](/iaas/Content/API/Concepts/usingapi.htm#nine).
-
-        '
-      in: query
-      name: limit
-      schema:
-        type: integer
-        default: 10
-        maximum: 1000
-        minimum: 1
   responses:
     DefaultError:
       description: An error has occurred.

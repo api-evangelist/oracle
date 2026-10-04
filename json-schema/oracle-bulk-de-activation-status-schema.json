@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/oracle/main/json-schema/oracle-bulk-de-activation-status-schema.json",
+  "title": "BulkDeActivationStatus",
+  "description": "Response of a bulk attribute deactivation operation.\n",
+  "x-generated": "2026-10-03",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/oracle-attributes-api-openapi.yml#/components/schemas/BulkDeActivationStatus",
+  "properties": {
+    "attributeStatuses": {
+      "description": "We preserve the order of the attribute items from the bulk activation request in this collection.  The ith object in this collection represents the\nbulk activation operation status of the ith object in the BulkActivateAttributeDetails object from the Bulk Activation request.  If the\nbulk activation operation results in a processing error or a validation error, the operationStatus property in the  BulkActivationMetadata object will\ncontain the appropriate bulk error status for the bulk operation.\n",
+      "items": {
+        "$ref": "#/$defs/AttributeResponse"
+      },
+      "type": "array"
+    },
+    "bulkDeActivationMetadata": {
+      "$ref": "#/$defs/BulkDeActivationMetadata"
+    }
+  },
+  "required": [
+    "attributeStatuses",
+    "bulkDeActivationMetadata"
+  ],
+  "type": "object",
+  "$defs": {
+    "AttributeResponse": {
+      "description": "Response of an individual attribute item in the bulk activate or deactivate operation.\n",
+      "properties": {
+        "attributeName": {
+          "description": "Attribute that was activated or deactivated by this bulk operation.\n",
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "attributeNameSpace": {
+          "default": "TRACES",
+          "description": "Namespace of the attribute whose properties were updated.  The attributeNamespace will default to TRACES if it is \nnot passed in.\n",
+          "enum": [
+            "TRACES",
+            "SYNTHETIC"
+          ],
+          "type": "string"
+        },
+        "attributeStatus": {
+          "description": "Status of the attribute after this operation.  The attribute can have one of the following statuses after the activate or deactivate operation.  The attribute\ncan have either a success status or an error status.  The status of the attribute must be correlated with the operation status property in the bulk operation metadata\nobject.  The bulk operation will be successful only when all attributes in the bulk request are processed successful and they get a success status back.\nThe following are successful status values of individual attribute items in a bulk attribute activation operation.\nATTRIBUTE_ACTIVATED - The attribute is activated and is available to be queried.  Note that ingest might still have not picked up the changes, and the\nassociated caches would not have refreshed yet to pick up the changes.\nATTRIBUTE_ALREADY_ACTIVE - The caller is trying to activate an attribute that is already active or in the process of getting activated.\nATTRIBUTE_DEACTIVATED - The attribute is deactivated and will not appear in searches.  Ingest might not have picked up the new changes and the associated caches\nmight not have refreshed yet.\nATTRIBUTE_ALREADY_DEACTIVATED - The caller is trying to deactivate an attribute that has already been deactivated or in the process of deactivation.\nDUPLICATE_ATTRIBUTE - The attribute is a duplicate of an attribute that was present in this bulk request.  Note that we deduplicate the attribute collection, process only unique attributes,\nand call out duplicates.  A duplicate attribute in a bulk request will not prevent the processing of further attributes in the bulk operation.\nThe following values are error statuses and the bulk processing is stopped when the first error is encountered.  None of the attributes in the bulk request would have been activated or\ndeactivated by this bulk operation.\nDEACTIVATION_NOT_ALLOWED - The caller has asked for the deactivation of an out of box tag which is not permitted.\nATTRIBUTE_DOES_NOT_EXIST - The caller tries to deactivate an attribute that doesn't exist in the APM Domain.\nINVALID_ATTRIBUTE - The attribute is invalid.\nINVALID_ATTRIBUTE_TYPE_CONFLICT - The attribute is invalid.  There were two attributes with same name but different type in the bulk request.\nATTRIBUTE_NOT_PROCESSED - The attribute was not processed, as there was another attribute in this bulk request collection that resulted in a processing error.\nATTRIBUTE_UPDATE_NOT_ALLOWED - The unit of the attribute cannot be updated as it is an in-built system attribute.\n",
+          "enum": [
+            "ATTRIBUTE_ALREADY_ACTIVE",
+            "ATTRIBUTE_ACTIVATED",
+            "ATTRIBUTE_DEACTIVATED",
+            "DEACTIVATION_NOT_ALLOWED",
+            "ATTRIBUTE_DOES_NOT_EXIST",
+            "ATTRIBUTE_ALREADY_DEACTIVATED",
+            "DUPLICATE_ATTRIBUTE",
+            "INVALID_ATTRIBUTE",
+            "INVALID_ATTRIBUTE_TYPE_CONFLICT",
+            "ATTRIBUTE_NOT_PROCESSED",
+            "ATTRIBUTE_UPDATE_NOT_ALLOWED"
+          ],
+          "type": "string"
+        },
+        "attributeType": {
+          "description": "Type of the attribute.\n",
+          "enum": [
+            "NUMERIC",
+            "STRING"
+          ],
+          "type": "string"
+        },
+        "notes": {
+          "description": "Notes for the activated attribute.\n",
+          "type": "string"
+        },
+        "operationType": {
+          "description": "Type of operation - activate or deactivate.\n",
+          "enum": [
+            "ACTIVATE",
+            "DEACTIVATE"
+          ],
+          "type": "string"
+        },
+        "timeUpdated": {
+          "description": "Time when the attribute was activated or deactivated.  Note that ingest might not have picked up the changes even if this time has elapsed.\n",
+          "format": "date-time",
+          "type": "string"
+        },
+        "unit": {
+          "description": "Unit of the attribute.   If unit is not specified, it defaults to NONE.\n",
+          "enum": [
+            "NONE",
+            "EPOCH_TIME_MS",
+            "BYTES",
+            "COUNT",
+            "DURATION_MS",
+            "TRACE_STATUS",
+            "PERCENTAGE"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "attributeName",
+        "attributeType",
+        "operationType",
+        "attributeStatus",
+        "timeUpdated",
+        "attributeNameSpace"
+      ],
+      "type": "object"
+    },
+    "BulkDeActivationMetadata": {
+      "description": "Metadata about the bulk deactivation operation.  The bulk deactivation operation is atomic and binary.  If the processing of any of the attributes\nin the bulk deactivation request results in a processing or validation error, then none of the attributes in the request are deactivated.\nThe bulk deactivation request succeeds only when all the attributes in the bulk deactivation request are processed and they get a successful\nattributeStatus back.\n",
+      "properties": {
+        "attributesDeActivated": {
+          "description": "Total number attributes (both string and numeric) in TRACES namespace that were deactivated.\n",
+          "type": "integer"
+        },
+        "availableNumericAttributes": {
+          "description": "Total number of free slots available for activation of additional numeric attributes in TRACES namespace in the APM Domain.\n",
+          "type": "integer"
+        },
+        "availableStringAttributes": {
+          "description": "Total number of free slots available for activation of additional string attributes in TRACES namespace in the APM Domain.\n",
+          "type": "integer"
+        },
+        "availableSyntheticNumericAttributes": {
+          "description": "Total number of free slots available for activation of additional numeric attributes in SYNTHETIC namespace in the APM Domain.\n",
+          "type": "integer"
+        },
+        "availableSyntheticStringAttributes": {
+          "description": "Total number of free slots available for activation of additional string attributes in SYNTHETIC namespace in the APM Domain.\n",
+          "type": "integer"
+        },
+        "operationStatus": {
+          "description": "Operation status of the bulk deactivation operation.  The bulk deactivation operation could have either a success or an error status as defined below.  Note that\nif a bulk operation has not succeeded, we do not deactivate any tags in the request set.\nSUCCESS - The bulk deactivation operation has succeeded and all the attributes in the bulk deactivation request have been deactivated by this operation or deactivated earlier.\nThe following are error statuses for the bulk deactivation operation.  Note that none of the attributes (string or numeric) in the bulk request have been deactivated by this bulk\ndeactivation operation if any of the below statuses are returned.\nEMPTY_ATTRIBUTE_LIST - The bulk deactivation request object was empty and did not contain any attributes to be deactivated.\nNUMERIC_ATTRIBUTE_LIMIT_EXCEEDED - The number of numeric attributes in the bulk request exceeded the maximum limit (100) of numeric attributes that could be present in the APM Domain.\nSTRING_ATTRIBUTE_LIMIT_EXCEEDED - The number of string attributes in the bulk request exceeded the maximum limit (700) of string attributes that could be present in the APM Domain.\nINVALID_BULK_REQUEST - The bulk request contains invalid attribute(s), or attribute(s) that resulted in a validation error, or an attribute that resulted\nin a processing error.\n",
+          "enum": [
+            "SUCCESS",
+            "EMPTY_ATTRIBUTE_LIST",
+            "NUMERIC_ATTRIBUTE_LIMIT_EXCEEDED",
+            "STRING_ATTRIBUTE_LIMIT_EXCEEDED",
+            "INVALID_BULK_REQUEST"
+          ],
+          "type": "string"
+        },
+        "operationType": {
+          "description": "Type of operation.\n",
+          "enum": [
+            "DEACTIVATE"
+          ],
+          "type": "string"
+        },
+        "syntheticAttributesDeActivated": {
+          "description": "Total number attributes (both string and numeric) in SYNTHETIC namespace that were deactivated.\n",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "operationType",
+        "operationStatus"
+      ],
+      "type": "object"
+    }
+  }
+}

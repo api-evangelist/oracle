@@ -425,35 +425,19 @@ paths:
         required: true
 components:
   schemas:
-    PutMessagesResult:
-      description: 'The response to a [PutMessages](#/en/streaming/20180418/methods/PutMessages) request. It indicates the number
-
-        of failed messages as well as an array of results for successful and failed messages.
-
-        '
+    PutMessagesDetails:
+      description: Object that represents an array of messages to emit to a stream.
       properties:
-        entries:
-          description: 'An array of items representing the result of each message.
-
-            The order is guaranteed to be the same as in the `PutMessagesDetails` object.
-
-            If a message was successfully appended to the stream, the entry includes the `offset`, `partition`, and `timestamp`.
-
-            If a message failed to be appended to the stream, the entry includes the `error` and `errorMessage`.
-
-            '
+        messages:
+          description: The array of messages to put into a stream.
           items:
-            $ref: '#/components/schemas/PutMessagesResultEntry'
+            $ref: '#/components/schemas/PutMessagesDetailsEntry'
           minItems: 1
           type: array
-        failures:
-          description: The number of messages that failed to be added to the stream.
-          type: integer
       required:
-      - failures
-      - entries
+      - messages
       type: object
-      x-example: "{\n  \"failures\": 0,\n  \"entries\": {\n    \"partition\": \"3\",\n    \"offset\": 0,\n    \"timestamp\": \"2018-04-20T23:21:12.428Z\"\n  }\n}\n"
+      x-example: "{\n  \"messages\":\n  [\n    {\n      \"key\": null,\n      \"value\": \"VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2cu\"\n    }\n  ]\n}\n"
     CreateCursorDetails:
       description: Object used to create a cursor to consume messages in a stream.
       properties:
@@ -514,24 +498,22 @@ components:
       - code
       - message
       type: object
-    PutMessagesDetailsEntry:
-      description: Object that represents a message to emit to a stream.
-      properties:
-        key:
-          description: 'The key of the message, expressed as a byte array up to 256 bytes in size. Messages with the same key are stored in the same partition.
+    UpdateGroupDetails:
+      description: 'Request body for operationally managing a group.
 
-            '
-          format: byte
-          maxItems: 256
+        '
+      properties:
+        time:
+          description: The time to consume from if type is AT_TIME.
+          format: date-time
           type: string
-        value:
-          description: The message, expressed as a byte array up to 1 MiB in size.
-          format: byte
-          maxItems: 1048576
-          minItems: 1
+        type:
+          description: The type of the cursor.
+          enum:
+          - AT_TIME
+          - LATEST
+          - TRIM_HORIZON
           type: string
-      required:
-      - value
       type: object
     PartitionReservation:
       description: 'Represents the state of a single partition reservation.
@@ -573,101 +555,6 @@ components:
       - streamId
       - groupName
       type: object
-    PutMessagesResultEntry:
-      description: 'Represents the result of a [PutMessages](#/en/streaming/20180418/methods/PutMessages) request, whether it was successful or not.
-
-        If a message was successfully appended to the stream, the entry includes the `offset`, `partition`, and `timestamp`.
-
-        If the message failed to be appended to the stream, the entry includes the `error` and `errorMessage`.
-
-        '
-      properties:
-        error:
-          description: The error code, in case the message was not successfully appended to the stream.
-          type: string
-        errorMessage:
-          description: A human-readable error message associated with the error code.
-          type: string
-        offset:
-          description: The offset of the message in the partition.
-          example: 42
-          format: int64
-          type: integer
-        partition:
-          description: The ID of the partition where the message was stored.
-          example: '1'
-          type: string
-        timestamp:
-          description: The timestamp indicating when the server appended the message to the stream.
-          format: date-time
-          type: string
-      type: object
-    Cursor:
-      description: 'A cursor that indicates the position in the stream from which you want to begin consuming messages and which is required by the [GetMessages](#/en/streaming/20180418/Message/GetMessages) operation.
-
-        '
-      properties:
-        value:
-          description: The cursor to pass to the `GetMessages` operation.
-          type: string
-      required:
-      - value
-      type: object
-      x-example: "{\n  \"value\": \"examplelIjoiVHJpbUhcvbl6b24iLCJvZmZzZXQiOm51bGwsInRpbWUiOm51bGwsInBhcnRpdGlvbiI6IjAiLCJzdHJlYW1JZCI6Im9jaWQxLnN0cmVhbS5kZXNrdG9wLi5hYWFhYWFhYWN1ZG5udHFjeXN4dHF6NTZuNWVoYWZ3c3JudHp5dHhjNmF3cDM0N3dxa2R0Ymt2d3VpaXEiLCJleHBfaux0aW9uIjoxNTI0Njg0MDE3NzUwfQ==\"\n}\n"
-    Message:
-      description: A message in a stream.
-      properties:
-        key:
-          description: The key associated with the message, expressed as a byte array.
-          format: byte
-          type: string
-        offset:
-          description: The offset of the message, which uniquely identifies it within the partition.
-          example: 42
-          format: int64
-          type: integer
-        partition:
-          description: The ID of the partition where the message is stored.
-          example: '1'
-          type: string
-        stream:
-          description: The name of the stream that the message belongs to.
-          example: ocid1.stream.realm.region.mnopqr789
-          type: string
-        timestamp:
-          description: The timestamp indicating when the server appended the message to the stream.
-          format: date-time
-          type: string
-        value:
-          description: The value associated with the message, expressed as a byte array.
-          format: byte
-          type: string
-      required:
-      - stream
-      - partition
-      - key
-      - value
-      - offset
-      - timestamp
-      type: object
-      x-example: "{\n  \"stream\": \"mynewstream\",\n  \"partition\": \"0\",\n  \"key\": null,\n  \"value\": \"VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2cu\",\n  \"offset\": 0,\n  \"timestamp\": \"2018-04-26T01:03:06.051Z\"\n}\n"
-    UpdateGroupDetails:
-      description: 'Request body for operationally managing a group.
-
-        '
-      properties:
-        time:
-          description: The time to consume from if type is AT_TIME.
-          format: date-time
-          type: string
-        type:
-          description: The type of the cursor.
-          enum:
-          - AT_TIME
-          - LATEST
-          - TRIM_HORIZON
-          type: string
-      type: object
     CreateGroupCursorDetails:
       description: Object used to create a group cursor.
       properties:
@@ -706,19 +593,132 @@ components:
       - groupName
       - type
       type: object
-    PutMessagesDetails:
-      description: Object that represents an array of messages to emit to a stream.
+    PutMessagesResultEntry:
+      description: 'Represents the result of a [PutMessages](#/en/streaming/20180418/methods/PutMessages) request, whether it was successful or not.
+
+        If a message was successfully appended to the stream, the entry includes the `offset`, `partition`, and `timestamp`.
+
+        If the message failed to be appended to the stream, the entry includes the `error` and `errorMessage`.
+
+        '
       properties:
-        messages:
-          description: The array of messages to put into a stream.
+        error:
+          description: The error code, in case the message was not successfully appended to the stream.
+          type: string
+        errorMessage:
+          description: A human-readable error message associated with the error code.
+          type: string
+        offset:
+          description: The offset of the message in the partition.
+          example: 42
+          format: int64
+          type: integer
+        partition:
+          description: The ID of the partition where the message was stored.
+          example: '1'
+          type: string
+        timestamp:
+          description: The timestamp indicating when the server appended the message to the stream.
+          format: date-time
+          type: string
+      type: object
+    Message:
+      description: A message in a stream.
+      properties:
+        key:
+          description: The key associated with the message, expressed as a byte array.
+          format: byte
+          type: string
+        offset:
+          description: The offset of the message, which uniquely identifies it within the partition.
+          example: 42
+          format: int64
+          type: integer
+        partition:
+          description: The ID of the partition where the message is stored.
+          example: '1'
+          type: string
+        stream:
+          description: The name of the stream that the message belongs to.
+          example: ocid1.stream.realm.region.mnopqr789
+          type: string
+        timestamp:
+          description: The timestamp indicating when the server appended the message to the stream.
+          format: date-time
+          type: string
+        value:
+          description: The value associated with the message, expressed as a byte array.
+          format: byte
+          type: string
+      required:
+      - stream
+      - partition
+      - key
+      - value
+      - offset
+      - timestamp
+      type: object
+      x-example: "{\n  \"stream\": \"mynewstream\",\n  \"partition\": \"0\",\n  \"key\": null,\n  \"value\": \"VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2cu\",\n  \"offset\": 0,\n  \"timestamp\": \"2018-04-26T01:03:06.051Z\"\n}\n"
+    PutMessagesDetailsEntry:
+      description: Object that represents a message to emit to a stream.
+      properties:
+        key:
+          description: 'The key of the message, expressed as a byte array up to 256 bytes in size. Messages with the same key are stored in the same partition.
+
+            '
+          format: byte
+          maxItems: 256
+          type: string
+        value:
+          description: The message, expressed as a byte array up to 1 MiB in size.
+          format: byte
+          maxItems: 1048576
+          minItems: 1
+          type: string
+      required:
+      - value
+      type: object
+    Cursor:
+      description: 'A cursor that indicates the position in the stream from which you want to begin consuming messages and which is required by the [GetMessages](#/en/streaming/20180418/Message/GetMessages) operation.
+
+        '
+      properties:
+        value:
+          description: The cursor to pass to the `GetMessages` operation.
+          type: string
+      required:
+      - value
+      type: object
+      x-example: "{\n  \"value\": \"examplelIjoiVHJpbUhcvbl6b24iLCJvZmZzZXQiOm51bGwsInRpbWUiOm51bGwsInBhcnRpdGlvbiI6IjAiLCJzdHJlYW1JZCI6Im9jaWQxLnN0cmVhbS5kZXNrdG9wLi5hYWFhYWFhYWN1ZG5udHFjeXN4dHF6NTZuNWVoYWZ3c3JudHp5dHhjNmF3cDM0N3dxa2R0Ymt2d3VpaXEiLCJleHBfaux0aW9uIjoxNTI0Njg0MDE3NzUwfQ==\"\n}\n"
+    PutMessagesResult:
+      description: 'The response to a [PutMessages](#/en/streaming/20180418/methods/PutMessages) request. It indicates the number
+
+        of failed messages as well as an array of results for successful and failed messages.
+
+        '
+      properties:
+        entries:
+          description: 'An array of items representing the result of each message.
+
+            The order is guaranteed to be the same as in the `PutMessagesDetails` object.
+
+            If a message was successfully appended to the stream, the entry includes the `offset`, `partition`, and `timestamp`.
+
+            If a message failed to be appended to the stream, the entry includes the `error` and `errorMessage`.
+
+            '
           items:
-            $ref: '#/components/schemas/PutMessagesDetailsEntry'
+            $ref: '#/components/schemas/PutMessagesResultEntry'
           minItems: 1
           type: array
+        failures:
+          description: The number of messages that failed to be added to the stream.
+          type: integer
       required:
-      - messages
+      - failures
+      - entries
       type: object
-      x-example: "{\n  \"messages\":\n  [\n    {\n      \"key\": null,\n      \"value\": \"VGhlIHF1aWNrIGJyb3duIGZveCBqdW1wZWQgb3ZlciB0aGUgbGF6eSBkb2cu\"\n    }\n  ]\n}\n"
+      x-example: "{\n  \"failures\": 0,\n  \"entries\": {\n    \"partition\": \"3\",\n    \"offset\": 0,\n    \"timestamp\": \"2018-04-20T23:21:12.428Z\"\n  }\n}\n"
   parameters:
     OpcRequestIdHeaderParam:
       description: 'The unique Oracle-assigned identifier for the request. If you need to contact Oracle about a
@@ -731,17 +731,6 @@ components:
       required: false
       schema:
         type: string
-    GroupCursorQueryParam:
-      description: 'The group-cursor representing the offsets of the group. This cursor is retrieved from the CreateGroupCursor API call.
-
-        '
-      in: query
-      name: cursor
-      required: true
-      schema:
-        type: string
-        maxLength: 1024
-        minLength: 1
     StreamIdPathParam:
       description: 'The OCID of the stream.
 
@@ -752,6 +741,17 @@ components:
       schema:
         type: string
         maxLength: 256
+        minLength: 1
+    GroupCursorQueryParam:
+      description: 'The group-cursor representing the offsets of the group. This cursor is retrieved from the CreateGroupCursor API call.
+
+        '
+      in: query
+      name: cursor
+      required: true
+      schema:
+        type: string
+        maxLength: 1024
         minLength: 1
   responses:
     DefaultError:
